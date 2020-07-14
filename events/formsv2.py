@@ -17,7 +17,7 @@ class StudentBatchForm(forms.ModelForm):
 
   class Meta(object):
     model = StudentBatch
-    exclude = ['academic', 'stcount', 'organiser']
+    exclude = ['academic', 'stcount', 'organiser', 'batch_name']
   
   def clean_csv_file(self):
     data = self.cleaned_data["csv_file"]
@@ -43,7 +43,7 @@ class UpdateStudentBatchForm(forms.ModelForm):
   )
   class Meta(object):
     model = StudentBatch
-    exclude = ['academic', 'stcount', 'organiser']
+    exclude = ['academic', 'stcount', 'organiser','batch_name']
 
 class UpdateStudentYearBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())

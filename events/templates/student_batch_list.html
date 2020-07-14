@@ -68,12 +68,15 @@
       {% for record in object_list %}
         <tr>
           <td>{{ forloop.counter }}</td>
+          <td>{{ record.batch_name }}</td>
           <td>{{ record.academic }}</td>
           <td>{{ record.department }}</td>
-          <td>{{ record.year }}</td>
+          <td>{{ record.year }}</td>          
           <td>{{ record.student_count }}</td>
           <td>
-              <a href="{% url 'eventsv2:edit_batch' record.id %}">Edit</a> |
+            {% if record.organiser.user == request.user %}
+              <a href="{% url 'eventsv2:edit_batch' record.id %}">Edit</a> | 
+            {% endif %}
             <a href="{% url 'eventsv2:list_student' record.id %}">Student List</a>
             {% if record|can_add_student:request.user %}
              | <a href="{% url 'eventsv2:add_student' record.id %}">Add Student</a>

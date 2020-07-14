@@ -563,6 +563,7 @@ class StudentBatch(models.Model):
   department = models.ForeignKey(Department, on_delete=models.PROTECT )
   year = models.PositiveIntegerField() # 2010-2014
   stcount = models.PositiveIntegerField(default=0)
+  batch_name = models.CharField(max_length=200, null=True)
 
   def __str__(self):
     return '%s, %s Batch' % (self.department.name, self.year)
@@ -598,6 +599,20 @@ class StudentBatch(models.Model):
     if self.trainingrequest_set.exists():
        return False
     return True
+
+  def create_batch_name(self):
+    batch_query = StudentBatch.objects.filter(department_id=self.department_id, year=self.year, organiser=self.organiser)
+    b_count = batch_query.count()
+    name =  str(self.department)+"-"+str(self.year)+"-"+str(b_count)
+
+    for a in range(b_count+1):
+      name =  str(self.department)+"-"+str(self.year)+"-"+str(a+1)
+    
+      if not batch_query.filter(batch_name=name).exists():
+        self.batch_name = name
+        self.save()
+        break
+    return name
 
 
 class StudentMaster(models.Model):
