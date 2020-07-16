@@ -17,6 +17,10 @@ function setGoImageWith(){
 $( window ).resize(function() {
     setGoImageWith();
 });
+function caller(){
+    event.preventDefault();
+    location.href = "https://ai.googleblog.com/2015/03/announcing-google-mooc-focused-research.html";
+}
 
 $(function(){
     // catch all a clicks
