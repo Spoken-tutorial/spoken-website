@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Create Training Event{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> Create New Training Event :
+{% endblock %}
+{% block search %}{% endblock %}
+
+ {% block content %}
+{{message.tags}}
+<div class="row " ><!--main div 1 style="background-color:#fad7a0"-->
+	<div class='col-sm-15'>
+	<form action="" method="POST" class='form-horizontal'>{% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save">
+	</form>
+	</div>
+</div>
+ {% endblock %}
+{% block jsblock %}
+
+{% endblock %}

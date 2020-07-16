@@ -93,6 +93,9 @@ urlpatterns = [
     #api
     url(r'^api/', include('api.urls', namespace='api')),
 
+    #training
+    url(r'^training/', include('training.urls', namespace='training')),
+
     # certificate
     url(r'^certificate/', include('certificate.urls', namespace='certificate')),
 

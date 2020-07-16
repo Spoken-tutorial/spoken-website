@@ -89,6 +89,7 @@ INSTALLED_APPS = [
     'team',
     'certificate',
     'api',
+    'training',
     'rest_framework',
     'workshop',
     'django_filters',
