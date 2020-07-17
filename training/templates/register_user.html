@@ -1,0 +1,77 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}User Registration{% endblock %}
+{% block content %}
+  <form method="post" action="/donate/send_onetime" class="form-horizontal" id="success_form">
+        <div class="row well bs-component">
+      {% csrf_token %}
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                <fieldset>
+                    <div class="form-group">
+                        <label for="id_name" class="col-lg-4 control-label">Full Name </label>
+                        <div class="col-lg-8">
+                            {% render_field form.name class+="form-control name" tabindex="1" %}
+                            {{ form.name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_difficulty_level" class="col-lg-4 control-label">Email</label>
+                        <div class="col-lg-8">
+                            {% render_field form.email class+="form-control email" tabindex="2" %}
+                            {{ form.email.errors }}
+                        </div>
+                        <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-left: 16px;">Send OTP</a>
+                        <div class="form-group col-sm-10" id="pwd" style="display: none;">
+                        <div style="display: flex;">
+                            <input type="password" class="form-control" id="id_password" placeholder="Password">
+                                <i class="fa fa-check-circle" aria-hidden="true" style="display: none;" id="check-pwd"></i>
+                        </div>
+                          <a href="{% url 'cms:password_reset' %}" id="forgot_pwd" target="_blank">Forgot Password ?</a>
+                          <div id="invalid_credentials"></div>
+                        </div>
+                        <div class="form-group col-sm-10 text-center" id="organizer_info" style="display: none;">
+                          <p id="organizer_paid_msg">Congratulations! You are a part of a Registered College & are entitled to free download.
+                          <br>
+                         <span class="organizer_paid_info text-muted">You are logged in successfully. Please proceed on cd content page.</span>
+                          </p>
+                        </div>
+                        <div class="form-group col-sm-10 text-center" id="logged_success" style="display: none;">
+                          <span style="color: #43A047;">Logged In Successfully </span>
+                        </div>
+                        <div class="form-group col-sm-10">
+                            <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 50%;">
+                        <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
+                        </div>
+                        <div class="form-group col-sm-10" id="registered-success-msg">
+                                <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_state" class="col-lg-4 control-label">State</label>
+                        <div class="col-lg-8">
+                            {% render_field form.state class+="form-control state" tabindex="3" %}
+                            {{ form.state.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
+                        <div class="col-lg-8">
+                            {% render_field form.amount class+="form-control amount" tabindex="5" %}
+                            {{ form.amount.errors }}
+                        </div>
+                    </div>
+                        <div class="col-lg-6 ">
+                            <button type="submit" form="cdcontent_download" value="Submit" class="btn btn-success">Register
+                            </button>
+                            <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" style="display: none;">Make Payment</button>
+		                </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+{%endblock%}
+{%block jsblock%}
+<script type="text/javascript" src="{% static 'js/register.js' %}"></script>
+{%endblock%}

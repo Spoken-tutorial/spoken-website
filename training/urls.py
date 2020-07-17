@@ -10,8 +10,11 @@ urlpatterns = [
       name="create_event"
     ),
     url(
-      r'^list_events/', 
+      r'^list_events', 
       TrainingEventsListView.as_view(template_name="list_events.html"), 
       name="list_events"
     ),
+    url(
+      r'^register_user',
+      RegisterUserView.as_view(template_name="register_user.html"))
     ]

@@ -7,7 +7,8 @@ from django.utils.decorators import method_decorator
 from events.decorators import group_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
-
+from .helpers import is_user_paid
+from .forms import *
 # Create your views here.
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
@@ -38,5 +39,15 @@ class TrainingEventsListView(ListView):
         return context
 
 
-
+class RegisterUserView(CreateView):
+	"""docstring for RegisterUserView"""
+	form_class = RegisterUser
+	template_name = "register_user.html"
+	context = {}
+	context['user_paid_college'] = is_user_paid(self.request)
+	return render(self.request, template_name, context)
+	def __init__(self, arg):
+		super(RegisterUserView, self).__init__()
+		self.arg = arg
+		
 

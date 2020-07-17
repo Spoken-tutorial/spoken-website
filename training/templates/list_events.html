@@ -18,7 +18,7 @@
     		{{event.host_college}}
     		</br>
     		Registration open from {{event.registartion_start_date}}, till {{event.registartion_end_date}}
-    		<input type="submit" value="Register Now">
+            <a href="{% url 'training:register_user' %}" type="submit">Register Now</a>
 
     	</div>
     </li>
