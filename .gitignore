@@ -99,3 +99,5 @@ cron/nohup.out
 .ipynb_checkpoints/
 .vscode/
 cron/spoken_search/index
+static/spoken/images/*
+cron/*

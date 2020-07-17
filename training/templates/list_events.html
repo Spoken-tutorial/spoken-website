@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}List Training Event{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> List of Training Events :
+{% endblock %}
+{% block search %}{% endblock %}
+
+ {% block content %}
+{{message.tags}}
+<ul>
+{% for event in object_list %}
+    <li>
+    	<div>
+    		{{ event.event_name }} : {{ event.event_start_date }} - {{event.event_end_date}}
+    		</br>
+    		{{event.host_college}}
+    		</br>
+    		Registration open from {{event.registartion_start_date}}, till {{event.registartion_end_date}}
+            <a href="{% url 'training:register_user' %}" type="submit">Register Now</a>
+
+    	</div>
+    </li>
+{% empty %}
+    <li>No articles yet.</li>
+{% endfor %}
+</ul>
+{% endblock %}
+{% block jsblock %}
+
+{% endblock %}

@@ -1,0 +1,41 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{wallpaper}
+\graphicspath{ {$image_dir} }
+
+\title{
+\includegraphics[scale=0.5]{logo.png}   SPOKEN TUTORIALS
+}
+\author{CD Content Download Receipt}
+
+
+\usepackage{natbib}
+\usepackage{hyperref}
+
+\begin{document}
+\TileWallPaper{22cm}{28cm}{back.png}
+\maketitle
+\centering
+\setlength{\tabcolsep}{10pt}
+\renewcommand{\arraystretch}{2.0}
+\large{
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Name}           & \verb|$name| \\ \hline
+\textbf{Amount}         & $amount \\ \hline
+\textbf{Expiry}         & $expiry \\ \hline
+\textbf{Email}          & \verb|$email| \\ \hline
+\textbf{Transaction ID} & $transId \\ \hline
+\textbf{Provider}       & $provId \\ \hline
+\textbf{Status}         & $msg \\ \hline
+\end{tabular}
+}
+\\
+\vspace{10mm} %5mm vertical space
+\large{Thank You for choosing Spoken Tutorials}\\
+\vspace{10mm} %5mm vertical space
+\textbf{In a Journey to make India \\IT Literate}
+
+\bibliographystyle{plain}
+\end{document}
