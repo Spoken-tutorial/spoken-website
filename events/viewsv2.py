@@ -315,8 +315,6 @@ class StudentBatchCreateView(CreateView):
       rowcsv = csv.reader(file_data, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
       gencount = studentcount + rowcount
-      print(('gencount',gencount))
-      print(('printing csv length',rowcount))
       if rowcount > 500:
         messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
       if gencount > 500:
@@ -325,7 +323,6 @@ class StudentBatchCreateView(CreateView):
         csvdata = csv.reader(file_data, delimiter=',', quotechar='|')
         for row in csvdata:
           stu_row_count = stu_row_count+1
-          print (stu_row_count)
           if len(row) < 4:
             skipped.append(row)
             continue
