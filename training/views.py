@@ -10,7 +10,7 @@ from events.decorators import group_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
-from .helpers import is_user_paid
+from .helpers import is_user_paid, user_college
 import json
 # Create your views here.
 class TrainingEventCreateView(CreateView):
@@ -56,11 +56,18 @@ def register_user(request):
 		if user.profile_set.all():
 			try:
 				form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
+				user_data = is_user_paid(request)
+				if user_data[0]:
+					print("college",user_data[1])
+					form.fields["college"].initial = user_data[1]
+				else:
+					print("user_college(request)",user_college(request))
+					form.fields["college"].initial = user_college(request)
 			except Exception as e:
 				raise e
 
 	if request.method == 'POST':
-		event_id = request.POST.get("event")
+		event_id = request.POST.get("event_id_info")
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
 			form.fields["event"].initial = event_register
