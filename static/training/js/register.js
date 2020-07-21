@@ -1,9 +1,12 @@
+$(document).ready(function(){
 $('#id_email').on('focusout',function(){
       var username = $('#id_name').val();
+alert(username);
       var email = $('#id_email').val();
+alert(email);
       $.ajax({
           url:'/donate/send_onetime/',
-          type:'POST',
+          type:"POST",
           data:{
               'username': username,
               'email': email,
@@ -72,3 +75,4 @@ $('#pwd').on('focusout',function(){
             }
             });
         });
+});

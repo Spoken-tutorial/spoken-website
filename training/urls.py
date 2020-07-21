@@ -15,6 +15,5 @@ urlpatterns = [
       name="list_events"
     ),
     url(
-      r'^register_user',
-      RegisterUserView.as_view(template_name="register_user.html"))
+      r'^register_user', register_user, name="register_user"),
     ]

@@ -15,42 +15,34 @@ class CreateTrainingEventForm(forms.ModelForm):
     
 
 class RegisterUser(forms.ModelForm):
-    """docstring for RegisterUser"""
-    state = forms.ChoiceField(
-        choices=[('', '-- None --'), ],
-        widget=forms.Select(attrs = {}), 
-        required = True,
-        error_messages = {'required':'State field is required.'})
-    college = forms.ChoiceField(
-        choices=[('', '-- None --'), ],
-        widget=forms.Select(attrs = {}),
-        required = True,
-        error_messages = {'required':'College Name field is required.'})
+    
+    state = forms.ModelChoiceField(
+            widget = forms.Select(attrs = {'class' : 'ac-state'}),
+            queryset = State.objects.order_by('name'),
+            empty_label = "--- Select State ---", 
+            help_text = "",
+            required=False,
+            )
+    
+
+    class Meta(object):
+        model = Participant
+        fields = ['name', 'email', 'state', 'gender', 'amount', 'event', 'college']
 
     def __init__(self, *args, **kwargs):
-        # load the choices
-        state_list = list(State.objects.exclude().order_by('name').values_list('id', 'name'))
-        state_list.insert(0, ('', '-- None --'))
-        self.fields['state'].choices = state_list
-
+        user = kwargs.pop('user', None)
+        print("user is -->",user)
+        super(RegisterUser, self).__init__(*args, **kwargs)	
+        if user:
+                if user.is_authenticated:
+                        self.fields['email'].initial = user.email
+                        self.fields['email'].widget.attrs['readonly'] = True
+                        self.fields['name'].initial = user.get_full_name()
         if 'user' in kwargs:
+            print("kw user :",kwargs["user"])
             self.user = kwargs["user"]
             del kwargs["user"]
-
-        ''' 
-            User Paid Details
-            0 - True/False
-            1 - AcademicCentre
-        '''
-        user_paid_info = is_user_paid(self.user)
-        if user_paid_info[0]:
-            self.fields['college'].initial = user_paid_info[1]
-
-        if args:
-            if 'state' in args[0]:
-                if args[0]['state'] and args[0]['state'] != '' and args[0]['state'] != 'None':
-                    choices = list(AcademicCenter.objects.filter(
-                        state_id = args[0]['state']).values_list('id', 'institution_name'))
-                    choices.insert(0, ('', '-- None --'))
-                    self.fields['college'].choices = choices
-                    self.fields['college'].widget.attrs = {}    
+            user_paid_info = is_user_paid(self.user)
+            if user_paid_info[0]:
+                 self.fields['college'].initial = user_paid_info[1]
+     

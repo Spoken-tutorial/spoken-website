@@ -200,7 +200,7 @@ def send_onetime(request):
 
 
 
-@csrf_protect
+@csrf_exempt
 def validate_user(request):
     print(request.POST)
     context = {}
