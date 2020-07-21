@@ -23,15 +23,22 @@
                             {{ form.email.errors }}
                         </div>
                         <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-left: 16px;">Send OTP</a>
-                        <div id="email-info">
+                        <div id="email-info" class="col-md-8 col-md-offset-4">
                             </div>
-			<div class="form-group col-sm-10" id="pwd" style="display: none;">
-                        <div style="display: flex;">
+			             <div class="form-group " id="pwd" style="display: none;">
+                        <div style="display: flex;" class="col-sm-8 col-sm-offset-4">
                             <input type="password" class="form-control" id="id_password" placeholder="Password">
                                 <i class="fa fa-check-circle" aria-hidden="true" style="display: none;" id="check-pwd"></i>
                         </div>
-                          <a href="{% url 'cms:password_reset' %}" id="forgot_pwd" target="_blank">Forgot Password ?</a>
-                          <div id="invalid_credentials"></div>
+                        <div class="row">
+                          <div class="col-sm-8 col-sm-offset-4">
+                            <p>
+                              <a href="{% url 'cms:password_reset' %}" id="forgot_pwd" target="_blank">Forgot Password ?</a>
+                            </p>
+                            
+                          </div>
+                        </div>
+                          <div id="invalid_credentials" class="col-sm-8 col-sm-offset-4"></div>
                         </div>
                         <div class="form-group col-sm-10 text-center" id="organizer_info" style="display: none;">
                           <p id="organizer_paid_msg" class="text-muted">Congratulations! You are a part of a Registered College & are entitled to free download.
@@ -39,9 +46,9 @@
                          <span class="organizer_paid_info text-muted">You are logged in successfully. Please proceed on cd content page.</span>
                           </p>
                         </div>
-User is from paid college : {{user|is_user_paid}}
-                        <div class="form-group col-sm-10 text-center" id="logged_success" style="display: none;">
-                          <span style="color: #43A047;">Logged In Successfully </span>
+ User is from paid college : {{user|is_user_paid}}
+                        <div class="form-group  text-center" id="logged_success" style="display: none;">
+                          <span style="color: #43A047;" class="col-sm-8 col-sm-offset-4">Logged In Successfully </span>
                         </div>
                         <div class="form-group col-sm-10">
                             <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 50%;">
@@ -73,7 +80,7 @@ User is from paid college : {{user|is_user_paid}}
                             {{ form.state.errors }}
                         </div>
                     </div>
-		    <div class="form-group">
+		              <div class="form-group">
                         <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
                         <div class="col-lg-8">
                             {% render_field form.college class+="form-control college" tabindex="5" %}
@@ -81,6 +88,16 @@ User is from paid college : {{user|is_user_paid}}
                         </div>
                     </div>
 
+                    {% if user|is_user_paid %}
+                    <div class="form-group">
+                      <div class="panel panel-primary col-lg-8 col-md-offset-4">
+                        <div class="panel-body">You are a part of a paid college.</div>
+                      </div>
+                        <!-- <div class="col-lg-8 col-md-offset-4">
+                            <span><p>You are a part of a paid college.</p></span>
+                        </div> -->
+                    </div>
+                    {% else %}
                     <div class="form-group">
                         <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
                         <div class="col-lg-8">
@@ -88,10 +105,13 @@ User is from paid college : {{user|is_user_paid}}
                             {{ form.amount.errors }}
                         </div>
                     </div>
-                        <div class="col-lg-6 ">
+                    {% endif %}
+                        <div class="row">
+                          <div class=" col-md-offset-4 col-md-4">
                             <button type="submit"  value="Submit" class="btn btn-success">Register
                             </button>
                             <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" style="display: none;">Make Payment</button>
+                          </div>
 		                </div>
                     </div>
                 </fieldset>
@@ -152,6 +172,7 @@ $('#pwd').on('focusout',function(){
                 csrfmiddlewaretoken: '{{ csrf_token }}',
             },
             success: function(data) {
+              $("#logged_success").show();
               if (data['error_msg']=='') {
                 var r = data['organizer_paid'];
                 if (data['organizer_paid']=='1') {
