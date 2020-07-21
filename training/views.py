@@ -48,9 +48,15 @@ def register_user(request):
 	context = {}
 	context['form']= form
 	if request.method == 'POST':
-		form = RegisterUser(request.POST)
-		form_data = form.save(commit=False)
-		form_data.user = request.user
-		form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
-		form_data.save()
+		event_id = request.POST.get("event")
+		if event_id:
+			event_register = TrainingEvents.objects.get(id=event_id)
+			form.fields["event"].initial = event_register
+			form.fields['event'].widget.attrs['readonly'] = True
+		else:
+			form = RegisterUser(request.POST)
+			form_data = form.save(commit=False)
+			form_data.user = request.user
+			form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
+			form_data.save()
 	return render(request, template_name,context)

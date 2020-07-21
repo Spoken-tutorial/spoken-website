@@ -58,7 +58,7 @@
 
  {% block content %}
 {{message.tags}}
-
+<form method="post" action = "{% url 'training:register_user' %}">
 {% for event in object_list %}
 <div class="activities-event ">
     <div class="date">
@@ -73,12 +73,13 @@
         </p>
         <p>                  
             Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
-            <a href="{% url 'training:register_user' %}" type="submit" class="btn btn-info">Register Now</a>
+		    <input type="event" id="event" name="event" value="{{event.id}}" style="display:none">
+            <button type="submit" class="btn btn-info">Register Now</button>
         </p>        
     </div>
 </div> 
 {% endfor %}
-
+</form>
 {% endblock %}
 {% block jsblock %}
 
