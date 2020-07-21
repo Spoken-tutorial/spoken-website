@@ -1,0 +1,205 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{%load trainingdata%}
+{% block title %}User Registration{% endblock %}
+{% block content %}
+  <form method="post"  class="form-horizontal">
+        <div class="row well bs-component">
+{% csrf_token %}
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                <fieldset>
+                    <div class="form-group">
+                        <label for="id_name" class="col-lg-4 control-label">Full Name </label>
+                        <div class="col-lg-8">
+                            {% render_field form.name class+="form-control name" tabindex="1" %}
+                            {{ form.name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_difficulty_level" class="col-lg-4 control-label">Email</label>
+                        <div class="col-lg-8">
+                            {% render_field form.email class+="form-control email" tabindex="2" %}
+                            {{ form.email.errors }}
+                        </div>
+                        <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-left: 16px;">Send OTP</a>
+                        <div id="email-info">
+                            </div>
+			<div class="form-group col-sm-10" id="pwd" style="display: none;">
+                        <div style="display: flex;">
+                            <input type="password" class="form-control" id="id_password" placeholder="Password">
+                                <i class="fa fa-check-circle" aria-hidden="true" style="display: none;" id="check-pwd"></i>
+                        </div>
+                          <a href="{% url 'cms:password_reset' %}" id="forgot_pwd" target="_blank">Forgot Password ?</a>
+                          <div id="invalid_credentials"></div>
+                        </div>
+                        <div class="form-group col-sm-10 text-center" id="organizer_info" style="display: none;">
+                          <p id="organizer_paid_msg" class="text-muted">Congratulations! You are a part of a Registered College & are entitled to free download.
+                          <br>
+                         <span class="organizer_paid_info text-muted">You are logged in successfully. Please proceed on cd content page.</span>
+                          </p>
+                        </div>
+User is from paid college : {{user|is_user_paid}}
+                        <div class="form-group col-sm-10 text-center" id="logged_success" style="display: none;">
+                          <span style="color: #43A047;">Logged In Successfully </span>
+                        </div>
+                        <div class="form-group col-sm-10">
+                            <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 50%;">
+                        <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
+                        </div>
+                        <div class="form-group col-sm-10" id="registered-success-msg" style="display: none">
+                                <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
+                        </div>
+                    </div>
+	            <div class="form-group">
+                        <label for="id_state" class="col-lg-4 control-label">Gender</label>
+                        <div class="col-lg-8">
+                            {% render_field form.gender class+="form-control gender" tabindex="3" %}
+                            {{ form.gender.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_state" class="col-lg-4 control-label">Event</label>
+                        <div class="col-lg-8">
+                            {% render_field form.event class+="form-control event" tabindex="3" %}
+                            {{ form.event.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_state" class="col-lg-4 control-label">State</label>
+                        <div class="col-lg-8">
+                            {% render_field form.state class+="form-control state" tabindex="3" %}
+                            {{ form.state.errors }}
+                        </div>
+                    </div>
+		    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
+                        <div class="col-lg-8">
+                            {% render_field form.college class+="form-control college" tabindex="5" %}
+                            {{ form.college.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
+                        <div class="col-lg-8">
+                            {% render_field form.amount class+="form-control amount" tabindex="5" %}
+                            {{ form.amount.errors }}
+                        </div>
+                    </div>
+                        <div class="col-lg-6 ">
+                            <button type="submit"  value="Submit" class="btn btn-success">Register
+                            </button>
+                            <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" style="display: none;">Make Payment</button>
+		                </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+{%endblock%}
+{% block jsblock %}
+<script type="text/javascript">
+ $( document ).ready(function() {
+$('#id_email').on('focusout',function(){
+      var username = $('#id_name').val();
+      var email = $('#id_email').val();
+      $.ajax({
+          url:'/donate/send_onetime/',
+          type:"POST",
+          data:{
+              'username': username,
+              'email': email,
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+          },
+        success: function(data) {
+            if (data['valid_email']=='1') {
+            $('#email-info').html('');
+            if(data['message']=="active_user"){
+                $("#send_otp").hide();
+                $("#pwd").show();
+                $("#forgot_pwd").show();
+                $("#email-info").html('This Email Id is already registered with Spoken Tutorials. Please enter your password to proceed.');
+                document.getElementById("email-info").style.color = "green";
+            }
+            else if(data['message']=='inactive_user'){
+                document.getElementById("otp_sent_msg").innerHTML = "OTP Re-sent";
+                document.getElementById('otp_sent_msg').className = 'label label-success';
+                $("#otp_sent_msg").show().delay(10000).fadeOut();
+            }
+            else{
+              $("#send_otp").show();
+            }
+            }else{
+                $('#email-info').html(data['email_validation']);
+            }
+        }
+    });
+
+$('#pwd').on('focusout',function(){
+        $('#invalid_credentials').html('');
+        var username = $('#id_name').val();
+        var email = $('#id_email').val();
+        var password = $('#id_password').val();
+        $.ajax({
+            url:'/donate/validate_user/',
+            type:"POST",
+            data:{
+                'username': username,
+                'email': email,
+                'password': password,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            success: function(data) {
+              if (data['error_msg']=='') {
+                var r = data['organizer_paid'];
+                if (data['organizer_paid']=='1') {
+                  $('#organizer_info').show();
+                  $('#download_btn').show();
+                  $('#make_payment').hide();
+                  
+                  $('#id_country').parent().hide();
+                  
+                  $('#registered-success-msg').hide();
+                  $('#otp_value').parent().hide();
+                  $('#forgot_pwd').hide();
+                  $("#email-info").hide();
+                }
+              }else{
+                  $('#invalid_credentials').html(data['error_msg']);
+              }
+            }
+            });
+        });
+
+  });
+
+$('#id_state').change(function(){
+   	var stateid  = $('#id_state').val();
+   	$.ajax({
+                type : "POST",
+                url:"/software-training/ajax-state-collage/",
+                dataType : "json",
+                data: {
+                  'state' : stateid,
+                },
+                success: function(data)
+                {
+                    $('#id_college').html(data);
+                }
+              });
+   	});
+});
+
+function send_otp(){
+        $("#send_otp").show();
+        document.getElementById("otp_sent_msg").innerHTML = "OTP sent";
+        document.getElementById('otp_sent_msg').className = 'label label-success';
+        $("#otp_value").show();
+        $("#otp_sent_msg").show().delay(10000).fadeOut();
+}
+
+</script>
+<script type="text/javascript" src="{% static 'cdcontent/js/cdcontent.js' %}"></script>
+{% endblock %}

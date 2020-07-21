@@ -29,7 +29,7 @@ class NewStudentBatchForm(forms.ModelForm):
 
   class Meta(object):
     model = StudentBatch
-    exclude = ['academic', 'year', 'department', 'stcount', 'organiser']
+    exclude = ['academic', 'year', 'department', 'stcount', 'organiser', 'batch_name']
   
   def clean_csv_file(self):
     data = self.cleaned_data["csv_file"]
@@ -49,7 +49,7 @@ class UpdateStudentYearBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())
   class Meta(object):
     model = StudentBatch
-    exclude = ['academic', 'stcount', 'organiser','department']
+    exclude = ['academic', 'stcount', 'organiser','department','batch_name']
 
 class TrainingRequestForm(forms.ModelForm):
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
@@ -644,3 +644,15 @@ class StudentGradeFilterForm(forms.Form):
     self.fields['activation_status'].widget.attrs.update({'class': 'form-control'})
     self.fields['from_date'].widget.attrs.update({'class': 'form-control'})
     self.fields['to_date'].widget.attrs.update({'class': 'form-control'})
+
+
+class AcademicPaymentStatusForm(forms.ModelForm):
+
+  class Meta(object):
+    model = AcademicPaymentStatus
+    exclude = ['entry_user']
+    widgets = {
+    'payment_date':DateInput(),
+    'phone':forms.NumberInput(),
+    'amount':forms.NumberInput()
+    }

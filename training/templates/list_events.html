@@ -73,7 +73,7 @@
         </p>
         <p>                  
             Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
-            <button type="submit" class="btn btn-info">Register Now</button>
+            <a href="{% url 'training:register_user' %}" type="submit" class="btn btn-info">Register Now</a>
         </p>        
     </div>
 </div> 

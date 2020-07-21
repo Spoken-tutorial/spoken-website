@@ -6,12 +6,10 @@ from builtins import object
 from django.contrib.auth.models import User
 from creation.models import FossCategory, Language
 from events.models import *
-
-
-class TrainingEvents(models.Model):
-	EVENT_TYPE_CHOICES =(
-	('', '-----'), ('FDP', 'FDP'), ('SDP', 'SDP'), ('Workshop', 'Workshop'),
-	)
+from .helpers import EVENT_TYPE_CHOICES
+from donate.models import Payee
+from donate.helpers import GENDER_CHOICES
+class TrainingEvents(models.Model):	
 
 	event_type = models.CharField(max_length = 50, choices = EVENT_TYPE_CHOICES)
 	event_name = models.CharField(max_length=200)
@@ -34,12 +32,14 @@ class TrainingEvents(models.Model):
 		return self.event_name
 
 
-class EventRegistartion(models.Model):
+class Participant(models.Model):
+	name = models.CharField(max_length=255,null=True)
+	email = models.EmailField(max_length=255,null=True)
+	gender = models.CharField(choices=GENDER_CHOICES, max_length=6,null=True)
+	amount = models.DecimalField(max_digits=10,decimal_places=2,null=True)	
 	event = models.ForeignKey(TrainingEvents, on_delete=models.PROTECT)
-	participant_name =  models.CharField(max_length=200)
-	participant_email = models.EmailField()
-	gender = models.CharField(max_length=200)
+	user = models.ForeignKey(User, on_delete=models.PROTECT)
 	state = models.ForeignKey(State, on_delete=models.PROTECT )
 	college = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT)
-	department = models.ForeignKey(Department, on_delete=models.PROTECT )
+	department = models.ForeignKey(Department, on_delete=models.PROTECT, null=True )
 	created = models.DateTimeField(auto_now_add = True)

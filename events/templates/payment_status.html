@@ -8,8 +8,16 @@
 {% block content %}
 <body onload="loading()">
     <div class= 'filters row' style="text-align: center;">
+        <i class="fa fa-exclamation-circle" aria-hidden="true" style="font-size: 2rem;
+    color: red;"></i>
         <h3>You are getting redirected to external payment gateway!!</h3>
-        <form action="https://www.it.iitb.ac.in/esospg/initpayment" name="test" method="post" class='form-horizontal' >
+        <h4>Please do not refresh or close the window</h4>
+        <h4 style="margin-top: 32px;">
+            <span style="border: 1px solid orange; padding: 10px 50px;">
+                The process may take upto 5 minutes        
+            </span>
+        </h4>
+        <form action="{{target}}" name="test" method="post" class='form-horizontal' >
             <input type="hidden" name="userId" value="{{userId}}" />
             <input type="hidden" name="name" value="{{name}}" />
             <input type="hidden" name="amount" value="{{amount}}" />

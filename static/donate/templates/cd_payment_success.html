@@ -1,0 +1,109 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Payment Status{% endblock %}
+{% block content %}
+  <form method="post" action="/donate/receipt" class="form-horizontal" id="success_form">
+        <div class="row well bs-component">
+      {% csrf_token %}
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                <fieldset>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_name" class="col-lg-4 control-label">Full Name </label>
+                        <div class="col-lg-8">
+                            {% render_field form.name class+="form-control name" tabindex="1" %}
+                            {{ form.name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_difficulty_level" class="col-lg-4 control-label">Email</label>
+                        <div class="col-lg-8">
+                            {% render_field form.email class+="form-control email" tabindex="2" %}
+                            {{ form.email.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_state" class="col-lg-4 control-label">Country</label>
+                        <div class="col-lg-8">
+                            {% render_field form.country class+="form-control country" tabindex="3" %}
+                            {{ form.country.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
+                        <div class="col-lg-8">
+                            {% render_field form.amount class+="form-control amount" tabindex="5" %}
+                            {{ form.amount.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Expiry Date</label>
+                        <div class="col-lg-8">
+                            {% render_field form.expiry class+="form-control expiry" tabindex="6" %}
+                            {{ form.expiry.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Request Id</label>
+                        <div class="col-lg-8">
+                            {% render_field form.reqId class+="form-control reqId" tabindex="7" %}
+                            {{ form.reqId.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Transaction Id</label>
+                        <div class="col-lg-8">
+                            {% render_field form.transId class+="form-control transId" tabindex="8" %}
+                            {{ form.transId.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Reference No</label>
+                        <div class="col-lg-8">
+                            {% render_field form.refNo class+="form-control refNo" tabindex="9" %}
+                            {{ form.refNo.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Payment Provider</label>
+                        <div class="col-lg-8">
+                            {% render_field form.provId class+="form-control provId" tabindex="10" %}
+                            {{ form.provId.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Transaction Status</label>
+                        <div class="col-lg-8">
+                            {% render_field form.msg class+="form-control msg" tabindex="10" %}
+                            {{ form.msg.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-8">
+                            {% render_field form.user class+="form-control user" tabindex="10" %}
+                            {{ form.user.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-lg-4 col-lg-offset-2">
+                            <input type="submit" class="btn btn-primary" value="Receipt"  tabindex="6" />
+                        </div>
+                        <div class="col-lg-6 ">
+                            <button type="submit" form="cdcontent_download" value="Submit" class="btn btn-success">Tutorial Content Download</button>
+		                </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </form>
+<form id="cdcontent_download" action="{% url 'cdcontent:create_cd_download' 'general' %}" method="post">
+{% csrf_token %}
+                    <div class="form-group">
+                        <div class="col-lg-8">
+                            {% render_field form.selected_foss class+="form-control selected_foss" tabindex="10" %}
+                            {{ form.selected_foss.errors }}
+                        </div>
+                    </div>
+		    </form>
+{%endblock%}

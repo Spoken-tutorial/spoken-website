@@ -1,13 +1,17 @@
 from django.shortcuts import render
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
-from training.models import *
-from training.forms import *
+from .models import *
+from .forms import *
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
+from events.models import State
 from events.decorators import group_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
-
+from django.core.serializers import serialize
+from .helpers import is_user_paid
+import json
 # Create your views here.
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
@@ -37,6 +41,16 @@ class TrainingEventsListView(ListView):
         context = super().get_context_data(**kwargs)
         return context
 
-
-
-
+@csrf_exempt
+def register_user(request):
+	form = RegisterUser()
+	template_name = "register_user.html"
+	context = {}
+	context['form']= form
+	if request.method == 'POST':
+		form = RegisterUser(request.POST)
+		form_data = form.save(commit=False)
+		form_data.user = request.user
+		form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
+		form_data.save()
+	return render(request, template_name,context)
