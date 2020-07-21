@@ -5,27 +5,80 @@
 {% block heading %}
   <i class="fa fa-list-ul"></i> List of Training Events :
 {% endblock %}
+{% block compressinlinecssblock %}
+<style>
+.activities-event{
+    padding: 1rem 1rem;
+    margin:0;
+    background-color: #fff;
+    display:flex;
+    box-shadow: 0 1px 5px rgb(104,104,104,0.5);
+    margin-right: 10px;
+    margin: 0;
+}
+
+.activities-event p{
+    line-height: 1.5rem;
+    font-size: 0.9rem;
+}
+.activities-event .date{
+    border-right: 1px solid #e0e0e0;
+    margin-bottom: 10px;
+    margin-top:  10px;
+    text-align: center;
+}
+.activities-event .date p{
+    margin-right: 20px;
+    font-size: 1.1rem;
+    color: #413e66;
+    }
+.activities-event .content{
+    text-align: left;
+    margin-left:30px;
+}
+.activities-event .content p{
+    font-size: 1.2rem;
+}
+.activities-event .content h6{
+    font-size: 1.5rem;
+    color: #413e66;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+.activities-event:hover{
+    background: #e1f5fe;
+}
+.fa-calendar{
+    font-size: 4em;
+    text-align: center;
+}
+</style>
+{% endblock %}
 {% block search %}{% endblock %}
 
  {% block content %}
 {{message.tags}}
-<ul>
-{% for event in object_list %}
-    <li>
-    	<div>
-    		{{ event.event_name }} : {{ event.event_start_date }} - {{event.event_end_date}}
-    		</br>
-    		{{event.host_college}}
-    		</br>
-    		Registration open from {{event.registartion_start_date}}, till {{event.registartion_end_date}}
-    		<input type="submit" value="Register Now">
 
-    	</div>
-    </li>
-{% empty %}
-    <li>No articles yet.</li>
+{% for event in object_list %}
+<div class="activities-event ">
+    <div class="date">
+        <p><i class="fa fa-calendar"></i></p>
+        <p>{{ event.event_start_date}} - {{ event.event_end_date}}</p>
+    </div>
+    <div class="content">
+        <h6>{{event.event_name}}</h6>
+        <p>
+            <b>Host College :</b> <span>{{event.host_college}}{{event.state.name}}</span></br>
+            <b>Event Coordinator Name :</b> <span>{{event.event_coordinator_name}}</span>
+        </p>
+        <p>                  
+            Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
+            <button type="submit" class="btn btn-info">Register Now</button>
+        </p>        
+    </div>
+</div> 
 {% endfor %}
-</ul>
+
 {% endblock %}
 {% block jsblock %}
 
