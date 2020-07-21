@@ -47,6 +47,18 @@ def register_user(request):
 	template_name = "register_user.html"
 	context = {}
 	context['form']= form
+
+	if request.user.is_authenticated():
+		user = request.user
+		form.fields["name"].initial = user.get_full_name()
+		form.fields["email"].initial = getattr(user, 'email')
+		form.fields['email'].widget.attrs['readonly'] = True
+		if user.profile_set.all():
+			try:
+				form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
+			except Exception as e:
+				raise e
+
 	if request.method == 'POST':
 		event_id = request.POST.get("event")
 		if event_id:
