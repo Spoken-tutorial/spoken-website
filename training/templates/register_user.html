@@ -84,13 +84,20 @@
                             {{ form.state.errors }}
                         </div>
                     </div>
+		{% if  user_college %}
+		 <div class="col-lg-8">
+			<input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
+		{%else%}
+                        <select class="form-control" id="id_college" name="dropdown_college">
+                        </select>
+                </div>
+		{% endif %}
                   <div class="form-group">
                         <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
                         <div class="col-lg-8">
-                            {% render_field form.college class+="form-control college" tabindex="5" %}
-                            {{ form.college.errors }}
-                        </div>
-                    </div>
+                            
+			</div>
+		 </div>
 
                     {% if user|is_user_paid %}
                     <div class="form-group">

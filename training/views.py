@@ -81,12 +81,12 @@ def register_user(request):
 				form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
 				user_data = is_user_paid(request)
 				if user_data[0]:
-					form.fields["college"].initial = user_data[1]
+					college = user_data[1]
 				else:
-					form.fields["college"].initial = user_college(request)
+					college = user_college(request)
+				context['user_college'] = college
 			except Exception as e:
 				raise e
-
 	if request.method == 'POST':
 		event_id = request.POST.get("event_id_info")
 		if event_id:
@@ -101,13 +101,6 @@ def register_user(request):
 			context['event_name'] = getattr(event_register, 'event_name')
 			context['event_coordinator_name'] = getattr(event_register, 'event_coordinator_name')
 			context['event_coordinator_email'] = getattr(event_register, 'event_coordinator_email')
-
-		else:
-			form = RegisterUser(request.POST)
-			form_data = form.save(commit=False)
-			form_data.user = request.user
-			form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
-			form_data.save()
 			context['event_obj']= event_register
 
 	return render(request, template_name,context)
@@ -125,7 +118,10 @@ def reg_success(request):
 		form_data = form.save(commit=False)
 		form_data.user = request.user
 		form_data.event = event
-		form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
+		try:
+			form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
+		except:
+			form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))
 		form_data.save()
 		event_name = event.event_name
 		context = {'name':name, 'email':email, 'event':event_name}
