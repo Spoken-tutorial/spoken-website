@@ -79,3 +79,19 @@ def register_user(request):
 			form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
 			form_data.save()
 	return render(request, template_name,context)
+
+def reg_success(request):
+	context = {}
+	template_name = "reg_success.html"
+	if request.method == 'POST':
+		name = request.POST.get('name')
+		email = request.POST.get('email')
+		event_id = request.POST.get('event')
+		event = TrainingEvents.objects.filter(id=1)
+		print('**************')
+		print(event)
+		print('**************')
+		event_name = getattr(event[0], 'event_name')
+		context = {'name':name, 'email':email, 'event':event_name}
+
+	return render(request, template_name,context)

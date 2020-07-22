@@ -16,4 +16,6 @@ urlpatterns = [
     ),
     url(
       r'^register_user', register_user, name="register_user"),
+    url(
+      r'^reg_success', reg_success, name="reg_success"),
     ]
