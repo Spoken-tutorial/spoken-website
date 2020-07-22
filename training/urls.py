@@ -23,4 +23,9 @@ urlpatterns = [
       r'^register_user', register_user, name="register_user"),
     url(
       r'^reg_success', reg_success, name="reg_success"),
+    url(
+      r'^(?P<eventid>\d+)/participants$', 
+      EventPraticipantsListView.as_view(template_name="list_event_participants.html"), 
+      name="list_event_participants"
+    ),
     ]

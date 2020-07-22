@@ -61,7 +61,7 @@ class TrainingEventsListView(ListView):
 		context['events'] =  self.events
 		context['show_myevents'] = self.show_myevents
 		if self.request.user:
-			context['userid'] = self.request.user.id
+			context['user'] = self.request.user
 		return context
 
 @csrf_exempt
@@ -115,3 +115,16 @@ def reg_success(request):
 		event_name = getattr(event[0], 'event_name')
 		context = {'name':name, 'email':email, 'event':event_name}
 	return render(request, template_name,context)
+
+
+class EventPraticipantsListView(ListView):
+	model = Participant
+
+	def dispatch(self, *args, **kwargs):
+		self.eventid = self.kwargs['eventid']
+		self.queryset = Participant.objects.filter(event_id=self.eventid)
+		return super(EventPraticipantsListView, self).dispatch(*args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(EventPraticipantsListView, self).get_context_data(**kwargs)
+		return context

@@ -2,6 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load trainingdata %}
+{% load eventsdata %}
 {% block title %}List Training Event{% endblock %}
 {% block heading %}
   <i class="fa fa-list-ul"></i> List of Training Events :
@@ -68,8 +69,6 @@
     {% endif %}
 </ul>
 
-
-
 <!-- Tab panes -->
 <div class="tab-content">
     <div class="tab-pane active" id="pending">
@@ -88,11 +87,16 @@
                 </p>
                 <p>                  
                     Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
+
                     {% if status != 'myevents' %}
                         {% if event.registartion_end_date|is_reg_valid %}
                             <input type="event" id="event_id_info" name="event_id_info" value="{{event.id}}" style="display:none">
                             <button type="submit" class="btn btn-info">Register Now</button>
                         {% endif %}
+                    {% endif %}
+
+                    {% if user|is_resource_person %}
+                        <a href="{% url 'training:list_event_participants' event.id %}" class="btn btn-info">Participant List</a>
                     {% endif %}
                 </p>        
             </div>
