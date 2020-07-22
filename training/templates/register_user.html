@@ -9,7 +9,7 @@
         <div class="row well bs-component">
 {% csrf_token %}
             <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-              <b>Welcome to the registration page of ----------</b>
+              <b>Welcome to the registration page of {{event_obj.event_name}}</b>
                 <fieldset>
                     <div class="form-group">
                         <label for="id_name" class="col-lg-4 control-label">Full Name </label>
@@ -48,9 +48,7 @@
                          <span class="organizer_paid_info text-muted">You are logged in successfully. Please proceed on cd content page.</span>
                           </p>
                         </div>
-              }
-              }
- User is from paid college : {{user|is_user_paid}}
+<p style="display: none;"> User is from paid college : {{user|is_user_paid}}</p>
                         <div class="form-group  text-center" id="logged_success" style="display: none;">
                           <span style="color: #43A047;" class="col-sm-8 col-sm-offset-4">Logged In Successfully </span>
                         </div>
