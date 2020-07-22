@@ -15,8 +15,9 @@
                  <form method="post"  class="form-horizontal" action="{% url 'training:reg_success' %}">
         <div class="row well bs-component">
 {% csrf_token %}
-            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">              
-
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+              <b>Welcome to the registration page of {{event_obj.event_name}}</b>
+		<input type="text"  id="event" name="event" value="{{event_obj.id}}" style="display:none">
                 <fieldset>
                     <div class="form-group">
                         <label for="id_name" class="col-lg-4 control-label">Full Name </label>
@@ -76,14 +77,6 @@
                             {{ form.gender.errors }}
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="id_state" class="col-lg-4 control-label">Event</label>
-                        <div class="col-lg-8">
-                            {% render_field form.event class+="form-control event" tabindex="3" %}
-                            {{ form.event.errors }}
-                        </div>
-                    </div>
-
                     <div class="form-group">
                         <label for="id_state" class="col-lg-4 control-label">State</label>
                         <div class="col-lg-8">

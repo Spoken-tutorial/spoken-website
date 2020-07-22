@@ -27,16 +27,15 @@ def user_college(request):
     try:
         college = request.user.organiser.academic_id
     except Exception as e1:
-        print("e1",e1)
         try:
              college = request.user.invigilator.academic_id
         except Exception as e2:
-             print("e2",e2)
              try:
                    studentbatch_id = request.user.student.studentmaster_set.values('batch_id')
                    batch = StudentBatch.objects.get(id=studentbatch_id)
                    college = batch.academic
-             except Exception as e3:
-                   print("e3",e3)
+             except:
+                   #user is not associated with any college
+                   pass
     return college
 
