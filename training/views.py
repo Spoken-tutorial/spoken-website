@@ -92,7 +92,7 @@ def register_user(request):
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
 			form.fields["event"].initial = event_register
-			form.fields['event'].widget.attrs['readonly'] = True
+			form.fields['event'].widget.attrs['disabled'] = True
 			form.fields["amount"].initial = EVENT_AMOUNT[event_register.event_type]
 			form.fields["amount"].widget.attrs['readonly'] = True
 			context['event_start_date'] = getattr(event_register, 'event_start_date')
@@ -109,6 +109,8 @@ def register_user(request):
 			form_data.user = request.user
 			form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
 			form_data.save()
+			context['event_obj']= event_register
+
 	return render(request, template_name,context)
 
 @csrf_exempt
