@@ -10,7 +10,7 @@ from events.decorators import group_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
-from .helpers import is_user_paid, user_college
+from .helpers import is_user_paid, user_college, EVENT_AMOUNT
 import json
 # Create your views here.
 class TrainingEventCreateView(CreateView):
@@ -47,7 +47,7 @@ def register_user(request):
 	template_name = "register_user.html"
 	context = {}
 	context['form']= form
-
+	
 	if request.user.is_authenticated():
 		user = request.user
 		form.fields["name"].initial = user.get_full_name()
@@ -58,10 +58,8 @@ def register_user(request):
 				form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
 				user_data = is_user_paid(request)
 				if user_data[0]:
-					print("college",user_data[1])
 					form.fields["college"].initial = user_data[1]
 				else:
-					print("user_college(request)",user_college(request))
 					form.fields["college"].initial = user_college(request)
 			except Exception as e:
 				raise e
@@ -72,6 +70,8 @@ def register_user(request):
 			event_register = TrainingEvents.objects.get(id=event_id)
 			form.fields["event"].initial = event_register
 			form.fields['event'].widget.attrs['readonly'] = True
+			form.fields["amount"].initial = EVENT_AMOUNT[event_register.event_type]
+			form.fields["amount"].widget.attrs['readonly'] = True
 		else:
 			form = RegisterUser(request.POST)
 			form_data = form.save(commit=False)

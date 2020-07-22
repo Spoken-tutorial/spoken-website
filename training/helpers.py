@@ -4,6 +4,9 @@ EVENT_TYPE_CHOICES =(
 	('', '-----'), ('FDP', 'FDP'), ('SDP', 'SDP'), ('Workshop', 'Workshop'),
 	)
 
+EVENT_AMOUNT = {
+     'FDP': '500', 'SDP':'250', 'Workshop': '1000'
+    }
 
 def is_user_paid(request):
     try:
@@ -30,7 +33,7 @@ def user_college(request):
         except Exception as e2:
              print("e2",e2)
              try:
-                   studentbatch_id = request.student.studentmaster_set.values('batch_id')
+                   studentbatch_id = request.user.student.studentmaster_set.values('batch_id')
                    batch = StudentBatch.objects.get(id=studentbatch_id)
                    college = batch.academic
              except Exception as e3:
