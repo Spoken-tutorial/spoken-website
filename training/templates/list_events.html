@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 {% load static %}
+{% load trainingdata %}
 {% block title %}List Training Event{% endblock %}
 {% block heading %}
   <i class="fa fa-list-ul"></i> List of Training Events :
@@ -57,27 +58,48 @@
 {% block search %}{% endblock %}
 
  {% block content %}
-{{message.tags}}
 
-{% for event in object_list %}
-<div class="activities-event ">
-    <div class="date">
-        <p><i class="fa fa-calendar"></i></p>
-        <p>{{ event.event_start_date}} - {{ event.event_end_date}}</p>
+{{message.tags}}
+<ul class="tabs nav nav-tabs">
+    <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/training/list_events/ongoing/">Ongoing Events</a></li>
+    <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/training/list_events/completed/">Past Events</a></li>
+    {% if show_myevents %}
+    <li {% if status == 'myevents' %}{{ 'class="active"'}}{% endif %}><a href="/training/list_events/myevents/">My Events</a></li>
+    {% endif %}
+</ul>
+
+
+
+<!-- Tab panes -->
+<div class="tab-content">
+    <div class="tab-pane active" id="pending">
+        {% for event in events %}
+        <div class="activities-event ">
+            <div class="date">
+                <p><i class="fa fa-calendar"></i></p>
+                <p>{{ event.event_start_date}} - {{ event.event_end_date}}</p>
+            </div>
+            <div class="content">
+                <h6>{{event.event_name}}</h6>
+                <p>
+                    <b>Host College :</b> <span>{{event.host_college}}{{event.state.name}}</span></br>
+                    <b>Event Coordinator Name :</b> <span>{{event.event_coordinator_name}}</span>
+                </p>
+                <p>                  
+                    Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
+                    {% if status != 'myevents' %}
+                        {% if event.registartion_end_date|is_reg_valid %}
+                            <a href="{% url 'training:register_user' %}" type="submit" class="btn btn-info">Register Now</a>
+                        {% endif %}
+                    {% endif %}
+                </p>        
+            </div>
+        </div> 
+        {% endfor %}
     </div>
-    <div class="content">
-        <h6>{{event.event_name}}</h6>
-        <p>
-            <b>Host College :</b> <span>{{event.host_college}}{{event.state.name}}</span></br>
-            <b>Event Coordinator Name :</b> <span>{{event.event_coordinator_name}}</span>
-        </p>
-        <p>                  
-            Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
-            <a href="{% url 'training:register_user' %}" type="submit" class="btn btn-info">Register Now</a>
-        </p>        
-    </div>
-</div> 
-{% endfor %}
+</div>
+
+
 
 {% endblock %}
 {% block jsblock %}
