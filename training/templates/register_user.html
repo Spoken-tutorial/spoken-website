@@ -5,11 +5,17 @@
 {% block title %}User Registration{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
-  <form method="post"  class="form-horizontal" action="{% url 'training:reg_success' %}">
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title"><b>Welcome to the registration page of {{event_name}}</b></h3>
+  </div>
+</div>
+<div class="panel panel-primary">
+                <div class="panel-body" style="background-color: #F5F5F5;">
+                 <form method="post"  class="form-horizontal" action="{% url 'training:reg_success' %}">
         <div class="row well bs-component">
 {% csrf_token %}
-            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-              <b>Welcome to the registration page of ----------</b>
+            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">              
                 <fieldset>
                     <div class="form-group">
                         <label for="id_name" class="col-lg-4 control-label">Full Name </label>
@@ -27,7 +33,7 @@
                         <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-left: 16px;">Send OTP</a>
                         <div id="email-info" class="col-md-8 col-md-offset-4">
                             </div>
-			             <div class="form-group " id="pwd" style="display: none;">
+                   <div class="form-group " id="pwd" style="display: none;">
                         <div style="display: flex;" class="col-sm-8 col-sm-offset-4">
                             <input type="password" class="form-control" id="id_password" placeholder="Password">
                                 <i class="fa fa-check-circle" aria-hidden="true" style="display: none;" id="check-pwd"></i>
@@ -48,8 +54,6 @@
                          <span class="organizer_paid_info text-muted">You are logged in successfully. Please proceed on cd content page.</span>
                           </p>
                         </div>
-              }
-              }
  User is from paid college : {{user|is_user_paid}}
                         <div class="form-group  text-center" id="logged_success" style="display: none;">
                           <span style="color: #43A047;" class="col-sm-8 col-sm-offset-4">Logged In Successfully </span>
@@ -62,7 +66,7 @@
                                 <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
                         </div>
                     </div>
-	            <div class="form-group">
+              <div class="form-group">
                         <label for="id_state" class="col-lg-4 control-label">Gender</label>
                         <div class="col-lg-8">
                             {% render_field form.gender class+="form-control gender" tabindex="3" %}
@@ -84,7 +88,7 @@
                             {{ form.state.errors }}
                         </div>
                     </div>
-		              <div class="form-group">
+                  <div class="form-group">
                         <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
                         <div class="col-lg-8">
                             {% render_field form.college class+="form-control college" tabindex="5" %}
@@ -116,12 +120,69 @@
                             </button>
                             <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" style="display: none;">Make Payment</button>
                           </div>
-		                </div>
+                    </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="panel panel-info">
+                        <div class="panel-heading"><i class="fa fa-calendar" aria-hidden="true"></i> Registration Dates</div>
+                          <table class="table table-bordered">
+                            <tbody>
+                              <tr>
+                                <td>Start Date</td>
+                                <td>{{reg_start_date}}</td>
+                              </tr>
+                              <tr>
+                                <td>End Date</td>
+                                <td>{{reg_start_date}}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="panel panel-info">
+                        <div class="panel-heading"><i class="fa fa-calendar" aria-hidden="true"></i> Event Dates</div>
+                          <table class="table table-bordered">
+                            <tbody>
+                              <tr>
+                                <td>Start Date</td>
+                                <td>{{event_start_date}}</td>
+                              </tr>
+                              <tr>
+                               <td>End Date</td>
+                                <td>{{event_start_date}}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="panel panel-info">
+                        <div class="panel-heading">Event</div>
+                          <table class="table table-bordered">
+                            <tbody>
+                              <tr>
+                                <td><i class="fa fa-map-marker" aria-hidden="true" style="color: #337AB7;"></i> {{event_name}}</td>
+                              </tr>
+                              <tr>
+                               <td><i class="fa fa-user" aria-hidden="true" style="color: #337AB7;"></i> {{event_coordinator_name}}</td>
+                              </tr>
+                              <tr>
+                               <td><i class="fa fa-envelope" aria-hidden="true" style="color: #337AB7;"></i> {{event_coordinator_email}}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                      
+                    
                     </div>
                 </fieldset>
             </div>
         </div>
     </form>
+
+                 
+                </div>
+              </div>
+
+  
 {%endblock%}
 {% block jsblock %}
 <script type="text/javascript">

@@ -95,6 +95,20 @@ def register_user(request):
 			form.fields['event'].widget.attrs['readonly'] = True
 			form.fields["amount"].initial = EVENT_AMOUNT[event_register.event_type]
 			form.fields["amount"].widget.attrs['readonly'] = True
+			context['event_start_date'] = getattr(event_register, 'event_start_date')
+			context['event_end_date'] = getattr(event_register, 'event_end_date')
+			context['reg_start_date'] = getattr(event_register, 'registartion_start_date')
+			context['reg_end_date'] = getattr(event_register, 'registartion_end_date')
+			context['event_name'] = getattr(event_register, 'event_name')
+			context['event_coordinator_name'] = getattr(event_register, 'event_coordinator_name')
+			context['event_coordinator_email'] = getattr(event_register, 'event_coordinator_email')
+
+		else:
+			form = RegisterUser(request.POST)
+			form_data = form.save(commit=False)
+			form_data.user = request.user
+			form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
+			form_data.save()
 	return render(request, template_name,context)
 
 @csrf_exempt
