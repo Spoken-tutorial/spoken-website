@@ -91,8 +91,7 @@ def register_user(request):
 		event_id = request.POST.get("event_id_info")
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
-			form.fields["event"].initial = event_register
-			form.fields['event'].widget.attrs['disabled'] = True
+			#form.fields["event"].initial = event_register
 			form.fields["amount"].initial = EVENT_AMOUNT[event_register.event_type]
 			form.fields["amount"].widget.attrs['readonly'] = True
 			context['event_obj']= event_register
@@ -106,12 +105,13 @@ def reg_success(request):
 		name = request.POST.get('name')
 		email = request.POST.get('email')
 		event_id = request.POST.get('event')
-		event = TrainingEvents.objects.filter(id=event_id)
+		event = TrainingEvents.objects.get(id=event_id)
 		form = RegisterUser(request.POST)
 		form_data = form.save(commit=False)
 		form_data.user = request.user
+		form_data.event = event
 		form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
 		form_data.save()
-		event_name = getattr(event[0], 'event_name')
+		event_name = event.event_name
 		context = {'name':name, 'email':email, 'event':event_name}
 	return render(request, template_name,context)

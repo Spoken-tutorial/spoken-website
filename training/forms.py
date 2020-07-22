@@ -23,26 +23,12 @@ class RegisterUser(forms.ModelForm):
             help_text = "",
             required=False,
             )
-    
+    #college = forms.CharField(
+    #    required = True,
+    #    error_messages = {'required': 'component type is required.'},
+    #) 
 
     class Meta(object):
         model = Participant
-        fields = ['name', 'email', 'state', 'gender', 'amount', 'event', 'college']
-
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        print("user is -->",user)
-        super(RegisterUser, self).__init__(*args, **kwargs)	
-        if user:
-                if user.is_authenticated:
-                        self.fields['email'].initial = user.email
-                        self.fields['email'].widget.attrs['readonly'] = True
-                        self.fields['name'].initial = user.get_full_name()
-        if 'user' in kwargs:
-            print("kw user :",kwargs["user"])
-            self.user = kwargs["user"]
-            del kwargs["user"]
-            user_paid_info = is_user_paid(self.user)
-            if user_paid_info[0]:
-                 self.fields['college'].initial = user_paid_info[1]
+        fields = ['name', 'email', 'state', 'gender', 'amount', 'college']
      
