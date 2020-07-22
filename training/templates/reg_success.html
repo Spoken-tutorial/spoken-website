@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}List Training Event{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> List of Training Events :
+{% endblock %}
+{% block compressinlinecssblock %}
+<style>
+
+</style>
+{% endblock %}
+{% block search %}{% endblock %}
+
+ {% block content %}
+{{message.tags}}
+{% csrf_token %}
+<div class="panel panel-success">
+  <!-- Default panel contents -->
+  <div class="panel-heading">Registration Successful</div>
+  <div class="panel-body">
+    <p>Thank you for registering for FDP Event. </p>
+  </div>
+
+  <!-- Table -->
+  <table class="table table-bordered">
+    <tbody>
+      <tr>
+        <td>Name</td>
+        <td>{{name}}</td>
+      </tr>
+      <tr>
+        <td>Email</td>
+        <td>{{email}}</td>
+      </tr>
+      <tr>
+        <td>Event</td>
+        <td>{{event}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+{% endblock %}
+{% block jsblock %}
+
+{% endblock %}
