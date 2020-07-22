@@ -91,11 +91,25 @@ def register_user(request):
 		event_id = request.POST.get("event_id_info")
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
-			form.fields["event"].initial = event_register
-			form.fields['event'].widget.attrs['disabled'] = True
+			#form.fields["event"].initial = event_register
 			form.fields["amount"].initial = EVENT_AMOUNT[event_register.event_type]
 			form.fields["amount"].widget.attrs['readonly'] = True
+			context['event_start_date'] = getattr(event_register, 'event_start_date')
+			context['event_end_date'] = getattr(event_register, 'event_end_date')
+			context['reg_start_date'] = getattr(event_register, 'registartion_start_date')
+			context['reg_end_date'] = getattr(event_register, 'registartion_end_date')
+			context['event_name'] = getattr(event_register, 'event_name')
+			context['event_coordinator_name'] = getattr(event_register, 'event_coordinator_name')
+			context['event_coordinator_email'] = getattr(event_register, 'event_coordinator_email')
+
+		else:
+			form = RegisterUser(request.POST)
+			form_data = form.save(commit=False)
+			form_data.user = request.user
+			form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
+			form_data.save()
 			context['event_obj']= event_register
+
 	return render(request, template_name,context)
 
 @csrf_exempt
@@ -106,13 +120,14 @@ def reg_success(request):
 		name = request.POST.get('name')
 		email = request.POST.get('email')
 		event_id = request.POST.get('event')
-		event = TrainingEvents.objects.filter(id=event_id)
+		event = TrainingEvents.objects.get(id=event_id)
 		form = RegisterUser(request.POST)
 		form_data = form.save(commit=False)
 		form_data.user = request.user
+		form_data.event = event
 		form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
 		form_data.save()
-		event_name = getattr(event[0], 'event_name')
+		event_name = event.event_name
 		context = {'name':name, 'email':email, 'event':event_name}
 	return render(request, template_name,context)
 
