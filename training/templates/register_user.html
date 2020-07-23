@@ -237,6 +237,19 @@ $('#pwd').on('focusout',function(){
             success: function(data) {
               $("#logged_success").show();
               if (data['error_msg']=='') {
+		$.ajax({
+                type : "POST",
+                url: '/training/register_user/',
+                dataType : "json",
+                data: {
+                  'event_id_info' : "{{event_obj.id}}",
+		csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+		error: function(data){
+			alert("Pulling up your data ... Hold on !!!");
+                  location.reload();
+                },
+		});
                 var r = data['organizer_paid'];
                 if (data['organizer_paid']=='1') {
                   $('#organizer_info').show();
