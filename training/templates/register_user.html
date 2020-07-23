@@ -7,7 +7,7 @@
 {% block content %}
 <div class="panel panel-primary">
   <div class="panel-heading">
-    <h3 class="panel-title"><b>Welcome to the registration page of {{event_name}}</b></h3>
+    <h3 class="panel-title"><b>Welcome to the registration page of {{event_obj.event_name}}</b></h3>
   </div>
 </div>
 <div class="panel panel-primary">
@@ -132,11 +132,11 @@
                             <tbody>
                               <tr>
                                 <td>Start Date</td>
-                                <td>{{reg_start_date}}</td>
+                                <td>{{event_obj.registartion_start_date}}</td>
                               </tr>
                               <tr>
                                 <td>End Date</td>
-                                <td>{{reg_start_date}}</td>
+                                <td>{{event_obj.registartion_end_date}}</td>
                               </tr>
                             </tbody>
                           </table>
@@ -147,11 +147,11 @@
                             <tbody>
                               <tr>
                                 <td>Start Date</td>
-                                <td>{{event_start_date}}</td>
+                                <td>{{event_obj.event_start_date}}</td>
                               </tr>
                               <tr>
                                <td>End Date</td>
-                                <td>{{event_start_date}}</td>
+                                <td>{{event_obj.event_end_date}}</td>
                               </tr>
                             </tbody>
                           </table>
@@ -161,27 +161,22 @@
                           <table class="table table-bordered">
                             <tbody>
                               <tr>
-                                <td><i class="fa fa-map-marker" aria-hidden="true" style="color: #337AB7;"></i> {{event_name}}</td>
+                                <td><i class="fa fa-map-marker" aria-hidden="true" style="color: #337AB7;"></i> {{event_obj.event_name}}</td>
                               </tr>
                               <tr>
-                               <td><i class="fa fa-user" aria-hidden="true" style="color: #337AB7;"></i> {{event_coordinator_name}}</td>
+                               <td><i class="fa fa-user" aria-hidden="true" style="color: #337AB7;"></i> {{event_obj.event_coordinator_name}}</td>
                               </tr>
                               <tr>
-                               <td><i class="fa fa-envelope" aria-hidden="true" style="color: #337AB7;"></i> {{event_coordinator_email}}</td>
+                               <td><i class="fa fa-envelope" aria-hidden="true" style="color: #337AB7;"></i> {{event_obj.event_coordinator_email}}</td>
                               </tr>
                             </tbody>
                           </table>
                         </div>
-
-                      
-                    
                     </div>
                 </fieldset>
             </div>
         </div>
     </form>
-
-                 
                 </div>
               </div>
 
