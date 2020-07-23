@@ -3,39 +3,53 @@
 {% load static %}
 {%load trainingdata%}
 {% block title %}User Registration{% endblock %}
+{% block compressinlinecssblock %}
+<style type="text/css">
+.info-icon{
+  color: #337AB7; 
+  margin-right: 10px;
+}
+.info-table td{
+  display: flex;
+}
+</style>
+{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+<!-- Event name starts -->
 <div class="panel panel-primary">
   <div class="panel-heading">
     <h3 class="panel-title"><b>Welcome to the registration page of {{event_obj.event_name}}</b></h3>
   </div>
 </div>
+<!-- Event name ends -->
+<!-- Event info starts -->
 <div class="panel panel-primary">
-                <div class="panel-body" style="background-color: #F5F5F5;">
-                 <form method="post"  class="form-horizontal" action="{% url 'training:reg_success' %}">
-        <div class="row well bs-component">
+    <div class="panel-body" style="background-color: #F5F5F5;">
+      <!-- registration form starts -->
+     <form method="post"  class="form-horizontal" action="{% url 'training:reg_success' %}">
+      <div class="row well bs-component">
 {% csrf_token %}
-            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
-              <b>Welcome to the registration page of {{event_obj.event_name}}</b>
-		<input type="text"  id="event" name="event" value="{{event_obj.id}}" style="display:none">
-                <fieldset>
-                    <div class="form-group">
-                        <label for="id_name" class="col-lg-4 control-label">Full Name </label>
-                        <div class="col-lg-8">
-                            {% render_field form.name class+="form-control name" tabindex="1" %}
-                            {{ form.name.errors }}
-                        </div>
+            <div class="col-md-7">
+              <fieldset>
+		              <input type="text"  id="event" name="event" value="{{event_obj.id}}" style="display:none">
+                  <div class="form-group">
+                    <label for="id_name" class="col-lg-4 control-label">Full Name </label>
+                    <div class="col-lg-8">
+                        {% render_field form.name class+="form-control name" tabindex="1" %}
+                        {{ form.name.errors }}
+                    </div>
                     </div>
                     <div class="form-group">
-                        <label for="id_difficulty_level" class="col-lg-4 control-label">Email</label>
-                        <div class="col-lg-8">
+                      <label for="id_difficulty_level" class="col-lg-4 control-label">Email</label>
+                      <div class="col-lg-8">
                             {% render_field form.email class+="form-control email" tabindex="2" %}
                             {{ form.email.errors }}
                         </div>
                         <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-left: 16px;">Send OTP</a>
-                        <div id="email-info" class="col-md-8 col-md-offset-4">
-                            </div>
-                   <div class="form-group " id="pwd" style="display: none;">
+                        <div id="email-info" class="col-md-8 col-md-offset-4"></div>
+                      </div>
+                    <div class="form-group " id="pwd" style="display: none;">
                         <div style="display: flex;" class="col-sm-8 col-sm-offset-4">
                             <input type="password" class="form-control" id="id_password" placeholder="Password">
                                 <i class="fa fa-check-circle" aria-hidden="true" style="display: none;" id="check-pwd"></i>
@@ -45,20 +59,18 @@
                             <p>
                               <a href="{% url 'cms:password_reset' %}" id="forgot_pwd" target="_blank">Forgot Password ?</a>
                             </p>
-                            
                           </div>
                         </div>
-                          <div id="invalid_credentials" class="col-sm-8 col-sm-offset-4"></div>
+                        <div id="invalid_credentials" class="col-sm-8 col-sm-offset-4">
                         </div>
-                        <div class="form-group col-sm-10 text-center" id="organizer_info" style="display: none;">
+                      </div>
+                      <div class="form-group col-sm-10 text-center" id="organizer_info" style="display: none;">
                           <p id="organizer_paid_msg" class="text-muted">Congratulations! You are a part of a Registered College & are entitled to free download.
                           <br>
                          <span class="organizer_paid_info text-muted">You are logged in successfully. Please proceed on cd content page.</span>
                           </p>
-                        </div>
-
-<p style="display: none;"> User is from paid college : {{user|is_user_paid}}</p>
-
+                      </div>
+                      <p style="display: none;"> User is from paid college : {{user|is_user_paid}}</p>
                         <div class="form-group  text-center" id="logged_success" style="display: none;">
                           <span style="color: #43A047;" class="col-sm-8 col-sm-offset-4">Logged In Successfully </span>
                         </div>
@@ -69,8 +81,8 @@
                         <div class="form-group col-sm-10" id="registered-success-msg" style="display: none">
                                 <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
                         </div>
-                    </div>
-              <div class="form-group">
+                    <!-- </div> -->
+                      <div class="form-group">
                         <label for="id_state" class="col-lg-4 control-label">Gender</label>
                         <div class="col-lg-8">
                             {% render_field form.gender class+="form-control gender" tabindex="3" %}
@@ -83,30 +95,28 @@
                             {% render_field form.state class+="form-control state" tabindex="3" %}
                             {{ form.state.errors }}
                         </div>
+                                    </div>
+                  {% if user_college %}
+                    <div class="form-group">
+                      <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
+                      <div class="col-lg-8">
+                      <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
+                      </div>
                     </div>
-		{% if  user_college %}
-		 <div class="col-lg-8">
-			<input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
-		{%else%}
-                        <select class="form-control" id="id_college" name="dropdown_college">
-                        </select>
-                </div>
-		{% endif %}
-                  <div class="form-group">
-                        <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
-                        <div class="col-lg-8">
-                            
-			</div>
-		 </div>
-
+                    {%else%}
+                    <div class="form-group">
+                      <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
+                      <div class="col-lg-8">
+                      <select class="form-control" id="id_college" name="dropdown_college">
+                    </select>
+                      </div>
+                    </div>
+                		{% endif %}
                     {% if user|is_user_paid %}
                     <div class="form-group">
                       <div class="panel panel-primary col-lg-8 col-md-offset-4">
                         <div class="panel-body">You are a part of a paid college.</div>
                       </div>
-                        <!-- <div class="col-lg-8 col-md-offset-4">
-                            <span><p>You are a part of a paid college.</p></span>
-                        </div> -->
                     </div>
                     {% else %}
                     <div class="form-group">
@@ -117,63 +127,62 @@
                         </div>
                     </div>
                     {% endif %}
+                    </fieldset>
                         <div class="row">
                           <div class=" col-md-offset-4 col-md-4">
+                            {% if user|is_user_paid %}
+                            <!-- if user belongs to a paid college -->
                             <button type="submit"  value="Submit" class="btn btn-success">Register
                             </button>
-                            <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" style="display: none;">Make Payment</button>
+                            {% else %}
+                            <!-- all other -->
+                            <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment">Make Payment</button>
+                            {% endif %}
                           </div>
-                    </div>
+                        </div>
+                    
                     </div>
                     <div class="col-md-4">
                       <div class="panel panel-info">
-                        <div class="panel-heading"><i class="fa fa-calendar" aria-hidden="true"></i> Registration Dates</div>
+                        <div class="panel-heading"><i class="fa fa-calendar" aria-hidden="true" style="margin-right: 10px;"></i>Important Dates</div>
                           <table class="table table-bordered">
                             <tbody>
                               <tr>
-                                <td>Start Date</td>
-                                <td>{{event_obj.registartion_start_date}}</td>
+                                <td><strong>Registration</strong></td>
+                                <td>{{ event_obj.registartion_start_date|format_date:event_obj.registartion_end_date }}
+                                </td>
                               </tr>
                               <tr>
-                                <td>End Date</td>
-                                <td>{{event_obj.registartion_end_date}}</td>
-                              </tr>
-                            </tbody>
-                          </table>
-                        </div>
-                        <div class="panel panel-info">
-                        <div class="panel-heading"><i class="fa fa-calendar" aria-hidden="true"></i> Event Dates</div>
-                          <table class="table table-bordered">
-                            <tbody>
-                              <tr>
-                                <td>Start Date</td>
-                                <td>{{event_obj.event_start_date}}</td>
-                              </tr>
-                              <tr>
-                               <td>End Date</td>
-                                <td>{{event_obj.event_end_date}}</td>
+                                <td><strong>Event</strong></td>
+                                <td>{{ event_obj.event_start_date|format_date:event_obj.event_end_date }}
+                                </td>
                               </tr>
                             </tbody>
                           </table>
                         </div>
                         <div class="panel panel-info">
                         <div class="panel-heading">Event</div>
-                          <table class="table table-bordered">
+                          <table class="table table-bordered info-table">
                             <tbody>
                               <tr>
-                                <td><i class="fa fa-map-marker" aria-hidden="true" style="color: #337AB7;"></i> {{event_obj.event_name}}</td>
+                                <td><i class="fa fa-map-marker info-icon" aria-hidden="true" ></i>
+                                   {{event_obj.host_college}}{{event_obj.state.name}} 
+                                </td>
                               </tr>
                               <tr>
-                               <td><i class="fa fa-user" aria-hidden="true" style="color: #337AB7;"></i> {{event_obj.event_coordinator_name}}</td>
+                               <td><i class="fa fa-user info-icon" aria-hidden="true" ></i> {{event_obj.event_coordinator_name}}</td>
                               </tr>
                               <tr>
-                               <td><i class="fa fa-envelope" aria-hidden="true" style="color: #337AB7;"></i> {{event_obj.event_coordinator_email}}</td>
+                               <td><i class="fa fa-envelope info-icon" aria-hidden="true"></i> {{event_obj.event_coordinator_email}}</td>
+                              </tr>
+                              <tr>
+                               <td><i class="fa fa-phone info-icon" aria-hidden="true"></i> {{event_obj.event_coordinator_contact_no}}</td>
                               </tr>
                             </tbody>
                           </table>
                         </div>
                     </div>
-                </fieldset>
+                
             </div>
         </div>
     </form>

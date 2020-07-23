@@ -34,7 +34,25 @@ def is_user_registered(eventid, userid):
         return True
     return False
 
+def format_date(start_date, end_date):
+    start = start_date.strftime("%d,%b,%Y").split(',')
+    end = end_date.strftime("%d,%b,%Y").split(',')
+    fdate = ''
+    if start==end:
+        fdate = start[0]+' '+start[1]+' , '+start[2]
+    else:
+        if start[2]==end[2]: #check year
+            if start[1]==end[1]: #check month
+                fdate = start[0] + ' - ' + end[0] + ' ' + start[1] + ' , ' + start[2]
+            else: 
+                fdate = start[0] + ' ' + start[1] + ' - ' + end[0] + ' ' + end[1] + ' , ' + start[2]
+        else: 
+            fdate = start[0] + ' ' + start[1] + ' , ' + start[2]+ ' - ' + end[0] + ' ' + end[1] + ' , ' + end[2]
+    print(fdate)
+    return fdate
+
 
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)
 register.filter('is_user_registered', is_user_registered)
+register.filter('format_date', format_date)
