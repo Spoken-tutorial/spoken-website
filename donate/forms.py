@@ -18,15 +18,15 @@ class PayeeForm(forms.ModelForm):
 
     class Meta:
         model = Payee
-        fields = ['name', 'email', 'country', 'state', 'gender', 'amount']
+        fields = ['name', 'email', 'state', 'gender', 'amount']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Please enter your name'})
         self.fields['email'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Your email id'})
-        self.fields['country'].widget.attrs.update({'class': 'form-control'})
-        self.fields['country'].initial = 'India'
+        #self.fields['country'].widget.attrs.update({'class': 'form-control'})
+        #self.fields['country'].initial = 'India'
         self.fields['state'].widget.attrs.update({'class': 'form-control'})
         self.fields['gender'].widget.attrs.update({'class': 'form-control'})
         self.fields['amount'].widget.attrs.update({'class': 'form-control'})

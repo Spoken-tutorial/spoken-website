@@ -13,7 +13,8 @@ from django.core.serializers import serialize
 from .helpers import is_user_paid, user_college, EVENT_AMOUNT
 import json
 from datetime import datetime,date
-# Create your views here.
+
+
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
 	model = TrainingEvents
@@ -81,12 +82,12 @@ def register_user(request):
 				form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
 				user_data = is_user_paid(request)
 				if user_data[0]:
-					form.fields["college"].initial = user_data[1]
+					college = user_data[1]
 				else:
-					form.fields["college"].initial = user_college(request)
+					college = user_college(request)
+				context['user_college'] = college
 			except Exception as e:
 				raise e
-
 	if request.method == 'POST':
 		event_id = request.POST.get("event_id_info")
 		if event_id:
@@ -94,22 +95,7 @@ def register_user(request):
 			#form.fields["event"].initial = event_register
 			form.fields["amount"].initial = EVENT_AMOUNT[event_register.event_type]
 			form.fields["amount"].widget.attrs['readonly'] = True
-			context['event_start_date'] = getattr(event_register, 'event_start_date')
-			context['event_end_date'] = getattr(event_register, 'event_end_date')
-			context['reg_start_date'] = getattr(event_register, 'registartion_start_date')
-			context['reg_end_date'] = getattr(event_register, 'registartion_end_date')
-			context['event_name'] = getattr(event_register, 'event_name')
-			context['event_coordinator_name'] = getattr(event_register, 'event_coordinator_name')
-			context['event_coordinator_email'] = getattr(event_register, 'event_coordinator_email')
-
-		else:
-			form = RegisterUser(request.POST)
-			form_data = form.save(commit=False)
-			form_data.user = request.user
-			form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
-			form_data.save()
 			context['event_obj']= event_register
-
 	return render(request, template_name,context)
 
 @csrf_exempt
@@ -119,13 +105,17 @@ def reg_success(request):
 	if request.method == 'POST':
 		name = request.POST.get('name')
 		email = request.POST.get('email')
-		event_id = request.POST.get('event')
-		event = TrainingEvents.objects.get(id=event_id)
+		event_obj = request.POST.get('event')
+		event = TrainingEvents.objects.get(id=event_obj)
 		form = RegisterUser(request.POST)
+		print("\n\n\n",form.errors)
 		form_data = form.save(commit=False)
 		form_data.user = request.user
 		form_data.event = event
-		form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))
+		try:
+			form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
+		except:
+			form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))
 		form_data.save()
 		event_name = event.event_name
 		context = {'name':name, 'email':email, 'event':event_name}

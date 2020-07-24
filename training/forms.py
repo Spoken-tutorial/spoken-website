@@ -3,7 +3,6 @@ from builtins import object
 from django import forms
 from django.contrib.auth.models import User
 from .helpers import is_user_paid
-
 from events.models import *
 from training.models import *
 
@@ -23,12 +22,16 @@ class RegisterUser(forms.ModelForm):
             help_text = "",
             required=False,
             )
-    #college = forms.CharField(
-    #    required = True,
-    #    error_messages = {'required': 'component type is required.'},
-    #) 
+    college = forms.CharField(
+        required = False,
+        error_messages = {'required': 'component type is required.'},
+    ) 
 
     class Meta(object):
         model = Participant
-        fields = ['name', 'email', 'state', 'gender', 'amount', 'college']
-     
+        fields = ['name', 'email', 'state', 'gender', 'amount']
+
+    def __init__(self, *args, **kwargs):
+        super(RegisterUser, self).__init__(*args, **kwargs)
+        self.fields['amount'].required = False
+
