@@ -143,3 +143,9 @@ class EventPraticipantsListView(ListView):
 	def get_context_data(self, **kwargs):
 		context = super(EventPraticipantsListView, self).get_context_data(**kwargs)
 		return context
+
+
+class EventUpdateView(UpdateView):
+	model = TrainingEvents
+	form_class = CreateTrainingEventForm
+	success_url = "/training/list_events/ongoing/"

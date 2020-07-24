@@ -28,4 +28,9 @@ urlpatterns = [
       EventPraticipantsListView.as_view(template_name="list_event_participants.html"), 
       name="list_event_participants"
     ),
+    url(
+      r'^(?P<pk>\d+)/update$', 
+      EventUpdateView.as_view(template_name="edit_event.html"), 
+      name="edit_event"
+    ),
     ]
