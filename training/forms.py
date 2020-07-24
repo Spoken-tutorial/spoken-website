@@ -31,3 +31,7 @@ class RegisterUser(forms.ModelForm):
         model = Participant
         fields = ['name', 'email', 'state', 'gender', 'amount']
 
+    def __init__(self, *args, **kwargs):
+        super(RegisterUser, self).__init__(*args, **kwargs)
+        self.fields['amount'].required = False
+

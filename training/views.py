@@ -13,7 +13,8 @@ from django.core.serializers import serialize
 from .helpers import is_user_paid, user_college, EVENT_AMOUNT
 import json
 from datetime import datetime,date
-# Create your views here.
+
+
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
 	model = TrainingEvents
@@ -104,9 +105,10 @@ def reg_success(request):
 	if request.method == 'POST':
 		name = request.POST.get('name')
 		email = request.POST.get('email')
-		event_id = request.POST.get('event')
-		event = TrainingEvents.objects.get(id=event_id)
+		event_obj = request.POST.get('event')
+		event = TrainingEvents.objects.get(id=event_obj)
 		form = RegisterUser(request.POST)
+		print("\n\n\n",form.errors)
 		form_data = form.save(commit=False)
 		form_data.user = request.user
 		form_data.event = event

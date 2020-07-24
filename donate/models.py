@@ -21,6 +21,7 @@ class Payee(models.Model):
     updated = models.DateTimeField(auto_now=True)
     expiry = models.DateTimeField(blank=True, null=True)
     user = models.ForeignKey(User,on_delete=models.PROTECT,related_name="payment_user" )
+    purpose = models.CharField(max_length=255, null=True)
     
     def get_selected_foss(self):
         selected_foss = {}

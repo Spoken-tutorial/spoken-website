@@ -33,6 +33,10 @@
             <div class="col-md-7">
               <fieldset>
 		              <input type="text"  id="event" name="event" value="{{event_obj.id}}" style="display:none">
+				<input type="text"  id="foss_id" name="foss_id" value="{{event_obj.foss.id}}" style="display:none">
+      				<input type="text"  id="language_id" name="language_id" value="{{event_obj.Language_of_workshop.id}}" style="display:none">
+      				<input type="text"  id="level_id" name="level_id" value="0" style="display:none">
+
                   <div class="form-group">
                     <label for="id_name" class="col-lg-4 control-label">Full Name </label>
                     <div class="col-lg-8">
@@ -136,7 +140,7 @@
                             </button>
                             {% else %}
                             <!-- all other -->
-                            <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment">Make Payment</button>
+                            <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.event_type %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment">Make Payment</button>
                             {% endif %}
                           </div>
                         </div>

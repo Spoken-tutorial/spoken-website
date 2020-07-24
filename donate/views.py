@@ -54,7 +54,7 @@ def donatehome(request):
 
 
 @csrf_exempt
-def form_valid(request, form):
+def form_valid(request, form, purpose):
     """
     If the form is valid, save the associated model.
     """
@@ -62,6 +62,7 @@ def form_valid(request, form):
     form_data.user = request.user
     form_data.status = 0
     form_data.expiry = calculate_expiry()
+    form_data.purpose = purpose
     form_data.save()
     payee_obj = form_data
 
@@ -105,14 +106,14 @@ def form_invalid(request, form):
 
 
 @csrf_exempt
-def controller(request):    
+def controller(request, purpose):
     form = PayeeForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
-            form_valid(request, form)
+            form_valid(request, form, purpose)
         else:
             form_invalid(request, form)
-    data = get_final_data(request, form)
+    data = get_final_data(request, form, purpose)
     return render(request, 'payment_status.html', data)
 
 
@@ -121,12 +122,12 @@ def calculate_expiry():
     return datetime.now() + timedelta(days = EXPIRY_DAYS)
 
 @csrf_exempt
-def encrypted_data(request, form):
+def encrypted_data(request, form, purpose):
     STdata = ''
     user_name = form.cleaned_data.get('name')
     amount = form.cleaned_data.get('amount')   
     #amount = 1.00
-    purpose = PURPOSE + str(form.save(commit=False).pk)
+    purpose = purpose + str(form.save(commit=False).pk)
     STdata = str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     
     s = display.value(str(STdata))
@@ -134,17 +135,17 @@ def encrypted_data(request, form):
 
 
 @csrf_exempt
-def get_final_data(request, form):
+def get_final_data(request, form, purpose):
 
     data = {
         'userId': request.user.id,
         'name': form.cleaned_data.get('name'),
         'amount':form.cleaned_data.get('amount'),
         #'amount': 1.00,
-        'purpose': PURPOSE + str(form.save(commit=False).pk),
+        'purpose': purpose + str(form.save(commit=False).pk),
         'channelId': CHANNEL_ID,
         'target': TARGET,
-        'random': encrypted_data(request, form)
+        'random': encrypted_data(request, form, purpose)
     }
     return data
 
@@ -202,14 +203,12 @@ def send_onetime(request):
 
 @csrf_exempt
 def validate_user(request):
-    print(request.POST)
     context = {}
     user_name = request.POST.get('username')
     email = request.POST.get('email')
     password = request.POST.get('password')
     if email and password:
         user = authenticate(username=email, password=password)
-        print(user)
         if user is not None:
             error_msg = ''
             if user.is_active:
@@ -219,14 +218,11 @@ def validate_user(request):
                 error_msg = "Your account is disabled.<br>\
                             Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
                             In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                            <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"% (user.email)
-                print(error_msg)                
+                            <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"% (user.email)                
         else:
             error_msg = 'Invalid username / password'
-            print(error_msg)
     else:
         error_msg = 'Please enter username and Password'
-        print(error_msg)
     
     context['error_msg']=error_msg
     return HttpResponse(json.dumps(context), content_type='application/json')
@@ -253,7 +249,6 @@ def validate(request):
 
 
 def receipt(request):
-    print("Yes :",request.POST)
     response = HttpResponse(content_type='application/pdf')
     file_name = request.POST.get("name")
     
