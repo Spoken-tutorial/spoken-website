@@ -725,7 +725,7 @@ pre.custom-jumbotron b {
     margin-right:32px;
 }
 #footer-wrapper a:hover {
-	color: #FFA500;
+    color: #FFA500;
 }
 .cc-data {
     color: #DEB887;
@@ -756,3 +756,15 @@ pre.custom-jumbotron b {
         text-align:center;
         padding: 0 60px;
 } 
+.block-info{
+    text-align: center;
+}
+.block-info span{
+    padding: 2px 20px;
+    border-right: 4px solid orangered;
+    border-left: 4px solid orangered;
+    font-size: 1.2rem;
+}
+.block-info span a{
+    color: orangered;
+}

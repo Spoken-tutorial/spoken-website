@@ -40,7 +40,7 @@
             <link rel="stylesheet" href="{% static 'spoken/css/main.css' %}" type="text/css" media="screen" charset="utf-8" />
         {% endcompress %}
         {% compress css %}{% block compresscssblock %}{% endblock %}{% endcompress %}
-	    {% compress css %}{% block compressinlinecssblock %}{% endblock %}{% endcompress %}
+        {% compress css %}{% block compressinlinecssblock %}{% endblock %}{% endcompress %}
         {% block cssblock %}{% endblock %}
     </head>
     <body>
@@ -203,6 +203,7 @@
                     </div> <!-- /#header-inner -->
                 </nav>
             </div> <!-- /#header-wrapper -->
+            {% block info %} {% endblock info %}
             {% block search %}
                 <div id="search-wrapper">
                     <div class="common-search row">
