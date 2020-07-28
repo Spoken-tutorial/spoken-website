@@ -758,13 +758,13 @@ pre.custom-jumbotron b {
 } 
 .block-info{
     text-align: center;
-}
-.block-info span{
-    padding: 2px 20px;
-    border-right: 4px solid orangered;
-    border-left: 4px solid orangered;
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: auto;
+    padding: 0px 10px;
     font-size: 1.2rem;
 }
 .block-info span a{
     color: orangered;
+    text-decoration: underline!important;
 }
