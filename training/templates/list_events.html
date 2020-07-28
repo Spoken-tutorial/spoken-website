@@ -94,11 +94,6 @@
                             <button type="submit" class="btn btn-info">Register Now</button>
                         {% endif %}
                     {% endif %}
-
-                    {% if user|is_resource_person %}
-                        <a href="{% url 'training:list_event_participants' event.id %}" class="btn btn-info">Participant List</a>
-                        <a href="{% url 'training:edit_event' event.id %}" class="btn btn-info">Edit Event</a>
-                    {% endif %}
                 </p>        
             </div>
         </div> 

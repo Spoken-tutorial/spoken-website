@@ -7,13 +7,19 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from events.models import State
 from events.decorators import group_required
+from events.views import is_resource_person, is_administrator
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
 from .helpers import is_user_paid, user_college, EVENT_AMOUNT
 import json
 from datetime import datetime,date
+from  events.filters import ViewEventFilter
+from cms.sortable import *
+from events.views import get_page
 
+
+today = date.today()
 
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
@@ -21,7 +27,7 @@ class TrainingEventCreateView(CreateView):
 	template_name = "create_event.html"
 	success_url = "/"
 
-	@method_decorator(group_required("Organiser"))
+	@method_decorator(group_required("Resource Person"))
 	def get(self, request, *args, **kwargs):
 		return render(self.request, self.template_name, {'form': self.form_class()})
 
@@ -112,10 +118,22 @@ def reg_success(request):
 		form_data = form.save(commit=False)
 		form_data.user = request.user
 		form_data.event = event
+
 		try:
 			form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
 		except:
 			form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))
+		
+		user_data = is_user_paid(request)
+		if event.host_college == form_data.college:
+			print("host")
+			form_data.registartion_type = 0 #host College
+		elif user_data[0]:
+			print("Subscribed")
+			form_data.registartion_type = 1 #Subscribed College
+		else:
+			form_data.registartion_type = 2 #Manual reg- paid 500
+
 		form_data.save()
 		event_name = event.event_name
 		context = {'name':name, 'email':email, 'event':event_name}
@@ -124,18 +142,142 @@ def reg_success(request):
 
 class EventPraticipantsListView(ListView):
 	model = Participant
-
+	@method_decorator(group_required("Resource Person"))
 	def dispatch(self, *args, **kwargs):
 		self.eventid = self.kwargs['eventid']
 		self.queryset = Participant.objects.filter(event_id=self.eventid)
+		self.event = TrainingEvents.objects.get(id=self.eventid)
+		today = date.today()
+		self.training_status = 0 #ongoing
+
+		if self.event.event_end_date < today:
+			self.training_status = 1 #completed
 		return super(EventPraticipantsListView, self).dispatch(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):
 		context = super(EventPraticipantsListView, self).get_context_data(**kwargs)
+		context['training_status']= self.training_status
+		context['eventid']= self.eventid
+		context['event']= self.event
 		return context
 
 
 class EventUpdateView(UpdateView):
 	model = TrainingEvents
 	form_class = CreateTrainingEventForm
-	success_url = "/training/list_events/ongoing/"
+	success_url = "/training/event/rp/ongoing/"
+
+def listevents(request, role, status):
+	context = {}
+	user = request.user
+	if not (user.is_authenticated() and (is_resource_person(user) or is_administrator(user))):
+		raise PermissionDenied()
+
+	if (not role ) or (not status):
+		raise PermissionDenied()
+
+
+	status_list = {'ongoing': 0, 'completed': 1, 'closed': 2,}
+	roles = ['rp', 'em']
+	if role in roles and status in status_list:
+		if status == 'ongoing':
+			queryset = TrainingEvents.objects.filter(training_status__lte=1, event_end_date__gte=today)
+		elif status == 'completed':
+			queryset = TrainingEvents.objects.filter(training_status=1, event_end_date__lt=today)
+		elif status == 'closed':
+			queryset = TrainingEvents.objects.filter(training_status=2)
+
+		header = {
+		1: SortableHeader('#', False),
+		2: SortableHeader(
+		  'state__name',
+		  True,
+		  'State'
+		),
+		3: SortableHeader(
+		  'host_college__academic_code',
+		  True,
+		  'Code'
+		),
+		4: SortableHeader(
+		  'host_college__institution_name',
+		  True,
+		  'Institution'
+		),
+		5: SortableHeader('foss__foss', True, 'Foss Name'),
+		6: SortableHeader(
+		  'event_coordinator_name',
+		  True,
+		  'Coordinator'
+		),
+		7: SortableHeader(
+		  'event_start_date',
+		  True,
+		  'Event Start Date'
+		),
+		8: SortableHeader(
+		  'event_end_date',
+		  True,
+		  'Event End Date'
+		),
+		9: SortableHeader('Action', False)
+		}
+
+		raw_get_data = request.GET.get('o', None)
+		queryset = get_sorted_list(
+			request,
+			queryset,
+			header,
+			raw_get_data
+		)
+		collection= ViewEventFilter(request.GET, queryset=queryset, user=user)
+      
+
+	else:
+		raise PermissionDenied()
+
+	context['form'] = collection.form
+	page = request.GET.get('page')
+	collection = get_page(collection.qs, page)
+	context['collection'] =  collection
+	context['role'] = role
+	context['status'] = status
+	context['header'] = header
+	context['ordering'] = get_field_index(raw_get_data)
+
+	return render(request,'event_status_list.html',context)
+
+
+def close_event(request, pk):
+	context = {}
+	user = request.user
+	if not (user.is_authenticated() and is_resource_person(user)):
+		raise PermissionDenied()
+	
+	event = TrainingEvents.objects.get(id=pk)
+	if event:
+		event.training_status = 2 #rclose event
+		event.save()
+		messages.success(request, 'Event has been closed successfully')
+	else:
+		print("Error")
+		messages.error(request, 'Request not sent.Please try again.')
+	return HttpResponseRedirect("/training/event/rp/completed/")
+
+
+def approve_event_registration(request, pk):
+	context = {}
+	user = request.user
+	if not (user.is_authenticated() and is_resource_person(user)):
+		raise PermissionDenied()
+	
+	event = TrainingEvents.objects.get(id=pk)
+	if event:
+		event.training_status = 1 #approve registraions
+		event.save()
+		messages.success(request, 'Registrations approved successfully')
+	else:
+		print("Error")
+		messages.error(request, 'Request not sent.Please try again.')
+	return HttpResponseRedirect("/training/event/rp/ongoing/")
+

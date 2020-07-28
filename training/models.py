@@ -6,9 +6,11 @@ from builtins import object
 from django.contrib.auth.models import User
 from creation.models import FossCategory, Language
 from events.models import *
-from .helpers import EVENT_TYPE_CHOICES
+from .helpers import EVENT_TYPE_CHOICES, REGISTRATION_TYPE_CHOICES
 from donate.models import Payee
 from donate.helpers import GENDER_CHOICES
+
+
 class TrainingEvents(models.Model):	
 
 	event_type = models.CharField(max_length = 50, choices = EVENT_TYPE_CHOICES)
@@ -24,6 +26,7 @@ class TrainingEvents(models.Model):
 	event_coordinator_contact_no = models.CharField(max_length = 100, null=True)
 	registartion_start_date = models.DateField(default=datetime.now)
 	registartion_end_date = models.DateField(default=datetime.now)
+	training_status = models.PositiveSmallIntegerField(default=0)
 	entry_date = models.DateTimeField(auto_now_add = True)
 	entry_user = models.ForeignKey(User, on_delete=models.PROTECT)
 
@@ -41,5 +44,6 @@ class Participant(models.Model):
 	user = models.ForeignKey(User, on_delete=models.PROTECT)
 	state = models.ForeignKey(State, on_delete=models.PROTECT )
 	college = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT)
-	department = models.ForeignKey(Department, on_delete=models.PROTECT, null=True )
+	department = models.ForeignKey(Department, on_delete=models.PROTECT, null=True)
+	registartion_type = models.PositiveSmallIntegerField(default=0)
 	created = models.DateTimeField(auto_now_add = True)

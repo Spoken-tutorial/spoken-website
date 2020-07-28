@@ -10,7 +10,7 @@ class CreateTrainingEventForm(forms.ModelForm):
 
    class Meta(object):
     model = TrainingEvents
-    exclude = ['entry_user']
+    exclude = ['entry_user', 'training_status']
     
 
 class RegisterUser(forms.ModelForm):

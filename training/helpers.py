@@ -8,6 +8,10 @@ EVENT_AMOUNT = {
      'FDP': '500', 'Workshop': '1000'
     }
 
+REGISTRATION_TYPE_CHOICES =(
+    ('', '-----'), ('0', 'Host College'), ('1', 'Subscribed College'),('2', 'Manual Registration')
+    )
+
 def is_user_paid(request):
     try:
         idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
