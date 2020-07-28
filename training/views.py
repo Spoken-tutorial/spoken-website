@@ -6,6 +6,7 @@ from .forms import *
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from events.models import State
+from creation.models import TutorialResource
 from events.decorators import group_required
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
@@ -92,7 +93,10 @@ def register_user(request):
 		event_id = request.POST.get("event_id_info")
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
-			#form.fields["event"].initial = event_register
+			langs = Language.objects.filter(id__in = 
+				TutorialResource.objects.filter(
+				tutorial_detail__foss = event_register.foss, status=1).values('language').distinct())
+			form.fields["foss_language"].queryset = langs
 			form.fields["amount"].initial = EVENT_AMOUNT[event_register.event_type]
 			form.fields["amount"].widget.attrs['readonly'] = True
 			context['event_obj']= event_register
@@ -108,7 +112,6 @@ def reg_success(request):
 		event_obj = request.POST.get('event')
 		event = TrainingEvents.objects.get(id=event_obj)
 		form = RegisterUser(request.POST)
-		print("\n\n\n",form.errors)
 		form_data = form.save(commit=False)
 		form_data.user = request.user
 		form_data.event = event

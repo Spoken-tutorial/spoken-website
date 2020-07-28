@@ -25,11 +25,16 @@ class RegisterUser(forms.ModelForm):
     college = forms.CharField(
         required = False,
         error_messages = {'required': 'component type is required.'},
-    ) 
+    )
+    foss_language = forms.ModelChoiceField(
+        queryset = Language.objects.order_by('name'),
+        required = False,
+        help_text = "You can listen to the FOSS in the above Indian languages"
+    )
 
     class Meta(object):
         model = Participant
-        fields = ['name', 'email', 'state', 'gender', 'amount']
+        fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language']
 
     def __init__(self, *args, **kwargs):
         super(RegisterUser, self).__init__(*args, **kwargs)

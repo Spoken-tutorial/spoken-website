@@ -116,6 +116,19 @@
                       </div>
                     </div>
                 		{% endif %}
+                    <div class="form-group">
+                    <label for="id_foss" class="col-lg-4 control-label">FOSS </label>
+                    <div class="col-lg-8">
+                        <div class="form-comtrol" style="font-size:1vw">{{event_obj.foss}}</div>
+                    </div>
+                    </div>
+                    <div class="form-group">
+                    <label for="id_foss_language" class="col-lg-4 control-label">Language </label>
+                    <div class="col-lg-8">
+                        {% render_field form.foss_language class+="form-control foss_language" tabindex="1" %}
+                        {{ form.name.errors }}
+                    </div>
+                    </div>
                     {% if user|is_user_paid %}
                     <div class="form-group">
                       <div class="panel panel-primary col-lg-8 col-md-offset-4">
