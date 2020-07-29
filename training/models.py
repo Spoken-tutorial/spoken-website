@@ -47,3 +47,4 @@ class Participant(models.Model):
 	department = models.ForeignKey(Department, on_delete=models.PROTECT, null=True)
 	registartion_type = models.PositiveSmallIntegerField(default=0)
 	created = models.DateTimeField(auto_now_add = True)
+	foss_language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True )
