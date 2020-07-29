@@ -6,7 +6,7 @@ from .forms import *
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from events.models import State
-from creation.models import TutorialResource
+from creation.models import TutorialResource, Language
 from events.decorators import group_required
 from events.views import is_resource_person, is_administrator
 from django.contrib import messages
@@ -26,7 +26,7 @@ class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
 	model = TrainingEvents
 	template_name = "create_event.html"
-	success_url = "/"
+	success_url = "/software-training/"
 
 	@method_decorator(group_required("Resource Person"))
 	def get(self, request, *args, **kwargs):
@@ -35,6 +35,7 @@ class TrainingEventCreateView(CreateView):
 	def form_valid(self, form, **kwargs):
 		self.object = form.save(commit=False)
 		self.object.entry_user = self.request.user
+		self.object.Language_of_workshop = Language.objects.get(id=22)
 		self.object.save()
 
 		messages.success(self.request, "New Event created successfully.")
@@ -43,7 +44,6 @@ class TrainingEventCreateView(CreateView):
 
 class TrainingEventsListView(ListView):
 	model = TrainingEvents
-	paginate_by = 50  # if pagination is desired
 
 	def dispatch(self, *args, **kwargs):
 		self.status = self.kwargs['status']
