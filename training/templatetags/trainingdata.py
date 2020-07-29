@@ -51,8 +51,15 @@ def format_date(start_date, end_date):
     print(fdate)
     return fdate
 
+def is_event_closed(eventid):
+    event = TrainingEvents.objects.get(id=eventid)
+    if event.training_status == 1:
+        return True
+    return False
+
 
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)
 register.filter('is_user_registered', is_user_registered)
 register.filter('format_date', format_date)
+register.filter('is_event_closed', is_event_closed)

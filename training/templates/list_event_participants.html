@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load trainingdata %}
+{% load eventsdata %}
+{% block title %}List Event Participants{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> List of Event Participants :
+{% endblock %}
+{% block search %}{% endblock %}
+
+{% block content %}
+{{message.tags}}
+<table class="paleblue table">
+	<tr>
+		<th>Sr. No.</th>
+		<th>Name</th>
+		<th>Email</th>
+		<th>College Name</th>
+		<th>State</th>
+		<th>Registration Type</th>
+	</tr>
+{% for record in object_list %}
+	<tr>
+		<td>{{ forloop.counter }}</td>
+		<td>{{ record.name}}</td>
+		<td>{{ record.email}}</td>
+		<td>{{ record.college.institution_name}}</td>
+		<td>{{ record.state.name}}</td>
+		<td>
+			{% if record.registartion_type == 0 %}
+				From Host college
+			{% elif record.registartion_type == 1 %}
+				From Subscribed college
+			{% elif record.registartion_type == 2 %}
+				Manual registartion
+			{% endif %}
+		</td>
+    </tr>
+{% endfor %}
+</table>
+{% if event.training_status == 0%}
+	<a href="{% url 'training:approve_event_registration' eventid %}" class="btn btn-info">Approve Registration</a>
+{% elif event.training_status == 1%}
+	{% if training_status %}
+	<a href="{% url 'training:close_event' eventid %}" class="btn btn-info">Close Event and Genearte Certificates</a>
+	{% endif %}
+{% elif event.training_status == 2%}
+	<a href="" class="btn btn-info">Download certificates</a>
+{% endif %}
+{% endblock %}

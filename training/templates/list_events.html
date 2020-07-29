@@ -2,6 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load trainingdata %}
+{% load eventsdata %}
 {% block title %}List Training Event{% endblock %}
 {% block heading %}
   <i class="fa fa-list-ul"></i> List of Training Events :
@@ -67,8 +68,6 @@
     <li {% if status == 'myevents' %}{{ 'class="active"'}}{% endif %}><a href="/training/list_events/myevents/">My Events</a></li>
     {% endif %}
 </ul>
-
-
 
 <!-- Tab panes -->
 <div class="tab-content">

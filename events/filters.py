@@ -1,6 +1,7 @@
 from builtins import object
 import django_filters
 from events.models import *
+from training.models import *
 from django.core.exceptions import ObjectDoesNotExist
 
 class AcademicCenterFilter(django_filters.FilterSet):
@@ -317,3 +318,26 @@ class TrainingRequestFilter(django_filters.FilterSet):
   class Meta(object):
     model = TrainingRequest
     fields = ['training_planner__academic__state', 'course__foss']
+
+
+class ViewEventFilter(django_filters.FilterSet):
+  state = django_filters.ChoiceFilter(choices=State.objects.none())  
+  # host_college = django_filters.CharFilter(lookup_expr='icontains')
+  event_start_date = django_filters.DateFromToRangeFilter()
+  event_end_date = django_filters.DateFromToRangeFilter()
+
+  def __init__(self, *args, **kwargs):
+    user = None
+    if 'user' in kwargs:
+      user = kwargs['user']
+      kwargs.pop('user')
+
+    super(ViewEventFilter, self).__init__(*args, **kwargs)
+    choices = None
+    choices = list(State.objects.values_list('id', 'name').order_by('name'))
+    choices.insert(0, ('', '---------'),)
+    self.filters['state'].extra.update({'choices' : choices})
+  class Meta(object):
+    model = TrainingEvents
+    fields = ['state', 'host_college',]
+
