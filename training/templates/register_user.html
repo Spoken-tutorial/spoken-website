@@ -153,7 +153,7 @@
                             </button>
                             {% else %}
                             <!-- all other -->
-                            <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.event_type %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment">Make Payment</button>
+                            <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment">Make Payment</button>
                             {% endif %}
                           </div>
                         </div>
