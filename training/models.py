@@ -9,6 +9,8 @@ from events.models import *
 from .helpers import EVENT_TYPE_CHOICES
 from donate.models import Payee
 from donate.helpers import GENDER_CHOICES
+import json
+
 class TrainingEvents(models.Model):	
 
 	event_type = models.CharField(max_length = 50, choices = EVENT_TYPE_CHOICES)
@@ -44,3 +46,16 @@ class Participant(models.Model):
 	department = models.ForeignKey(Department, on_delete=models.PROTECT, null=True )
 	created = models.DateTimeField(auto_now_add = True)
 	foss_language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True )
+
+	def get_foss_langs(self):
+		selected_foss = {}
+		cd_foss_langs = TrainingEvents.objects.get(id=self.event.id)
+		foss_json = json.dumps(cd_foss_langs.foss.id)
+		def_langs_json = json.dumps(cd_foss_langs.Language_of_workshop.id)
+		if self.foss_language :
+			user_langs_json = json.dumps(self.foss_language.id)
+			selected_foss[foss_json] = [[def_langs_json,user_langs_json],0]
+		else:
+			selected_foss[foss_json] = [[def_langs_json],0]
+		return json.dumps(selected_foss)
+

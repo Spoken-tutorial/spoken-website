@@ -53,7 +53,8 @@ class TrainingEventsListView(ListView):
 		if self.status == 'ongoing':
 			self.events = TrainingEvents.objects.filter(event_end_date__gte=today)
 		if self.status == 'myevents':
-			self.events = TrainingEvents.objects.filter(id__in=Participant.objects.filter(user_id=self.request.user.id).values('event_id'))
+			participant = Participant.objects.filter(user_id=self.request.user.id)
+			self.events = participant
 		return super(TrainingEventsListView, self).dispatch(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):

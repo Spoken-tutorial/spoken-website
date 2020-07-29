@@ -107,6 +107,7 @@ def form_invalid(request, form):
 
 @csrf_exempt
 def controller(request, purpose):
+    print("req\n\n\n",request.POST)
     form = PayeeForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
