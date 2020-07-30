@@ -2675,7 +2675,7 @@ def payment_home(request):
 @login_required
 def payment_status(request):
   context ={}
-  academic_year = 2018
+  academic_year =  datetime.today().year
 
   if request.method == 'POST':
     user = User.objects.get(id = request.user.id)
@@ -2691,23 +2691,7 @@ def payment_status(request):
     else:
         amount = "25000"
 
-    STdata = ''
-    user_name = user.first_name+' '+user.last_name
-    STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+CHANNEL_ID+CHANNEL_KEY
-    print(STdata)
-    s = display.value(str(STdata))
-
-    data = {
-    'userId':user.id,
-    'name':user_name,
-    'amount':amount,
-    'purpose':'Subscription',
-    'channelId':CHANNEL_ID,
-    'target':TARGET,
-    'random':s
-    }
-
-
+    reqId = 0
     try:
         paymentdetails = PaymentDetails()
         paymentdetails.user = user
@@ -2719,10 +2703,12 @@ def payment_status(request):
         paymentdetails.academic_year = academic_year
         paymentdetails.gstno = request.POST['id_gstin']
         paymentdetails.save()
+        reqId = paymentdetails.id
 
     except Exception as e:
         try:
           paymentdetails = PaymentDetails.objects.get(academic_id = accountexecutive.academic.id, academic_year = academic_year)
+          reqId = paymentdetail.id
         except:
           return HttpResponseRedirect('/software-training/payment-home')
 
@@ -2735,6 +2721,23 @@ def payment_status(request):
         messages.error(request, 'This college has aready initiated the payment.')
         return HttpResponseRedirect('/software-training/payment-home')
 
+
+    STdata = ''
+    user_name = user.first_name+' '+user.last_name
+    STdata = str(reqId)+str(user.id)+str(user_name)+str(amount)+"Subscription"+CHANNEL_ID+CHANNEL_KEY
+    print(STdata)
+    s = display.value(str(STdata))
+
+    data = {
+    'reqId' : reqId,
+    'userId':user.id,
+    'name':user_name,
+    'amount':amount,
+    'purpose':'Subscription',
+    'channelId':CHANNEL_ID,
+    'target':TARGET,
+    'random':s
+    }
     return render(request,'payment_status.html',data)
   #not post
   else:
@@ -2776,7 +2779,7 @@ def payment_success(request):
 
 
     STresponsedata = ''
-    STresponsedata = str(user.id)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
+    STresponsedata = str(reqId)+str(user.id)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
     STresponsedata_hexa = display.value(str(STresponsedata))
     template_name = ''
     
@@ -2799,16 +2802,26 @@ def payment_success(request):
           messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
           return HttpResponseRedirect('/software-training')
       else:
-        try:
-          pd = get_payee_id(purpose)
-          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+        training_participant = Participant.objects.filter(
+          event=purpose, user=request.user)
+        if training_participant.exists():
+          tp_values = training_participant.values('name','email','event')
+          default_response = '/training/list_events/ongoing/'
+          template_name = 'training/templates/reg_success.html'
+          context['name'] = tp_values[0]['name']
+          context['email'] = tp_values[0]['email']
+          context['event'] = tp_values[0]['event']
+        else:
+          default_response = '/cdcontent/'
           template_name = 'donate/templates/cd_payment_success.html'
+        try:
+          pd = get_payee_id(reqId)
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)          
           context['form'] = get_updated_form(transaction)
-          default_response = '/cdcontent'
         except Exception as e:
           print(e)
           messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')
-          return HttpResponseRedirect('/cdcontent')
+          return HttpResponseRedirect(default_response)
       update_status(pd, status)
       context['transId'] = transId
       context['refNo'] = refNo
@@ -2851,9 +2864,9 @@ def add_transaction(purpose, pid, requestType, userId, amount, reqId, transId, r
     transaction.save()
   return transaction
 
-def get_payee_id(purpose):
-  payee_id = purpose.split("CdContent")[1]
-  pd = Payee.objects.get(id=payee_id)
+def get_payee_id(reqId):
+  #payee_id = purpose.split("CdContent")[1]
+  pd = Payee.objects.get(id=reqId)
   return pd
 
 def update_status(pd, status):
@@ -2898,7 +2911,7 @@ def payment_reconciliation_update(request):
   random = request.GET.get('random')
 
   STresponsedata = ''
-  STresponsedata = str(userId)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
+  STresponsedata = str(reqId)+str(userId)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
   STresponsedata_hexa = display.value(str(STresponsedata))
 
   if STresponsedata_hexa == random:
@@ -2913,7 +2926,7 @@ def payment_reconciliation_update(request):
       except:
         return HttpResponseRedirect("Failed1")
     else:
-      pd = get_payee_id(purpose)
+      pd = get_payee_id(reqId)
     try:
       transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
       print("saved")

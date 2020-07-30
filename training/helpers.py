@@ -1,4 +1,5 @@
 from events.models import AcademicKey, StudentBatch
+from datetime import datetime,date
 
 EVENT_TYPE_CHOICES =(
 	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme')
@@ -12,19 +13,20 @@ REGISTRATION_TYPE_CHOICES =(
     ('', '-----'), ('0', 'Host College'), ('1', 'Subscribed College'),('2', 'Manual Registration')
     )
 
-def is_user_paid(request):
+def is_user_paid(user_obj):
     try:
-        idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
-        user_paid = [True, request.user.organiser.academic] if (idcase.expiry_date >= date.today()) else [False]
+        idcase = AcademicKey.objects.get(academic_id=user_obj.organiser.academic_id)
+        user_paid = [True, user_obj.organiser.academic] if (idcase.expiry_date >= date.today()) else [False]
+        return user_paid
     except:
         user_paid = [False]
     try:
-        idcase = AcademicKey.objects.get(academic_id=request.user.invigilator.academic_id)
-        user_paid = [True,request.user.invigilator.academic] if (idcase.expiry_date >= date.today()) else [False]
+        idcase = AcademicKey.objects.get(academic_id=user_obj.invigilator.academic_id)
+        user_paid = [True, user_obj.invigilator.academic] if (idcase.expiry_date >= date.today()) else [False]
+        return user_paid
     except:
         user_paid = [False]
     return user_paid
-
 
 def user_college(request):
     college = ''

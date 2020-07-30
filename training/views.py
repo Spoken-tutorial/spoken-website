@@ -59,7 +59,8 @@ class TrainingEventsListView(ListView):
 		if self.status == 'ongoing':
 			self.events = TrainingEvents.objects.filter(event_end_date__gte=today)
 		if self.status == 'myevents':
-			self.events = TrainingEvents.objects.filter(id__in=Participant.objects.filter(user_id=self.request.user.id).values('event_id'))
+			participant = Participant.objects.filter(user_id=self.request.user.id)
+			self.events = participant
 		return super(TrainingEventsListView, self).dispatch(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):
@@ -87,7 +88,7 @@ def register_user(request):
 		if user.profile_set.all():
 			try:
 				form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
-				user_data = is_user_paid(request)
+				user_data = is_user_paid(request.user)
 				if user_data[0]:
 					college = user_data[1]
 				else:
@@ -127,7 +128,7 @@ def reg_success(request):
 		except:
 			form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))
 		
-		user_data = is_user_paid(request)
+		user_data = is_user_paid(request.user)
 		if event.host_college == form_data.college:
 			print("host")
 			form_data.registartion_type = 0 #host College

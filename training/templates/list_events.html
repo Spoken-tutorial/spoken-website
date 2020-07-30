@@ -71,9 +71,31 @@
 
 <!-- Tab panes -->
 <div class="tab-content">
-    <div class="tab-pane active" id="pending">
-        <form method="post" action = "{% url 'training:register_user' %}">
+    <div class="tab-pane active" id="pending">        
         {% for event in events %}
+<form method="post" action = "{% url 'training:register_user' %}">
+{% csrf_token %}
+        {% if status == 'myevents'%}
+        <div class="activities-event ">
+            <div class="date">
+                <p><i class="fa fa-calendar"></i></p>
+                <p>{{ event.event.event_start_date}} - {{ event.event.event_end_date}}</p>
+            </div>
+            <div class="content">
+                <h6>{{event.event.event_name}}</h6>
+                <p>
+                    <b>Host College :</b> <span>{{event.event.host_college}}{{event.event.state.name}}</span><br>
+                    <b>Event Coordinator Name :</b> <span>{{event.event.event_coordinator_name}}</span><br>
+                    <b>FOSS :</b> <span >{{event.event.foss}}</span>
+                              <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{event.get_foss_langs}}' style="display: none;">
+                </p>
+                <div style="text-align: right;">
+                 <button class="btn btn-primary" type="submit" 
+        formaction="{% url 'cdcontent:create_cd_download' 'paid' %}">Download CD Content</button>
+                </div>
+            </div>
+        </div>
+        {% else %}
         <div class="activities-event ">
             <div class="date">
                 <p><i class="fa fa-calendar"></i></p>
@@ -82,13 +104,12 @@
             <div class="content">
                 <h6>{{event.event_name}}</h6>
                 <p>
-                    <b>Host College :</b> <span>{{event.host_college}}{{event.state.name}}</span></br>
+                    <b>Host College :</b> <span>{{event.host_college}}{{event.state.name}}</span><br>
                     <b>Event Coordinator Name :</b> <span>{{event.event_coordinator_name}}</span>
                 </p>
                 <p>                  
                     Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
-
-                    {% if status != 'myevents' %}
+                    {% if status == 'ongoing' %}
                         {% if event.registartion_end_date|is_reg_valid %}
                             <input type="event" id="event_id_info" name="event_id_info" value="{{event.id}}" style="display:none">
                             <button type="submit" class="btn btn-info">Register Now</button>
@@ -97,8 +118,9 @@
                 </p>        
             </div>
         </div> 
+        {% endif %}
+</form>
         {% endfor %}
     </div>
 </div>
-
 {% endblock %}

@@ -5,6 +5,7 @@
 {% load cmsdata %}
 {% load creationdata %}
 {% block search %}{% endblock %}
+{% block title %}Payment{% endblock %}
 {% block content %}
 <body onload="loading()">
     <div class= 'filters row' style="text-align: center;">
@@ -18,6 +19,7 @@
             </span>
         </h4>
         <form action="{{target}}" name="test" method="post" class='form-horizontal' >
+            <input type="hidden" name="reqId" value="{{reqId}}" />
             <input type="hidden" name="userId" value="{{userId}}" />
             <input type="hidden" name="name" value="{{name}}" />
             <input type="hidden" name="amount" value="{{amount}}" />
