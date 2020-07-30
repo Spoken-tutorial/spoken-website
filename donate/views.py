@@ -130,7 +130,7 @@ def encrypted_data(request, form, purpose):
     #amount = 1.00
     purpose = purpose
 
-    STdata = str(form.save(commit=False).pk) + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
+    STdata =  CHANNEL_ID+str(form.save(commit=False).pk) + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     
     s = display.value(str(STdata))
     return s
@@ -140,8 +140,8 @@ def encrypted_data(request, form, purpose):
 def get_final_data(request, form, purpose):
 
     data = {
-        'reqId' : str(form.save(commit=False).pk)
-        'userId': request.user.id,
+        'reqId' :  CHANNEL_ID+str(form.save(commit=False).pk),
+        'userId': str(request.user.id),
         'name': form.cleaned_data.get('name'),
         'amount':form.cleaned_data.get('amount'),
         #'amount': 1.00,
