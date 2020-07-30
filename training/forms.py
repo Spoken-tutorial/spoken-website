@@ -8,9 +8,9 @@ from training.models import *
 
 class CreateTrainingEventForm(forms.ModelForm):
 
-   class Meta(object):
-    model = TrainingEvents
-    exclude = ['entry_user', 'training_status']
+    class Meta(object):
+        model = TrainingEvents
+        exclude = ['entry_user', 'training_status', 'Language_of_workshop']
     
 
 class RegisterUser(forms.ModelForm):
@@ -39,4 +39,11 @@ class RegisterUser(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(RegisterUser, self).__init__(*args, **kwargs)
         self.fields['amount'].required = False
+
+class UploadParticipantsForm(forms.ModelForm):
+    csv_file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+
+    class Meta(object):
+        model = Participant
+        fields = ['name']
 

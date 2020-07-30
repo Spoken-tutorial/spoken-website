@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Participants{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> Upload Participants :
+{% endblock %}
+{% block search %}{% endblock %}
+
+ {% block content %}
+{{message.tags}}
+<form action="" method="POST" class='form-horizontal'>{% csrf_token %}
+<div class='form-row'>
+<div class='col-xs-12 form-group required'>
+  <label class='control-label'>Csv File</label>&nbsp;&nbsp;<small>(Please upload your CSV file here.)</small>
+
+  {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
+
+<small>If you have used MS-EXCEL to create the CSV file please make sure that you have saved it with csv(ms-dos) file extention.</small>
+</div>
+</div>
+
+
+<div class="form-group">
+			<div class="col-sm-offset-5 col-sm-9">
+			<input class="btn btn-warning btn-lg" type="submit" id="submit_button" value="Submit" />
+			</div>
+		</div>
+</form>
+{% endblock %}

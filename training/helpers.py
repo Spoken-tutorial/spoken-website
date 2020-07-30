@@ -2,7 +2,7 @@ from events.models import AcademicKey, StudentBatch
 from datetime import datetime,date
 
 EVENT_TYPE_CHOICES =(
-	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),
+	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme')
 	)
 
 EVENT_AMOUNT = {
@@ -44,4 +44,7 @@ def user_college(request):
                    #user is not associated with any college
                    pass
     return college
+
+def handle_uploaded_file(request):
+    return "successfull"
 

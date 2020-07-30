@@ -37,4 +37,9 @@ urlpatterns = [
       listevents, 
       name='tr_event_list'
     ),
+    url(
+      r'^(?P<eventid>\d+)/upload_participants$', 
+      ParticipantCreateView.as_view(template_name="upload_participants.html"), 
+      name="upload_participants"
+    ),
     ]

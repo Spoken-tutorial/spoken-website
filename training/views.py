@@ -6,13 +6,13 @@ from .forms import *
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from events.models import State
-from creation.models import TutorialResource
+from creation.models import TutorialResource, Language
 from events.decorators import group_required
 from events.views import is_resource_person, is_administrator
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
-from .helpers import is_user_paid, user_college, EVENT_AMOUNT
+from .helpers import is_user_paid, user_college, EVENT_AMOUNT, handle_uploaded_file
 import json
 from datetime import datetime,date
 from  events.filters import ViewEventFilter
@@ -26,7 +26,7 @@ class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
 	model = TrainingEvents
 	template_name = "create_event.html"
-	success_url = "/"
+	success_url = "/software-training/"
 
 	@method_decorator(group_required("Resource Person"))
 	def get(self, request, *args, **kwargs):
@@ -35,6 +35,7 @@ class TrainingEventCreateView(CreateView):
 	def form_valid(self, form, **kwargs):
 		self.object = form.save(commit=False)
 		self.object.entry_user = self.request.user
+		self.object.Language_of_workshop = Language.objects.get(id=22)
 		self.object.save()
 
 		messages.success(self.request, "New Event created successfully.")
@@ -43,7 +44,6 @@ class TrainingEventCreateView(CreateView):
 
 class TrainingEventsListView(ListView):
 	model = TrainingEvents
-	paginate_by = 50  # if pagination is desired
 
 	def dispatch(self, *args, **kwargs):
 		self.status = self.kwargs['status']
@@ -284,4 +284,33 @@ def approve_event_registration(request, pk):
 		print("Error")
 		messages.error(request, 'Request not sent.Please try again.')
 	return HttpResponseRedirect("/training/event/rp/ongoing/")
+
+
+class ParticipantCreateView(CreateView):
+	form_class = UploadParticipantsForm
+	success_url = '/'
+
+	@method_decorator(group_required("Resource Person"))
+	def dispatch(self, *args, **kwargs):
+		if 'eventid' in kwargs:
+			try:
+				self.event = TrainingEvents.objects.filter(pk=kwargs['eventid'])
+			except:
+				print("Error")
+				messages.error(request, 'Event not found')
+		return super(ParticipantCreateView, self).dispatch(*args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(ParticipantCreateView, self).get_context_data(**kwargs)
+		context['event']= self.event
+		return context
+
+	def post(self, request, *args, **kwargs):
+		form = self.form_class(request.POST, request.FILES)
+		if form.is_valid():
+			form.save()
+			print(handle_uploaded_file(f))
+			return redirect(self.success_url)
+		else:
+			return render(request, self.template_name, {'form': form})
 
