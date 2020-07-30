@@ -32,7 +32,7 @@ import subprocess
 import os
 from events.models import AcademicKey
 import random
-
+from training.views import reg_success
 @csrf_exempt
 def donatehome(request):
     form = PayeeForm(initial={'country': 'India'})
@@ -108,6 +108,9 @@ def form_invalid(request, form):
 @csrf_exempt
 def controller(request, purpose):
     print("req\n\n\n",request.POST)
+    if purpose != 'cdcontent':
+        reg_success(request)
+    print("Participant data saved")
     form = PayeeForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
@@ -131,14 +134,15 @@ def encrypted_data(request, form, purpose):
     purpose = purpose
 
     STdata =  CHANNEL_ID+str(form.save(commit=False).pk) + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
-    
+    print("STdata",STdata)
     s = display.value(str(STdata))
+    print("the s :",s)
     return s
 
 
 @csrf_exempt
 def get_final_data(request, form, purpose):
-
+    #TARGET = '/software-training/payment-success/'
     data = {
         'reqId' :  CHANNEL_ID+str(form.save(commit=False).pk),
         'userId': str(request.user.id),
