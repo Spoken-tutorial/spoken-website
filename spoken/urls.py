@@ -23,8 +23,18 @@ urlpatterns = [
     url(r'^addu/$', add_user, name='addu'),
     # url(r'^NMEICT-Intro/$', nmeict_intro, name="nmeict_intro"),
     url(r'^tutorial-search/$', tutorial_search, name="tutorial-search"),
+
+    url(r'^health/$', health_landing, name="health"),
+
+    url(r'^health/health-and-nutrition$', nutrition_foss, name="health-and-nutrition"),
+    url(r'^health/health-tutorial-search/$',  health_tutorial_search, name="health-tutorial-search"),
+
+    url(r'^health/covid-19$', covid_foss, name="covid"),
+    url(r'^health/covid-tutorial-search/$',  covid_tutorial_search, name="covid-tutorial-search"),
+
     url(r'^series/$', series_foss, name="series"),
-    url(r'^series_tutorial-search/$',  series_tutorial_search, name="series-tutorial-search"),
+    url(r'^series-tutorial-search/$',  series_tutorial_search, name="series-tutorial-search"),
+
     url(r'^archived/$', archived_foss, name="archived"),
     url(r'^archived_tutorial-search/$',  archived_tutorial_search, name="archived-tutorial-search"),
     url(r'^news/(?P<cslug>[\w-]+)/$',  news, name="news"),

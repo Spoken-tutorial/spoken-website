@@ -116,9 +116,18 @@
         }
     </style>
 {% endblock %}
+<div class="container">
 <div class="well tab-content tutorial-search-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
     <div class="col-sm-12">
-        <form action=" {% url 'series-tutorial-search' %} " method="GET" class='form-horizontal'>
+        {% if series_type == "health"%}
+            <form action=" {% url 'health-tutorial-search' %} " method="GET" class='form-horizontal'>          
+        {% elif series_type == "series"%}
+            <form action=" {% url 'series-tutorial-search' %} " method="GET" class='form-horizontal'>  
+        {% elif series_type == "covid"%}
+            <form action=" {% url 'covid-tutorial-search' %} " method="GET" class='form-horizontal'>  
+        {% endif %}
+      
+       
             {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
                 {% if form.non_field_errors %}
                 <ul>
@@ -141,7 +150,14 @@
                     </div>
                     <div class="col-sm-2 add-padding">
                         <input class="btn btn-primary" type="submit" value="Search" />
-                        <a href="{% url 'series'%}" class='pull-left'>Reset dropdowns</a>
+                        {% if series_type == "health"%}
+                            <a href="{% url 'health-and-nutrition'%}" class='pull-left'>
+                        {% elif series_type == "series"%}
+                            <a href="{% url 'series'%}" class='pull-left'>
+                        {% elif series_type == "covid"%}
+                            <a href="{% url 'covid'%}" class='pull-left'>
+                        {% endif %}
+                            Reset dropdowns</a>
                     </div>
                 </div>
             {% endwith %}
@@ -153,8 +169,8 @@
         <h4 class="page-title">
             <i class="fa fa-list-ul"></i> Testimonials
             {% if add_button_show %}
-            <a class="btn btn-primary pull-right" href="{% url 'testimonials_new_media' testimonial_type='series' %}">Upload Series Testimonial</a>
-            {% endif %}
+            <a class="btn btn-primary pull-right" href="{% url 'testimonials_new_media' testimonial_type=series_type %}">Upload Series Testimonial</a>
+            {% endif %}  
         </h4>
         {% for record in collection %}
             {% if record.path %}
@@ -206,5 +222,5 @@
             {% endif %}
         {% endfor %}
     </div>
-
+</div>
 {% endblock %}
