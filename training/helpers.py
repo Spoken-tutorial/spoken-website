@@ -10,7 +10,7 @@ EVENT_AMOUNT = {
     }
 
 REGISTRATION_TYPE_CHOICES =(
-    ('', '-----'), ('0', 'Host College'), ('1', 'Subscribed College'),('2', 'Manual Registration')
+    ('', '-----'),  ('1', 'Subscribed College'),('2', 'Manual Registration')
     )
 
 def is_user_paid(user_obj):

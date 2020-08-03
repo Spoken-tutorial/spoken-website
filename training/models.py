@@ -45,9 +45,10 @@ class Participant(models.Model):
 	state = models.ForeignKey(State, on_delete=models.PROTECT )
 	college = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT)
 	department = models.ForeignKey(Department, on_delete=models.PROTECT, null=True)
-	registartion_type = models.PositiveSmallIntegerField(default=0)
+	registartion_type = models.PositiveSmallIntegerField(choices= REGISTRATION_TYPE_CHOICES, default=1)
 	created = models.DateTimeField(auto_now_add = True)
 	foss_language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True )
+	payment_status = models.ForeignKey(Payee, on_delete=models.PROTECT, null=True)
 
 	def get_foss_langs(self):
 		selected_foss = {}

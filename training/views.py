@@ -102,7 +102,8 @@ def register_user(request):
 			event_register = TrainingEvents.objects.get(id=event_id)
 			langs = Language.objects.filter(id__in = 
 				TutorialResource.objects.filter(
-				tutorial_detail__foss = event_register.foss, status=1).values('language').distinct())
+				tutorial_detail__foss = event_register.foss, status=1).exclude(
+					language=event_register.Language_of_workshop).values('language').distinct())
 			form.fields["foss_language"].queryset = langs
 			form.fields["amount"].initial = EVENT_AMOUNT[event_register.event_type]
 			form.fields["amount"].widget.attrs['readonly'] = True
@@ -110,7 +111,7 @@ def register_user(request):
 	return render(request, template_name,context)
 
 @csrf_exempt
-def reg_success(request):
+def reg_success(request, user_type):
 	context = {}
 	template_name = "reg_success.html"
 	if request.method == 'POST':
@@ -119,29 +120,34 @@ def reg_success(request):
 		event_obj = request.POST.get('event')
 		event = TrainingEvents.objects.get(id=event_obj)
 		form = RegisterUser(request.POST)
-		form_data = form.save(commit=False)
-		form_data.user = request.user
-		form_data.event = event
+		if form.is_valid():
+			form_data = form.save(commit=False)
+			form_data.user = request.user
+			form_data.event = event
+			try:
+				form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
+			except:
+				form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
+			user_data = is_user_paid(request.user)
+			if event.host_college == form_data.college:
+				print("host")
+				form_data.registartion_type = 0 #host College
+			elif user_data[0]:
+				print("Subscribed")
+				form_data.registartion_type = 1 #Subscribed College
+			else:
+				form_data.registartion_type = 2 #Manual reg- paid 500
 
-		try:
-			form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
-		except:
-			form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))
-		
-		user_data = is_user_paid(request.user)
-		if event.host_college == form_data.college:
-			print("host")
-			form_data.registartion_type = 0 #host College
-		elif user_data[0]:
-			print("Subscribed")
-			form_data.registartion_type = 1 #Subscribed College
+			form_data.save()
+			event_name = event.event_name
+			if user_type == 'paid':
+				context = {'name':name, 'email':email, 'event':event_name}
+				return render(request, template_name,context)
+			else:
+				return form_data
 		else:
-			form_data.registartion_type = 2 #Manual reg- paid 500
-
-		form_data.save()
-		event_name = event.event_name
-		context = {'name':name, 'email':email, 'event':event_name}
-	return render(request, template_name,context)
+			messages.warning(request, 'Invalid form payment request.')
+			return redirect('training:list_events' 'ongoing' )
 
 
 class EventPraticipantsListView(ListView):

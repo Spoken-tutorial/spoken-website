@@ -27,7 +27,7 @@
 <div class="panel panel-primary">
     <div class="panel-body" style="background-color: #F5F5F5;">
       <!-- registration form starts -->
-     <form method="post"  class="form-horizontal" action="{% url 'training:reg_success' %}">
+     <form method="post"  class="form-horizontal" action="{% url 'training:reg_success' 'paid' %}">
       <div class="row well bs-component">
 {% csrf_token %}
             <div class="col-md-7">
@@ -89,14 +89,14 @@
                       <div class="form-group">
                         <label for="id_state" class="col-lg-4 control-label">Gender</label>
                         <div class="col-lg-8">
-                            {% render_field form.gender class+="form-control gender" tabindex="3" %}
+                            {% render_field form.gender class+="form-control gender" tabindex="4" %}
                             {{ form.gender.errors }}
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="id_state" class="col-lg-4 control-label">State</label>
                         <div class="col-lg-8">
-                            {% render_field form.state class+="form-control state" tabindex="3" %}
+                            {% render_field form.state class+="form-control state" tabindex="5" %}
                             {{ form.state.errors }}
                         </div>
                                     </div>
@@ -111,9 +111,10 @@
                     <div class="form-group">
                       <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
                       <div class="col-lg-8">
-                      <select class="form-control" id="id_college" name="dropdown_college">
+                      <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6">
                     </select>
                       </div>
+			<div id="college-info" class="col-md-8 col-md-offset-4" style="display:none" >Please select your college</div>
                     </div>
                 		{% endif %}
                     <div class="form-group">
@@ -125,7 +126,7 @@
                     <div class="form-group">
                     <label for="id_foss_language" class="col-lg-4 control-label">Language </label>
                     <div class="col-lg-8">
-                        {% render_field form.foss_language class+="form-control foss_language" tabindex="1" %}
+                        {% render_field form.foss_language class+="form-control foss_language" tabindex="7" %}
                         {{ form.name.errors }}
                     </div>
                     </div>
@@ -139,7 +140,7 @@
                     <div class="form-group">
                         <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
                         <div class="col-lg-8">
-                            {% render_field form.amount class+="form-control amount" tabindex="5" %}
+                            {% render_field form.amount class+="form-control amount"  %}
                             {{ form.amount.errors }}
                         </div>
                     </div>
@@ -147,13 +148,13 @@
                     </fieldset>
                         <div class="row">
                           <div class=" col-md-offset-4 col-md-4">
-                            {% if user|is_user_paid %}
+                            {% if  user|is_user_paid %}
                             <!-- if user belongs to a paid college -->
-                            <button type="submit"  value="Submit" class="btn btn-success">Register
+                            <button type="submit"  value="Submit" class="btn btn-success" tabindex="8">Register
                             </button>
                             {% else %}
                             <!-- all other -->
-                            <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment">Make Payment</button>
+                            <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled tabindex="8">Make Payment</button>
                             {% endif %}
                           </div>
                         </div>
@@ -211,6 +212,7 @@
 {% block jsblock %}
 <script type="text/javascript">
  $( document ).ready(function() {
+
 $('#id_email').on('focusout',function(){
       var username = $('#id_name').val();
       var email = $('#id_email').val();
@@ -310,6 +312,7 @@ $('#id_state').change(function(){
                 success: function(data)
                 {
                     $('#id_college').html(data);
+		    $('#college-info').show();	
                 }
               });
    	});
@@ -323,6 +326,16 @@ function send_otp(){
         $("#otp_sent_msg").show().delay(10000).fadeOut();
 }
 
+function check_college(control){
+if(control.value=='None'){
+document.getElementById('college-info').style.display = "block";
+document.getElementById('make_payment').disabled = true;
+}
+else{
+document.getElementById('college-info').style.display = "none";
+document.getElementById('make_payment').disabled = false;
+}
+}
 </script>
 <script type="text/javascript" src="{% static 'cdcontent/js/cdcontent.js' %}"></script>
 {% endblock %}

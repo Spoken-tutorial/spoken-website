@@ -20,7 +20,7 @@ class RegisterUser(forms.ModelForm):
             queryset = State.objects.order_by('name'),
             empty_label = "--- Select State ---", 
             help_text = "",
-            required=False,
+            required=True,
             )
     college = forms.CharField(
         required = False,

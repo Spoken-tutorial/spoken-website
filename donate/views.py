@@ -94,6 +94,7 @@ def form_valid(request, form, purpose):
                     cd_foss_langs.level = foss_level
                 cd_foss_langs.save()
     form.save_m2m()
+    return payee_obj
 
 @csrf_exempt
 def form_invalid(request, form):
@@ -107,16 +108,16 @@ def form_invalid(request, form):
 
 @csrf_exempt
 def controller(request, purpose):
-    print("req\n\n\n",request.POST)
-    if purpose != 'cdcontent':
-        reg_success(request)
-    print("Participant data saved")
     form = PayeeForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
-            form_valid(request, form, purpose)
+            payee_obj_new = form_valid(request, form, purpose)
         else:
             form_invalid(request, form)
+    if purpose != 'cdcontent':
+        participant_form = reg_success(request, 'general')
+        participant_form.payment_status = payee_obj_new
+        participant_form.save()
     data = get_final_data(request, form, purpose)
     return render(request, 'payment_status.html', data)
 
@@ -134,9 +135,7 @@ def encrypted_data(request, form, purpose):
     purpose = purpose
 
     STdata =  CHANNEL_ID+str(form.save(commit=False).pk) + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
-    print("STdata",STdata)
     s = display.value(str(STdata))
-    print("the s :",s)
     return s
 
 
@@ -249,7 +248,6 @@ def validate(request):
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
         context['validate'] = "success"
-        print("user is :",request.user)
     else:
         context["validate"] = "fail"
     return HttpResponse(json.dumps(context), content_type='application/json')
