@@ -18,7 +18,10 @@ from datetime import datetime,date
 from  events.filters import ViewEventFilter
 from cms.sortable import *
 from events.views import get_page
-
+from django.urls import reverse
+import csv
+from django.contrib.auth.models import User
+from cms.views import create_profile, send_registration_confirmation
 
 today = date.today()
 
@@ -102,7 +105,8 @@ def register_user(request):
 			event_register = TrainingEvents.objects.get(id=event_id)
 			langs = Language.objects.filter(id__in = 
 				TutorialResource.objects.filter(
-				tutorial_detail__foss = event_register.foss, status=1).values('language').distinct())
+				tutorial_detail__foss = event_register.foss, status=1).exclude(
+					language=event_register.Language_of_workshop).values('language').distinct())
 			form.fields["foss_language"].queryset = langs
 			form.fields["amount"].initial = EVENT_AMOUNT[event_register.event_type]
 			form.fields["amount"].widget.attrs['readonly'] = True
@@ -110,7 +114,7 @@ def register_user(request):
 	return render(request, template_name,context)
 
 @csrf_exempt
-def reg_success(request):
+def reg_success(request, user_type):
 	context = {}
 	template_name = "reg_success.html"
 	if request.method == 'POST':
@@ -119,29 +123,34 @@ def reg_success(request):
 		event_obj = request.POST.get('event')
 		event = TrainingEvents.objects.get(id=event_obj)
 		form = RegisterUser(request.POST)
-		form_data = form.save(commit=False)
-		form_data.user = request.user
-		form_data.event = event
+		if form.is_valid():
+			form_data = form.save(commit=False)
+			form_data.user = request.user
+			form_data.event = event
+			try:
+				form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
+			except:
+				form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
+			user_data = is_user_paid(request.user)
+			if event.host_college == form_data.college:
+				print("host")
+				form_data.registartion_type = 0 #host College
+			elif user_data[0]:
+				print("Subscribed")
+				form_data.registartion_type = 1 #Subscribed College
+			else:
+				form_data.registartion_type = 2 #Manual reg- paid 500
 
-		try:
-			form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
-		except:
-			form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))
-		
-		user_data = is_user_paid(request.user)
-		if event.host_college == form_data.college:
-			print("host")
-			form_data.registartion_type = 0 #host College
-		elif user_data[0]:
-			print("Subscribed")
-			form_data.registartion_type = 1 #Subscribed College
+			form_data.save()
+			event_name = event.event_name
+			if user_type == 'paid':
+				context = {'name':name, 'email':email, 'event':event_name}
+				return render(request, template_name,context)
+			else:
+				return form_data
 		else:
-			form_data.registartion_type = 2 #Manual reg- paid 500
-
-		form_data.save()
-		event_name = event.event_name
-		context = {'name':name, 'email':email, 'event':event_name}
-	return render(request, template_name,context)
+			messages.warning(request, 'Invalid form payment request.')
+			return redirect('training:list_events' 'ongoing' )
 
 
 class EventPraticipantsListView(ListView):
@@ -288,16 +297,15 @@ def approve_event_registration(request, pk):
 
 class ParticipantCreateView(CreateView):
 	form_class = UploadParticipantsForm
-	success_url = '/'
 
 	@method_decorator(group_required("Resource Person"))
 	def dispatch(self, *args, **kwargs):
 		if 'eventid' in kwargs:
 			try:
-				self.event = TrainingEvents.objects.filter(pk=kwargs['eventid'])
+				self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
 			except:
-				print("Error")
-				messages.error(request, 'Event not found')
+				messages.error(self.request, 'Event not found')
+				return HttpResponseRedirect(reverse("training:create_event"))
 		return super(ParticipantCreateView, self).dispatch(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):
@@ -305,14 +313,58 @@ class ParticipantCreateView(CreateView):
 		context['event']= self.event
 		return context
 
-	def post(self, request, *args, **kwargs):
-		form = self.form_class(request.POST, request.FILES)
-		if form.is_valid():
-			form.save()
-			print(handle_uploaded_file(f))
-			return redirect(self.success_url)
-		else:
-			return render(request, self.template_name, {'form': form})
+	def form_valid(self, form):
+		csv_file_data = form.cleaned_data['csv_file']
+		registration_type = form.clean_data['registartion_type']
+		rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
+		for i, row in enemurate(rows_data):
+			user = self.get_create_user(row)
+			user_data = is_user_paid(user)
+			if user_data[0]:
+				college = user_data[1]
+			else:
+				college = user_college(user)
+			if college == '':
+				try:
+					college = AcademicCenter.objects.get(institution_name=row[6])
+				except AcademicCenter.DoesNotExist:
+					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist.")
+					continue
+			try:
+				department = Department.objects.get(name = row[7])
+			except Department.DoesNotExist:
+				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Department name " + row[7] + " does not exist.")
+				continue
+			try:
+				Participant.objects.create(
+					name = row[0], 
+					email = row[2].strip(), 
+					gender = row[3], 
+					amount = row[4], 
+					event = self.event, 
+					user = user, 
+					state = college.state, 
+					college = college, 
+					department = department,
+					registartion_type = registartion_type
+					)
+			except:
+				messages.add_message(self.request, messages.ERROR, "Could not create participant having email id" + row[2])
+
+		messages.success(self.request, 'Successfully uploaded.')
+		return HttpResponseRedirect(reverse("training:upload_participants", kwargs={'eventid': self.event.pk}))
+	
+	def get_create_user(self, row):
+		try:
+			return User.objects.get(email=row[2].strip())
+		except User.DoesNotExist:
+			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
+			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
+			user.save()
+			create_profile(user, '')
+			send_registration_confirmation(user)			
+			return user
+
 
 
 class EventAttendanceListView(ListView):

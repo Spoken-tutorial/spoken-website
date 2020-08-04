@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from .helpers import is_user_paid
 from events.models import *
 from training.models import *
+from .validators import validate_csv_file
 
 class CreateTrainingEventForm(forms.ModelForm):
 
@@ -20,7 +21,7 @@ class RegisterUser(forms.ModelForm):
             queryset = State.objects.order_by('name'),
             empty_label = "--- Select State ---", 
             help_text = "",
-            required=False,
+            required=True,
             )
     college = forms.CharField(
         required = False,
@@ -41,9 +42,14 @@ class RegisterUser(forms.ModelForm):
         self.fields['amount'].required = False
 
 class UploadParticipantsForm(forms.ModelForm):
-    csv_file = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    csv_file = forms.FileField(required=True)
 
     class Meta(object):
         model = Participant
-        fields = ['name']
+        fields = ['registartion_type']
+    
+    def clean_csv_file(self):
+        data = self.cleaned_data["csv_file"]
+        file_data = validate_csv_file(data)
+        return file_data
 

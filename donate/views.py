@@ -32,7 +32,7 @@ import subprocess
 import os
 from events.models import AcademicKey
 import random
-
+from training.views import reg_success
 @csrf_exempt
 def donatehome(request):
     form = PayeeForm(initial={'country': 'India'})
@@ -94,6 +94,7 @@ def form_valid(request, form, purpose):
                     cd_foss_langs.level = foss_level
                 cd_foss_langs.save()
     form.save_m2m()
+    return payee_obj
 
 @csrf_exempt
 def form_invalid(request, form):
@@ -107,13 +108,16 @@ def form_invalid(request, form):
 
 @csrf_exempt
 def controller(request, purpose):
-    print("req\n\n\n",request.POST)
     form = PayeeForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
-            form_valid(request, form, purpose)
+            payee_obj_new = form_valid(request, form, purpose)
         else:
             form_invalid(request, form)
+    if purpose != 'cdcontent':
+        participant_form = reg_success(request, 'general')
+        participant_form.payment_status = payee_obj_new
+        participant_form.save()
     data = get_final_data(request, form, purpose)
     return render(request, 'payment_status.html', data)
 
@@ -131,14 +135,13 @@ def encrypted_data(request, form, purpose):
     purpose = purpose
 
     STdata =  CHANNEL_ID+str(form.save(commit=False).pk) + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
-    
     s = display.value(str(STdata))
     return s
 
 
 @csrf_exempt
 def get_final_data(request, form, purpose):
-
+    #TARGET = '/software-training/payment-success/'
     data = {
         'reqId' :  CHANNEL_ID+str(form.save(commit=False).pk),
         'userId': str(request.user.id),
@@ -213,21 +216,21 @@ def validate_user(request):
     if email and password:
         user = authenticate(username=email, password=password)
         if user is not None:
-            error_msg = ''
             if user.is_active:
                 login(request, user)
+                msg = ''
                 context['organizer_paid'] = is_organizer_paid(request)
             else:
-                error_msg = "Your account is disabled.<br>\
+                msg = "Your account is disabled.<br>\
                             Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
                             In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
                             <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"% (user.email)                
         else:
-            error_msg = 'Invalid username / password'
+            msg = 'Invalid username / password'
     else:
-        error_msg = 'Please enter username and Password'
+        msg = 'Please enter username and Password'
     
-    context['error_msg']=error_msg
+    context['msg']=msg
     return HttpResponse(json.dumps(context), content_type='application/json')
 
 
@@ -245,7 +248,6 @@ def validate(request):
         user.backend = 'django.contrib.auth.backends.ModelBackend'
         login(request, user)
         context['validate'] = "success"
-        print("user is :",request.user)
     else:
         context["validate"] = "fail"
     return HttpResponse(json.dumps(context), content_type='application/json')

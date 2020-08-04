@@ -15,6 +15,7 @@ from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from events.models import *
 from donate.models import *
+from training.models import *
 from events.filters import TrainingRequestFilter
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
@@ -2744,13 +2745,13 @@ def payment_status(request):
     return HttpResponseRedirect('/software-training')
 
 @csrf_exempt
-@login_required
 def payment_success(request):
   context = {}
-  user = User.objects.get(id = request.user.id)
+  print("request ",request.user)
+  #user = User.objects.get(id = request.user.id)
   default_response = '/'
-  context['user'] = user
-  print("Entered")
+  #context['user'] = user
+  print("\n\n\nEntered")
   if request.method == 'POST':
      # requestType    // I/R/J  (I - Immediate response,R- Reconciled & J - Transaction rejected)
     # userId;        // Id of the user
@@ -2779,10 +2780,9 @@ def payment_success(request):
 
 
     STresponsedata = ''
-    STresponsedata = str(reqId)+str(user.id)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
+    STresponsedata = reqId+str(userId)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
     STresponsedata_hexa = display.value(str(STresponsedata))
-    template_name = ''
-    
+    template_name = '' 
     if STresponsedata_hexa == random:
       #save transaction details in db
       if purpose == 'Subscription':
@@ -2802,16 +2802,18 @@ def payment_success(request):
           messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
           return HttpResponseRedirect('/software-training')
       else:
-        training_participant = Participant.objects.filter(
-          event=purpose, user=request.user)
-        if training_participant.exists():
-          tp_values = training_participant.values('name','email','event')
-          default_response = '/training/list_events/ongoing/'
-          template_name = 'training/templates/reg_success.html'
-          context['name'] = tp_values[0]['name']
-          context['email'] = tp_values[0]['email']
-          context['event'] = tp_values[0]['event']
-        else:
+        try:
+              training_participant = Participant.objects.filter(
+                  event=int(purpose), user=int(userId))
+              tp_values = training_participant.values('name','email','event__event_name')
+              #if status == 'S': update value of participant else delete
+              default_response = '/training/list_events/ongoing/'
+              template_name = 'reg_success.html'
+              context['name'] = tp_values[0]['name']
+              context['email'] = tp_values[0]['email']
+              context['event'] = tp_values[0]['event__event_name']
+        except Exception as e1:
+          print("came here ",e1)
           default_response = '/cdcontent/'
           template_name = 'donate/templates/cd_payment_success.html'
         try:
@@ -2865,8 +2867,8 @@ def add_transaction(purpose, pid, requestType, userId, amount, reqId, transId, r
   return transaction
 
 def get_payee_id(reqId):
-  #payee_id = purpose.split("CdContent")[1]
-  pd = Payee.objects.get(id=reqId)
+  payee_id = reqId.split(CHANNEL_ID)[1]
+  pd = Payee.objects.get(id=int(payee_id))
   return pd
 
 def update_status(pd, status):
