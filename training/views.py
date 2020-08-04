@@ -314,3 +314,42 @@ class ParticipantCreateView(CreateView):
 		else:
 			return render(request, self.template_name, {'form': form})
 
+
+class EventAttendanceListView(ListView):
+	queryset = ""
+	paginate_by = 500
+
+	def dispatch(self, *args, **kwargs):
+		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
+		self.queryset = Participant.objects.filter(event_id=kwargs['eventid'])
+
+		if self.event.training_status == 2:
+			self.queryset = self.event.eventattendance_set.all()
+		return super(EventAttendanceListView, self).dispatch(*args, **kwargs)
+
+
+	def get_context_data(self, **kwargs):
+		context = super(EventAttendanceListView, self).get_context_data(**kwargs)
+		
+		context['event'] = self.event
+		context['eventid'] = self.event.id
+		return context
+
+	def post(self, request, *args, **kwargs):
+		self.object = None
+		self.user = request.user
+		eventid = kwargs['eventid']
+		if request.POST and 'user' in request.POST:
+			marked_participant = request.POST.getlist('user', None)
+			# delete un marked record if exits
+			EventAttendance.objects.filter(event_id =eventid).exclude(participant_id__in = marked_participant).delete()
+			# insert new record if not exits
+			for record in marked_participant:
+				event_attend = EventAttendance.objects.filter(event_id =eventid, participant_id = record)
+				if not event_attend.exists():
+					EventAttendance.objects.create(event_id =eventid, participant_id = record)
+				#print marked_participant
+		else:
+			EventAttendance.objects.filter(event_id = eventid).delete()
+		return HttpResponseRedirect('/training/event/rp/completed')
+
