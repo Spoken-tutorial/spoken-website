@@ -89,10 +89,12 @@
                     <b>FOSS :</b> <span >{{event.event.foss}}</span>
                               <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{event.get_foss_langs}}' style="display: none;">
                 </p>
+                {% if event.reg_approval_status == 1%}
                 <div style="text-align: right;">
                  <button class="btn btn-primary" type="submit" 
         formaction="{% url 'cdcontent:create_cd_download' 'paid' %}">Download CD Content</button>
                 </div>
+                {% endif %}
             </div>
         </div>
         {% else %}

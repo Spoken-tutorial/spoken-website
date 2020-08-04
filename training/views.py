@@ -366,15 +366,28 @@ class ParticipantCreateView(CreateView):
 			send_registration_confirmation(user)			
 			return user
 
+def unmark_reg_approval(pid, eventid):
+    participant = Participant.objects.get(event_id =eventid, id=pid)
+    participant.reg_approval_status = 0
+    participant.save()
 
+def mark_reg_approval(pid, eventid):
+    participant = Participant.objects.get(event_id =eventid, id=pid)
+    participant.reg_approval_status = 1
+    participant.save()
 
 class EventAttendanceListView(ListView):
 	queryset = ""
 	paginate_by = 500
+	success_url = ""
 
 	def dispatch(self, *args, **kwargs):
 		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
 		self.queryset = Participant.objects.filter(event_id=kwargs['eventid'])
+
+		
+		if self.event.training_status == 1:
+			self.queryset = Participant.objects.filter(event_id=kwargs['eventid'], reg_approval_status=1)
 
 		if self.event.training_status == 2:
 			self.queryset = self.event.eventattendance_set.all()
@@ -404,5 +417,25 @@ class EventAttendanceListView(ListView):
 				#print marked_participant
 		else:
 			EventAttendance.objects.filter(event_id = eventid).delete()
-		return HttpResponseRedirect('/training/event/rp/completed')
+		success_url = '/training/event/rp/completed'
+
+		if request.POST and 'user_reg' in request.POST:
+			print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+			marked_registrations = request.POST.getlist('user_reg', None)
+			print("###################################",marked_registrations)
+			# delete un marked record if exits
+			remove_reg = Participant.objects.filter(event_id =eventid, reg_approval_status=1).exclude(id__in = marked_registrations)
+			print("^^^^^^^^^^^^^^^^^^^^^^^", remove_reg)
+			for p in remove_reg:
+				unmark_reg_approval(p.id, eventid)
+
+			# insert new record if not exits
+			for record in marked_registrations:
+				reg_attend = Participant.objects.filter(event_id =eventid, id = record, reg_approval_status=1)
+				if not reg_attend.exists():
+					mark_reg_approval(record, eventid)
+				#print marked_registrations
+			success_url = '/training/event/rp/ongoing'
+		
+		return HttpResponseRedirect(success_url)
 

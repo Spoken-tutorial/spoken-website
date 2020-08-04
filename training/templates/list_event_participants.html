@@ -16,7 +16,7 @@
 <table class="paleblue table">
 	<tr>
 		<th>Sr. No.</th>
-		{% if eventid|is_tr_completed%}
+		{% if eventid|is_tr_completed or eventid|is_tr_ongoing%}
 		<th>Check</th>
 		{% endif %}
 		<th>Name</th>
@@ -28,6 +28,16 @@
 {% for record in object_list %}
 	<tr>
 		<td>{{ forloop.counter }}</td>
+
+		{% if eventid|is_tr_ongoing%}
+			{% if eventid|is_reg_confirmed:record.id %}
+				<td><input type='checkbox' name="user_reg" value="{{record.id}}" checked="checked"></td>
+			{% else %}
+				<td><input type='checkbox' name="user_reg" value="{{record.id}}"></td>
+			{% endif %}
+		{% endif %}
+
+
 		{% if eventid|is_tr_completed%}
 			{% if eventid|is_attendance_marked:record.id %}
 				<td><input type='checkbox' name="user" value="{{record.id}}" checked="checked"></td>
@@ -35,6 +45,7 @@
 				<td><input type='checkbox' name="user" value="{{record.id}}"></td>
 			{% endif %}
 		{% endif %}
+
 		{% if eventid|is_event_closed %}
 			<td>{{ record.participant.name}}</td>
 			<td>{{ record.participant.email}}</td>
@@ -69,8 +80,10 @@
 {% endfor %}
 </table>
 </form>
-{% if eventid|is_tr_ongoing%}
-	<a href="{% url 'training:approve_event_registration' eventid %}" class="btn btn-info">Approve Registration</a>
+{% if eventid|is_tr_ongoing %}
+	<a  class="btn btn-info" type="Submit" onclick="document.forms['form-id'].submit();">Submit Registration</a>
+	{% if eventid|event_has_registration %}
+	<a href="{% url 'training:approve_event_registration' eventid %}" class="btn btn-info">Approve Registration</a>{% endif %}
 
 {% elif eventid|is_tr_completed %}
 	<a  class="btn btn-info" type="Submit" onclick="document.forms['form-id'].submit();">Submit Attendance</a>
