@@ -105,6 +105,11 @@
                       <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
                       <div class="col-lg-8">
                       <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
+                      <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6" style="display: none;">
+                      </select>
+                      <button type="button" class="btn btn-default btn-sm" id="edit_clg">
+                         Edit
+                      </button>
                       </div>
                     </div>
                     {%else%}
@@ -214,6 +219,8 @@
  $( document ).ready(function() {
 
 $('#id_email').on('focusout',function(){
+  var isReadOnly = $('#id_email').is('[readonly]');
+      if (!isReadOnly) {
       var username = $('#id_name').val();
       var email = $('#id_email').val();
       $.ajax({
@@ -248,6 +255,11 @@ $('#id_email').on('focusout',function(){
         }
     });
 
+      }
+      
+  });
+
+
 $('#pwd').on('focusout',function(){
         $('#invalid_credentials').html('');
         var username = $('#id_name').val();
@@ -263,21 +275,21 @@ $('#pwd').on('focusout',function(){
                 csrfmiddlewaretoken: '{{ csrf_token }}',
             },
             success: function(data) {
-              $("#logged_success").show();
-              if (data['error_msg']=='') {
-		$.ajax({
+              if (data['msg']=='') {
+                $("#logged_success").show();
+              $.ajax({
                 type : "POST",
                 url: '/training/register_user/',
                 dataType : "json",
                 data: {
                   'event_id_info' : "{{event_obj.id}}",
-		csrfmiddlewaretoken: '{{ csrf_token }}'
+    csrfmiddlewaretoken: '{{ csrf_token }}'
                 },
-		error: function(data){
-			alert("Pulling up your data ... Hold on !!!");
+    error: function(data){
+      alert("Pulling up your data ... Hold on !!!");
                   location.reload();
                 },
-		});
+    });
                 var r = data['organizer_paid'];
                 if (data['organizer_paid']=='1') {
                   $('#organizer_info').show();
@@ -292,13 +304,11 @@ $('#pwd').on('focusout',function(){
                   $("#email-info").hide();
                 }
               }else{
-                  $('#invalid_credentials').html(data['error_msg']);
+                  $('#invalid_credentials').html(data['msg']);
               }
             }
             });
         });
-
-  });
 
 $('#id_state').change(function(){
    	var stateid  = $('#id_state').val();
@@ -316,6 +326,16 @@ $('#id_state').change(function(){
                 }
               });
    	});
+
+
+$( "#edit_clg" ).click(function() {
+  $('#college_user_details').hide();
+  $('#id_college').show();
+  var state = $('#id_state').val();
+  $('#id_state').val(state).trigger('change');
+});
+
+
 });
 
 function send_otp(){

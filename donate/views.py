@@ -216,21 +216,21 @@ def validate_user(request):
     if email and password:
         user = authenticate(username=email, password=password)
         if user is not None:
-            error_msg = ''
             if user.is_active:
                 login(request, user)
+                msg = ''
                 context['organizer_paid'] = is_organizer_paid(request)
             else:
-                error_msg = "Your account is disabled.<br>\
+                msg = "Your account is disabled.<br>\
                             Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
                             In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
                             <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"% (user.email)                
         else:
-            error_msg = 'Invalid username / password'
+            msg = 'Invalid username / password'
     else:
-        error_msg = 'Please enter username and Password'
+        msg = 'Please enter username and Password'
     
-    context['error_msg']=error_msg
+    context['msg']=msg
     return HttpResponse(json.dumps(context), content_type='application/json')
 
 
