@@ -22,6 +22,7 @@ from django.urls import reverse
 import csv
 from django.contrib.auth.models import User
 from cms.views import create_profile, send_registration_confirmation
+import random
 
 today = date.today()
 
@@ -269,7 +270,7 @@ def close_event(request, pk):
 	
 	event = TrainingEvents.objects.get(id=pk)
 	if event:
-		event.training_status = 2 #rclose event
+		event.training_status = 2 #close event
 		event.save()
 		messages.success(request, 'Event has been closed successfully')
 	else:
@@ -315,9 +316,9 @@ class ParticipantCreateView(CreateView):
 
 	def form_valid(self, form):
 		csv_file_data = form.cleaned_data['csv_file']
-		registration_type = form.clean_data['registartion_type']
+		registration_type = form.cleaned_data['registartion_type']
 		rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
-		for i, row in enemurate(rows_data):
+		for i, row in enumerate(rows_data):
 			user = self.get_create_user(row)
 			user_data = is_user_paid(user)
 			if user_data[0]:
@@ -328,12 +329,12 @@ class ParticipantCreateView(CreateView):
 				try:
 					college = AcademicCenter.objects.get(institution_name=row[6])
 				except AcademicCenter.DoesNotExist:
-					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist.")
+					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " did not created.")
 					continue
 			try:
 				department = Department.objects.get(name = row[7])
 			except Department.DoesNotExist:
-				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Department name " + row[7] + " does not exist.")
+				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Department name " + row[7] + " does not exist."+" Participant "+ row[2] + " did not created.")
 				continue
 			try:
 				Participant.objects.create(
