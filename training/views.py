@@ -323,7 +323,7 @@ class ParticipantCreateView(CreateView):
 			if user_data[0]:
 				college = user_data[1]
 			else:
-				college = user_college(self.request)
+				college = user_college(user)
 			if college == '':
 				try:
 					college = AcademicCenter.objects.get(institution_name=row[6])
