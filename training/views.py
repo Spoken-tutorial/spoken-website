@@ -269,7 +269,7 @@ def close_event(request, pk):
 	
 	event = TrainingEvents.objects.get(id=pk)
 	if event:
-		event.training_status = 2 #rclose event
+		event.training_status = 2 #close event
 		event.save()
 		messages.success(request, 'Event has been closed successfully')
 	else:
@@ -316,6 +316,7 @@ class ParticipantCreateView(CreateView):
 	def form_valid(self, form):
 		csv_file_data = form.cleaned_data['csv_file']
 		registration_type = form.clean_data['registartion_type']
+		print("####################################",registartion_type)
 		rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
 		for i, row in enemurate(rows_data):
 			user = self.get_create_user(row)
