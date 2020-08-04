@@ -95,7 +95,7 @@ def register_user(request):
 				if user_data[0]:
 					college = user_data[1]
 				else:
-					college = user_college(request)
+					college = user_college(request.user)
 				context['user_college'] = college
 			except Exception as e:
 				raise e

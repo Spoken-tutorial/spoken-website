@@ -28,16 +28,16 @@ def is_user_paid(user_obj):
         user_paid = [False]
     return user_paid
 
-def user_college(request):
+def user_college(user_obj):
     college = ''
     try:
-        college = request.user.organiser.academic
+        college = user_obj.organiser.academic
     except Exception as e1:
         try:
-             college = request.user.invigilator.academic
+             college = user_obj.invigilator.academic
         except Exception as e2:
              try:
-                   studentbatch_id = request.user.student.studentmaster_set.values('batch_id')
+                   studentbatch_id = user_obj.student.studentmaster_set.values('batch_id')
                    batch = StudentBatch.objects.get(id=studentbatch_id)
                    college = batch.academic
              except:
