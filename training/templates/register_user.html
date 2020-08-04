@@ -328,6 +328,16 @@ $('#id_state').change(function(){
    	});
 
 
+$('#id_gender').change(function(){
+    var stateid = $('#id_state').val();
+    var college = $('#college_user_details').val();
+    if( stateid && college)
+    {
+      document.getElementById('make_payment').disabled = false;
+    }
+    });
+
+
 $( "#edit_clg" ).click(function() {
   $('#college_user_details').hide();
   $('#id_college').show();
