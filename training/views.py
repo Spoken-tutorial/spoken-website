@@ -313,7 +313,7 @@ class ParticipantCreateView(CreateView):
 
 	def form_valid(self, form):
 		csv_file_data = form.cleaned_data['csv_file']
-		registration_type = form.cleaned_data['registartion_type']
+		registartion_type = form.cleaned_data['registartion_type']
 		rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
 		csv_error = False
 		for i, row in enumerate(rows_data):
@@ -325,17 +325,23 @@ class ParticipantCreateView(CreateView):
 				college = user_college(user)
 			if college == '':
 				try:
-					college = AcademicCenter.objects.get(institution_name=row[6])
+					college = AcademicCenter.objects.get(academic_code=row[6])
 				except AcademicCenter.DoesNotExist:
 					csv_error = True
 					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " did not created.")
 					continue
+			# try:
+			# 	department = Department.objects.get(name = row[7])
+			# except Department.DoesNotExist:
+			# 	csv_error = True
+			# 	messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Department name " + row[7] + " does not exist."+" Participant "+ row[2] + " did not created.")
+			# 	continue
+			# foss language for additional cd download language
 			try:
-				department = Department.objects.get(name = row[7])
-			except Department.DoesNotExist:
-				csv_error = True
-				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Department name " + row[7] + " does not exist."+" Participant "+ row[2] + " did not created.")
-				continue
+				foss_language = Language.objects.get(name=row[8].strip())	
+			except :
+				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Language name " + row[8] + " does not exist."+" Participant "+ row[2] + " did not created.")
+				continue			
 			try:
 				Participant.objects.create(
 					name = row[0], 
@@ -345,13 +351,19 @@ class ParticipantCreateView(CreateView):
 					event = self.event, 
 					user = user, 
 					state = college.state, 
-					college = college, 
-					department = department,
+					college = college,
+					# department = department,
+					foss_language = foss_language,
 					registartion_type = registartion_type
 					)
-			except:
-				csv_error = True
-				messages.add_message(self.request, messages.ERROR, "Could not create participant having email id" + row[2])
+			except Exception as e:
+				print(e)
+				participant = Participant.objects.filter(email=row[2].strip(),event = self.event)
+				if participant.exists():
+					messages.add_message(self.request, messages.WARNING, "Participant with email "+row[2]+" already registered for "+self.event)
+				else:	
+					csv_error = True
+					messages.add_message(self.request, messages.ERROR, "Could not create participant having email id" + row[2])
 		if csv_error:
 			messages.success(self.request, 'Some rows in the csv file has errors and are not created.')
 		else:
