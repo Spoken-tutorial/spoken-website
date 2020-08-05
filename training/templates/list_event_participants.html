@@ -30,6 +30,7 @@
 		<td>{{ forloop.counter }}</td>
 
 		{% if eventid|is_tr_ongoing%}
+		<input type="hidden" id="event_status" name="event_status" value="reg">
 			{% if eventid|is_reg_confirmed:record.id %}
 				<td><input type='checkbox' name="user_reg" value="{{record.id}}" checked="checked"></td>
 			{% else %}
@@ -38,7 +39,8 @@
 		{% endif %}
 
 
-		{% if eventid|is_tr_completed%}
+		{% if eventid|is_tr_completed %}
+		<input type="hidden" id="event_status" name="event_status" value="attend">
 			{% if eventid|is_attendance_marked:record.id %}
 				<td><input type='checkbox' name="user" value="{{record.id}}" checked="checked"></td>
 			{% else %}
