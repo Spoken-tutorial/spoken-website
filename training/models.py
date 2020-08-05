@@ -49,6 +49,7 @@ class Participant(models.Model):
 	created = models.DateTimeField(auto_now_add = True)
 	foss_language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True )
 	payment_status = models.ForeignKey(Payee, on_delete=models.PROTECT, null=True)
+	reg_approval_status = models.PositiveSmallIntegerField(default=0)
 
 	def get_foss_langs(self):
 		selected_foss = {}

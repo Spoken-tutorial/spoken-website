@@ -93,6 +93,19 @@ def is_attendance_marked(eventid, participantid):
   return False
 
 
+@register.filter
+def is_reg_confirmed(eventid, participantid):
+  if Participant.objects.filter(id=participantid, event_id=eventid, reg_approval_status=1).exists():
+    return True
+  return False
+
+@register.filter
+def event_has_registration(eventid):
+  if Participant.objects.filter(event_id=eventid, reg_approval_status=1).exists():
+    return True
+  return False
+
+
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)
 register.filter('is_user_registered', is_user_registered)
