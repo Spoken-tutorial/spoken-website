@@ -132,7 +132,6 @@ def reg_success(request, user_type):
 				form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
 			except:
 				form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
-			print("form college",form_data.college)
 			user_data = is_college_paid(form_data.college)
 			if user_data:
 				print("Subscribed")

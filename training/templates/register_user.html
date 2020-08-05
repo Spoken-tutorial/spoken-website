@@ -338,9 +338,10 @@ $('#id_state').change(function(){
    	});
 
 function payment_btn_activate(){
-var make_payment = document.getElementById('make_payment');
-if(make_payment){
-      make_payment.disabled = false;
+var make_payment_btn = document.getElementById('make_payment');
+if($('#make_payment').length > 0){
+      alert("Entered");
+      $('#make_payment').removeAttr('disabled');
 }
 else{
       document.getElementById('make_payment_back').disabled = false;
@@ -349,7 +350,7 @@ else{
 function payment_btn_hide(){
 var make_payment = document.getElementById('make_payment');
 if(make_payment){
-      make_payment.style.display = 'none';
+       document.getElementById('make_payment').style.display = 'none';
 }
 else{
       document.getElementById('make_payment_back').style.display = 'none';
@@ -359,14 +360,18 @@ else{
 $('#id_gender').change(function(){
     var stateid = $('#id_state').val();
     var college = $('#id_college').val();
-    if( stateid && college)
+    var saved_college = $('#college_user_details').val();
+    if( stateid && (college||saved_college))
     {
 $('#paid-info').hide();
 $('#amount_back').show();
 payment_btn_activate();
 }
+try{
 document.getElementById('register_paid').disabled = false;
-    });
+}
+catch{}
+});
 
 
 $( "#edit_clg" ).click(function() {
@@ -396,7 +401,10 @@ $.ajax({
 		}
 		else{
 		payment_btn_hide();
+		try{
 		document.getElementById('register_paid').style.display = 'block';
+		}
+		catch{}
 		}
                 }
               });
