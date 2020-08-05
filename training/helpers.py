@@ -48,3 +48,12 @@ def user_college(user_obj):
 def handle_uploaded_file(request):
     return "successfull"
 
+def is_college_paid(college_id):
+    try:
+        idcase = AcademicKey.objects.get(academic_id=college_id)
+        college_paid = True if (idcase.expiry_date >= date.today()) else False
+        return college_paid
+    except:
+        college_paid = False
+    
+    return college_paid

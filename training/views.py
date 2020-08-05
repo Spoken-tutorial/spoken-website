@@ -12,7 +12,7 @@ from events.views import is_resource_person, is_administrator
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
-from .helpers import is_user_paid, user_college, EVENT_AMOUNT, handle_uploaded_file
+from .helpers import *
 import json
 from datetime import datetime,date
 from  events.filters import ViewEventFilter
@@ -132,11 +132,9 @@ def reg_success(request, user_type):
 				form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
 			except:
 				form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
-			user_data = is_user_paid(request.user)
-			if event.host_college == form_data.college:
-				print("host")
-				form_data.registartion_type = 0 #host College
-			elif user_data[0]:
+			print("form college",form_data.college)
+			user_data = is_college_paid(form_data.college)
+			if user_data:
 				print("Subscribed")
 				form_data.registartion_type = 1 #Subscribed College
 			else:
@@ -412,3 +410,9 @@ class EventAttendanceListView(ListView):
 			EventAttendance.objects.filter(event_id = eventid).delete()
 		return HttpResponseRedirect('/training/event/rp/completed')
 
+
+
+@csrf_exempt
+def ajax_check_college(request):
+	college_id = request.POST.get("college_id")
+	return HttpResponse(json.dumps(is_college_paid(college_id)), content_type='application/json')
