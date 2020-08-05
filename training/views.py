@@ -12,7 +12,7 @@ from events.views import is_resource_person, is_administrator
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
-from .helpers import is_user_paid, user_college, EVENT_AMOUNT, handle_uploaded_file
+from .helpers import *
 import json
 from datetime import datetime,date
 from  events.filters import ViewEventFilter
@@ -96,7 +96,7 @@ def register_user(request):
 				if user_data[0]:
 					college = user_data[1]
 				else:
-					college = user_college(request)
+					college = user_college(request.user)
 				context['user_college'] = college
 			except Exception as e:
 				raise e
@@ -132,11 +132,9 @@ def reg_success(request, user_type):
 				form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
 			except:
 				form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
-			user_data = is_user_paid(request.user)
-			if event.host_college == form_data.college:
-				print("host")
-				form_data.registartion_type = 0 #host College
-			elif user_data[0]:
+			print("form college",form_data.college)
+			user_data = is_college_paid(form_data.college)
+			if user_data:
 				print("Subscribed")
 				form_data.registartion_type = 1 #Subscribed College
 			else:
@@ -318,6 +316,7 @@ class ParticipantCreateView(CreateView):
 		csv_file_data = form.cleaned_data['csv_file']
 		registration_type = form.cleaned_data['registartion_type']
 		rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
+		csv_error = False
 		for i, row in enumerate(rows_data):
 			user = self.get_create_user(row)
 			user_data = is_user_paid(user)
@@ -329,11 +328,13 @@ class ParticipantCreateView(CreateView):
 				try:
 					college = AcademicCenter.objects.get(institution_name=row[6])
 				except AcademicCenter.DoesNotExist:
+					csv_error = True
 					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " did not created.")
 					continue
 			try:
 				department = Department.objects.get(name = row[7])
 			except Department.DoesNotExist:
+				csv_error = True
 				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Department name " + row[7] + " does not exist."+" Participant "+ row[2] + " did not created.")
 				continue
 			try:
@@ -350,9 +351,12 @@ class ParticipantCreateView(CreateView):
 					registartion_type = registartion_type
 					)
 			except:
+				csv_error = True
 				messages.add_message(self.request, messages.ERROR, "Could not create participant having email id" + row[2])
-
-		messages.success(self.request, 'Successfully uploaded.')
+		if csv_error:
+			messages.success(self.request, 'Some rows in the csv file has errors and are not created.')
+		else:
+			messages.success(self.request, 'Successfully uploaded.')
 		return HttpResponseRedirect(reverse("training:upload_participants", kwargs={'eventid': self.event.pk}))
 	
 	def get_create_user(self, row):
@@ -435,3 +439,9 @@ class EventAttendanceListView(ListView):
 			success_url = '/training/event/rp/ongoing'
 		return HttpResponseRedirect(success_url)
 
+
+
+@csrf_exempt
+def ajax_check_college(request):
+	college_id = request.POST.get("college_id")
+	return HttpResponse(json.dumps(is_college_paid(college_id)), content_type='application/json')
