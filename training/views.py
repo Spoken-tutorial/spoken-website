@@ -222,16 +222,21 @@ def listevents(request, role, status):
 		  'Coordinator'
 		),
 		7: SortableHeader(
+		  'registartion_end_date',
+		  True,
+		  'Registration Period'
+		),
+		8: SortableHeader(
 		  'event_start_date',
 		  True,
 		  'Event Start Date'
 		),
-		8: SortableHeader(
+		9: SortableHeader(
 		  'event_end_date',
 		  True,
 		  'Event End Date'
 		),
-		9: SortableHeader('Action', False)
+		10: SortableHeader('Action', False)
 		}
 
 		raw_get_data = request.GET.get('o', None)
