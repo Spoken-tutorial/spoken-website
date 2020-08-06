@@ -49,6 +49,7 @@ class Participant(models.Model):
 	created = models.DateTimeField(auto_now_add = True)
 	foss_language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True )
 	payment_status = models.ForeignKey(Payee, on_delete=models.PROTECT, null=True)
+	reg_approval_status = models.PositiveSmallIntegerField(default=0)
 
 	def get_foss_langs(self):
 		selected_foss = {}
@@ -61,4 +62,13 @@ class Participant(models.Model):
 		else:
 			selected_foss[foss_json] = [[def_langs_json],0]
 		return json.dumps(selected_foss)
+
+
+class EventAttendance(models.Model):
+	participant = models.ForeignKey(Participant, on_delete=models.PROTECT)
+	event = models.ForeignKey(TrainingEvents, on_delete=models.PROTECT)
+	created = models.DateTimeField(auto_now_add = True)
+	updated = models.DateTimeField(auto_now = True)
+
+
 

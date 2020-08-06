@@ -2,6 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {% load eventsdata %}
+{% load trainingdata %}
 {% load cmsdata %}
 {% load creationdata %}
 {% block title %}Events - {{ status}} {% endblock %}
@@ -87,6 +88,7 @@
             <td>{{ record.host_college.institution_name }}</td>
             <td>{{ record.foss.foss }}</td>
             <td>{{ record.event_coordinator_name }}</td>
+            <td>{{ record.registartion_start_date}} - {{record.registartion_end_date}}</td>
             <td>{{ record.event_start_date }}</td>
             <td>{{ record.event_end_date }}</td>
             <td>
@@ -94,10 +96,12 @@
                 <a href="{% url 'training:edit_event' record.id %}" >Edit Event</a> |
                 <a href="{% url 'training:upload_participants' record.id %}" >Upload Participants</a>
               {% endif %}
-              {% if record.training_status == 0%}
-                <a href="{% url 'training:list_event_participants' record.id %}" >Participant List</a>
-              {% elif record.training_status >= 1%}
-                <a style="color: green;" href="{% url 'training:list_event_participants' record.id %}" >Participant List</a>
+              {% if record.id|is_tr_ongoing%}
+                  <a href="{% url 'training:event_attendance' record.id %}" >Participant List</a>
+              {% elif record.id|is_reg_approved_ongoing %}
+                  <a style="color: orange;" href="{% url 'training:event_attendance' record.id %}" >Participant List</a>
+              {% else %}
+                  <a style="color: green;" href="{% url 'training:event_attendance' record.id %}" >Participant List</a>
               {% endif %}
 
             </td>

@@ -15,14 +15,14 @@ urlpatterns = [
       name="list_events"
     ),
     url(
-      r'^register_user', register_user, name="register_user"),
+      r'^register_user/$', register_user, name="register_user"),
     url(
       r'^reg_success/(?P<user_type>\w+)/$', reg_success, name="reg_success"),
-    url(
-      r'^(?P<eventid>\d+)/participants$', 
-      EventPraticipantsListView.as_view(template_name="list_event_participants.html"), 
-      name="list_event_participants"
-    ),
+    # url(
+    #   r'^(?P<eventid>\d+)/participants$', 
+    #   EventPraticipantsListView.as_view(template_name="list_event_participants.html"), 
+    #   name="list_event_participants"
+    # ),
     url(
       r'^(?P<pk>\d+)/update$', 
       EventUpdateView.as_view(template_name="edit_event.html"), 
@@ -42,4 +42,10 @@ urlpatterns = [
       ParticipantCreateView.as_view(template_name="upload_participants.html"), 
       name="upload_participants"
     ),
+    url(
+      r'^(?P<eventid>\d+)/participants$', 
+      EventAttendanceListView.as_view(template_name="list_event_participants.html"), 
+      name="event_attendance"
+    ),
+    url(r'^ajax_check_college/', ajax_check_college, name="ajax_check_college"),
     ]

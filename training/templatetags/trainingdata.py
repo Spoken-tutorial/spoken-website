@@ -4,6 +4,7 @@ from django import template
 from datetime import datetime,date
 register = template.Library()
 
+today = date.today()
 
 def is_user_paid(user_obj):
     try:
@@ -53,9 +54,56 @@ def format_date(start_date, end_date):
 
 def is_event_closed(eventid):
     event = TrainingEvents.objects.get(id=eventid)
-    if event.training_status == 1:
+    if event.training_status == 2:
         return True
     return False
+
+@register.filter
+def is_tr_completed(eventid):
+    event = TrainingEvents.objects.get(id=eventid)
+    if event.training_status == 1 and event.event_end_date < today:
+        return True
+    return False
+
+@register.filter
+def is_reg_approved_ongoing(eventid):
+    event = TrainingEvents.objects.get(id=eventid)
+    if event.training_status == 1 and event.event_end_date >= today:
+        return True
+    return False
+
+@register.filter
+def is_tr_ongoing(eventid):
+    event = TrainingEvents.objects.get(id=eventid)
+    if event.training_status == 0:
+        return True
+    return False
+
+@register.filter
+def event_has_attendance(eventid):
+  if EventAttendance.objects.filter(event_id=eventid).exists():
+    return True
+  return False
+
+
+@register.filter
+def is_attendance_marked(eventid, participantid):
+  if EventAttendance.objects.filter(event_id=eventid, participant_id=participantid).exists():
+    return True
+  return False
+
+
+@register.filter
+def is_reg_confirmed(eventid, participantid):
+  if Participant.objects.filter(id=participantid, event_id=eventid, reg_approval_status=1).exists():
+    return True
+  return False
+
+@register.filter
+def event_has_registration(eventid):
+  if Participant.objects.filter(event_id=eventid, reg_approval_status=1).exists():
+    return True
+  return False
 
 
 register.filter('is_user_paid', is_user_paid)

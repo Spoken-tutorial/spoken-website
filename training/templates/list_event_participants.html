@@ -11,9 +11,14 @@
 
 {% block content %}
 {{message.tags}}
+<form action="{{ action }}" id="form-id" method="post">
+	{% csrf_token %}
 <table class="paleblue table">
 	<tr>
 		<th>Sr. No.</th>
+		{% if eventid|is_tr_completed or eventid|is_tr_ongoing%}
+		<th>Check</th>
+		{% endif %}
 		<th>Name</th>
 		<th>Email</th>
 		<th>College Name</th>
@@ -23,29 +28,71 @@
 {% for record in object_list %}
 	<tr>
 		<td>{{ forloop.counter }}</td>
-		<td>{{ record.name}}</td>
-		<td>{{ record.email}}</td>
-		<td>{{ record.college.institution_name}}</td>
-		<td>{{ record.state.name}}</td>
-		<td>
-			{% if record.registartion_type == 0 %}
-				From Host college
-			{% elif record.registartion_type == 1 %}
-				From Subscribed college
-			{% elif record.registartion_type == 2 %}
-				Manual registartion
+
+		{% if eventid|is_tr_ongoing%}
+		<input type="hidden" id="event_status" name="event_status" value="reg">
+			{% if eventid|is_reg_confirmed:record.id %}
+				<td><input type='checkbox' name="user_reg" value="{{record.id}}" checked="checked"></td>
+			{% else %}
+				<td><input type='checkbox' name="user_reg" value="{{record.id}}"></td>
 			{% endif %}
-		</td>
+		{% endif %}
+
+
+		{% if eventid|is_tr_completed %}
+		<input type="hidden" id="event_status" name="event_status" value="attend">
+			{% if eventid|is_attendance_marked:record.id %}
+				<td><input type='checkbox' name="user" value="{{record.id}}" checked="checked"></td>
+			{% else %}
+				<td><input type='checkbox' name="user" value="{{record.id}}"></td>
+			{% endif %}
+		{% endif %}
+
+		{% if eventid|is_event_closed %}
+			<td>{{ record.participant.name}}</td>
+			<td>{{ record.participant.email}}</td>
+			<td>{{ record.participant.college.institution_name}}</td>
+			<td>{{ record.participant.state.name}}</td>
+			<td>
+				{% if record.participant.registartion_type == 0 %}
+					From Host college
+				{% elif record.participant.registartion_type == 1 %}
+					From Subscribed college
+				{% elif record.participant.registartion_type == 2 %}
+					Manual registartion
+				{% endif %}
+			</td>
+		{% else %}
+
+			<td>{{ record.name}}</td>
+			<td>{{ record.email}}</td>
+			<td>{{ record.college.institution_name}}</td>
+			<td>{{ record.state.name}}</td>
+			<td>
+				{% if record.registartion_type == 0 %}
+					From Host college
+				{% elif record.registartion_type == 1 %}
+					From Subscribed college
+				{% elif record.registartion_type == 2 %}
+					Manual registartion
+				{% endif %}
+			</td>
+		{% endif %}
     </tr>
 {% endfor %}
 </table>
-{% if event.training_status == 0%}
-	<a href="{% url 'training:approve_event_registration' eventid %}" class="btn btn-info">Approve Registration</a>
-{% elif event.training_status == 1%}
-	{% if training_status %}
-	<a href="{% url 'training:close_event' eventid %}" class="btn btn-info">Close Event and Genearte Certificates</a>
-	{% endif %}
-{% elif event.training_status == 2%}
+</form>
+{% if eventid|is_tr_ongoing %}
+	<a  class="btn btn-info" type="Submit" onclick="document.forms['form-id'].submit();">Submit Registration</a>
+	{% if eventid|event_has_registration %}
+	<a href="{% url 'training:approve_event_registration' eventid %}" class="btn btn-info">Approve Registration</a>{% endif %}
+
+{% elif eventid|is_tr_completed %}
+	<a  class="btn btn-info" type="Submit" onclick="document.forms['form-id'].submit();">Submit Attendance</a>
+	{% if eventid|event_has_attendance %}
+	<a href="{% url 'training:close_event' eventid %}" class="btn btn-info">Close Event and Genearte Certificates</a>{% endif %}
+
+{% elif eventid|is_event_closed%}
 	<a href="" class="btn btn-info">Download certificates</a>
 {% endif %}
 {% endblock %}

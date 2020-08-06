@@ -114,6 +114,7 @@ def controller(request, purpose):
             payee_obj_new = form_valid(request, form, purpose)
         else:
             form_invalid(request, form)
+            print("\n\n\nerors",form.errors)
     if purpose != 'cdcontent':
         participant_form = reg_success(request, 'general')
         participant_form.payment_status = payee_obj_new

@@ -115,7 +115,7 @@
                       <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6" style="display: none;">
                       </select>
-                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"> Edit </button> This option cannot be changed later</span>
+                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later</span>
                       </div>
                     </div>
                     {%else%}
@@ -142,11 +142,19 @@
                     </div>
                     </div>
                     {% if user|is_user_paid %}
-                    <div class="form-group">
+                    <div class="form-group" id="paid-info">
                       <div class="panel panel-primary col-lg-8 col-md-offset-4">
                         <div class="panel-body">You are a part of a paid college.</div>
                       </div>
                     </div>
+			<div class="form-group" style="display:none" id=""amount_back">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
+                        <div class="col-lg-8">
+                            {% render_field form.amount class+="form-control amount"  %}
+                            {{ form.amount.errors }}
+                        </div>
+                    </div>
+
                     {% else %}
                     <div class="form-group">
                         <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
@@ -161,8 +169,9 @@
                           <div class=" col-md-offset-4 col-md-4">
                             {% if  user|is_user_paid %}
                             <!-- if user belongs to a paid college -->
-                            <button type="submit"  value="Submit" class="btn btn-success" tabindex="8">Register
+                            <button type="submit"  value="Submit" class="btn btn-success" tabindex="8" id="register_paid" disabled>Register
                             </button>
+				<button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment_back" disabled tabindex="8" style="display:none;">Make Payment</button>
                             {% else %}
                             <!-- all other -->
                             <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled tabindex="8">Make Payment</button>
@@ -340,6 +349,42 @@ $('#id_state').change(function(){
               });
    	});
 
+function payment_btn_activate(){
+var make_payment_btn = document.getElementById('make_payment');
+if($('#make_payment').length > 0){
+      alert("Entered");
+      $('#make_payment').removeAttr('disabled');
+}
+else{
+      document.getElementById('make_payment_back').disabled = false;
+}
+}
+function payment_btn_hide(){
+var make_payment = document.getElementById('make_payment');
+if(make_payment){
+       document.getElementById('make_payment').style.display = 'none';
+}
+else{
+      document.getElementById('make_payment_back').style.display = 'none';
+}
+
+}
+$('#id_gender').change(function(){
+    var stateid = $('#id_state').val();
+    var college = $('#id_college').val();
+    var saved_college = $('#college_user_details').val();
+    if( stateid && (college||saved_college))
+    {
+
+$('#amount_back').show();
+payment_btn_activate();
+}
+try{
+document.getElementById('register_paid').disabled = false;
+}
+catch{}
+});
+
 
 $( "#edit_clg" ).click(function() {
   $('#college_user_details').hide();
@@ -348,7 +393,36 @@ $( "#edit_clg" ).click(function() {
   $('#id_state').val(state).trigger('change');
 });
 
+$('#id_college').change(function(){
+var collegeid = $('#id_college').val();
+$.ajax({
+                type : "POST",
+                url:"/training/ajax_check_college/",
+                dataType : "json",
+                data: {
+                  'college_id' : collegeid,
+                },
+                success: function(data)
+                {
+                    if(!data){
+			$('#make_payment_back').show();;
+			$('#register_paid').hide();
+			document.getElementById('college_user_details').value = '';
+			$('#paid-info').hide();
+			payment_btn_activate();
+		}
+		else{
+		payment_btn_hide();
+		try{
+		document.getElementById('register_paid').style.display = 'block';
+		}
+		catch{}
+		}
+                }
+              });
 
+
+});
 });
 
 function send_otp(){
@@ -365,8 +439,11 @@ document.getElementById('college-info').style.display = "block";
 document.getElementById('make_payment').disabled = true;
 }
 else{
+try{
 document.getElementById('college-info').style.display = "none";
 document.getElementById('make_payment').disabled = false;
+}
+catch{}
 }
 }
 </script>
