@@ -757,7 +757,8 @@ pre.custom-jumbotron b {
         padding: 0 60px;
 } 
 #nav-fdp{
-    border: 2px solid #D57E27;
-    padding: 5px;
-    border-radius: 2px;
+    border: 1px solid #C9302C;
+    background: #C9302C;
+    color: #fff;
+    float: left;
 }
