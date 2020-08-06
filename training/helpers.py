@@ -36,13 +36,13 @@ def user_college(user_obj):
         try:
              college = user_obj.invigilator.academic
         except Exception as e2:
-             try:
-                   studentbatch_id = user_obj.student.studentmaster_set.values('batch_id')
-                   batch = StudentBatch.objects.get(id=studentbatch_id)
-                   college = batch.academic
-             except:
-                   #user is not associated with any college
-                   pass
+             #try:
+             #      studentbatch_id = user_obj.student.studentmaster_set.values('batch_id')
+             #      batch = StudentBatch.objects.get(id=studentbatch_id)
+             #      college = batch.academic
+             #except:
+             #      #user is not associated with any college
+             pass
     return college
 
 def handle_uploaded_file(request):
