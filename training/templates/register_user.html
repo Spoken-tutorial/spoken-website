@@ -49,8 +49,9 @@
                       <div class="col-lg-8">
                             {% render_field form.email class+="form-control email" tabindex="2" %}
                             {{ form.email.errors }}
+                        <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-top: 10px;">Send OTP</a>
                         </div>
-                        <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-left: 16px;">Send OTP</a>
+                        
                         <div id="email-info" class="col-md-8 col-md-offset-4"></div>
                       </div>
                     <div class="form-group " id="pwd" style="display: none;">
@@ -68,22 +69,31 @@
                         <div id="invalid_credentials" class="col-sm-8 col-sm-offset-4">
                         </div>
                       </div>
-                      <div class="form-group col-sm-10 text-center" id="organizer_info" style="display: none;">
+                      <div class="form-group" id="organizer_info" style="display: none;">
+                        <div class="col-md-8 col-md-offset-4">
                           <p id="organizer_paid_msg" class="text-muted">Congratulations! You are a part of a Registered College & are entitled to free download.
                           <br>
                          <span class="organizer_paid_info text-muted">You are logged in successfully. Please proceed on cd content page.</span>
                           </p>
+                        </div>
                       </div>
                       <p style="display: none;"> User is from paid college : {{user|is_user_paid}}</p>
                         <div class="form-group  text-center" id="logged_success" style="display: none;">
                           <span style="color: #43A047;" class="col-sm-8 col-sm-offset-4">Logged In Successfully </span>
                         </div>
-                        <div class="form-group col-sm-10">
-                            <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 50%;">
-                        <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
+                        <div class="form-group">
+                          <div class="col-lg-4"></div>
+                          <div class="col-lg-8">
+                            <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 80%;">
+                            <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
+                          </div>
+                            
+                        
                         </div>
-                        <div class="form-group col-sm-10" id="registered-success-msg" style="display: none">
-                                <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
+                        <div class="form-group" id="registered-success-msg" style="display: none">
+                          <div class="col-md-offset-4 col-md-8">
+                            <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
+                          </div>
                         </div>
                     <!-- </div> -->
                       <div class="form-group">
@@ -107,10 +117,7 @@
                       <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6" style="display: none;">
                       </select>
-			
-                      <button type="button" class="btn btn-default btn-sm" id="edit_clg">
-                        <i class="fa fa-edit"></i> Edit
-                      </button>
+                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later</span>
                       </div>
                     </div>
                     {%else%}
@@ -166,9 +173,11 @@
                             <!-- if user belongs to a paid college -->
                             <button type="submit"  value="Submit" class="btn btn-success" tabindex="8" id="register_paid" disabled>Register
                             </button>
-				<button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment_back" disabled tabindex="8" style="display:none;">Make Payment</button>
+        <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled tabindex="8" style="display:none;">Make Payment</button>
                             {% else %}
                             <!-- all other -->
+                            <button type="submit"  value="Submit" class="btn btn-success" tabindex="8" id="register_paid" style="display:none;">Register
+                            </button>
                             <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled tabindex="8">Make Payment</button>
                             {% endif %}
                           </div>
@@ -213,6 +222,14 @@
                               </tr>
                             </tbody>
                           </table>
+                        </div>
+                        <div class="panel panel-info">
+                          <div class="panel-heading" style="font-weight: bold;">NEFT Payment Information</div>
+                          <div class="panel-body">
+                            Click here for <a href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">Payment Flow via NEFT.</a>
+                            <p class="help-block">You can pay by NEFT and contact your state Training Manager for registration</p>
+                            
+                          </div>
                         </div>
                     </div>
                 
@@ -340,22 +357,12 @@ $('#id_state').change(function(){
 function payment_btn_activate(){
 var make_payment_btn = document.getElementById('make_payment');
 if($('#make_payment').length > 0){
-      alert("Entered");
       $('#make_payment').removeAttr('disabled');
-}
-else{
-      document.getElementById('make_payment_back').disabled = false;
 }
 }
 function payment_btn_hide(){
-var make_payment = document.getElementById('make_payment');
-if(make_payment){
-       document.getElementById('make_payment').style.display = 'none';
-}
-else{
-      document.getElementById('make_payment_back').style.display = 'none';
-}
-
+  $('#make_payment').hide();
+  $('#register_paid').show();
 }
 $('#id_gender').change(function(){
     var stateid = $('#id_state').val();
@@ -393,7 +400,7 @@ $.ajax({
                 success: function(data)
                 {
                     if(!data){
-			$('#make_payment_back').show();;
+      $('#make_payment').show()
 			$('#register_paid').hide();
 			document.getElementById('college_user_details').value = '';
 			$('#paid-info').hide();
