@@ -49,8 +49,9 @@
                       <div class="col-lg-8">
                             {% render_field form.email class+="form-control email" tabindex="2" %}
                             {{ form.email.errors }}
+                        <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-top: 10px;">Send OTP</a>
                         </div>
-                        <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-left: 16px;">Send OTP</a>
+                        
                         <div id="email-info" class="col-md-8 col-md-offset-4"></div>
                       </div>
                     <div class="form-group " id="pwd" style="display: none;">
@@ -78,12 +79,19 @@
                         <div class="form-group  text-center" id="logged_success" style="display: none;">
                           <span style="color: #43A047;" class="col-sm-8 col-sm-offset-4">Logged In Successfully </span>
                         </div>
-                        <div class="form-group col-sm-10">
+                        <div class="form-group">
+                          <div class="col-lg-4"></div>
+                          <div class="col-lg-8">
                             <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 50%;">
-                        <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
+                            <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
+                          </div>
+                            
+                        
                         </div>
-                        <div class="form-group col-sm-10" id="registered-success-msg" style="display: none">
-                                <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
+                        <div class="form-group" id="registered-success-msg" style="display: none">
+                          <div class="col-md-offset-4 col-md-8">
+                            <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
+                          </div>
                         </div>
                     <!-- </div> -->
                       <div class="form-group">
@@ -107,9 +115,7 @@
                       <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6" style="display: none;">
                       </select>
-                      <button type="button" class="btn btn-default btn-sm" id="edit_clg">
-                         Edit
-                      </button>
+                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"> Edit </button> This option cannot be changed later</span>
                       </div>
                     </div>
                     {%else%}
@@ -203,6 +209,13 @@
                               </tr>
                             </tbody>
                           </table>
+                        </div>
+                        <div class="panel panel-info">
+                          <div class="panel-heading" style="font-weight: bold;">NEFT Payment Information</div>
+                          <div class="panel-body">
+                            <p class="help-block">You can pay by NEFT and contact your state Training Manager for registration</p>
+                            Click here for <a href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">Payment Flow via NEFT.</a>
+                          </div>
                         </div>
                     </div>
                 
