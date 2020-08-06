@@ -463,4 +463,9 @@ class EventAttendanceListView(ListView):
 @csrf_exempt
 def ajax_check_college(request):
 	college_id = request.POST.get("college_id")
-	return HttpResponse(json.dumps(is_college_paid(college_id)), content_type='application/json')
+	user_details = is_user_paid(request.user)
+	check = False
+	if user_details[0]:
+		if int(college_id) == int(user_details[1].id):
+			check = True
+	return HttpResponse(json.dumps(check), content_type='application/json')
