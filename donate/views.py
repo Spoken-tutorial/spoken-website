@@ -69,7 +69,6 @@ def form_valid(request, form, purpose):
     foss_ids = form.cleaned_data.get('foss_id')
     languages = form.cleaned_data.get('language_id')
     level_ids = form.cleaned_data.get('level_id')
-    
     fosses = foss_ids.split(',')
     foss_languages = languages.split(',|')
     levels = level_ids.split(',')
@@ -83,8 +82,14 @@ def form_valid(request, form, purpose):
             foss_level = Level.objects.get(pk=int(levels[i]))
         
         languages = foss_languages[i].split(',')
+        try:
+             custom_lang = request.POST.get('foss_language')
+             languages = languages + [str(custom_lang)]
+        except:
+             # this is coming from Events' page
+             pass
         for language in languages:
-            if language != '':
+            if language not in ('','None'):
                 foss_language = Language.objects.get(pk=int(language))
                 cd_foss_langs = CdFossLanguages()
                 cd_foss_langs.payment = Payee.objects.get(pk=payee_id)
@@ -114,7 +119,6 @@ def controller(request, purpose):
             payee_obj_new = form_valid(request, form, purpose)
         else:
             form_invalid(request, form)
-            print("\n\n\nerors",form.errors)
     if purpose != 'cdcontent':
         participant_form = reg_success(request, 'general')
         participant_form.payment_status = payee_obj_new
