@@ -421,7 +421,9 @@
           $('.language').attr("disabled", "disabled");
       }
       $('#id_email').on('focusout',function(){
-      var username = $('#id_name').val();
+       var isReadOnly = $('#id_email').is('[readonly]');
+      if (!isReadOnly) {
+        var username = $('#id_name').val();
       var email = $('#id_email').val();
       $.ajax({
           url:'/donate/send_onetime/',
@@ -454,6 +456,8 @@
             }      
         }
     });
+      } 
+      
     });
     $('#pwd').on('focusout',function(){
         $('#invalid_credentials').html('');
