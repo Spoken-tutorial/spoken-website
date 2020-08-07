@@ -22,6 +22,14 @@
 			</div>
 
 			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_event_fee">Event Charges </label>
+				<div class="col-sm-9">
+				{% render_field form.event_fee class+="form-control event_fee" %}
+				{{ form.event_fee.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
 				<label class="col-sm-3 control-label" for= "id_event_name">Event Name </label>
 				<div class="col-sm-9">
 				{% render_field form.event_name class+="form-control event_name" %}
