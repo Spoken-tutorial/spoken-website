@@ -118,7 +118,10 @@ def controller(request, purpose):
     if purpose != 'cdcontent':
         participant_form = reg_success(request, 'general')
         participant_form.payment_status = payee_obj_new
-        participant_form.save()
+        try :
+            participant_form.save()
+        except :
+            return redirect('training:list_events', status='myevents')
     data = get_final_data(request, form, purpose)
     return render(request, 'payment_status.html', data)
 

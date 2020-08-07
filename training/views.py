@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from .models import *
@@ -139,7 +139,11 @@ def reg_success(request, user_type):
 			else:
 				form_data.registartion_type = 2 #Manual reg- paid 500
 
-			form_data.save()
+			try:
+				form_data.save()
+			except :
+				messages.success(request, "You have already registered for this event.")
+				return redirect('training:list_events', status='myevents')
 			event_name = event.event_name
 			if user_type == 'paid':
 				context = {'name':name, 'email':email, 'event':event_name}
