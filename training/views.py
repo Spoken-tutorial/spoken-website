@@ -9,6 +9,7 @@ from events.models import State
 from creation.models import TutorialResource, Language
 from events.decorators import group_required
 from events.views import is_resource_person, is_administrator
+from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
@@ -109,7 +110,7 @@ def register_user(request):
 				tutorial_detail__foss = event_register.foss, status=1).exclude(
 					language=event_register.Language_of_workshop).values('language').distinct())
 			form.fields["foss_language"].queryset = langs
-			form.fields["amount"].initial = EVENT_AMOUNT[event_register.event_type]
+			form.fields["amount"].initial = event_register.event_fee
 			form.fields["amount"].widget.attrs['readonly'] = True
 			context['event_obj']= event_register
 	return render(request, template_name,context)
