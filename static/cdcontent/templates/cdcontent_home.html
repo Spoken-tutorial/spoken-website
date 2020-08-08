@@ -95,7 +95,7 @@
       </td>
 
       
-      {% if item.is_past_due %}
+      {% if item.is_past_due and item.status == 1 %}
 	<form id="cdcontent_download{{item.id}}" action="{% url 'cdcontent:create_cd_download' 'general' %}" method="post">
     {% csrf_token %}
           <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{item.get_selected_foss}}' style="display: none">
@@ -103,7 +103,11 @@
       <td>
         <button type="submit" form="cdcontent_download{{item.id}}" value="Submit" class="custom-btn">Download</button>
       </td>
-      {% else %}
+      {% elif item.status == 2 %}
+      <td>Payment Unsuccessful</td>
+      {% elif item.status == 0 %}
+      <td>Payment Incomplete</td>
+	{% else %}
       <td>Expired</td>
       {% endif %}
     </tr>
@@ -237,7 +241,7 @@
 <tbody>
   <tr>
     <td >< 100 mb</td>
-    <td >100 INR</td>
+    <td >99 INR</td>
   </tr>
   <tr>
     <td > > 100 mb</td>
@@ -256,7 +260,7 @@
 <tr>
     <td></td>
     <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymodal">
-  Make Payment
+  Proceed
 </button>
 </td>
 
@@ -421,7 +425,9 @@
           $('.language').attr("disabled", "disabled");
       }
       $('#id_email').on('focusout',function(){
-      var username = $('#id_name').val();
+       var isReadOnly = $('#id_email').is('[readonly]');
+      if (!isReadOnly) {
+        var username = $('#id_name').val();
       var email = $('#id_email').val();
       $.ajax({
           url:'/donate/send_onetime/',
@@ -454,6 +460,8 @@
             }      
         }
     });
+      } 
+      
     });
     $('#pwd').on('focusout',function(){
         $('#invalid_credentials').html('');

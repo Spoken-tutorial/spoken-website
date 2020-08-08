@@ -81,14 +81,12 @@
                         <div class="form-group  text-center" id="logged_success" style="display: none;">
                           <span style="color: #43A047;" class="col-sm-8 col-sm-offset-4">Logged In Successfully </span>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" id="otp_wrapper">
                           <div class="col-lg-4"></div>
                           <div class="col-lg-8">
                             <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 80%;">
                             <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
                           </div>
-                            
-                        
                         </div>
                         <div class="form-group" id="registered-success-msg" style="display: none">
                           <div class="col-md-offset-4 col-md-8">
@@ -126,9 +124,10 @@
                       <div class="col-lg-8">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6">
                     </select>
+                    <span class="help-block">This option cannot be changed later</span>
                       </div>
 			<div id="college-info" class="col-md-8 col-md-offset-4" style="display:none" >Please select your college</div>
-			<span class="help-block" style="text-align: center;">This option cannot be changed later</span>
+		<!-- 	<span class="help-block" style="text-align: center;">This option cannot be changed later</span> -->
                     </div>
 
                 		{% endif %}
@@ -267,16 +266,22 @@ $('#id_email').on('focusout',function(){
                 $("#send_otp").hide();
                 $("#pwd").show();
                 $("#forgot_pwd").show();
+                $("#otp_value").hide();
+                $("#otp_sent_msg").hide();
                 $("#email-info").html('This Email Id is already registered with Spoken Tutorials. Please enter your password to proceed.');
                 document.getElementById("email-info").style.color = "green";
             }
             else if(data['message']=='inactive_user'){
                 document.getElementById("otp_sent_msg").innerHTML = "OTP Re-sent";
                 document.getElementById('otp_sent_msg').className = 'label label-success';
-                $("#otp_sent_msg").show().delay(10000).fadeOut();
+                $("#send_otp").show();
+                $("#pwd").hide();
+                // $('#id_country').parent().hide();
+                // $("#otp_sent_msg").show().delay(10000).fadeOut();
             }
             else{
               $("#send_otp").show();
+              $("#pwd").hide();
             }
             }else{
                 $('#email-info').html(data['email_validation']);
@@ -420,15 +425,10 @@ $.ajax({
 
 
 });
+
 });
 
-function send_otp(){
-        $("#send_otp").show();
-        document.getElementById("otp_sent_msg").innerHTML = "OTP sent";
-        document.getElementById('otp_sent_msg').className = 'label label-success';
-        $("#otp_value").show();
-        $("#otp_sent_msg").show().delay(10000).fadeOut();
-}
+
 
 function check_college(control){
 if(control.value=='None'){
