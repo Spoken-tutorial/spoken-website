@@ -1,46 +1,90 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}List Training Event{% endblock %}
+{%load trainingdata%}
+{% block title %}{% endblock %}
 {% block heading %}
   <i class="fa fa-list-ul"></i> List of Training Events :
 {% endblock %}
 {% block compressinlinecssblock %}
 <style>
+  .reg-wrapper{
+    border: 5px solid #337ab7;
+   /* margin:10px 25px;*/
+  }
+  .reg-wrapper .highlight{
+    color: #337ab7;
+    font-size: 3rem;
+
+  }
+  .reg-wrapper .highlight p{
+    font-size: 5rem;
+
+  }
+  .reg-wrapper table{
+  /*  margin: auto;*/
+  }
+  .reg-wrapper .reg-table{
+    padding: 2% 5%;
+  }
+  .reg-wrapper .bl{
+    /*border-right: 1px solid #337ab7;*/
+    border-left:1px solid rgba(51,122,183,0.2);
+  }
+  .reg-wrapper h5{
+    color: #3c763d;
+  }
+  .reg-wrapper .reg-icon{
+    color: #337ab7;
+    margin-right: 10px;
+  }
 
 </style>
 {% endblock %}
 {% block search %}{% endblock %}
 
- {% block content %}
+{% block content %}
 {{message.tags}}
 {% csrf_token %}
-<div class="panel panel-success">
-  <!-- Default panel contents -->
-  <div class="panel-heading">Registration Successful</div>
-  <div class="panel-body">
-    <p>Thank you for registering for FDP Event. </p>
+<div class="row">
+  <div class="col-sm-12 col-md-8 col-md-offset-2 ">
+    <div class=" reg-wrapper">
+  <div class="text-center highlight">
+      <!-- <p><i class="fa fa-check-circle-o" aria-hidden="true"></i></p> -->
+      <p><i class="fa fa-check" aria-hidden="true" style="color: rgba(51,122,183,0.7);;"></i></p>
+    <h4>Thank you for registering with Spoken Tutorials.</h4>
   </div>
-
-  <!-- Table -->
-  <table class="table table-bordered">
-    <tbody>
-      <tr>
-        <td>Name</td>
-        <td>{{name}}</td>
-      </tr>
-      <tr>
-        <td>Email</td>
-        <td>{{email}}</td>
-      </tr>
-      <tr>
-        <td>Event</td>
-        <td>{{event}}</td>
-      </tr>
-    </tbody>
-  </table>
+  <br>
+  <div class="reg-table row">
+    <div class="col-md-6">
+      <h5>Participant</h5>
+      <hr>
+      <p>Name : {{name}}</p>
+      <p>Email : {{email}}</p>
+      <br>
+      <h5>FOSS</h5>
+      <hr>
+      <p>foss name</p>
+      <p>foss language</p>
+    </div>
+    <div class="col-md-6 bl">
+      <h5>Event</h5>
+      <hr>
+      <p>event name}</p>
+       <p><i class="fa fa-calendar reg-icon" aria-hidden="true"></i>start date - end date</p>
+      <p><i class="fa fa-map-marker reg-icon" aria-hidden="true"></i>host_college</p>
+      <br>
+      <h5>Contact Details</h5>
+      <hr>
+      <p><i class="fa fa-user reg-icon" aria-hidden="true"></i>event_coordinator_name</p>
+      <p><i class="fa fa-phone reg-icon" aria-hidden="true"></i>event_coordinator_contact_no</p>
+      <p><i class="fa fa-envelope reg-icon" aria-hidden="true"></i>event_coordinator_email</p>
+    </div>
+    
+  </div>
 </div>
-
+  </div>
+</div>
 
 {% endblock %}
 {% block jsblock %}
