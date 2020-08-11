@@ -2818,6 +2818,9 @@ def payment_success(request):
           template_name = 'donate/templates/cd_payment_success.html'
         try:
           pd = get_payee_id(reqId)
+          if pd == 'incorrect_data':
+            messages.error(request, 'Incorrct Data')
+            return HttpResponseRedirect('/training/list_events/ongoing/')
           transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)          
           context['form'] = get_updated_form(transaction)
         except Exception as e:
@@ -2867,9 +2870,14 @@ def add_transaction(purpose, pid, requestType, userId, amount, reqId, transId, r
   return transaction
 
 def get_payee_id(reqId):
-  payee_id = reqId.split(CHANNEL_ID)[1]
-  pd = Payee.objects.get(id=int(payee_id))
-  return pd
+  try:
+    hash_value = reqId.split(CHANNEL_ID)[1]
+    created_hash = str(display.value(str(userId)))
+    payee_id = hash_value.split(created_hash)[0]
+    pd = Payee.objects.get(id=int(payee_id))
+    return pd  
+  except :
+    return 'incorrect_data'
 
 def update_status(pd, status):
   if status == 'S':
@@ -2929,6 +2937,9 @@ def payment_reconciliation_update(request):
         return HttpResponseRedirect("Failed1")
     else:
       pd = get_payee_id(reqId)
+      if pd == 'incorrect_data':
+        messages.error(request, 'Incorrct Data')
+        return HttpResponseRedirect('/training/list_events/ongoing/')
     try:
       transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
       print("saved")
