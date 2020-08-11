@@ -140,9 +140,9 @@ def encrypted_data(request, form, purpose):
     user_name = form.cleaned_data.get('name')
     amount = form.cleaned_data.get('amount')   
     #amount = 1.00
-    purpose = purpose
-    request_id = CHANNEL_ID+str(form.save(commit=False).pk)+str(display.value(str(request.user.id)))
-    STdata =   + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
+    purpose = purpose+"NEW"+str(form.save(commit=False).pk)
+    request_id = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
+    STdata =  request_id + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
     return s
 
@@ -151,12 +151,12 @@ def encrypted_data(request, form, purpose):
 def get_final_data(request, form, purpose):
     #TARGET = '/software-training/payment-success/'
     data = {
-        'reqId' :  CHANNEL_ID+str(form.save(commit=False).pk)+str(display.value(str(request.user.id))),
+            'reqId' :  CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20]),
         'userId': str(request.user.id),
         'name': form.cleaned_data.get('name'),
         'amount':form.cleaned_data.get('amount'),
         #'amount': 1.00,
-        'purpose': purpose ,
+        'purpose': purpose+"NEW"+str(form.save(commit=False).pk) ,
         'channelId': CHANNEL_ID,
         'target': TARGET,
         'random': encrypted_data(request, form, purpose)

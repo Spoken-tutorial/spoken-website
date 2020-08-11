@@ -2804,7 +2804,7 @@ def payment_success(request):
       else:
         try:
               training_participant = Participant.objects.filter(
-                  event=int(purpose), user=int(userId))
+                  event=int(purpose.split("NEW")[0]), user=int(userId))
               tp_values = training_participant.values('name','email','event__event_name')
               #if status == 'S': update value of participant else delete
               default_response = '/training/list_events/ongoing/'
@@ -2817,7 +2817,7 @@ def payment_success(request):
           default_response = '/cdcontent/'
           template_name = 'donate/templates/cd_payment_success.html'
         try:
-          pd = get_payee_id(reqId)
+          pd = get_payee_id(purpose)
           if pd == 'incorrect_data':
             messages.error(request, 'Incorrct Data')
             return HttpResponseRedirect('/training/list_events/ongoing/')
@@ -2869,11 +2869,9 @@ def add_transaction(purpose, pid, requestType, userId, amount, reqId, transId, r
     transaction.save()
   return transaction
 
-def get_payee_id(reqId):
+def get_payee_id(purpose):
   try:
-    hash_value = reqId.split(CHANNEL_ID)[1]
-    created_hash = str(display.value(str(userId)))
-    payee_id = hash_value.split(created_hash)[0]
+    payee_id = purpose.split('NEW')[1]
     pd = Payee.objects.get(id=int(payee_id))
     return pd  
   except :
@@ -2936,9 +2934,9 @@ def payment_reconciliation_update(request):
       except:
         return HttpResponseRedirect("Failed1")
     else:
-      pd = get_payee_id(reqId)
+      pd = get_payee_id(purpose)
       if pd == 'incorrect_data':
-        messages.error(request, 'Incorrct Data')
+        messages.error(request, 'Incorrect Data')
         return HttpResponseRedirect('/training/list_events/ongoing/')
     try:
       transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
