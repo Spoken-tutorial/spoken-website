@@ -149,7 +149,6 @@ def encrypted_data(request, form, purpose):
 
 @csrf_exempt
 def get_final_data(request, form, purpose):
-    #TARGET = '/software-training/payment-success/'
     data = {
             'reqId' :  CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20]),
         'userId': str(request.user.id),
