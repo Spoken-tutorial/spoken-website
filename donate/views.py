@@ -141,8 +141,8 @@ def encrypted_data(request, form, purpose):
     amount = form.cleaned_data.get('amount')   
     #amount = 1.00
     purpose = purpose
-
-    STdata =  CHANNEL_ID+str(form.save(commit=False).pk) + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
+    request_id = CHANNEL_ID+str(form.save(commit=False).pk)+str(display.value(str(request.user.id)))
+    STdata =   + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
     return s
 
@@ -151,7 +151,7 @@ def encrypted_data(request, form, purpose):
 def get_final_data(request, form, purpose):
     #TARGET = '/software-training/payment-success/'
     data = {
-        'reqId' :  CHANNEL_ID+str(form.save(commit=False).pk),
+        'reqId' :  CHANNEL_ID+str(form.save(commit=False).pk)+str(display.value(str(request.user.id))),
         'userId': str(request.user.id),
         'name': form.cleaned_data.get('name'),
         'amount':form.cleaned_data.get('amount'),
