@@ -13,6 +13,17 @@
 {{message.tags}}
 <form action="{{ action }}" id="form-id" method="post">
 	{% csrf_token %}
+{% if eventid|is_tr_completed %}
+<div style="width:200px;float:left;text-align:center;">
+  <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All Attendance" onClick="this.value=check_attendance()">
+</div>
+{% endif %}
+{% if eventid|is_tr_ongoing%}
+<div style="width:200px;float:left;text-align:center;">
+  <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All registartion" onClick="this.value=check_reg()">
+</div>
+{% endif %}
+
 <table class="paleblue table">
 	<tr>
 		<th>Sr. No.</th>
@@ -95,4 +106,46 @@
 {% elif eventid|is_event_closed%}
 	<a href="" class="btn btn-info">Download certificates</a>
 {% endif %}
+{% endblock %}
+
+{% block jsblock %}
+  <script type="text/javascript">
+  var checkflag = "false";
+  function check_attendance() {
+  var field=document.getElementsByName('user');
+    if (checkflag == "false") {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = true;
+      }
+      checkflag = "true";
+      $("#button-select").text("To deselect all participants");
+      return "Uncheck All Attendance";
+    } else {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = false;
+      }
+      checkflag = "false";
+      return "Check All Attendance";
+    }
+  }
+
+  function check_reg() {
+  var field=document.getElementsByName('user_reg');
+    if (checkflag == "false") {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = true;
+      }
+      checkflag = "true";
+      $("#button-select").text("To deselect all participants");
+      return "Uncheck All Registration";
+    } else {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = false;
+      }
+      checkflag = "false";
+      return "Check All Registration";
+    }
+  }
+  
+  </script>
 {% endblock %}
