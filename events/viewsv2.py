@@ -2676,7 +2676,7 @@ def payment_home(request):
 @login_required
 def payment_status(request):
   context ={}
-  academic_year =  datetime.today().year
+  academic_year =  datetime.datetime.today().year
 
   if request.method == 'POST':
     user = User.objects.get(id = request.user.id)
@@ -2725,12 +2725,12 @@ def payment_status(request):
 
     STdata = ''
     user_name = user.first_name+' '+user.last_name
-    STdata = str(reqId)+str(user.id)+str(user_name)+str(amount)+"Subscription"+CHANNEL_ID+CHANNEL_KEY
+    STdata = CHANNEL_IDstr(reqId)+str(user.id)+str(user_name)+str(amount)+"Subscription"+CHANNEL_ID+CHANNEL_KEY
     print(STdata)
     s = display.value(str(STdata))
 
     data = {
-    'reqId' : reqId,
+    'reqId' : CHANNEL_ID+str(reqId),
     'userId':user.id,
     'name':user_name,
     'amount':amount,
