@@ -15,7 +15,7 @@
 	<form action="" method="POST" class='form-horizontal'>{% csrf_token %}
 	    <div class="col-sm-11">
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_event_type">Event Type </label>
+				<label class="col-sm-3 control-label" for= "id_event_type">Event Type <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.event_type class+="form-control event_type" %}
 				{{ form.event_type.errors }}
@@ -23,7 +23,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_event_fee">Event Charges</label>
+				<label class="col-sm-3 control-label" for= "id_event_fee">Event Charges <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.event_fee class+="form-control event_fee" %}
 				{{ form.event_fee.errors }}
@@ -31,7 +31,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_event_name">Event Name </label>
+				<label class="col-sm-3 control-label" for= "id_event_name">Event Name <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.event_name class+="form-control event_name" %}
 				{{ form.event_name.errors }}
@@ -39,7 +39,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_state">State </label>
+				<label class="col-sm-3 control-label" for= "id_state">State <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.state class+="form-control state" %}
 				{{ form.state.errors }}
@@ -47,7 +47,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_host_college">Host College </label>
+				<label class="col-sm-3 control-label" for= "id_host_college">Host College <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.host_college class+="form-control host_college" %}
 				{{ form.host_college.errors }}
@@ -55,7 +55,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Foss </label>
+				<label class="col-sm-3 control-label" for= "id_name">Foss <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.foss class+="form-control foss" %}
 				{{ form.foss.errors }}
@@ -63,7 +63,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Event Start Date </label>
+				<label class="col-sm-3 control-label" for= "id_name">Event Start Date <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.event_start_date class+="form-control event_start_date" %}
 				{{ form.event_start_date.errors }}
@@ -71,7 +71,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Event End Date </label>
+				<label class="col-sm-3 control-label" for= "id_name">Event End Date <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.event_end_date class+="form-control event_end_date" %}
 				{{ form.event_end_date.errors }}
@@ -79,7 +79,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Event Coordinator Name </label>
+				<label class="col-sm-3 control-label" for= "id_name">Event Coordinator Name <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.event_coordinator_name class+="form-control event_coordinator_name" %}
 				{{ form.event_coordinator_name.errors }}
@@ -102,7 +102,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Registartion Start Date </label>
+				<label class="col-sm-3 control-label" for= "id_name">Registartion Start Date <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.registartion_start_date class+="form-control registartion_start_date" %}
 				{{ form.registartion_start_date.errors }}
@@ -110,7 +110,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Registartion End Date </label>
+				<label class="col-sm-3 control-label" for= "id_name">Registartion End Date <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.registartion_end_date class+="form-control registartion_end_date" %}
 				{{ form.registartion_end_date.errors }}
