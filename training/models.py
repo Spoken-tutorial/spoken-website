@@ -76,7 +76,7 @@ class EventAttendance(models.Model):
 
 
 class TrainingCertificate(models.Model):
-	participant = models.ForeignKey(Participant, on_delete=models.PROTECT)
+    participant = models.ForeignKey(Participant, on_delete=models.PROTECT)
     serial_no = models.CharField(max_length=50)  # purpose+uin+1stletter
     counter = models.IntegerField()
     event = models.ForeignKey(TrainingEvents, on_delete=models.PROTECT)
