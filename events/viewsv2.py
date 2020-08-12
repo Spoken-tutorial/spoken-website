@@ -2803,15 +2803,15 @@ def payment_success(request):
           return HttpResponseRedirect('/software-training')
       else:
         try:
-              training_participant = Participant.objects.filter(
+              training_participant = Participant.objects.get(
                   event=int(purpose.split("NEW")[0]), user=int(userId))
-              tp_values = training_participant.values('name','email','event__event_name')
+              #tp_values = training_participant.values('name','email','event__event_name')
               #if status == 'S': update value of participant else delete
               default_response = '/training/list_events/ongoing/'
               template_name = 'reg_success.html'
-              context['name'] = tp_values[0]['name']
-              context['email'] = tp_values[0]['email']
-              context['event'] = tp_values[0]['event__event_name']
+              #context['name'] = tp_values[0]['name']
+              #context['email'] = tp_values[0]['email']
+              context['event_obj'] = training_participant
         except Exception as e1:
           print("came here ",e1)
           default_response = '/cdcontent/'
