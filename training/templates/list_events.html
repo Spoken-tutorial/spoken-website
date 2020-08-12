@@ -95,6 +95,8 @@
         formaction="{% url 'cdcontent:create_cd_download' 'general' %}">Download CD Content</button>
                 </div>
                 {% endif %}
+                {% if event.event.id|is_event_closed %}
+    <a href="{% url 'training: generate_training_certificate'%}" class="btn btn-info">Download certificate</a>
             </div>
         </div>
         {% else %}

@@ -104,7 +104,7 @@
 	<a href="{% url 'training:close_event' eventid %}" class="btn btn-info">Close Event and Genearte Certificates</a>{% endif %}
 
 {% elif eventid|is_event_closed%}
-	<a href="" class="btn btn-info">Download certificates</a>
+	<a href="{% url 'training: generate_training_certificate'%}" class="btn btn-info">Download certificates</a>
 {% endif %}
 {% endblock %}
 

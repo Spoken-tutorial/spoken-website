@@ -75,4 +75,12 @@ class EventAttendance(models.Model):
 	updated = models.DateTimeField(auto_now = True)
 
 
-
+class TrainingCertificate(models.Model):
+	participant = models.ForeignKey(Participant, on_delete=models.PROTECT)
+    serial_no = models.CharField(max_length=50)  # purpose+uin+1stletter
+    counter = models.IntegerField()
+    event = models.ForeignKey(TrainingEvents, on_delete=models.PROTECT)
+    paper = models.CharField(max_length=100, null=True, blank=True)
+    verified = models.IntegerField(default=0)
+    serial_key = models.CharField(max_length=200, null=True)
+    short_key = models.CharField(max_length=50, null=True)
