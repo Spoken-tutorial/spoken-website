@@ -8,7 +8,8 @@ from training.models import *
 from .validators import validate_csv_file
 
 class CreateTrainingEventForm(forms.ModelForm):
-
+    event_coordinator_email = forms.CharField(required = False)
+    event_coordinator_contact_no = forms.CharField(required = False)
     class Meta(object):
         model = TrainingEvents
         exclude = ['entry_user', 'training_status', 'Language_of_workshop']
