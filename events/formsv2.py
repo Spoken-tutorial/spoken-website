@@ -647,7 +647,14 @@ class StudentGradeFilterForm(forms.Form):
 
 
 class AcademicPaymentStatusForm(forms.ModelForm):
-
+  email = forms.CharField(required = False)
+  phone = forms.CharField(required = False)
+  transactionid = forms.CharField(required = False)
+  pan_number = forms.CharField(required = False)
+  gst_number = forms.CharField(required = False)
+  customer_id = forms.CharField(required = False)
+  invoice_no = forms.CharField(required = False)
+  remarks = forms.CharField(required = False)
   class Meta(object):
     model = AcademicPaymentStatus
     exclude = ['entry_user']

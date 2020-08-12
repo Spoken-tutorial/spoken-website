@@ -22,7 +22,7 @@
 		{% csrf_token %}
 		<div class="col-sm-9">
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_state">State </label>
+				<label class="col-sm-2 control-label" for= "id_state">State <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.state class+="form-control state" %}
 				{{ form.state.errors }}
@@ -30,7 +30,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_academic">Academic </label>
+				<label class="col-sm-2 control-label" for= "id_academic">Academic <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.academic class+="form-control academic" %}
 				{{ form.academic.errors }}
@@ -38,7 +38,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_name_of_the_payer">Name<br> <small class="text-muted">(Payee name)</small> </label>
+				<label class="col-sm-2 control-label" for= "id_name_of_the_payer">Name <sup style="color:red";>*</sup><br> <small class="text-muted">(Payee name)</small> </label>
 				<div class="col-sm-9">
 				{% render_field form.name_of_the_payer class+="form-control name_of_the_payer" %}
 				{{ form.name_of_the_payer.errors }}
@@ -62,7 +62,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_amount">Amount </label>
+				<label class="col-sm-2 control-label" for= "id_amount">Amount <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.amount class+="form-control amount" %}
 				{{ form.amount.errors }}
@@ -70,7 +70,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_subscription">Subscription </label>
+				<label class="col-sm-2 control-label" for= "id_subscription">Subscription <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.subscription class+="form-control subscription" %}
 				{{ form.subscription.errors }}
@@ -86,7 +86,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_payment_date">Payment Date </label>
+				<label class="col-sm-2 control-label" for= "id_payment_date">Payment Date <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.payment_date class+="form-control payment_date" %}
 				{{ form.payment_date.errors }}
@@ -94,7 +94,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_payment_status">Payment Status </label>
+				<label class="col-sm-2 control-label" for= "id_payment_status">Payment Status <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.payment_status class+="form-control payment_status" %}
 				{{ form.payment_status.errors }}
@@ -102,7 +102,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_college_type">College Type </label>
+				<label class="col-sm-2 control-label" for= "id_college_type">College Type <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.college_type class+="form-control college_type" %}
 				{{ form.college_type.errors }}
@@ -118,7 +118,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_gst_number">GST Number</label>
+				<label class="col-sm-2 control-label" for= "id_gst_number">GST Number </label>
 				<div class="col-sm-9 text-uppercase">
 				{% render_field form.gst_number class+="form-control gst_number" %}
 				{{ form.gst_number.errors }}
@@ -134,7 +134,7 @@
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_invoice_no">Invoice Number</label>
+				<label class="col-sm-2 control-label" for= "id_invoice_no">Invoice Number </label>
 				<div class="col-sm-9">
 				{% render_field form.invoice_no class+="form-control invoice_no" %}
 				{{ form.invoice_no.errors }}
@@ -191,12 +191,12 @@ function validateForm(event) {
   	messages.push('Invalid GST Number');
   	document.getElementById("id_gst_number").style.border = "1px solid #ef5350";
   }
-  if (messages.length > 0) {
-  	 var error_msg = messages.join(' , ');
-  	 document.getElementById("errors_msg").style.backgroundColor = "#ffebee";
-  	 $('#errors_msg').html(error_msg);
-  	 event.preventDefault();
-  }
+  //if (messages.length > 0) {
+  //	 var error_msg = messages.join(' , ');
+  //	 document.getElementById("errors_msg").style.backgroundColor = "#ffebee";
+  //	 $('#errors_msg').html(error_msg);
+  //	 event.preventDefault();
+  //}
  }
 
 
