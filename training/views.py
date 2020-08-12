@@ -147,7 +147,7 @@ def reg_success(request, user_type):
 				return redirect('training:list_events', status='myevents')
 			event_name = event.event_name
 			if user_type == 'paid':
-				context = {'name':name, 'email':email, 'event':event_name}
+				context = {'name':name, 'email':email, 'event':event_name, 'event_obj':form_data}
 				return render(request, template_name,context)
 			else:
 				return form_data

@@ -2,7 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {%load trainingdata%}
-{% block title %}{% endblock %}
+{% block title %}{{event_obj.event.event_name}} Registration{% endblock %}
 {% block heading %}
   <i class="fa fa-list-ul"></i> List of Training Events :
 {% endblock %}
@@ -59,26 +59,26 @@
     <div class="col-md-6">
       <h5>Participant</h5>
       <hr>
-      <p>Name : {{name}}</p>
-      <p>Email : {{email}}</p>
+      <p>Name : {{event_obj.name}}</p>
+      <p>Email : {{event_obj.email}}</p>
       <br>
       <h5>FOSS</h5>
       <hr>
-      <p>foss name</p>
-      <p>foss language</p>
+      <p>{{event_obj.event.foss}}</p>
+      <p>{{event_obj.event.Language_of_workshop}} {{event_obj.foss_language}}</p>
     </div>
     <div class="col-md-6 bl">
       <h5>Event</h5>
       <hr>
-      <p>event name}</p>
-       <p><i class="fa fa-calendar reg-icon" aria-hidden="true"></i>start date - end date</p>
-      <p><i class="fa fa-map-marker reg-icon" aria-hidden="true"></i>host_college</p>
+      <p>{{event_obj.event.event_name}}</p>
+       <p><i class="fa fa-calendar reg-icon" aria-hidden="true"></i>{{event_obj.event.event_start_date}} - {{event_obj.event.event_end_date}}</p>
+      <p><i class="fa fa-map-marker reg-icon" aria-hidden="true"></i>{{event_obj.event.host_college}}</p>
       <br>
       <h5>Contact Details</h5>
       <hr>
-      <p><i class="fa fa-user reg-icon" aria-hidden="true"></i>event_coordinator_name</p>
-      <p><i class="fa fa-phone reg-icon" aria-hidden="true"></i>event_coordinator_contact_no</p>
-      <p><i class="fa fa-envelope reg-icon" aria-hidden="true"></i>event_coordinator_email</p>
+      <p><i class="fa fa-user reg-icon" aria-hidden="true"></i>{{event_obj.event.event_coordinator_name}}</p>
+      <p><i class="fa fa-phone reg-icon" aria-hidden="true"></i>{{event_obj.event.event_coordinator_contact_no}}</p>
+      <p><i class="fa fa-envelope reg-icon" aria-hidden="true"></i>{{event_obj.event.event_coordinator_email}}</p>
     </div>
     
   </div>
