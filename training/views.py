@@ -23,6 +23,7 @@ from django.urls import reverse
 import csv
 from django.contrib.auth.models import User
 from cms.views import create_profile, send_registration_confirmation
+from .helpers import PAYMENT_STATUS_CHOICES, COLLEGE_TYPE_CHOICES, SUBSCRIPTION_CHOICES
 import random
 
 today = date.today()
@@ -519,3 +520,91 @@ def generate_training_certificate(request):
         print("error is ",e)
 
     return response
+
+
+def get_create_user(row):
+		try:
+			return User.objects.get(email=row[2].strip())
+		except User.DoesNotExist:
+			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
+			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
+			user.save()
+			create_profile(user, '')
+			send_registration_confirmation(user)			
+			return user
+
+
+def upload_college_details(request):
+	form = UploadCollegeForm
+
+	if request.POST:
+		if form.is_valid():
+			csv_file_data = form.cleaned_data['csv_file']
+			rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
+			for i, row in enumerate(rows_data):
+				user = get_create_user(row)
+				try:
+					college = AcademicCenter.objects.get(academic_code=row[2])
+				except AcademicCenter.DoesNotExist:
+					csv_error = True
+					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" College "+ row[2] + " was not added.")
+					continue
+				try:
+					state = State.objects.get(name=row[1])
+				except State.DoesNotExist:
+					csv_error = True
+					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " State " + row[6] + " does not exist."+" College "+ row[2] + " was not added.")
+					continue
+			subscription = ''
+			payment_status = ''
+			college_type = ''
+			if '1 year Subscription' in row[8]:
+				subscription = SUBSCRIPTION_CHOICES['365']
+			if '6 months' in row[8]:
+				subscription = SUBSCRIPTION_CHOICES['180']
+			if row[11] in PAYMENT_STATUS_CHOICES :
+				payment_status = PAYMENT_STATUS_CHOICES[row[11]]
+			if row[12] == 'Engineering':
+				college_type = COLLEGE_TYPE_CHOICES['Engg']
+			try:
+				AcademicPaymentStatus.objects.create(
+					state = state,
+  					academic = college,
+					name_of_the_payer = row[4],
+					email = row[5],
+					phone = row[6],
+					amount = row[7],
+					subscription =  subscription,
+					transactionid = row[9],
+					payment_date = row[10],
+					payment_status = payment_status, 
+					college_type = college_type,
+					pan_number = row[13],
+					gst_number = row[14],
+					customer_id = row[15],
+					invoice_no = row[16],
+					remarks = row[17],
+					entry_date = row[10],
+					entry_user = request.user
+					)
+			except Exception as e:
+				print(e)
+				academic_centre = AcademicPaymentStatus.objects.filter(
+					academic=college, transactionid= row[9], payment_date = row[10])
+				if academic_centre.exists():
+					messages.add_message(request, messages.WARNING, "Institution "+row[2]+" already made payment on "+row[10])
+				else:	
+					csv_error = True
+					messages.add_message(request, messages.ERROR, "Could not add Academic payment for " + row[2])
+		if csv_error:
+			messages.success(request, 'Some rows in the csv file has errors and are not created.')
+		else:
+			messages.success(request, 'Successfully uploaded.')
+		return HttpResponseRedirect(reverse("training:upload_participants", kwargs={'eventid': self.event.pk}))
+
+		else:
+			messages.error(request, "Invalid Form")
+			return HttpResponseRedirect('/training/upload_college_details/')
+	else:
+		messages.error(request, "Invalid Request")
+		return HttpResponseRedirect('/training/upload_college_details/')

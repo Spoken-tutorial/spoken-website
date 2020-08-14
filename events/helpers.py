@@ -8,6 +8,15 @@ from donate.models import CdFossLanguages
 # Third Party Stuff
 from django.conf import settings
 
+PAYMENT_STATUS_CHOICES =(
+    ('', '-----'), ('New', 'New'), ('Renewal', 'Renewal'),
+  )
+  COLLEGE_TYPE_CHOICES =(
+    ('', '-----'), ('Engg', 'Engg'), ('ASC', 'ASC'), ('University', 'University'),
+  )
+  SUBSCRIPTION_CHOICES = (
+      ('', '-----'), ('365', 'One_Year'), ('182', 'Six_Months'),
+    )
 
 def get_academic_years(default=settings.ACADEMIC_DURATION):
     current_year = dt.datetime.now().year

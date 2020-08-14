@@ -54,3 +54,20 @@ class UploadParticipantsForm(forms.ModelForm):
         file_data = validate_csv_file(data)
         return file_data
 
+
+class UploadCollegeForm(forms.ModelForm):
+    csv_file = forms.FileField(required=True)
+
+    class Meta(object):
+        model = AcademicPaymentStatusForm
+        exclude = ['entry_user']
+    #     widgets = {
+    # 'payment_date':DateInput(),
+    # 'phone':forms.NumberInput(),
+    # 'amount':forms.NumberInput()
+    #     }
+    
+    def clean_csv_file(self):
+        data = self.cleaned_data["csv_file"]
+        file_data = validate_csv_file(data)
+        return file_data
