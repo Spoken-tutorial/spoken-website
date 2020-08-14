@@ -23,7 +23,17 @@ from events.signals import revoke_student_permission
 #creation app models
 from creation.models import FossCategory, Language, \
   FossAvailableForWorkshop, FossAvailableForTest
-from .helpers import PAYMENT_STATUS_CHOICES, COLLEGE_TYPE_CHOICES, SUBSCRIPTION_CHOICES
+
+PAYMENT_STATUS_CHOICES =(
+    ('', '-----'), ('New', 'New'), ('Renewal', 'Renewal')
+  )
+COLLEGE_TYPE_CHOICES =(
+    ('', '-----'), ('Engg', 'Engg'), ('ASC', 'ASC'), ('University', 'University')
+  )
+SUBSCRIPTION_CHOICES = (
+      ('', '-----'), ('365', 'One_Year'), ('182', 'Six_Months')
+    )
+
 
 # Create your models here.
 @python_2_unicode_compatible
