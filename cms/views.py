@@ -144,6 +144,41 @@ IIT Bombay.
     except:
         pass
 
+def email_otp(user):
+    p = Profile.objects.get(user=user)
+    subject = 'Spoken Tutorial'
+    message = """Hello {0},
+
+
+Your OTP is
+
+{1}
+
+If you enter the OTP correctly, this email address will get activated on Spoken Tutorial({2}).
+
+Regards,
+Admin
+Spoken Tutorials
+IIT Bombay.
+    """.format(
+        user.username,
+        str(p.confirmation_code),
+        "https://spoken-tutorial.org",
+    )
+
+    email = EmailMultiAlternatives(
+        subject, message, 'no-reply@spoken-tutorial.org',
+        to = [user.email], bcc = [], cc = [],
+        headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+    )
+
+    #email.attach_alternative(message, "text/html")
+    try:
+        result = email.send(fail_silently=False)
+    except:
+        pass
+
+
 def confirm(request, confirmation_code, username):
     try:
         user = User.objects.get(username=username)

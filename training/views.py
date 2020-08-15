@@ -22,7 +22,7 @@ from events.views import get_page
 from django.urls import reverse
 import csv
 from django.contrib.auth.models import User
-from cms.views import create_profile, send_registration_confirmation
+from cms.views import create_profile, email_otp
 import random
 
 today = date.today()
@@ -388,7 +388,7 @@ class ParticipantCreateView(CreateView):
 			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
 			user.save()
 			create_profile(user, '')
-			send_registration_confirmation(user)			
+			email_otp(user)
 			return user
 
 
@@ -529,7 +529,7 @@ def get_create_user(row):
 			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
 			user.save()
 			create_profile(user, '')
-			send_registration_confirmation(user)			
+			email_otp(user)
 			return user
 
 from io import TextIOWrapper
