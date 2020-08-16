@@ -375,7 +375,7 @@ class ParticipantCreateView(CreateView):
 					csv_error = True
 					messages.add_message(self.request, messages.ERROR, "Could not create participant having email id" + row[2])
 		if csv_error:
-			messages.success(self.request, 'Some rows in the csv file has errors and are not created.')
+			messages.warning(self.request, 'Some rows in the csv file has errors and are not created.')
 		else:
 			messages.success(self.request, 'Successfully uploaded.')
 		return HttpResponseRedirect(reverse("training:upload_participants", kwargs={'eventid': self.event.pk}))
@@ -549,62 +549,61 @@ def upload_college_details(request):
 				college = AcademicCenter.objects.get(academic_code=row[2])
 			except AcademicCenter.DoesNotExist:
 				csv_error = True
-				messages.add_message(request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" College "+ row[2] + " was not added.")
+				messages.add_message(request, messages.ERROR, "Row: "+ str(i+1) + " College" + row[2] + "  does not exist.")
 				continue
 			try:
 				state = State.objects.get(name=row[1])
 			except State.DoesNotExist:
 				csv_error = True
-				messages.add_message(request, messages.ERROR, "Row: "+ str(i+1) + " State " + row[6] + " does not exist."+" College "+ row[2] + " was not added.")
+				messages.add_message(request, messages.ERROR, "Row: "+ str(i+1) + " State " + row[1] + " does not exist."+" College "+ row[2] + " was not added.")
 				continue
-		subscription = ''
-		payment_status = ''
-		college_type = ''
-		if '1 year Subscription' in row[8]:
-			subscription = '365'
-		if '6 months' in row[8]:
-			subscription = '180'
-		if row[12] == 'Engineering':
-			college_type = 'Engg'
-		day,mon,year = row[10].split('/')
-		payment_date = datetime.datetime(year=int(year), month=int(mon), day=int(day))
-		try:
-			AcademicPaymentStatus.objects.create(
-				state = state,
-  				academic = college,
-				name_of_the_payer = row[4],
-				email = row[5],
-				phone = row[6],
-				amount = row[7],
-				subscription =  subscription,
-				transactionid = row[9],
-				payment_date = payment_date,
-				payment_status = row[11],
-				college_type = college_type,
-				pan_number = row[13],
-				gst_number = row[14],
-				customer_id = row[15],
-				invoice_no = row[16],
-				remarks = row[17],
-				entry_date = payment_date,
-				entry_user = request.user
-				)
-		except Exception as e:
-			print(e)
-			academic_centre = AcademicPaymentStatus.objects.filter(
-				academic=college, transactionid= row[9], payment_date = payment_date)
-			if academic_centre.exists():
-				messages.add_message(request, messages.WARNING, "Institution "+row[2]+" already made payment on "+row[10])
-			else:	
-				csv_error = True
-				messages.add_message(request, messages.ERROR, "Could not add Academic payment for " + row[2])
+			subscription = ''
+			payment_status = ''
+			college_type = ''
+			if '1 year Subscription' in row[7]:
+				subscription = '365'
+			if '6 months' in row[7]:
+				subscription = '180'
+			if row[11] == 'Engineering':
+				college_type = 'Engg'
+			day,mon,year = row[9].split('/')
+			payment_date = datetime.datetime(year=int(year), month=int(mon), day=int(day))
+			try:
+				AcademicPaymentStatus.objects.create(
+					state = state,
+	  				academic = college,
+					name_of_the_payer = row[3],
+					email = row[4],
+					phone = row[5],
+					amount = row[6],
+					subscription =  subscription,
+					transactionid = row[8],
+					payment_date = payment_date,
+					payment_status = row[10],
+					college_type = college_type,
+					pan_number = row[12],
+					gst_number = row[13],
+					customer_id = row[14],
+					invoice_no = row[15],
+					remarks = row[16],
+					entry_date = payment_date,
+					entry_user = request.user
+					)
+			except Exception as e:
+				print(e)
+				academic_centre = AcademicPaymentStatus.objects.filter(
+					academic=college, transactionid= row[9], payment_date = payment_date)
+				if academic_centre.exists():
+					messages.add_message(request, messages.WARNING, "Institution "+row[2]+" already made payment on "+row[9])
+				else:	
+					csv_error = True
+					messages.add_message(request, messages.ERROR, " Academic payment for " + row[2]+" already exists")
 		if csv_error:
-			messages.success(request, 'Some rows in the csv file has errors and are not created.')
+			messages.warning(request, 'Some rows in the csv file has errors and are not created.')
 		else:
 			messages.success(request, 'Successfully uploaded.')
 			return render(request,'upload_college_details.html',context)
 	else:
-		messages.error(request, "Invalid Form")
 		return render(request,'upload_college_details.html',context)
 
 	return render(request,'upload_college_details.html',context)
