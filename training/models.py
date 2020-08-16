@@ -53,7 +53,7 @@ class Participant(models.Model):
 	reg_approval_status = models.PositiveSmallIntegerField(default=0)
 	
 	class Meta(object):
-		unique_together = ('event', 'user',)
+		unique_together = ('event', 'user', 'payment_status')
 
 	def get_foss_langs(self):
 		selected_foss = {}

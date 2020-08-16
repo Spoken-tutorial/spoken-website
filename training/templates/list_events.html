@@ -116,7 +116,7 @@
                 <p>                  
                     Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
                     {% if status == 'ongoing' %}
-                        {% if event.registartion_end_date|is_reg_valid %}
+                        {% if event.registartion_end_date|is_reg_valid and not user|registartion__successful:event%}
                             <input type="event" id="event_id_info" name="event_id_info" value="{{event.id}}" style="display:none">
                             <button type="submit" class="btn btn-info">Register Now</button>
                         {% endif %}
