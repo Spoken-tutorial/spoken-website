@@ -118,7 +118,7 @@
                     {% if status == 'ongoing' %}
                     <input type="event" id="event_id_info" name="event_id_info" value="{{event.id}}" style="display:none">
                         {% if event.registartion_end_date|is_reg_valid %}
-                            {% if user %}
+                            {% if user.is_authenticated %}
                                 {% if not user|registartion_successful:event %}
                                     <button type="submit" class="btn btn-info">Register Now</button>
                                 {% endif %}
