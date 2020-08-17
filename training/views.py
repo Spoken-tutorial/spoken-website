@@ -1,29 +1,33 @@
+# Django imports
 from django.shortcuts import render, redirect
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
-from .models import *
-from .forms import *
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
-from events.models import *
-from creation.models import TutorialResource, Language
-from events.decorators import group_required
-from events.views import is_resource_person, is_administrator
 from django.core.exceptions import PermissionDenied
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
-from .helpers import *
-import json
-from datetime import datetime,date
-from  events.filters import ViewEventFilter
-from cms.sortable import *
-from events.views import get_page
-from django.urls import reverse
-import csv
+from django.db.models import Q
 from django.contrib.auth.models import User
-from cms.views import create_profile, email_otp
+from django.urls import reverse
+# Python imports
+from datetime import datetime,date
+import csv
+import json
 import random
+# Spoken imports
+from .models import *
+from .forms import *
+from .helpers import *
+from creation.models import TutorialResource, Language
+from events.decorators import group_required
+from events.models import *
+from events.views import is_resource_person, is_administrator, get_page 
+from events.filters import ViewEventFilter
+from cms.sortable import *
+from cms.views import create_profile, email_otp
+
 
 today = date.today()
 
@@ -133,22 +137,23 @@ def reg_success(request, user_type):
 				form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
 			except:
 				form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
-			user_data = is_college_paid(form_data.college)
-			if user_data:
-				print("Subscribed")
+			user_data = is_user_paid(request.user)
+			if user_data[0]:
 				form_data.registartion_type = 1 #Subscribed College
 			else:
 				form_data.registartion_type = 2 #Manual reg- paid 500
 
-			try:
-				form_data.save()
-			except :
+			if Participant.objects.filter(
+				Q(payment_status__status = 1)|Q(registartion_type = 1),
+				user = request.user, event = form_data.event):
 				messages.success(request, "You have already registered for this event.")
 				return redirect('training:list_events', status='myevents')
+			else :
+				form_data.save()
 			event_name = event.event_name
 			if user_type == 'paid':
-				context = {'name':name, 'email':email, 'event':event_name, 'event_obj':form_data}
-				return render(request, template_name,context)
+				context = {'event_obj':form_data}
+				return render(request, template_name, context)
 			else:
 				return form_data
 		else:
