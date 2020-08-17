@@ -50,16 +50,21 @@
   <div class="col-sm-12 col-md-8 col-md-offset-2 ">
     <div class=" reg-wrapper">
   <div class="text-center highlight">
-      {% if participant_obj.payment_status.status == 1 %}
+      {% if user|registartion_successful:participant_obj.event  %}
       <p><i class="fa fa-check" aria-hidden="true" style="color: rgba(51,122,183,0.7);"></i></p>
     <h4>Thank you for registering with Spoken Tutorials.</h4>
     {% else %}
-    <p><i class="fa fa-times" aria-hidden="true" style="color: rgba(51,122,183,0.7);"></i></p>
-    <h4>Your payment failed.<br> But don't worry, we have still partially registered you.<br>
-      Please try to complete the payment once again <br>
-      or <br>
-      Use <a href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">Payment Flow via NEFT</a> and get in touch with our Training Managers for more help. <br>
-      [<a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">Spoken Tutorial Training Managers</a>]</h4>
+    <p><i class="fa fa-times" aria-hidden="true" style="color: rgba(250,128,114);"></i></p>
+    <h4 >Your Payment Failed.<br><br> But don't worry, we have still partially registered you.<br><br>
+      Please try the following to complete the registration<br><br>
+<ul>
+  <li> Try the Registration process once again</li>
+  <li> Use <a style="color:red" href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">
+	<div >Payment Flow via NEFT</div></a> and get in touch with our Training Managers for more help. <br>
+ <a style="color:red" href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">[
+<div >Spoken Tutorial Training Managers</div>]</a></h4>
+</li>
+</ul>
     {% endif %}
   </div>
   <br>
@@ -73,7 +78,11 @@
       <h5>FOSS</h5>
       <hr>
       <p>{{participant_obj.event.foss}}</p>
-      <p>{{participant_obj.event.Language_of_workshop}} {{participant_obj.foss_language}}</p>
+      <p>{{participant_obj.event.Language_of_workshop}}
+	{% if participant_obj.foss_language %}
+, {{participant_obj.foss_language}}
+    	{% endif %}
+      </p>
     </div>
     <div class="col-md-6 bl">
       <h5>Event</h5>
