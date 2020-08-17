@@ -104,7 +104,7 @@ def event_has_registration(eventid):
 
 
 @register.filter
-def registartion__successful(user, event):
+def registartion_successful(user, event):
   # Payee status 1 - complete , 2 - Failed
   participant = Participant.objects.filter(user = user, event = event)
   if participant.filter(payment_status__status=1).exists():

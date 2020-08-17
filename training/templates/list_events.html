@@ -89,14 +89,14 @@
                     <b>FOSS :</b> <span >{{event.event.foss}}</span>
                               <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{event.get_foss_langs}}' style="display: none;">
                 </p>
-                {% if event.reg_approval_status == 1%}
+                {% if event.reg_approval_status == 1 and user|registartion_successful:event.event %}
                 <div style="text-align: right;">
                  <button class="btn btn-primary" type="submit" 
         formaction="{% url 'cdcontent:create_cd_download' 'general' %}">Download CD Content</button>
                 </div>
                 {% endif %}
-                {% if event.event.id|is_event_closed %}
-    <a href="/training/generate_training_certificate/" class="btn btn-info">Download certificate</a>
+                {% if event.event.id|is_event_closed and user|registartion_successful:event.event %}
+    <a href="/training/generate_training_certificate/" class="btn btn-info">Download Certificate</a>
         	{% endif %}   
 	 </div>
         </div>
@@ -116,11 +116,17 @@
                 <p>                  
                     Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
                     {% if status == 'ongoing' %}
-                        {% if event.registartion_end_date|is_reg_valid and not user|registartion__successful:event%}
-                            <input type="event" id="event_id_info" name="event_id_info" value="{{event.id}}" style="display:none">
-                            <button type="submit" class="btn btn-info">Register Now</button>
+                    <input type="event" id="event_id_info" name="event_id_info" value="{{event.id}}" style="display:none">
+                        {% if event.registartion_end_date|is_reg_valid %}
+                            {% if user.is_authenticated %}
+                                {% if not user|registartion_successful:event %}
+                                    <button type="submit" class="btn btn-info">Register Now</button>
+                                {% endif %}
+                            {% else %}
+                                <button type="submit" class="btn btn-info">Register Now</button>
                         {% endif %}
                     {% endif %}
+		{% endif %}
                 </p>        
             </div>
         </div> 

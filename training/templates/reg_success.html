@@ -2,7 +2,7 @@
 {% load widget_tweaks %}
 {% load static %}
 {%load trainingdata%}
-{% block title %}{{event_obj.event.event_name}} Registration{% endblock %}
+{% block title %}{{participant_obj.event.event_name}} Registration{% endblock %}
 {% block heading %}
   <i class="fa fa-list-ul"></i> List of Training Events :
 {% endblock %}
@@ -50,35 +50,43 @@
   <div class="col-sm-12 col-md-8 col-md-offset-2 ">
     <div class=" reg-wrapper">
   <div class="text-center highlight">
-      <!-- <p><i class="fa fa-check-circle-o" aria-hidden="true"></i></p> -->
-      <p><i class="fa fa-check" aria-hidden="true" style="color: rgba(51,122,183,0.7);;"></i></p>
+      {% if participant_obj.payment_status.status == 1 %}
+      <p><i class="fa fa-check" aria-hidden="true" style="color: rgba(51,122,183,0.7);"></i></p>
     <h4>Thank you for registering with Spoken Tutorials.</h4>
+    {% else %}
+    <p><i class="fa fa-times" aria-hidden="true" style="color: rgba(51,122,183,0.7);"></i></p>
+    <h4>Your payment failed.<br> But don't worry, we have still partially registered you.<br>
+      Please try to complete the payment once again <br>
+      or <br>
+      Use <a href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">Payment Flow via NEFT</a> and get in touch with our Training Managers for more help. <br>
+      [<a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">Spoken Tutorial Training Managers</a>]</h4>
+    {% endif %}
   </div>
   <br>
   <div class="reg-table row">
     <div class="col-md-6">
       <h5>Participant</h5>
       <hr>
-      <p>Name : {{event_obj.name}}</p>
-      <p>Email : {{event_obj.email}}</p>
+      <p>Name : {{participant_obj.name}}</p>
+      <p>Email : {{participant_obj.email}}</p>
       <br>
       <h5>FOSS</h5>
       <hr>
-      <p>{{event_obj.event.foss}}</p>
-      <p>{{event_obj.event.Language_of_workshop}} {{event_obj.foss_language}}</p>
+      <p>{{participant_obj.event.foss}}</p>
+      <p>{{participant_obj.event.Language_of_workshop}} {{participant_obj.foss_language}}</p>
     </div>
     <div class="col-md-6 bl">
       <h5>Event</h5>
       <hr>
-      <p>{{event_obj.event.event_name}}</p>
-       <p><i class="fa fa-calendar reg-icon" aria-hidden="true"></i>{{event_obj.event.event_start_date}} - {{event_obj.event.event_end_date}}</p>
-      <p><i class="fa fa-map-marker reg-icon" aria-hidden="true"></i>{{event_obj.event.host_college}}</p>
+      <p>{{participant_obj.event.event_name}}</p>
+       <p><i class="fa fa-calendar reg-icon" aria-hidden="true"></i>{{participant_obj.event.event_start_date}} - {{participant_obj.event.event_end_date}}</p>
+      <p><i class="fa fa-map-marker reg-icon" aria-hidden="true"></i>{{participant_obj.event.host_college}}</p>
       <br>
       <h5>Contact Details</h5>
       <hr>
-      <p><i class="fa fa-user reg-icon" aria-hidden="true"></i>{{event_obj.event.event_coordinator_name}}</p>
-      <p><i class="fa fa-phone reg-icon" aria-hidden="true"></i>{{event_obj.event.event_coordinator_contact_no}}</p>
-      <p><i class="fa fa-envelope reg-icon" aria-hidden="true"></i>{{event_obj.event.event_coordinator_email}}</p>
+      <p><i class="fa fa-user reg-icon" aria-hidden="true"></i>{{participant_obj.event.event_coordinator_name}}</p>
+      <p><i class="fa fa-phone reg-icon" aria-hidden="true"></i>{{participant_obj.event.event_coordinator_contact_no}}</p>
+      <p><i class="fa fa-envelope reg-icon" aria-hidden="true"></i>{{participant_obj.event.event_coordinator_email}}</p>
     </div>
     
   </div>

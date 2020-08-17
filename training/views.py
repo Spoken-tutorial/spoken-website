@@ -153,7 +153,7 @@ def reg_success(request, user_type):
 				form_data.save()
 			event_name = event.event_name
 			if user_type == 'paid':
-				context = {'event_obj':form_data}
+				context = {'participant_obj':form_data}
 				return render(request, template_name, context)
 			else:
 				return form_data
@@ -287,7 +287,6 @@ def close_event(request, pk):
 		event.save()
 		messages.success(request, 'Event has been closed successfully')
 	else:
-		print("Error")
 		messages.error(request, 'Request not sent.Please try again.')
 	return HttpResponseRedirect("/training/event/rp/completed/")
 
@@ -304,7 +303,6 @@ def approve_event_registration(request, pk):
 		event.save()
 		messages.success(request, 'Registrations approved successfully')
 	else:
-		print("Error")
 		messages.error(request, 'Request not sent.Please try again.')
 	return HttpResponseRedirect("/training/event/rp/ongoing/")
 
@@ -373,7 +371,6 @@ class ParticipantCreateView(CreateView):
 					registartion_type = registartion_type
 					)
 			except Exception as e:
-				print(e)
 				participant = Participant.objects.filter(email=row[2].strip(),event = self.event)
 				if participant.exists():
 					messages.add_message(self.request, messages.WARNING, "Participant with email "+row[2]+" already registered for "+self.event)
@@ -433,7 +430,6 @@ class EventAttendanceListView(ListView):
 		self.user = request.user
 		eventid = kwargs['eventid']
 		attendance_type = request.POST.get('event_status', None)
-		print(attendance_type,"********************************************")
 
 		if attendance_type == 'attend':
 			if request.POST and 'user' in request.POST:
@@ -596,7 +592,6 @@ def upload_college_details(request):
 					entry_user = request.user
 					)
 			except Exception as e:
-				print(e)
 				academic_centre = AcademicPaymentStatus.objects.filter(
 					academic=college, transactionid= row[9], payment_date = payment_date)
 				if academic_centre.exists():
