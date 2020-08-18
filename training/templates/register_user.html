@@ -84,7 +84,7 @@
                         <div class="form-group" id="otp_wrapper">
                           <div class="col-lg-4"></div>
                           <div class="col-lg-8">
-                            <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 80%;">
+                            <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 80%;" tabindex="3">
                             <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
                           </div>
                         </div>
@@ -156,7 +156,7 @@
 			<div class="form-group" style="display:none" id=""amount_back">
                         <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
                         <div class="col-lg-8">
-                            {% render_field form.amount class+="form-control amount"  %}
+                            {% render_field form.amount class+="form-control amount" tabindex="9" %}
                             {{ form.amount.errors }}
                         </div>
                     </div>
@@ -375,7 +375,8 @@ function show_clg_list(){
 
 function payment_btn_activate(){
 var make_payment_btn = document.getElementById('make_payment');
-if($('#make_payment').length > 0){
+var user_loggedin = "{{user.is_authenticated|yesno:"True,False"}}";
+if($('#make_payment').length > 0 && user_loggedin == 'True'){
       $('#make_payment').removeAttr('disabled');
 }
 }
@@ -419,9 +420,11 @@ $.ajax({
                 success: function(data)
                 {
                     if(!data){
-      $('#make_payment').show()
+      			$('#make_payment').show()
 			$('#register_paid').hide();
+			try{
 			document.getElementById('college_user_details').value = '';
+			}catch{}
 			$('#paid-info').hide();
 			payment_btn_activate();
 		}
@@ -445,12 +448,12 @@ $.ajax({
 function check_college(control){
 if(control.value=='None'){
 document.getElementById('college-info').style.display = "block";
-document.getElementById('make_payment').disabled = true;
+payment_btn_activate();
 }
 else{
 try{
 document.getElementById('college-info').style.display = "none";
-document.getElementById('make_payment').disabled = false;
+payment_btn_hide();
 }
 catch{}
 }
