@@ -20,6 +20,7 @@ import random
 from .models import *
 from .forms import *
 from .helpers import *
+from .templatetags.trainingdata import registartion_successful
 from creation.models import TutorialResource, Language
 from events.decorators import group_required
 from events.models import *
@@ -318,6 +319,8 @@ class ParticipantCreateView(CreateView):
 			except:
 				messages.error(self.request, 'Event not found')
 				return HttpResponseRedirect(reverse("training:create_event"))
+			if not self.event.training_status == 0:
+					messages.error(self.request,'Upoad via CSV is not allowed as Event registration is closed')
 		return super(ParticipantCreateView, self).dispatch(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):
@@ -326,8 +329,12 @@ class ParticipantCreateView(CreateView):
 		return context
 
 	def form_valid(self, form):
+		count = 0
 		csv_file_data = form.cleaned_data['csv_file']
-		registartion_type = form.cleaned_data['registartion_type']
+		registartion_type = form.cleaned_data['registartion_type']			
+		if registartion_type == 2:
+			# 3 - Manual Registration via CSV(option not visible outside)
+			registartion_type = 3
 		rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
 		csv_error = False
 		for i, row in enumerate(rows_data):
@@ -342,47 +349,48 @@ class ParticipantCreateView(CreateView):
 					college = AcademicCenter.objects.get(academic_code=row[6])
 				except AcademicCenter.DoesNotExist:
 					csv_error = True
-					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " did not created.")
+					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " was not created.")
 					continue
-			# try:
-			# 	department = Department.objects.get(name = row[7])
-			# except Department.DoesNotExist:
-			# 	csv_error = True
-			# 	messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Department name " + row[7] + " does not exist."+" Participant "+ row[2] + " did not created.")
-			# 	continue
-			# foss language for additional cd download language
+			if registartion_type == 1:
+				if not(is_college_paid(college.id)):
+					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution " + row[6] + " is not a Paid college."+" Participant "+ row[2] + " was not created.")
+					continue
+
 			try:
-				foss_language = Language.objects.get(name=row[8].strip())	
+				foss_language = Language.objects.get(name=row[7].strip())	
 			except :
-				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Language name " + row[8] + " does not exist."+" Participant "+ row[2] + " did not created.")
-				continue			
-			try:
-				Participant.objects.create(
-					name = row[0], 
-					email = row[2].strip(), 
-					gender = row[3], 
-					amount = row[4], 
-					event = self.event, 
-					user = user, 
-					state = college.state, 
-					college = college,
-					# department = department,
-					foss_language = foss_language,
-					registartion_type = registartion_type
-					)
-			except Exception as e:
-				participant = Participant.objects.filter(email=row[2].strip(),event = self.event)
-				if participant.exists():
-					messages.add_message(self.request, messages.WARNING, "Participant with email "+row[2]+" already registered for "+self.event)
-				else:	
+				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Language name " + row[7] + " does not exist."+" Participant "+ row[2] + " was not created.")
+				continue
+
+			participant = Participant.objects.filter(email=row[2].strip(),event = self.event)
+			if participant.exists() and registartion_successful(user, self.event):
+				messages.add_message(self.request, messages.WARNING, "Participant with email "+row[2]+" already registered for "+self.event.event_name)
+				continue
+			else:
+				try:
+					Participant.objects.create(
+						name = row[0], 
+						email = row[2].strip(), 
+						gender = row[3], 
+						amount = row[4], 
+						event = self.event, 
+						user = user, 
+						state = college.state, 
+						college = college,
+						foss_language = foss_language,
+						registartion_type = registartion_type
+						)
+					count = count + 1
+				except :
 					csv_error = True
 					messages.add_message(self.request, messages.ERROR, "Could not create participant having email id" + row[2])
 		if csv_error:
 			messages.warning(self.request, 'Some rows in the csv file has errors and are not created.')
-		else:
-			messages.success(self.request, 'Successfully uploaded.')
+		if count > 0:
+			messages.success(self.request, 'Successfully uploaded '+str(count)+" participants")
 		return HttpResponseRedirect(reverse("training:upload_participants", kwargs={'eventid': self.event.pk}))
-	
+
+
 	def get_create_user(self, row):
 		try:
 			return User.objects.get(email=row[2].strip())
@@ -541,6 +549,7 @@ def upload_college_details(request):
 	form = UploadCollegeForm
 	context ={}
 	context['form'] = form
+	count = 0
 	csv_error = ''
 	if request.POST:
 		csv_file_data = TextIOWrapper(request.FILES['csv_file'], encoding=request.encoding)
@@ -591,7 +600,8 @@ def upload_college_details(request):
 					entry_date = payment_date,
 					entry_user = request.user
 					)
-			except Exception as e:
+				count = count + 1
+			except :
 				academic_centre = AcademicPaymentStatus.objects.filter(
 					academic=college, transactionid= row[9], payment_date = payment_date)
 				if academic_centre.exists():
@@ -601,8 +611,8 @@ def upload_college_details(request):
 					messages.add_message(request, messages.ERROR, " Academic payment for " + row[2]+" already exists")
 		if csv_error:
 			messages.warning(request, 'Some rows in the csv file has errors and are not created.')
-		else:
-			messages.success(request, 'Successfully uploaded.')
+		if count > 0:
+			messages.success(request, 'Successfully uploaded '+str(count)+" Institutions")
 			return render(request,'upload_college_details.html',context)
 	else:
 		return render(request,'upload_college_details.html',context)

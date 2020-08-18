@@ -106,10 +106,11 @@ def event_has_registration(eventid):
 @register.filter
 def registartion_successful(user, event):
   # Payee status 1 - complete , 2 - Failed
+  # Registration Type 1 - Subcribed clg, 2 -Unsubscribed clg, 3 - Unsubscribed colg added via csv(DB Payment checks not possible)
   participant = Participant.objects.filter(user = user, event = event)
   if participant.filter(payment_status__status=1).exists():
     return True
-  if participant.filter(registartion_type=1).exists():
+  if participant.filter(registartion_type__in=(1,3)).exists():
     return True
   return False 
 
