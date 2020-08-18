@@ -19,7 +19,7 @@
 <!-- Event name starts -->
 <div class="panel panel-primary">
   <div class="panel-heading">
-    <h3 class="panel-title"><b>Welcome to the registration page of {{event_obj.event_name}}</b></h3>
+    <h3 class="panel-title"><b><i class="fa fa-times" aria-hidden="true"></i>Welcome to the registration page of {{event_obj.event_name}}</b></h3>
   </div>
 </div>
 <!-- Event name ends -->
@@ -134,16 +134,19 @@
                     <div class="form-group">
                     <label for="id_foss" class="col-lg-4 control-label">FOSS </label>
                     <div class="col-lg-8">
-                        <div class="form-comtrol" style="font-size:1vw">{{event_obj.foss}}</div>
+                        <div class="form-control" style="font-size:1vw;">{{event_obj.foss}}</div>
                     </div>
                     </div>
+                    {% if langs %}
                     <div class="form-group">
                     <label for="id_foss_language" class="col-lg-4 control-label">Language </label>
                     <div class="col-lg-8">
                         {% render_field form.foss_language class+="form-control foss_language" tabindex="7" %}
                         {{ form.name.errors }}
+                         <span class="help-block">Language of Tutorial Instructions</span>
                     </div>
                     </div>
+                    {% endif %}
                     {% if user|is_user_paid %}
                     <div class="form-group" id="paid-info">
                       <div class="panel panel-primary col-lg-8 col-md-offset-4">
@@ -246,6 +249,11 @@
 <script type="text/javascript">
  $( document ).ready(function() {
 
+  // If state exists, get college list
+  if($('#id_state').val()){
+    show_clg_list();
+  }
+
 $('#id_email').on('focusout',function(){
   var isReadOnly = $('#id_email').is('[readonly]');
       if (!isReadOnly) {
@@ -345,8 +353,12 @@ $('#pwd').on('focusout',function(){
         });
 
 $('#id_state').change(function(){
-   	var stateid  = $('#id_state').val();
-   	$.ajax({
+   	show_clg_list()
+});
+
+function show_clg_list(){
+  var stateid  = $('#id_state').val();
+    $.ajax({
                 type : "POST",
                 url:"/software-training/ajax-state-collage/",
                 dataType : "json",
@@ -356,10 +368,10 @@ $('#id_state').change(function(){
                 success: function(data)
                 {
                     $('#id_college').html(data);
-		    $('#college-info').show();	
+        $('#college-info').show();  
                 }
               });
-   	});
+}
 
 function payment_btn_activate(){
 var make_payment_btn = document.getElementById('make_payment');

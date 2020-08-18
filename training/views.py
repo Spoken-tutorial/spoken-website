@@ -113,6 +113,7 @@ def register_user(request):
 				TutorialResource.objects.filter(
 				tutorial_detail__foss = event_register.foss, status=1).exclude(
 					language=event_register.Language_of_workshop).values('language').distinct())
+			context["langs"] = langs
 			form.fields["foss_language"].queryset = langs
 			form.fields["amount"].initial = event_register.event_fee
 			form.fields["amount"].widget.attrs['readonly'] = True

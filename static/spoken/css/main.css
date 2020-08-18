@@ -187,6 +187,7 @@ h1.page-title, h4.page-title {
 #search-wrapper .common-search{
     margin: auto;
     width: 67.77%;
+    width: 65%;
     padding: 15px 0;
     padding-bottom: 5px;
 }
@@ -722,10 +723,10 @@ pre.custom-jumbotron b {
     margin-bottom: 2px;
 }
 .alternate-search-link {
-    margin-right:32px;
+    margin-right:0;
 }
 #footer-wrapper a:hover {
-	color: #FFA500;
+    color: #FFA500;
 }
 .cc-data {
     color: #DEB887;
@@ -761,4 +762,71 @@ pre.custom-jumbotron b {
     background: #C9302C;
     color: #fff;
     float: left;
+}
+.block-info{
+    text-align: center;
+    overflow-x: hidden;
+    margin: auto;
+    width: 65%;
+}
+.block-info div{
+    color: white;
+    background: rgba(0,0,0,0.5);
+    font-size: 1.1rem;
+    padding: 5px;
+    font-weight: 500;
+}
+.block-info span a{
+    text-decoration: underline!important;
+    color: gold;
+}
+.search-wrap{
+    display: flex;
+    width: 100%;
+    margin: 0!important;
+    margin-bottom: 2px!important;
+}
+.search-wrap div{
+    width: 42%;
+    margin-right: 2%;
+}
+
+.search-wrap .fl-search-btn{
+    width: 10%;    
+    margin-right: 0!important;
+    margin-left: 2%;
+}
+.search-wrap .fl-search-btn input{
+    float: right!important;
+    width: 100%;
+    margin-right: 0!important;
+}
+@media (max-width: 767px) {
+  .block-info{
+    width: 100%;
+  }
+  .block-info div{
+    padding: 5px 10px;
+  }
+  .search-wrap{
+    display: flex;
+    flex-direction: column;
+  }
+  .search-wrap div{
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .search-wrap .fl-search-btn{
+    width: 40%;
+    margin-left: 0!important;
+  }
+  .common-search{
+    display: flex;
+    flex-direction: column;
+  }
+}
+@media (min-width: 768px) and (max-width: 991.98px) { 
+     .search-wrap .fl-search-btn{
+    width: 14%;
+  }
 }
