@@ -16,6 +16,7 @@ from datetime import datetime,date
 import csv
 import json
 import random
+import uuid 
 # Spoken imports
 from .models import *
 from .forms import *
@@ -577,7 +578,7 @@ def upload_college_details(request):
 			day,mon,year = row[9].split('/')
 			payment_date = datetime.datetime(year=int(year), month=int(mon), day=int(day))
 			try:
-				AcademicPaymentStatus.objects.create(
+				ac_payment_new = AcademicPaymentStatus.objects.create(
 					state = state,
 	  				academic = college,
 					name_of_the_payer = row[3],
@@ -597,6 +598,10 @@ def upload_college_details(request):
 					entry_date = payment_date,
 					entry_user = request.user
 					)
+				try:
+					add_Academic_key(ac_payment_new, subscription)
+				except :
+					messages.add_message(request, messages.ERROR, " Academic key for " + row[2]+" already exists")
 				count = count + 1
 			except :
 				academic_centre = AcademicPaymentStatus.objects.filter(
@@ -615,3 +620,19 @@ def upload_college_details(request):
 		return render(request,'upload_college_details.html',context)
 
 	return render(request,'upload_college_details.html',context)
+
+def add_Academic_key(ac_pay_status_object, subscription):
+	u_key = uuid.uuid1()
+	hex_key = u_key.hex
+
+
+	Subscription_time = int(subscription)
+	expiry_date = ac_pay_status_object.payment_date + timedelta(days=Subscription_time)
+
+	ac_key = AcademicKey()      
+	ac_key.ac_pay_status = ac_pay_status_object
+	ac_key.academic = ac_pay_status_object.academic
+	ac_key.u_key = u_key
+	ac_key.hex_key = hex_key
+	ac_key.expiry_date = expiry_date
+	ac_key.save()
