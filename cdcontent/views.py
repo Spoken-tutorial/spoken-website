@@ -4,7 +4,7 @@ from builtins import str
 import json
 import os
 import zipfile
-from datetime import datetime
+from datetime import datetime,date
 
 # Third Party Stuff
 from django.conf import settings
@@ -12,14 +12,16 @@ from django.conf import settings
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.template.context_processors import csrf
 
 # Spoken Tutorial Stuff
 from cdcontent.forms import *
 from creation.models import *
 from forums.models import Answer, Question
-
+from events.models import AcademicCenter, State, AcademicKey
+from donate.forms import PayeeForm
+from donate.models import Payee
 
 # Create your views here.
 def zipdir(src_path, dst_path, archive):
@@ -225,117 +227,139 @@ def add_srt_file(archive, tr_rec, filepath, eng_flag, srt_files):
             archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
 
 
+def internal_computation(request, user_type):
+    zipfile_name = '{}.zip'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
+    file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
+    archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
+    try:
+        selectedfoss = json.loads(request.POST.get('selected_foss', {}))
+    except:
+        selectedfoss = request.POST.get('selected_foss', {})
+    all_foss_details = get_all_foss_details(selectedfoss)
+    eng_rec = Language.objects.get(name="English")
+    languages = set()
+
+    for key, values in list(selectedfoss.items()):
+        foss_rec = FossCategory.objects.get(pk=key)
+        level = int(values[1])
+        eng_flag = True
+        srt_files = set()
+        common_files = set()
+
+        if str(eng_rec.id) in values[0]:
+            eng_flag = False
+
+        t_resource_qs = TutorialResource.objects.filter(Q(status=1) | Q(status=2),
+                                                        tutorial_detail__foss_id=key)
+
+        if level:
+            t_resource_qs = t_resource_qs.filter(tutorial_detail__level_id=level)
+
+        for value in values[0]:
+            language = Language.objects.get(pk=value)
+            add_sheets(archive, foss_rec, language)
+
+            tr_recs = t_resource_qs.filter(language_id=value).order_by(
+                'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+
+            languages.add(language.name)
+
+            for rec in tr_recs:
+                filepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
+                 # get list of questions of a particular tutorial
+                question_s = Question.objects.filter(category=foss_rec.foss.replace(' ','-'),tutorial=rec.tutorial_detail.tutorial.replace(' ','-')).order_by('-date_created')
+
+
+                if os.path.isfile(settings.MEDIA_ROOT + filepath):
+                    archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
+
+                # add srt file to archive
+                add_srt_file(archive, rec, filepath, eng_flag, srt_files)
+
+                # collect common files
+                collect_common_files(rec, common_files)
+
+                tutorial_path = '{}/{}/'.format(rec.tutorial_detail.foss_id, rec.tutorial_detail_id)
+                filepath = 'spoken/videos/{}show-video-{}.html'.format(tutorial_path, rec.language.name)
+                ctx = {'tr_rec': rec, 'tr_recs': tr_recs,
+                       'media_path': settings.MEDIA_ROOT, 'tutorial_path': tutorial_path,'question_s': question_s}
+                convert_template_to_html_file(archive, filepath, request,
+                                              "cdcontent/templates/watch_tutorial.html", ctx)
+                # for each question find the answers
+                for question in question_s:
+                    answer=Answer.objects.filter(question=question)
+                    ctx = {'question': question, 'answer': answer}
+                    filepath = 'spoken/videos/' + str(foss_rec.id) + '/' + str(rec.tutorial_detail_id) + '/answer-to-question-' + str(question.id) + '.html'
+                    convert_template_to_html_file(archive, filepath, request, "cdcontent/templates/answer_to_question.html", ctx)
+
+
+
+
+            filepath = 'spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html'
+            ctx = {'collection': tr_recs, 'foss_details': all_foss_details,
+                   'foss': foss_rec.id, 'lang': language.id}
+            convert_template_to_html_file(archive, filepath, request,
+                                          "cdcontent/templates/tutorial_search.html", ctx)
+
+        # add common files for current foss
+        add_common_files(archive, common_files)
+
+    # add side-by-side tutorials for selected languages
+    languages = add_side_by_side_tutorials(archive, languages)
+    add_forum_video(archive)
+
+    ctx = {'foss_details': all_foss_details, 'foss':'' ,
+           'lang': '', 'languages': languages}
+    convert_template_to_html_file(archive, 'spoken/videos/home.html', request,
+                                  "cdcontent/templates/home.html", ctx)
+
+    # add all required static files to archive
+    add_static_files(archive)
+    archive.close()
+
+    file_obj.close()
+    file_path= os.path.dirname(os.path.realpath(__file__))+'/../media/cdimage/{}'.format(zipfile_name)
+    response = HttpResponse(open(file_path, 'rb'), content_type='application/zip')
+    if user_type == 'paid':
+        return zipfile_name
+    elif user_type == 'general':
+        return response
+
+@csrf_exempt
 def home(request):
     if request.method == 'POST':
         form = CDContentForm(request.POST)
 
         if form.is_valid():
             try:
-                zipfile_name = '{}.zip'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
-                file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
-                archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
-                selectedfoss = json.loads(request.POST.get('selected_foss', {}))
-                all_foss_details = get_all_foss_details(selectedfoss)
-                eng_rec = Language.objects.get(name="English")
-                languages = set()
-
-                for key, values in list(selectedfoss.items()):
-                    foss_rec = FossCategory.objects.get(pk=key)
-                    level = int(values[1])
-                    eng_flag = True
-                    srt_files = set()
-                    common_files = set()
-
-                    if str(eng_rec.id) in values[0]:
-                        eng_flag = False
-
-                    t_resource_qs = TutorialResource.objects.filter(Q(status=1) | Q(status=2),
-                                                                    tutorial_detail__foss_id=key)
-
-                    if level:
-                        t_resource_qs = t_resource_qs.filter(tutorial_detail__level_id=level)
-
-                    for value in values[0]:
-                        language = Language.objects.get(pk=value)
-                        add_sheets(archive, foss_rec, language)
-
-                        tr_recs = t_resource_qs.filter(language_id=value).order_by(
-                            'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
-
-                        languages.add(language.name)
-
-                        for rec in tr_recs:
-                            filepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
-                             # get list of questions of a particular tutorial
-                            question_s = Question.objects.filter(category=foss_rec.foss.replace(' ','-'),tutorial=rec.tutorial_detail.tutorial.replace(' ','-')).order_by('-date_created')
-
-
-                            if os.path.isfile(settings.MEDIA_ROOT + filepath):
-                                archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
-
-                            # add srt file to archive
-                            add_srt_file(archive, rec, filepath, eng_flag, srt_files)
-
-                            # collect common files
-                            collect_common_files(rec, common_files)
-
-                            tutorial_path = '{}/{}/'.format(rec.tutorial_detail.foss_id, rec.tutorial_detail_id)
-                            filepath = 'spoken/videos/{}show-video-{}.html'.format(tutorial_path, rec.language.name)
-                            ctx = {'tr_rec': rec, 'tr_recs': tr_recs,
-                                   'media_path': settings.MEDIA_ROOT, 'tutorial_path': tutorial_path,'question_s': question_s}
-                            convert_template_to_html_file(archive, filepath, request,
-                                                          "cdcontent/templates/watch_tutorial.html", ctx)
-                            # for each question find the answers
-                            for question in question_s:
-                                answer=Answer.objects.filter(question=question)
-                                ctx = {'question': question, 'answer': answer}
-                                filepath = 'spoken/videos/' + str(foss_rec.id) + '/' + str(rec.tutorial_detail_id) + '/answer-to-question-' + str(question.id) + '.html'
-                                convert_template_to_html_file(archive, filepath, request, "cdcontent/templates/answer_to_question.html", ctx)
-
-
-
-
-                        filepath = 'spoken/videos/' + str(foss_rec.id) + '/list-videos-' + language.name + '.html'
-                        ctx = {'collection': tr_recs, 'foss_details': all_foss_details,
-                               'foss': foss_rec.id, 'lang': language.id}
-                        convert_template_to_html_file(archive, filepath, request,
-                                                      "cdcontent/templates/tutorial_search.html", ctx)
-
-                    # add common files for current foss
-                    add_common_files(archive, common_files)
-
-                # add side-by-side tutorials for selected languages
-                languages = add_side_by_side_tutorials(archive, languages)
-                add_forum_video(archive)
-
-                ctx = {'foss_details': all_foss_details, 'foss': foss_rec.id,
-                       'lang': language.id, 'languages': languages}
-                convert_template_to_html_file(archive, 'spoken/videos/home.html', request,
-                                              "cdcontent/templates/home.html", ctx)
-
-                # add all required static files to archive
-                add_static_files(archive)
-                archive.close()
-
-                file_obj.close()
+                zipfile_name = internal_computation(request, 'paid')
                 # wrapper = FileWrapper(temp)
                 # response = HttpResponse(wrapper, content_type='application/zip')
                 # response['Content-Disposition'] = 'attachment; filename=spoken-tutorial-cdcontent.zip'
                 # response['Content-Length'] = temp.tell()
                 # return response
                 context = {'path': '/media/cdimage/{}'.format(zipfile_name), 'status': True}
-            except Exception:
+            except Exception as e:
+                print(e)
                 context = {'path': '', 'status': False}
         return HttpResponse(json.dumps(context), content_type='application/json')
     else:
         form = CDContentForm()
+    states = State.objects.order_by('name')
+
     context = {
-        'form': form
+        'form': form,
+        'states': states,
+        'payment_form': PayeeForm(user=request.user),
     }
+    if request.user.is_authenticated():
+        payee_list = Payee.objects.prefetch_related(
+            'cdfosslanguages_set__foss','cdfosslanguages_set__lang',
+            'payment_transaction').filter(user=request.user)
+        context['payee_list'] = payee_list
     context.update(csrf(request))
-
+    context['organizer_paid'] = is_organizer_paid(request)
     return render(request, "cdcontent/templates/cdcontent_home.html", context)
-
 
 @csrf_exempt
 def ajax_fill_languages(request):
@@ -360,6 +384,7 @@ def ajax_fill_languages(request):
 
 @csrf_exempt
 def ajax_add_foss(request):
+    
     foss = request.POST.get('foss', '')
     level = int(request.POST.get('level', 0))
     selectedfoss = {}
@@ -374,7 +399,6 @@ def ajax_add_foss(request):
     if foss and langs:
         selectedfoss[foss] = [langs, level]
     data = json.dumps(selectedfoss)
-
     return HttpResponse(json.dumps(data), content_type='application/json')
 
 
@@ -385,6 +409,7 @@ def ajax_show_added_foss(request):
     except:
         tmp = {}
 
+    
     data = ''
     fsize_total = 0.0
     languages = set()
@@ -392,16 +417,22 @@ def ajax_show_added_foss(request):
 
     for key, values in list(tmp.items()):
         langs_list = list(values[0])
+        
+        
+
         foss, level = FossCategory.objects.get(pk=key), int(values[1])
+        
         langs = ', '.join(list(
             Language.objects.filter(id__in=list(values[0])).order_by('name').values_list('name', flat=True)))
-
+        
         if level:
             tr_recs = TutorialResource.objects.filter(Q(status=1) | Q(
                 status=2), tutorial_detail__foss=foss, tutorial_detail__level_id=level, language_id__in=langs_list)
+            level_txt = Level.objects.get(pk=level)
         else:
             tr_recs = TutorialResource.objects.filter(Q(status=1) | Q(
                 status=2), tutorial_detail__foss=foss, language_id__in=langs_list)
+            level_txt = 'All'
 
         fsize = 0.0
         eng_flag = True
@@ -456,9 +487,10 @@ def ajax_show_added_foss(request):
         for filepath in common_files:
             if os.path.isfile(filepath):
                 fsize += os.path.getsize(filepath)
-
         fsize_total += fsize
-        data += '<tr><td>{}</td><td>{}</td><td>{}</td></tr>'.format(foss.foss, langs, humansize(fsize))
+        
+        
+        data += '<tr><td name="foss[]">{}</td><td name="level[]">{}</td><td name="langs[]">{}</td><td name="size">{}</td><td id="{}"></td></tr>'.format(foss.foss,level_txt, langs, humansize(fsize),foss.id)
 
     fsize = 0.0
     languages.add(eng_rec.name)
@@ -479,7 +511,66 @@ def ajax_show_added_foss(request):
     fsize += calculate_static_file_size()
 
     fsize_total += fsize
-    data += '<tr><td colspan="2">Extra files</td><td>{}</td></tr>'.format(humansize(fsize))
-
-    output = {0: data, 1: humansize(fsize_total)}
+    data += '<tr><td colspan="3">Extra files</td><td>{}</td></tr>'.format(humansize(fsize))
+    
+    #check if user is registered
+    user_details = check_user_details(request,fsize_total )
+    output = {0: data, 1: humansize(fsize_total), 2:user_details}
     return HttpResponse(json.dumps(output), content_type='application/json')
+
+
+def get_user_type(request):
+    user_type = 0
+    classification ={
+    'unregistered' : 'UR',
+    'registered_not_paid' : 'RNP',
+    'registered_paid' : 'RP'
+    }
+    # 'UR':'UnRegistered User',
+    # 'RNP':'Registered but not Paid User',
+    # 'RP':'Registered and Paid User'
+    if request.user.is_authenticated():
+        try:
+            AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
+            return classification['registered_paid']
+        except :
+            user_type = classification['registered_not_paid']
+
+        try:
+            AcademicKey.objects.get(academic_id=request.user.invigilator.academic_id)
+            return classification['registered_paid']
+        except :
+            user_type = classification['registered_not_paid']
+
+        try:
+            AcademicKey.objects.get(academic_id=request.user.student.academic_id)
+            return classification['registered_paid']
+        except :
+            user_type = classification['registered_not_paid']
+        return user_type
+    else:
+        return classification['unregistered']
+
+def get_payable_amount(filesize):
+    if filesize < 100.0: 
+        return '100'
+    else:
+        return '250'
+
+def check_user_details(request, filesize):
+    file_size = round(filesize/ pow(2,20),1)
+    user_type = get_user_type(request)
+    amount = get_payable_amount(file_size)
+    if user_type == 'RP':
+        return ['RP','No Limit']
+    else:
+        return [user_type, amount]
+
+# return '1' if organizer belongs to paid college with valid expiry date, else '0'
+def is_organizer_paid(request):
+    try:
+        idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
+        organizer_paid = '1' if (idcase.expiry_date >= date.today()) else '0'
+    except:
+        organizer_paid = '0'
+    return organizer_paid

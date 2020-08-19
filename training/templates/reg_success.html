@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{%load trainingdata%}
+{% block title %}{{participant_obj.event.event_name}} Registration{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> List of Training Events :
+{% endblock %}
+{% block compressinlinecssblock %}
+<style>
+  .reg-wrapper{
+    border: 5px solid #337ab7;
+  }
+  .reg-wrapper .status-icon{
+    font-size: 5rem;
+
+  }
+  .reg-wrapper .reg-table{
+    padding: 2% 5%;
+  }
+  .reg-wrapper .bl{
+    border-left:1px solid rgba(51,122,183,0.2);
+  }
+  .reg-wrapper h5{
+    color: #3c763d;
+  }
+  .reg-wrapper .reg-icon{
+    color: #337ab7;
+    margin-right: 10px;
+  }
+
+
+</style>
+{% endblock %}
+{% block search %}{% endblock %}
+
+{% block content %}
+{{message.tags}}
+{% csrf_token %}
+<div class="row">
+  <div class="col-sm-12 col-md-8 col-md-offset-2 ">
+    <div class=" reg-wrapper">
+  <div class="text-center">
+      {% if user|registartion_successful:participant_obj.event  %}
+      <p class="status-icon"><i class="fa fa-check" aria-hidden="true" style="color: rgba(51,122,183,0.7);"></i></p>
+    <h4>Thank you for registering with Spoken Tutorials.</h4>
+    {% else %}
+    <p class="status-icon"><i class="fa fa-times" aria-hidden="true" style="color: rgba(250,128,114);"></i></p>
+    <h4>Your Payment Failed.</h4>
+    <p>But don't worry, we have still partially registered you.</p>
+    <div class="panel panel-default text-left">
+      <div class="panel-body">
+        <p>Please try the following to complete the registration.</p>
+        <ul>
+          <li><span>Try the Registration process once again</span></li>
+          <li> <span>Use <a href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">
+          <span style="color:#b71c1c;text-decoration: underline;">Payment Flow via NEFT</span></a> and get in touch with our Training Managers for more help. </span>
+          <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">
+         <span style="color:#b71c1c;text-decoration: underline;">[ Spoken Tutorial Training Managers ] </span></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  <br>
+  <div class="reg-table row">
+    <div class="col-md-6">
+      <h5>Participant</h5>
+      <hr>
+      <p>Name : {{participant_obj.name}}</p>
+      <p>Email : {{participant_obj.email}}</p>
+      <br>
+      <h5>FOSS</h5>
+      <hr>
+      <p>{{participant_obj.event.foss}}</p>
+      <p>{{participant_obj.event.Language_of_workshop}}
+	{% if participant_obj.foss_language %}
+, {{participant_obj.foss_language}}
+    	{% endif %}
+      </p>
+    </div>
+    <div class="col-md-6 bl">
+      <h5>Event</h5>
+      <hr>
+      <p>{{participant_obj.event.event_name}}</p>
+       <p><i class="fa fa-calendar reg-icon" aria-hidden="true"></i>{{participant_obj.event.event_start_date}} - {{participant_obj.event.event_end_date}}</p>
+      <p><i class="fa fa-map-marker reg-icon" aria-hidden="true"></i>{{participant_obj.event.host_college}}</p>
+      <br>
+      <h5>Contact Details</h5>
+      <hr>
+      <p><i class="fa fa-user reg-icon" aria-hidden="true"></i>{{participant_obj.event.event_coordinator_name}}</p>
+      <p><i class="fa fa-phone reg-icon" aria-hidden="true"></i>{{participant_obj.event.event_coordinator_contact_no}}</p>
+      <p><i class="fa fa-envelope reg-icon" aria-hidden="true"></i>{{participant_obj.event.event_coordinator_email}}</p>
+    </div>
+    
+  </div>
+</div>
+  </div>
+</div>
+
+{% endblock %}
+{% block jsblock %}
+
+{% endblock %}

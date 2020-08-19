@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load trainingdata %}
+{% load eventsdata %}
+{% block title %}List Event Participants{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> List of Event Participants :
+{% endblock %}
+{% block search %}{% endblock %}
+
+{% block content %}
+{{message.tags}}
+<form action="{{ action }}" id="form-id" method="post">
+	{% csrf_token %}
+{% if eventid|is_tr_completed %}
+<div style="width:200px;float:left;text-align:center;">
+  <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All Attendance" onClick="this.value=check_attendance()">
+</div>
+{% endif %}
+{% if eventid|is_tr_ongoing%}
+<div style="width:200px;float:left;text-align:center;">
+  <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All registartion" onClick="this.value=check_reg()">
+</div>
+{% endif %}
+
+<table class="paleblue table">
+	<tr>
+		<th>Sr. No.</th>
+		{% if eventid|is_tr_completed or eventid|is_tr_ongoing%}
+		<th>Check</th>
+		{% endif %}
+		<th>Name</th>
+		<th>Email</th>
+		<th>College Name</th>
+		<th>State</th>
+		<th>Registration Type</th>
+	</tr>
+{% for record in object_list %}
+	<tr>
+		<td>{{ forloop.counter }}</td>
+
+		{% if eventid|is_tr_ongoing%}
+		<input type="hidden" id="event_status" name="event_status" value="reg">
+			{% if eventid|is_reg_confirmed:record.id %}
+				<td><input type='checkbox' name="user_reg" value="{{record.id}}" checked="checked"></td>
+			{% else %}
+				<td><input type='checkbox' name="user_reg" value="{{record.id}}"></td>
+			{% endif %}
+		{% endif %}
+
+
+		{% if eventid|is_tr_completed %}
+		<input type="hidden" id="event_status" name="event_status" value="attend">
+			{% if eventid|is_attendance_marked:record.id %}
+				<td><input type='checkbox' name="user" value="{{record.id}}" checked="checked"></td>
+			{% else %}
+				<td><input type='checkbox' name="user" value="{{record.id}}"></td>
+			{% endif %}
+		{% endif %}
+
+		{% if eventid|is_event_closed %}
+			<td>{{ record.participant.name}}</td>
+			<td>{{ record.participant.email}}</td>
+			<td>{{ record.participant.college.institution_name}}</td>
+			<td>{{ record.participant.state.name}}</td>
+			<td>
+				{% if record.participant.registartion_type == 0 %}
+					From Host college
+				{% elif record.participant.registartion_type == 1 %}
+					From Subscribed college
+				{% elif record.participant.registartion_type == 2 %}
+					Manual registartion
+				{% endif %}
+			</td>
+		{% else %}
+
+			<td>{{ record.name}}</td>
+			<td>{{ record.email}}</td>
+			<td>{{ record.college.institution_name}}</td>
+			<td>{{ record.state.name}}</td>
+			<td>
+				{% if record.registartion_type == 0 %}
+					From Host college
+				{% elif record.registartion_type == 1 %}
+					From Subscribed college
+				{% elif record.registartion_type == 2 %}
+					Manual registartion
+				{% endif %}
+			</td>
+		{% endif %}
+    </tr>
+{% endfor %}
+</table>
+</form>
+{% if eventid|is_tr_ongoing %}
+	<a  class="btn btn-info" type="Submit" onclick="document.forms['form-id'].submit();">Submit Registration</a>
+	{% if eventid|event_has_registration %}
+	<a href="{% url 'training:approve_event_registration' eventid %}" class="btn btn-info">Approve Registration</a>{% endif %}
+
+{% elif eventid|is_tr_completed %}
+	<a  class="btn btn-info" type="Submit" onclick="document.forms['form-id'].submit();">Submit Attendance</a>
+	{% if eventid|event_has_attendance %}
+	<a href="{% url 'training:close_event' eventid %}" class="btn btn-info">Close Event and Genearte Certificates</a>{% endif %}
+
+{% elif eventid|is_event_closed%}
+	<a href="#" class="btn btn-info">Download certificates</a>
+{% endif %}
+{% endblock %}
+
+{% block jsblock %}
+  <script type="text/javascript">
+  var checkflag = "false";
+  function check_attendance() {
+  var field=document.getElementsByName('user');
+    if (checkflag == "false") {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = true;
+      }
+      checkflag = "true";
+      $("#button-select").text("To deselect all participants");
+      return "Uncheck All Attendance";
+    } else {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = false;
+      }
+      checkflag = "false";
+      return "Check All Attendance";
+    }
+  }
+
+  function check_reg() {
+  var field=document.getElementsByName('user_reg');
+    if (checkflag == "false") {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = true;
+      }
+      checkflag = "true";
+      $("#button-select").text("To deselect all participants");
+      return "Uncheck All Registration";
+    } else {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = false;
+      }
+      checkflag = "false";
+      return "Check All Registration";
+    }
+  }
+  
+  </script>
+{% endblock %}

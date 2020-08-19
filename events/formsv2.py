@@ -644,3 +644,22 @@ class StudentGradeFilterForm(forms.Form):
     self.fields['activation_status'].widget.attrs.update({'class': 'form-control'})
     self.fields['from_date'].widget.attrs.update({'class': 'form-control'})
     self.fields['to_date'].widget.attrs.update({'class': 'form-control'})
+
+
+class AcademicPaymentStatusForm(forms.ModelForm):
+  email = forms.CharField(required = False)
+  phone = forms.CharField(required = False)
+  transactionid = forms.CharField(required = False)
+  pan_number = forms.CharField(required = False)
+  gst_number = forms.CharField(required = False)
+  customer_id = forms.CharField(required = False)
+  invoice_no = forms.CharField(required = False)
+  remarks = forms.CharField(required = False)
+  class Meta(object):
+    model = AcademicPaymentStatus
+    exclude = ['entry_user']
+    widgets = {
+    'payment_date':DateInput(),
+    'phone':forms.NumberInput(),
+    'amount':forms.NumberInput()
+    }

@@ -27,6 +27,8 @@ from mdldjango.models import MdlUser
 from mdldjango.urls import *
 from django.template.context_processors import csrf
 
+from donate.models import Payee
+
 def dispatcher(request, permalink=''):
     if permalink == '':
         return HttpResponseRedirect('/')
@@ -60,7 +62,7 @@ def dispatcher(request, permalink=''):
 
 
 def create_profile(user, phone):
-    confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(33))
+    confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(7))
     profile = Profile(user=user, confirmation_code=confirmation_code, phone=phone)
     profile.save()
     return profile
@@ -141,6 +143,41 @@ IIT Bombay.
         result = email.send(fail_silently=False)
     except:
         pass
+
+def email_otp(user):
+    p = Profile.objects.get(user=user)
+    subject = 'Spoken Tutorial'
+    message = """Hello {0},
+
+
+Your OTP is
+
+{1}
+
+If you enter the OTP correctly, this email address will get activated on Spoken Tutorial({2}).
+
+Regards,
+Admin
+Spoken Tutorials
+IIT Bombay.
+    """.format(
+        user.username,
+        str(p.confirmation_code),
+        "https://spoken-tutorial.org",
+    )
+
+    email = EmailMultiAlternatives(
+        subject, message, 'no-reply@spoken-tutorial.org',
+        to = [user.email], bcc = [], cc = [],
+        headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
+    )
+
+    #email.attach_alternative(message, "text/html")
+    try:
+        result = email.send(fail_silently=False)
+    except:
+        pass
+
 
 def confirm(request, confirmation_code, username):
     try:
@@ -288,10 +325,16 @@ def account_view_profile(request, username):
       profile = Profile.objects.get(user = user)
     except:
       profile = create_profile(user)
+
+    
     context = {
         'profile' : profile,
         'media_url' : settings.MEDIA_URL,
     }
+    if request.user.is_authenticated():
+        payee_list = Payee.objects.prefetch_related('cdfosslanguages_set__foss','cdfosslanguages_set__lang').filter(user=request.user)
+        context['payee_list'] = payee_list
+        
     return render(request, 'cms/templates/view-profile.html', context)
 
 def password_reset(request):
@@ -334,7 +377,7 @@ Your current login information is now:
 With respect to change your password kindly follow the steps written below :
 
 Step 1. Visit below link to change the password. Provide temporary password given above in the place of Old Password field.
-	{3}
+    {3}
 
 Step 2.Use this changed password for spoken forum login and in moodle login also.
 

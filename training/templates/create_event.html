@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Create Training Event{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> Create New Training Event :
+{% endblock %}
+{% block search %}{% endblock %}
+
+ {% block content %}
+{{message.tags}}
+<div class="row " ><!--main div 1 style="background-color:#fad7a0"-->
+	<div class='col-sm-15'>
+	<form action="" method="POST" class='form-horizontal'>{% csrf_token %}
+	    <div class="col-sm-11">
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_event_type">Event Type <sup style="color:red";>*</sup></label>
+				
+				<div class="col-sm-9">
+				{% render_field form.event_type class+="form-control event_type" %}
+				{{ form.event_type.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_event_fee">Event Charges <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.event_fee class+="form-control event_fee" %}
+				{{ form.event_fee.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_event_name">Event Name <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.event_name class+="form-control event_name" %}
+				{{ form.event_name.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_state">State <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.state class+="form-control state" %}
+				{{ form.state.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_host_college">Host College <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.host_college class+="form-control host_college" %}
+				{{ form.host_college.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Foss <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.foss class+="form-control foss" %}
+				{{ form.foss.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Event Start Date <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.event_start_date class+="form-control event_start_date" %}
+				{{ form.event_start_date.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Event End Date <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.event_end_date class+="form-control event_end_date" %}
+				{{ form.event_end_date.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Event Coordinator Name <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.event_coordinator_name class+="form-control event_coordinator_name" %}
+				{{ form.event_coordinator_name.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Event Coordinator Email </label>
+				<div class="col-sm-9">
+				{% render_field form.event_coordinator_email class+="form-control event_coordinator_email" %}
+				{{ form.event_coordinator_email.errors }}
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Event Coordinator Contact No. </label>
+				<div class="col-sm-9">
+				{% render_field form.event_coordinator_contact_no class+="form-control event_coordinator_contact_no" %}
+				{{ form.event_coordinator_contact_no.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Registartion Start Date <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.registartion_start_date class+="form-control registartion_start_date" %}
+				{{ form.registartion_start_date.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_name">Registartion End Date <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.registartion_end_date class+="form-control registartion_end_date" %}
+				{{ form.registartion_end_date.errors }}
+				</div>
+			</div>
+
+		</div>
+
+		<div class="form-group">
+			<div class="col-sm-offset-5 col-sm-9">
+			<input class="btn btn-warning btn-lg" type="submit" id="submit_button" value="Add Event" />
+			</div>
+		</div>
+
+	</form>
+	</div>
+</div>
+ {% endblock %}
+{% block jsblock %}
+<script type="text/javascript">
+ $( document ).ready(function() {
+
+ 	$('#id_state').change(function(){
+   	var stateid  = $('#id_state').val();
+   	$.ajax({
+                type : "POST",
+                url:"/software-training/ajax-state-collage/",
+                dataType : "json",
+                data: {
+                  'state' : stateid,
+                },
+                success: function(data)
+                {
+                    $('#id_host_college').html(data);
+                }
+              });
+   	});
+
+
+  });
+
+ </script>
+{% endblock %}
