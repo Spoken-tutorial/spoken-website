@@ -48,6 +48,5 @@ urlpatterns = [
       name="event_attendance"
     ),
     url(r'^ajax_check_college/', ajax_check_college, name="ajax_check_college"),
-    url(r'^generate_training_certificate/', generate_training_certificate, name="generate_training_certificate"),
     url(r'^upload_college_details/', upload_college_details, name="upload_college_details"),
     ]

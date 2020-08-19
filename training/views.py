@@ -161,7 +161,7 @@ def reg_success(request, user_type):
 				return form_data
 		else:
 			messages.warning(request, 'Invalid form payment request.')
-			return redirect('training:list_events' 'ongoing' )
+			return redirect('training:list_events', status='ongoing' )
 
 
 class EventPraticipantsListView(ListView):
@@ -482,51 +482,6 @@ def ajax_check_college(request):
 		if int(college_id) == int(user_details[1].id):
 			check = True
 	return HttpResponse(json.dumps(check), content_type='application/json')
-
-
-def generate_training_certificate(request):
-    response = HttpResponse(content_type='application/pdf')
-    file_name = request.POST.get("name")
-    
-    try:
-        template = 'receipt_template'
-        download_file_name = "ST_"+request.POST.get("name")+'.pdf'
-        certificate_path = os.path.dirname(os.path.realpath(__file__))+"/receipt/"
-        template_file = open('{0}{1}'.format
-                             (certificate_path, template), 'r')
-        content = Template(template_file.read())
-        template_file.close()
-
-        content_tex = content.safe_substitute(
-            image_dir = certificate_path+"images/",
-            name = request.POST.get("name"),
-            amount = request.POST.get("amount"),
-            reqId = request.POST.get("reqId"),
-            transId = request.POST.get("transId"),
-            refNo = request.POST.get("refNo"),
-            provId = request.POST.get("provId"),
-            status = request.POST.get("status"),
-            msg = request.POST.get("msg"),
-            key = request.POST.get("key"),
-            expiry = request.POST.get("expiry"),
-            email = request.POST.get("email"))
-        create_tex = open('{0}{1}.tex'.format
-                          (certificate_path, file_name), 'w')
-        create_tex.write(content_tex)
-        create_tex.close()
-        out = certificate_path
-        
-        subprocess.run(['pdflatex','--output-directory',certificate_path,certificate_path+file_name+'.tex'])
-        pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
-        response['Content-Disposition'] = 'attachment; \
-                    filename=%s' % (download_file_name)
-        response.write(pdf.read())
-        _clean_certificate_certificate(certificate_path, file_name)
-        return response
-    except Exception as e:
-        print("error is ",e)
-
-    return response
 
 
 def get_create_user(row):
