@@ -340,17 +340,14 @@ class ParticipantCreateView(CreateView):
 		for i, row in enumerate(rows_data):
 			user = self.get_create_user(row)
 			user_data = is_user_paid(user)
-			if user_data[0]:
-				college = user_data[1]
-			else:
-				college = user_college(user)
-			if college == '':
-				try:
-					college = AcademicCenter.objects.get(academic_code=row[6])
-				except AcademicCenter.DoesNotExist:
-					csv_error = True
-					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " was not created.")
-					continue
+			
+			try:
+				college = AcademicCenter.objects.get(academic_code=row[6])
+			except AcademicCenter.DoesNotExist:
+				csv_error = True
+				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " was not created.")
+				continue
+			
 			if registartion_type == 1:
 				if not(is_college_paid(college.id)):
 					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution " + row[6] + " is not a Paid college."+" Participant "+ row[2] + " was not created.")
