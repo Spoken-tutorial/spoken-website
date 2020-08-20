@@ -1,5 +1,4 @@
 $(document).ready(function(){
-    
     $('.create_zip').prop('disabled', true); 
 
     // announcement
@@ -320,7 +319,7 @@ function show_added_foss(selected_foss){
          $('.user-message').html(message);
          $('.download-a').html("Download");
          $("#rate-div").show();
-         $("#user_file_size").html("Foss Purchase (INR) ");
+         // $("#user_file_size").html("Foss Purchase (INR)");
         document.getElementById("amount_to_pay").value = data[2][1];
         }
         if(data[2][0]=='RP') {
@@ -337,7 +336,7 @@ function show_added_foss(selected_foss){
          $('.download-a').html("Download");
 
          $("#rate-div").show();
-         $("#user_file_size").html("Foss Purchase (INR)");
+         // $("#user_file_size").html("Foss Purchase (INR)");
          document.getElementById("amount_to_pay").value = data[2][1];
         }
         if (Object.keys(JSON.parse(selectedfoss)).length === 0) {

@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.template.context_processors import csrf
 from donate.forms import PayeeForm, TransactionForm
 from donate.models import *
-from cms.views import create_profile, email_otp
+from cms.views import create_profile, email_otp,send_registration_confirmation
 from django import forms
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -195,7 +195,7 @@ def send_onetime(request):
         if user.is_active:
             context['message'] = "active_user"
         else:
-            email_otp(user)
+            send_registration_confirmation(user)
             context['message'] = "inactive_user"
 
     except MultipleObjectsReturned as e:

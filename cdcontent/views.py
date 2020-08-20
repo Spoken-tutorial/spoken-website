@@ -552,10 +552,13 @@ def get_user_type(request):
         return classification['unregistered']
 
 def get_payable_amount(filesize):
+    lt_100 = 99
+    gt_100 = 250
+    gst = 0.18
     if filesize < 100.0: 
-        return '100'
+        return (lt_100 + (lt_100 * gst))
     else:
-        return '250'
+        return (gt_100 + (gt_100 * gst))
 
 def check_user_details(request, filesize):
     file_size = round(filesize/ pow(2,20),1)

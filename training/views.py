@@ -28,7 +28,7 @@ from events.models import *
 from events.views import is_resource_person, is_administrator, get_page 
 from events.filters import ViewEventFilter
 from cms.sortable import *
-from cms.views import create_profile, email_otp
+from cms.views import create_profile, send_registration_confirmation
 
 
 today = date.today()
@@ -397,7 +397,7 @@ class ParticipantCreateView(CreateView):
 			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
 			user.save()
 			create_profile(user, '')
-			email_otp(user)
+			send_registration_confirmation(user)
 			return user
 
 
@@ -492,7 +492,7 @@ def get_create_user(row):
 			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
 			user.save()
 			create_profile(user, '')
-			email_otp(user)
+			send_registration_confirmation(user)
 			return user
 
 from io import TextIOWrapper
