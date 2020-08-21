@@ -40,29 +40,50 @@
 <div class="row">
   <div class="col-sm-12 col-md-8 col-md-offset-2 ">
     <div class=" reg-wrapper">
+
+
   <div class="text-center">
+    {% if participant_obj %}
       {% if user|registartion_successful:participant_obj.event  %}
-      <p class="status-icon"><i class="fa fa-check" aria-hidden="true" style="color: rgba(51,122,183,0.7);"></i></p>
-    <h4>Thank you for registering with Spoken Tutorials.</h4>
+        <p class="status-icon"><i class="fa fa-check" aria-hidden="true" style="color: rgba(51,122,183,0.7);"></i></p>
+        <h4>Thank you for registering with Spoken Tutorials.</h4>
+        {% else %}
+          <p class="status-icon"><i class="fa fa-times" aria-hidden="true" style="color: rgba(250,128,114);"></i></p>
+          <h4>Your Payment Failed.</h4>
+          <div class="panel panel-default text-left">
+            <div class="panel-body">
+              <p>Please try the following to complete the registration.</p>
+              <ul>
+                <li><span>Try the Registration process once again</span></li>
+                <li> <span>Use <a href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">
+                <span style="color:#b71c1c;text-decoration: underline;">Payment Flow via NEFT</span></a> and get in touch with our Training Managers for more help. </span>
+                <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">
+               <span style="color:#b71c1c;text-decoration: underline;">[ Spoken Tutorial Training Managers ] </span></a>
+                </li>
+              </ul>
+            </div>
+          </div>
+      {% endif %}
     {% else %}
-    <p class="status-icon"><i class="fa fa-times" aria-hidden="true" style="color: rgba(250,128,114);"></i></p>
-    <h4>Your Payment Failed.</h4>
-    <p>But don't worry, we have still partially registered you.</p>
-    <div class="panel panel-default text-left">
-      <div class="panel-body">
-        <p>Please try the following to complete the registration.</p>
-        <ul>
-          <li><span>Try the Registration process once again</span></li>
-          <li> <span>Use <a href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">
-          <span style="color:#b71c1c;text-decoration: underline;">Payment Flow via NEFT</span></a> and get in touch with our Training Managers for more help. </span>
-          <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">
-         <span style="color:#b71c1c;text-decoration: underline;">[ Spoken Tutorial Training Managers ] </span></a>
-          </li>
-        </ul>
-      </div>
-    </div>
+          <p class="status-icon"><i class="fa fa-times" aria-hidden="true" style="color: rgba(250,128,114);"></i></p>
+          <h4>Your Payment Failed.</h4>
+          <div class="panel panel-default text-left">
+            <div class="panel-body">
+              <p>Please try the following to complete the registration.</p>
+              <ul>
+                <li><span>Try the Registration process once again</span></li>
+                <li> <span>Use <a href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">
+                <span style="color:#b71c1c;text-decoration: underline;">Payment Flow via NEFT</span></a> and get in touch with our Training Managers for more help. </span>
+                <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">
+               <span style="color:#b71c1c;text-decoration: underline;">[ Spoken Tutorial Training Managers ] </span></a>
+                </li>
+              </ul>
+            </div>
+          </div>
     {% endif %}
   </div>
+
+{% if participant_obj %}
   <br>
   <div class="reg-table row">
     <div class="col-md-6">
@@ -75,9 +96,9 @@
       <hr>
       <p>{{participant_obj.event.foss}}</p>
       <p>{{participant_obj.event.Language_of_workshop}}
-	{% if participant_obj.foss_language %}
-, {{participant_obj.foss_language}}
-    	{% endif %}
+        	{% if participant_obj.foss_language %}
+        , {{participant_obj.foss_language}}
+    	     {% endif %}
       </p>
     </div>
     <div class="col-md-6 bl">
@@ -95,6 +116,8 @@
     </div>
     
   </div>
+{% endif %}
+
 </div>
   </div>
 </div>
