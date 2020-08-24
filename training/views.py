@@ -70,7 +70,9 @@ class TrainingEventsListView(ListView):
 		if self.status == 'ongoing':
 			self.events = TrainingEvents.objects.filter(event_end_date__gte=today)
 		if self.status == 'myevents':
-			participant = Participant.objects.filter(user_id=self.request.user.id)
+			participant = Participant.objects.filter(
+				Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
+				user_id=self.request.user.id)
 			self.events = participant
 		return super(TrainingEventsListView, self).dispatch(*args, **kwargs)
 
@@ -146,12 +148,15 @@ def reg_success(request, user_type):
 			else:
 				form_data.registartion_type = 2 #Manual reg- paid 500
 
-			if Participant.objects.filter(
-				Q(payment_status__status = 1)|Q(registartion_type = 1),
-				user = request.user, event = form_data.event):
+			part = Participant.objects.filter(
+				Q(payment_status__status = 1)|Q(registartion_type__in  = (1,3)),
+				user = request.user, event = form_data.event)
+
+			if part.exists():
 				messages.success(request, "You have already registered for this event.")
 				return redirect('training:list_events', status='myevents')
 			else :
+
 				form_data.save()
 			event_name = event.event_name
 			if user_type == 'paid':
