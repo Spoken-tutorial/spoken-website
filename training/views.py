@@ -119,7 +119,9 @@ def register_user(request):
 					language=event_register.Language_of_workshop).values('language').distinct())
 			context["langs"] = langs
 			form.fields["foss_language"].queryset = langs
-			form.fields["amount"].initial = event_register.event_fee
+			gst = float(event_register.event_fee)* 0.18
+			context["gst"] = gst
+			form.fields["amount"].initial = float(event_register.event_fee) + gst
 			form.fields["amount"].widget.attrs['readonly'] = True
 			context['event_obj']= event_register
 	return render(request, template_name,context)
