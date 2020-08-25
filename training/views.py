@@ -512,8 +512,8 @@ def upload_college_details(request):
 	count = 0
 	csv_error = ''
 	if request.POST:
-		csv_file_data = TextIOWrapper(request.FILES['csv_file'], encoding=request.encoding)
-		rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
+		csv_file_data = TextIOWrapper(request.FILES['csv_file'], encoding='utf-8')
+		rows_data = csv.reader(csv_file_data, delimiter=',')
 		for i, row in enumerate(rows_data):
 			user = get_create_user(row)
 			try:
