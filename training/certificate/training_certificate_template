@@ -1,0 +1,57 @@
+%% Certificate template
+\documentclass[landscape]{article}
+\usepackage{wallpaper}
+\usepackage{xcolor}
+\usepackage{ulem}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{multirow}
+\usepackage{chancery}
+\usepackage[T1]{fontenc}
+%% package to execute bash commands
+%% \usepackage{bashful}
+
+%% generate QR code
+%%\usepackage{pst-barcode}
+%%\usepackage{auto-pst-pdf}
+
+\geometry{tmargin=.2cm,bmargin=.2cm,
+  lmargin=.2cm, rmargin=.2cm}
+\usepackage{multicol}
+\setlength{\columnseprule}{1pt}
+\columnwidth=0.6\textwidth
+
+\begin{document}
+
+\TileWallPaper{28cm}{22cm}{/../images/cert_koha.png}
+
+
+\centering
+\scalebox{3.1}{\color{brown!30!brown!60}
+\begin{minipage}{.33\textwidth}
+
+
+{\centering
+	\vspace{2cm}
+	\textcolor{black!100}
+	{\fontsize{6}{1} \selectfont 
+		This is to certify that
+		\textcolor{red!30!black!90}{\fontsize{8}{7} \selectfont {$name}}\\
+		\vspace{0.08cm}
+		from 
+			\textcolor{red!30!black!90}{\fontsize{6}{7} \selectfont{$college}}\\
+		attended \textcolor{red!30!black!90}{\fontsize{6}{7} \selectfont{$event_name}}  on\\
+		\textcolor{red!30!black!90}{\fontsize{6}{7} \selectfont{$foss}} held at \textcolor{red!30!black!90}{\fontsize{6}{7} \selectfont{$host_college}}\\ on \textcolor{red!30!black!90}{\fontsize{6}{7} \selectfont{$event_start_date}}\\
+		\vspace{0.1cm}
+		This training was conducted under the aegis of the National Virtual Library of India,\\
+		\vspace{-0.18cm}funded by the Ministry of Culture, Government of India.
+	}
+	
+
+	\vspace{0.5cm}
+	
+}
+
+\end{minipage}
+}
+\end{document}

@@ -598,3 +598,26 @@ def add_Academic_key(ac_pay_status_object, subscription):
 	ac_key.hex_key = hex_key
 	ac_key.expiry_date = expiry_date
 	ac_key.save()
+
+
+def generate_training_certificate(request):
+    response = HttpResponse(content_type='application/pdf')
+    participantname = request.user.first_name   
+    eventid = request.POST.get("eventid")
+    event = TrainingEvents.objects.get(id=eventid)
+    response = create_certificate(event.id, participantname)
+    return response
+
+
+def generate_alltraining_certificate(request):
+	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+	response = HttpResponse(content_type='application/pdf')   
+	eventid = request.POST.get("eventid")
+	print(eventid)
+	event = TrainingEvents.objects.get(id=eventid)
+	participants = Participant.objects.filter(id__in=EventAttendance.objects.filter(event_id=eventid).values('participant'))
+	print(participants)
+	for p in participants:
+		response = create_certificate(eventid, p.name)
+		# Add each pdf in zip file
+	return response
