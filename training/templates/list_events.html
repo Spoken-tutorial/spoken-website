@@ -96,6 +96,7 @@
                 </div>
                 {% endif %}
                 {% if event.event.id|is_event_closed and user|registartion_successful:event.event %}
+                {{event.event.id}}
                 <input type="hidden" name="eventid" value="{{event.event.id}}">
                 <div style="text-align: right;">
                     <button class="btn btn-info" type="submit" 

@@ -1,4 +1,5 @@
 from events.models import AcademicKey, StudentBatch
+from training.models import TrainingEvents
 from datetime import datetime,date
 from certificate.views import _clean_certificate_certificate
 from django.http import HttpResponse
@@ -6,17 +7,6 @@ import os
 from string import Template
 import subprocess
 
-EVENT_TYPE_CHOICES =(
-	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme')
-	)
-
-EVENT_AMOUNT = {
-     'FDP': '500', 'Workshop': '1000'
-    }
-
-# REGISTRATION_TYPE_CHOICES =(
-#     ('', '-----'),  (1, 'Subscribed College'),(2, 'Manual Registration')
-#     )
 
 def is_user_paid(user_obj):
     try:
@@ -69,7 +59,7 @@ def create_certificate(eventid,pname):
     event = TrainingEvents.objects.get(id=eventid)
     try:        
         file_name = pname
-        template = 'training_certificate_template'
+        template = 'fdp_cert_template/training_certificate_template'
         download_file_name = "ST_"+event.event_name+'.pdf'
         certificate_path = os.path.dirname(os.path.realpath(__file__))+"/certificate/"
         template_file = open('{0}{1}'.format

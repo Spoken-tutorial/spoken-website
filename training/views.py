@@ -609,6 +609,7 @@ def generate_training_certificate(request):
     response = HttpResponse(content_type='application/pdf')
     participantname = request.user.first_name   
     eventid = request.POST.get("eventid")
+    print(eventid)
     event = TrainingEvents.objects.get(id=eventid)
     response = create_certificate(event.id, participantname)
     return response
