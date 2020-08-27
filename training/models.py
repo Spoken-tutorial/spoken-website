@@ -6,10 +6,15 @@ from builtins import object
 from django.contrib.auth.models import User
 from creation.models import FossCategory, Language
 from events.models import *
-from .helpers import EVENT_TYPE_CHOICES, REGISTRATION_TYPE_CHOICES
+from .helpers import EVENT_TYPE_CHOICES
 from donate.models import Payee
 from donate.helpers import GENDER_CHOICES
 import json
+
+
+REGISTRATION_TYPE_CHOICES =(
+    ('', '-----'),  (1, 'Subscribed College'),(2, 'Manual Registration')
+    )
 
 class TrainingEvents(models.Model):	
 

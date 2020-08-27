@@ -29,6 +29,11 @@ from events.views import is_resource_person, is_administrator, get_page
 from events.filters import ViewEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
+from certificate.views import _clean_certificate_certificate
+from django.http import HttpResponse
+import os
+from string import Template
+import subprocess
 
 
 today = date.today()
