@@ -410,16 +410,18 @@ def mark_reg_approval(pid, eventid):
 
 class EventAttendanceListView(ListView):
 	queryset = ""
+	unsuccessful_payee = ""
 	paginate_by = 500
 	success_url = ""
 
 	def dispatch(self, *args, **kwargs):
 		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
-		self.queryset = Participant.objects.filter(event_id=kwargs['eventid'])
+		self.queryset = Participant.objects.filter(event_id=kwargs['eventid'], payment_status__status=1)
+		self.unsuccessful_payee = Participant.objects.filter(event_id=kwargs['eventid'], payment_status__status__in=(0,2))
 
 		
 		if self.event.training_status == 1:
-			self.queryset = Participant.objects.filter(event_id=kwargs['eventid'], reg_approval_status=1)
+			self.queryset = Participant.objects.filter(event_id=kwargs['eventid'], reg_approval_status=1, payment_status__status=1)
 
 		if self.event.training_status == 2:
 			self.queryset = self.event.eventattendance_set.all()
@@ -431,6 +433,7 @@ class EventAttendanceListView(ListView):
 		
 		context['event'] = self.event
 		context['eventid'] = self.event.id
+		context['unsuccessful_payee'] = self.unsuccessful_payee
 		return context
 
 	def post(self, request, *args, **kwargs):
