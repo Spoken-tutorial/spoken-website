@@ -58,4 +58,3 @@ def is_college_paid(college_id):
         college_paid = False
     
     return college_paid
-

@@ -140,7 +140,7 @@ def reg_success(request, user_type):
 				form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
 			except:
 				form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
-			user_data = is_user_paid(request.user, form_data.college)
+			user_data = is_user_paid(request.user, form_data.college.id)
 			if user_data[0]:
 				form_data.registartion_type = 1 #Subscribed College
 			else:
@@ -478,10 +478,9 @@ class EventAttendanceListView(ListView):
 @csrf_exempt
 def ajax_check_college(request):
 	college_id = request.POST.get("college_id")
-	user_details = is_user_paid(request.user, college_id)
+	user_details = is_user_paid(request.user, int(college_id))
 	check = False
 	if user_details[0]:
-		if int(college_id) == int(user_details[1].id):
 			check = True
 	return HttpResponse(json.dumps(check), content_type='application/json')
 
@@ -593,5 +592,3 @@ def add_Academic_key(ac_pay_status_object, subscription):
 	ac_key.hex_key = hex_key
 	ac_key.expiry_date = expiry_date
 	ac_key.save()
-
-
