@@ -35,6 +35,7 @@
 		<th>College Name</th>
 		<th>State</th>
 		<th>Registration Type</th>
+		<th>Payment Status</th>
 	</tr>
 {% for record in object_list %}
 	<tr>
@@ -73,6 +74,16 @@
 					Manual registartion
 				{% endif %}
 			</td>
+			<td><strong>
+				{% if record.participant.payment_status.status == 0 %}
+					Payment Initiated, not paid
+				{% elif record.participant.payment_status.status == 1 %}
+					Payment successfully completed
+				{% elif record.participant.payment_status.status == 2 %}
+					Payment failed
+				{% endif %}
+				</strong>
+			</td>
 		{% else %}
 
 			<td>{{ record.name}}</td>
@@ -87,6 +98,16 @@
 				{% elif record.registartion_type >= 2 %}
 					Manual registartion
 				{% endif %}
+			</td>
+			<td><strong>
+				{% if record.payment_status.status == 0 %}
+					Payment Initiated, not paid
+				{% elif record.payment_status.status == 1 %}
+					Payment successfully completed
+				{% elif record.payment_status.status == 2 %}
+					Payment failed
+				{% endif %}
+				</strong>
 			</td>
 		{% endif %}
     </tr>
@@ -106,6 +127,47 @@
 {% elif eventid|is_event_closed%}
 	<a href="#" class="btn btn-info">Download certificates</a>
 {% endif %}
+
+<h4>Unsuccessful Payee Details</h4>
+<table class="paleblue table">
+	<tr>
+		<th>Sr. No.</th>
+		<th>Name</th>
+		<th>Email</th>
+		<th>College Name</th>
+		<th>State</th>
+		<th>Registration Type</th>
+		<th>Payment Status</th>
+	</tr>
+	{% for payee in unsuccessful_payee %}
+	<tr>
+		<td>{{ forloop.counter }}</td>
+		<td>{{ payee.name}}</td>
+		<td>{{ payee.email}}</td>
+		<td>{{ payee.college.institution_name}}</td>
+		<td>{{ payee.state.name}}</td>
+		<td>
+			{% if payee.registartion_type == 0 %}
+				From Host college
+			{% elif payee.registartion_type == 1 %}
+				From Subscribed college
+			{% elif payee.registartion_type >= 2 %}
+				Manual registartion
+			{% endif %}
+		</td>
+		<td><strong>
+			{% if payee.payment_status.status == 0 %}
+				Payment Initiated, not paid
+			{% elif payee.payment_status.status == 1 %}
+				Payment successfully completed
+			{% elif payee.payment_status.status == 2 %}
+				Payment failed
+			{% endif %}
+			</strong>
+		</td>
+	</tr>
+	{% endfor %}
+</table>
 {% endblock %}
 
 {% block jsblock %}
