@@ -369,7 +369,7 @@ class ParticipantCreateView(CreateView):
 			else:
 				try:
 					Participant.objects.create(
-						name = row[0], 
+						name = row[0]+" "+row[1], 
 						email = row[2].strip(), 
 						gender = row[3], 
 						amount = row[4], 
@@ -378,7 +378,8 @@ class ParticipantCreateView(CreateView):
 						state = college.state, 
 						college = college,
 						foss_language = foss_language,
-						registartion_type = registartion_type
+						registartion_type = registartion_type,
+						reg_approval_status = 1
 						)
 					count = count + 1
 				except :
@@ -410,16 +411,20 @@ def mark_reg_approval(pid, eventid):
 
 class EventAttendanceListView(ListView):
 	queryset = ""
+	unsuccessful_payee = ""
 	paginate_by = 500
 	success_url = ""
 
 	def dispatch(self, *args, **kwargs):
 		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
-		self.queryset = Participant.objects.filter(event_id=kwargs['eventid'])
+		main_query = Participant.objects.filter(event_id=kwargs['eventid'])
+
+		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)))
+		self.unsuccessful_payee = main_query.filter(payment_status__status__in=(0,2))
 
 		
 		if self.event.training_status == 1:
-			self.queryset = Participant.objects.filter(event_id=kwargs['eventid'], reg_approval_status=1)
+			self.queryset = main_query.filter(reg_approval_status=1)
 
 		if self.event.training_status == 2:
 			self.queryset = self.event.eventattendance_set.all()
@@ -431,6 +436,7 @@ class EventAttendanceListView(ListView):
 		
 		context['event'] = self.event
 		context['eventid'] = self.event.id
+		context['unsuccessful_payee'] = self.unsuccessful_payee
 		return context
 
 	def post(self, request, *args, **kwargs):
