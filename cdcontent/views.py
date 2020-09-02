@@ -512,6 +512,11 @@ def ajax_show_added_foss(request):
     filepath = '{}videos/32/1450/Spoken-Tutorial-Forums-English.ogv'.format(settings.MEDIA_ROOT)
     if os.path.isfile(filepath):
             fsize += os.path.getsize(filepath)
+
+    # calculate size for suplementary video
+    filepath = '{}videos/32/1537/Spoken-Tutorial-Supplementary-Material-English.ogv'.format(settings.MEDIA_ROOT)
+    if os.path.isfile(filepath):
+            fsize += os.path.getsize(filepath)
             
     # calculate static file size
     fsize += calculate_static_file_size()
