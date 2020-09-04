@@ -1,11 +1,16 @@
 from __future__ import absolute_import, unicode_literals
-from spoken.config import *
-from celery import shared_task
-from .models import AsyncCronMail
 import csv
 from builtins import str
 import time
 import os, sys
+# setting django environment
+from django.core.wsgi import get_wsgi_application
+from config import *
+sys.path.append(SPOKEN_PATH)
+os.environ["DJANGO_SETTINGS_MODULE"] = "spoken.settings"
+application = get_wsgi_application()
+
+from .models import AsyncCronMail
 from datetime import datetime  
 from django.utils import timezone
 from django.conf import settings
@@ -15,8 +20,11 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from smtplib import SMTPException, SMTPServerDisconnected
 from django.core.mail import BadHeaderError
+from rq.decorators import job
+from cron import REDIS_CLIENT
 
-@shared_task
+
+@job('default', connection=REDIS_CLIENT)
 def async_bulk_email(taskid, *args, **kwargs):
     sent=0
     errors=0
