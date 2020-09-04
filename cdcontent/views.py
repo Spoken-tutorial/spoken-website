@@ -105,6 +105,11 @@ def add_forum_video(archive):
     if os.path.isfile(filepath):
             archive.write(filepath, 'spoken/videos/Spoken-Tutorial-Forums-English.ogv')
 
+def add_suplementary_video(archive):
+    filepath = '{}videos/32/1537/Spoken-Tutorial-Supplementary-Material-English.ogv'.format(settings.MEDIA_ROOT)
+    if os.path.isfile(filepath):
+            archive.write(filepath, 'spoken/videos/Spoken-Tutorial-Supplementary-Material-English.ogv')
+
 
 def get_static_files():
     return {
@@ -307,6 +312,7 @@ def internal_computation(request, user_type):
     # add side-by-side tutorials for selected languages
     languages = add_side_by_side_tutorials(archive, languages)
     add_forum_video(archive)
+    add_suplementary_video(archive)
 
     ctx = {'foss_details': all_foss_details, 'foss':'' ,
            'lang': '', 'languages': languages}
@@ -504,6 +510,11 @@ def ajax_show_added_foss(request):
 
     # calculate size for forum video
     filepath = '{}videos/32/1450/Spoken-Tutorial-Forums-English.ogv'.format(settings.MEDIA_ROOT)
+    if os.path.isfile(filepath):
+            fsize += os.path.getsize(filepath)
+
+    # calculate size for suplementary video
+    filepath = '{}videos/32/1537/Spoken-Tutorial-Supplementary-Material-English.ogv'.format(settings.MEDIA_ROOT)
     if os.path.isfile(filepath):
             fsize += os.path.getsize(filepath)
             
