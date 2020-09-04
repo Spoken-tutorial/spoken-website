@@ -55,6 +55,9 @@ class TrainingEventCreateView(CreateView):
 
 class TrainingEventsListView(ListView):
 	model = TrainingEvents
+	raw_get_data = None
+	header = None
+	collection = None
 
 	def dispatch(self, *args, **kwargs):
 		self.status = self.kwargs['status']
@@ -74,11 +77,25 @@ class TrainingEventsListView(ListView):
 				Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
 				user_id=self.request.user.id)
 			self.events = participant
+
+		self.raw_get_data = self.request.GET.get('o', None)
+		self.queryset = get_sorted_list(
+			self.request,
+			self.events,
+			self.header,
+			self.raw_get_data
+		)
+
+		self.collection= ViewEventFilter(self.request.GET, queryset=self.queryset, user=self.request.user)
 		return super(TrainingEventsListView, self).dispatch(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):
 		context = super(TrainingEventsListView, self).get_context_data(**kwargs)
-
+		context['form'] = self.collection.form
+		page = self.request.GET.get('page')
+		collection = get_page(self.collection.qs, page)
+		context['collection'] =  collection
+		context['ordering'] = get_field_index(self.raw_get_data)
 		context['status'] =  self.status
 		context['events'] =  self.events
 		context['show_myevents'] = self.show_myevents
