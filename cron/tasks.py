@@ -21,16 +21,15 @@ from django.core.exceptions import ValidationError
 from smtplib import SMTPException, SMTPServerDisconnected
 from django.core.mail import BadHeaderError
 from rq.decorators import job
-from cron import REDIS_CLIENT
+from cron import DEFAULT_QUEUE
 
-
-@job('default', connection=REDIS_CLIENT)
+@job(DEFAULT_QUEUE)
 def async_bulk_email(taskid, *args, **kwargs):
     sent=0
     errors=0
     task = AsyncCronMail.objects.get(pk=taskid)
     log_file_name = 'log_email_'+uuid.uuid4().hex+".csv"
-    log_file=open(settings.CRON_ROOT + log_file_name, "w+")
+    log_file=open(settings.CRON_ROOT + log_file_name, "a")
     with open(task.csvfile.path, newline='') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
         for row in csvreader:
@@ -62,6 +61,10 @@ def async_bulk_email(taskid, *args, **kwargs):
             except SMTPServerDisconnected as disconnect:
                 log_file.write(str(row[0])+','+str(0)+','+str('Failed to connect to SMTP server.')+'\n')
                 errors+=1
+            except OSError as e:
+                log_file.write(str(row[0])+','+str(0)+','+str('Failed to connect to SMTP server.')+'\n')
+                errors+=1
+
         
         task.log_file.name = 'emails/' + log_file_name
         task.completed_at = timezone.now()

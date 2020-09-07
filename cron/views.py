@@ -49,8 +49,9 @@ def run_cron_mail(request):
             cron_id = request.POST['cron_id']
             task = AsyncCronMail.objects.get(pk=cron_id)
             task.started_at = timezone.now()
+            job=async_bulk_email.delay(cron_id)
+            task.job_id=job.id
             task.save()
-            async_bulk_email.delay(cron_id)
             messages.success(request, "We are processing your request. Please wait a moment and refresh this page.")
             return redirect('cron:mail_list_create')
         else:
