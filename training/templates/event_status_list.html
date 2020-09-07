@@ -26,19 +26,31 @@
         </div>
      </div>
 
-<!--      <div class="col-lg-4 col-md-4 col-sm-4">
+     <div class="col-lg-4 col-md-4 col-sm-4">
         <div class="form-group">
-          <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
+          <label for="id_foss" class="col-sm-4 control-label">Foss</label>
           <div class="col-sm-8">
-            {% render_field form.host_college class+="form-control chosen host_college" tabindex="1" %}
+            {% render_field form.foss class+="form-control foss foss" tabindex="1" %}
+            {{ form.foss.errors }}
+          </div>
+        </div>
+     </div>
+
+     <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_host_college" class="col-sm-4 control-label">Host College</label>
+          <div class="col-sm-8">
+            {% render_field form.host_college class+="form-control host_college host_college" tabindex="1" %}
             {{ form.host_college.errors }}
           </div>
         </div>
-      </div> -->
+     </div>
+
+
 
       <div class="col-lg-4 col-md-4 col-sm-4">
        <div class="form-group">
-          <label for="id_tdate" class="col-sm-4 control-label">Start Date Range</label>
+          <label for="id_tdate" class="col-sm-4 control-label">Event Start Date Range</label>
           <div class="col-sm-8">
             {% render_field form.event_start_date class+="form-control event_start_date date" tabindex="1" %}
             {{ form.event_start_date.errors }}
@@ -48,7 +60,7 @@
 
       <div class="col-lg-4 col-md-4 col-sm-4"> 
         <div class="form-group">
-          <label for="id_tdate" class="col-sm-4 control-label">End Date Range</label>
+          <label for="id_tdate" class="col-sm-4 control-label">Event End Date Range</label>
           <div class="col-sm-8">
             {% render_field form.event_end_date class+="form-control event_end_date date" tabindex="1" %}
             {{ form.event_end_date.errors }}
@@ -94,7 +106,7 @@
             <td>
               {% if record.training_status == 0%}
                 <a href="{% url 'training:edit_event' record.id %}" >Edit Event</a> |
-                <a href="{% url 'training:upload_participants' record.id %}" >Upload Participants</a>
+                <a href="{% url 'training:upload_participants' record.id %}" >Upload Participants</a> |
               {% endif %}
               {% if record.id|is_tr_ongoing%}
                   <a href="{% url 'training:event_attendance' record.id %}" >Participant List</a>

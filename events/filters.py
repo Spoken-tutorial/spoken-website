@@ -321,8 +321,18 @@ class TrainingRequestFilter(django_filters.FilterSet):
 
 
 class ViewEventFilter(django_filters.FilterSet):
-  state = django_filters.ChoiceFilter(choices=State.objects.none())  
-  # host_college = django_filters.CharFilter(lookup_expr='icontains')
+  state = django_filters.ChoiceFilter(choices=State.objects.none())
+  host_college = django_filters.ChoiceFilter(
+    choices= [('', '---------')] + list(
+      TrainingEvents.objects.filter().order_by('host_college__institution_name').values_list('host_college__id', 'host_college__institution_name').distinct()
+    )
+  )
+  foss = django_filters.ChoiceFilter(
+    choices= [('', '---------')] + list(
+      TrainingEvents.objects.filter().order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()
+    )
+  )
+
   event_start_date = django_filters.DateFromToRangeFilter()
   event_end_date = django_filters.DateFromToRangeFilter()
 
@@ -339,5 +349,5 @@ class ViewEventFilter(django_filters.FilterSet):
     self.filters['state'].extra.update({'choices' : choices})
   class Meta(object):
     model = TrainingEvents
-    fields = ['state', 'host_college',]
+    fields = ['state', 'foss', 'host_college']
 

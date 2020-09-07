@@ -8,15 +8,15 @@ from string import Template
 import subprocess
 
 
-def is_user_paid(user_obj):
+def is_user_paid(user_obj, academic_id):
     try:
-        idcase = AcademicKey.objects.get(academic_id=user_obj.organiser.academic_id)
+        idcase = AcademicKey.objects.get(academic_id=academic_id)
         user_paid = [True, user_obj.organiser.academic] if (idcase.expiry_date >= date.today()) else [False]
         return user_paid
     except:
         user_paid = [False]
     try:
-        idcase = AcademicKey.objects.get(academic_id=user_obj.invigilator.academic_id)
+        idcase = AcademicKey.objects.get(academic_id=academic_id)
         user_paid = [True, user_obj.invigilator.academic] if (idcase.expiry_date >= date.today()) else [False]
         return user_paid
     except:

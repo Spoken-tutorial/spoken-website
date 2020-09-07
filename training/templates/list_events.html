@@ -1,8 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
 {% load trainingdata %}
 {% load eventsdata %}
+{% load cmsdata %}
 {% block title %}List Training Event{% endblock %}
 {% block heading %}
   <i class="fa fa-list-ul"></i> List of Training Events :
@@ -59,8 +60,72 @@
 {% block search %}{% endblock %}
 
  {% block content %}
+  <div class= 'filters row'>
+    <form action="" method="get" class='form-horizontal'>
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_state" class="col-sm-4 control-label">State</label>
+          <div class="col-sm-8">
+            {% render_field form.state class+="form-control state state" tabindex="1" %}
+            {{ form.state.errors }}
+          </div>
+        </div>
+     </div>
+
+     <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_foss" class="col-sm-4 control-label">Foss</label>
+          <div class="col-sm-8">
+            {% render_field form.foss class+="form-control foss foss" tabindex="1" %}
+            {{ form.foss.errors }}
+          </div>
+        </div>
+     </div>
+
+     <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_host_college" class="col-sm-4 control-label">Host College</label>
+          <div class="col-sm-8">
+            {% render_field form.host_college class+="form-control host_college host_college" tabindex="1" %}
+            {{ form.host_college.errors }}
+          </div>
+        </div>
+     </div>
+
+      <div class="col-lg-4 col-md-4 col-sm-4">
+       <div class="form-group">
+          <label for="id_tdate" class="col-sm-4 control-label">Event Start Date Range</label>
+          <div class="col-sm-8">
+            {% render_field form.event_start_date class+="form-control event_start_date date" tabindex="1" %}
+            {{ form.event_start_date.errors }}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-4 col-sm-4"> 
+        <div class="form-group">
+          <label for="id_tdate" class="col-sm-4 control-label">Event End Date Range</label>
+          <div class="col-sm-8">
+            {% render_field form.event_end_date class+="form-control event_end_date date" tabindex="1" %}
+            {{ form.event_end_date.errors }}
+          </div>
+        </div>
+        </div>
+
+        <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <div class="col-sm-offset-4 col-sm-8">
+           <input class="btn btn-success" type="submit" value="Filter" />
+           <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+          </div>
+        </div>
+      </div>
+      
+    </form>
+  </div>
 
 {{message.tags}}
+
 <ul class="tabs nav nav-tabs">
     <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/training/list_events/ongoing/">Ongoing Events</a></li>
     <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/training/list_events/completed/">Past Events</a></li>
@@ -72,7 +137,7 @@
 <!-- Tab panes -->
 <div class="tab-content">
     <div class="tab-pane active" id="pending">        
-        {% for event in events %}
+        {% for event in collection %}
 <form method="post" action = "{% url 'training:register_user' %}">
 {% csrf_token %}
         {% if status == 'myevents'%}

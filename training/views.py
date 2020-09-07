@@ -70,6 +70,9 @@ class TrainingEventCreateView(CreateView):
 
 class TrainingEventsListView(ListView):
 	model = TrainingEvents
+	raw_get_data = None
+	header = None
+	collection = None
 
 	def dispatch(self, *args, **kwargs):
 		self.status = self.kwargs['status']
@@ -89,11 +92,25 @@ class TrainingEventsListView(ListView):
 				Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
 				user_id=self.request.user.id)
 			self.events = participant
+
+		self.raw_get_data = self.request.GET.get('o', None)
+		self.queryset = get_sorted_list(
+			self.request,
+			self.events,
+			self.header,
+			self.raw_get_data
+		)
+
+		self.collection= ViewEventFilter(self.request.GET, queryset=self.queryset, user=self.request.user)
 		return super(TrainingEventsListView, self).dispatch(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):
 		context = super(TrainingEventsListView, self).get_context_data(**kwargs)
-
+		context['form'] = self.collection.form
+		page = self.request.GET.get('page')
+		collection = get_page(self.collection.qs, page)
+		context['collection'] =  collection
+		context['ordering'] = get_field_index(self.raw_get_data)
 		context['status'] =  self.status
 		context['events'] =  self.events
 		context['show_myevents'] = self.show_myevents
@@ -116,11 +133,7 @@ def register_user(request):
 		if user.profile_set.all():
 			try:
 				form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
-				user_data = is_user_paid(request.user)
-				if user_data[0]:
-					college = user_data[1]
-				else:
-					college = user_college(request.user)
+				college = user_college(request.user)
 				context['user_college'] = college
 			except Exception as e:
 				raise e
@@ -159,7 +172,7 @@ def reg_success(request, user_type):
 				form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
 			except:
 				form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
-			user_data = is_user_paid(request.user)
+			user_data = is_user_paid(request.user, form_data.college.id)
 			if user_data[0]:
 				form_data.registartion_type = 1 #Subscribed College
 			else:
@@ -362,7 +375,6 @@ class ParticipantCreateView(CreateView):
 		csv_error = False
 		for i, row in enumerate(rows_data):
 			user = self.get_create_user(row)
-			user_data = is_user_paid(user)
 			
 			try:
 				college = AcademicCenter.objects.get(academic_code=row[6])
@@ -389,7 +401,7 @@ class ParticipantCreateView(CreateView):
 			else:
 				try:
 					Participant.objects.create(
-						name = row[0], 
+						name = row[0]+" "+row[1], 
 						email = row[2].strip(), 
 						gender = row[3], 
 						amount = row[4], 
@@ -398,7 +410,8 @@ class ParticipantCreateView(CreateView):
 						state = college.state, 
 						college = college,
 						foss_language = foss_language,
-						registartion_type = registartion_type
+						registartion_type = registartion_type,
+						reg_approval_status = 1
 						)
 					count = count + 1
 				except :
@@ -430,16 +443,20 @@ def mark_reg_approval(pid, eventid):
 
 class EventAttendanceListView(ListView):
 	queryset = ""
+	unsuccessful_payee = ""
 	paginate_by = 500
 	success_url = ""
 
 	def dispatch(self, *args, **kwargs):
 		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
-		self.queryset = Participant.objects.filter(event_id=kwargs['eventid'])
+		main_query = Participant.objects.filter(event_id=kwargs['eventid'])
+
+		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)))
+		self.unsuccessful_payee = main_query.filter(payment_status__status__in=(0,2))
 
 		
 		if self.event.training_status == 1:
-			self.queryset = Participant.objects.filter(event_id=kwargs['eventid'], reg_approval_status=1)
+			self.queryset = main_query.filter(reg_approval_status=1)
 
 		if self.event.training_status == 2:
 			self.queryset = self.event.eventattendance_set.all()
@@ -451,6 +468,7 @@ class EventAttendanceListView(ListView):
 		
 		context['event'] = self.event
 		context['eventid'] = self.event.id
+		context['unsuccessful_payee'] = self.unsuccessful_payee
 		return context
 
 	def post(self, request, *args, **kwargs):
@@ -498,10 +516,9 @@ class EventAttendanceListView(ListView):
 @csrf_exempt
 def ajax_check_college(request):
 	college_id = request.POST.get("college_id")
-	user_details = is_user_paid(request.user)
+	user_details = is_user_paid(request.user, int(college_id))
 	check = False
 	if user_details[0]:
-		if int(college_id) == int(user_details[1].id):
 			check = True
 	return HttpResponse(json.dumps(check), content_type='application/json')
 

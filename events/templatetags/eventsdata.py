@@ -166,6 +166,17 @@ def feedback_status_likely(status):
     status_dict = {0 : 'Not at All', 1 : 'Not at All', 2 : 'Maybe', 3 : 'Likely', 4 : 'Quite likely', 5 : 'Definitely'}
     return status_dict[status]
 
+@register.filter
+def is_college_subscribed(college_id):
+    try:
+        idcase = AcademicKey.objects.get(academic_id=college_id)
+        college_paid = True if (idcase.expiry_date >= date.today()) else False
+        return college_paid
+    except:
+        college_paid = False
+    
+    return college_paid
+
 register.filter('participant_picture', participant_picture)
 register.filter('get_trainingstatus', get_trainingstatus)
 register.filter('get_trainingparticipant_status', get_trainingparticipant_status)

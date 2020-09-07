@@ -3413,7 +3413,7 @@ class AcademicKeyCreateView(CreateView):
     template_name = "academic_payment_details_form.html"
     success_url = "/software-training/academic_payment_details/"
 
-    @method_decorator(group_required("Organiser"))
+    @method_decorator(group_required("Resource Person"))
     def get(self, request, *args, **kwargs):
         return render(self.request, self.template_name, {'form': self.form_class()})
 
