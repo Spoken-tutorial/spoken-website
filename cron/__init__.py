@@ -8,4 +8,4 @@ REDIS_CLIENT = Redis(
 
 from rq import Retry, Queue
 
-DEFAULT_QUEUE = Queue('default', connection=REDIS_CLIENT, timeout='24h', retry=Retry(max=2))
+DEFAULT_QUEUE = Queue('default', connection=REDIS_CLIENT, job_timeout='24h', retry=Retry(max=2))

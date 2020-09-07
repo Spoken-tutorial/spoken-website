@@ -21,9 +21,10 @@ from django.core.exceptions import ValidationError
 from smtplib import SMTPException, SMTPServerDisconnected
 from django.core.mail import BadHeaderError
 from rq.decorators import job
-from cron import DEFAULT_QUEUE
+from cron import REDIS_CLIENT
+from rq import Retry
 
-@job(DEFAULT_QUEUE)
+@job('default', connection=REDIS_CLIENT, timeout='24h', retry=Retry(max=2))
 def async_bulk_email(taskid, *args, **kwargs):
     sent=0
     errors=0
