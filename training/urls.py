@@ -49,7 +49,9 @@ urlpatterns = [
     ),
     url(r'^ajax_check_college/', ajax_check_college, name="ajax_check_college"),
     url(r'^upload_college_details/', upload_college_details, name="upload_college_details"),
-
-    url(r'^generate_training_certificate/', generate_training_certificate, name="generate_training_certificate"),
-url(r'^generate_alltraining_certificate/', generate_alltraining_certificate, name="generate_alltraining_certificate"),
+    url(
+      r'^generate_training_certificate/$', 
+      EventTrainingCertificateView.as_view(), \
+        name="generate_training_certificate"
+    ),
     ]
