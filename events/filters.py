@@ -2,6 +2,7 @@ from builtins import object
 import django_filters
 from events.models import *
 from training.models import *
+from donate.models import *
 from django.core.exceptions import ObjectDoesNotExist
 
 class AcademicCenterFilter(django_filters.FilterSet):
@@ -344,10 +345,33 @@ class ViewEventFilter(django_filters.FilterSet):
 
     super(ViewEventFilter, self).__init__(*args, **kwargs)
     choices = None
-    choices = list(State.objects.values_list('id', 'name').order_by('name'))
+    # choices = list(State.objects.values_list('id', 'name').order_by('name'))
+    choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
     choices.insert(0, ('', '---------'),)
     self.filters['state'].extra.update({'choices' : choices})
   class Meta(object):
     model = TrainingEvents
     fields = ['state', 'foss', 'host_college']
+
+
+class PaymentTransFilter(django_filters.FilterSet):
+  paymentdetail__state = django_filters.ChoiceFilter(choices=State.objects.none())
+  created = django_filters.DateFromToRangeFilter()
+  paymentdetail__purpose = django_filters.ChoiceFilter(choices= [('', '---------'), (1, 'Registration'), (2, 'CD-Content')])
+  paymentdetail__email = django_filters.CharFilter(lookup_expr='icontains')
+
+  def __init__(self, *args, **kwargs):
+    user = None
+    if 'user' in kwargs:
+      user = kwargs['user']
+      kwargs.pop('user')
+
+    super(PaymentTransFilter, self).__init__(*args, **kwargs)
+    choices = None
+    choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
+    choices.insert(0, ('', '---------'),)
+    self.filters['paymentdetail__state'].extra.update({'choices' : choices})
+  class Meta(object):
+    model = PaymentTransaction
+    fields = ['paymentdetail__state',]
 

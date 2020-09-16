@@ -26,9 +26,10 @@ from creation.models import TutorialResource, Language
 from events.decorators import group_required
 from events.models import *
 from events.views import is_resource_person, is_administrator, get_page 
-from events.filters import ViewEventFilter
+from events.filters import ViewEventFilter, PaymentTransFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
+from donate.models import *
 
 
 today = date.today()
@@ -615,3 +616,72 @@ def add_Academic_key(ac_pay_status_object, subscription):
 	ac_key.hex_key = hex_key
 	ac_key.expiry_date = expiry_date
 	ac_key.save()
+
+
+class ParticipantTransactionsListView(ListView):
+	model = PaymentTransaction
+	raw_get_data = None
+	header = None
+	collection = None
+	@method_decorator(group_required("Resource Person","Administrator"))
+	def dispatch(self, *args, **kwargs):
+		today = date.today()
+		
+		self.PaymentTransaction = PaymentTransaction.objects.all()
+		self.events = self.PaymentTransaction
+
+		self.header = {
+		1: SortableHeader('#', False),
+		2: SortableHeader(
+		  'paymentdetail__user__first_name',
+		  True,
+		  'First Name'
+		),
+		3: SortableHeader(
+		  'paymentdetail__user__last_name',
+		  True,
+		  'Last Name'
+		),
+		4: SortableHeader(
+		  'paymentdetail__email',
+		  True,
+		  'Email'
+		),
+		5: SortableHeader(
+		  'paymentdetail__state',
+		  True,
+		  'State'
+		),
+		
+		6: SortableHeader('transId', True, 'Transaction id'),
+		7: SortableHeader('refNo', True, 'Reference No.'),
+		8: SortableHeader('status', True, 'Status'),
+		8: SortableHeader('paymentdetail__purpose', True, 'Purpose'),
+		9: SortableHeader('amount', True, 'Amount'),
+		10: SortableHeader('created', True, 'Entry Date'),
+		}
+
+
+		self.raw_get_data = self.request.GET.get('o', None)
+		self.queryset = get_sorted_list(
+			self.request,
+			self.events,
+			self.header,
+			self.raw_get_data
+		)
+
+		self.collection= PaymentTransFilter(self.request.GET, queryset=self.queryset, user=self.request.user)
+		return super(ParticipantTransactionsListView, self).dispatch(*args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(ParticipantTransactionsListView, self).get_context_data(**kwargs)
+		context['form'] = self.collection.form
+		page = self.request.GET.get('page')
+		collection = get_page(self.collection.qs, page)
+		context['collection'] =  collection
+		context['header'] = self.header
+		context['ordering'] = get_field_index(self.raw_get_data)
+		context['events'] =  self.events
+		if self.request.user:
+			context['user'] = self.request.user
+		return context
