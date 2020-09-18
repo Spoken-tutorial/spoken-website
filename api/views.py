@@ -19,6 +19,8 @@ from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from spoken.config import FOSS_API_LIST
 from django.core.cache import cache
+from creation.templatetags.creationdata import instruction_sheet, installation_sheet, get_prerequisite
+from rest_framework import status
 
 @csrf_exempt
 def video_list(request):
@@ -221,3 +223,35 @@ class RelianceJioAPI(APIView):
         video_serializer = RelianceJioVideoSerializer(tr, context={'request':request}, many=True)
         language_serializer = RelianceJioLanguageSerializer(tr, context={'language':language, 'videos' : video_serializer.data})
         return language_serializer.data
+
+class TutorialResourceAPI(APIView):
+
+    def get(self, request, format='json'):
+        context = {}
+        foss = request.query_params.get('foss', None)
+        tutorial = request.query_params.get('tutorial', None)
+        language = request.query_params.get('language', None)
+
+        if foss and tutorial and language:
+            try:
+                tr = TutorialResource.objects.get(
+                    Q(status=1) | Q(status=2),
+                    tutorial_detail__foss__foss=foss, 
+                    tutorial_detail__tutorial=tutorial, 
+                    language__name=language
+                    )
+                context['foss_id'] = tr.tutorial_detail.foss.pk
+                context['tutorial_id'] = tr.tutorial_detail.pk
+                context['language_id'] = tr.language.pk
+                context['instruction_sheet'] = request.build_absolute_uri(instruction_sheet(tr.tutorial_detail.foss, tr.language))
+                context['installation_sheet'] = request.build_absolute_uri(installation_sheet(tr.tutorial_detail.foss, tr.language))
+                context['prerequisite'] = request.build_absolute_uri("watch/" + get_prerequisite(tr, tr.tutorial_detail))
+                context['code_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.code)
+                context['assignment'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.assignment)
+                context['slide'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.slide)
+                context['script'] = "https://script.spoken-tutorial.org/index.php/" + tr.script
+                context['timed_script'] = "https://script.spoken-tutorial.org/index.php/" + tr.timed_script
+                return Response(context, status=status.HTTP_200_OK)
+            except TutorialResource.DoesNotExist:
+                return Response(context, status=status.HTTP_400_BAD_REQUEST)
+        return Response(context, status=status.HTTP_400_BAD_REQUEST)
