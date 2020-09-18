@@ -357,8 +357,9 @@ class ViewEventFilter(django_filters.FilterSet):
 class PaymentTransFilter(django_filters.FilterSet):
   paymentdetail__state = django_filters.ChoiceFilter(choices=State.objects.none())
   created = django_filters.DateFromToRangeFilter()
-  paymentdetail__purpose = django_filters.ChoiceFilter(choices= [('', '---------'), (1, 'Registration'), (2, 'CD-Content')])
+  paymentdetail__purpose = django_filters.ChoiceFilter(choices= [('', 'Registration'), ('cdcontent', 'CD-Content')])
   paymentdetail__email = django_filters.CharFilter(lookup_expr='icontains')
+  requestType = django_filters.ChoiceFilter(choices= [('I', 'Ongoing'), ('R', 'Reconciled')])
 
   def __init__(self, *args, **kwargs):
     user = None
@@ -368,10 +369,11 @@ class PaymentTransFilter(django_filters.FilterSet):
 
     super(PaymentTransFilter, self).__init__(*args, **kwargs)
     choices = None
-    choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
-    choices.insert(0, ('', '---------'),)
+    choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('name', 'name').order_by('name'))
+    # choices.insert(0, ('', '---------'),)
     self.filters['paymentdetail__state'].extra.update({'choices' : choices})
+
+
   class Meta(object):
     model = PaymentTransaction
-    fields = ['paymentdetail__state',]
-
+    fields = []

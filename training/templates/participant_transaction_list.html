@@ -30,6 +30,16 @@
 
      <div class="col-lg-4 col-md-4 col-sm-4">
      <div class="form-group">
+          <label for="id_requestType" class="col-sm-4 control-label">Request Type</label>
+          <div class="col-sm-8">
+            {% render_field form.requestType class+="form-control requestType" tabindex="1" %}
+            {{ form.requestType.errors }}
+          </div>
+        </div>
+      </div>
+
+     <div class="col-lg-4 col-md-4 col-sm-4">
+     <div class="form-group">
           <label for="id_paymentdetail__email" class="col-sm-4 control-label">Email</label>
           <div class="col-sm-8">
             {% render_field form.paymentdetail__email class+="form-control paymentdetail__email" tabindex="1" %}
@@ -37,10 +47,21 @@
           </div>
         </div>
       </div>
+
     </div>
 
 
-    <div class= 'filters row'>     
+    <div class= 'filters row'>  
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_paymentdetail__purpose" class="col-sm-4 control-label">Purpose</label>
+          <div class="col-sm-8">
+            {% render_field form.paymentdetail__purpose class+="form-control paymentdetail__purpose paymentdetail__purpose" tabindex="1" %}
+            {{ form.paymentdetail__purpose.errors }}
+          </div>
+        </div>
+     </div>
+
       <div class="col-lg-4 col-md-4 col-sm-4">
        <div class="form-group">
           <label for="id_tdate" class="col-sm-4 control-label">Transaction Date Range</label>
@@ -82,6 +103,14 @@
             <td>{{ record.transId }}</td>
             <td>{{ record.refNo}}</td>
             <td>{{ record.status }}</td>
+            <td>
+              {% ifnotequal record.paymentdetail.purpose 'cdcontent'%}
+                Registration
+              {% else %}
+                CD-Content
+              {% endifnotequal %}
+            </td>
+            <td>{{ record.requestType }}</td>
             <td>{{ record.amount }}</td>
             <td>{{ record.created }}</td>
           </tr>

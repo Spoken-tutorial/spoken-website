@@ -626,8 +626,8 @@ class ParticipantTransactionsListView(ListView):
 	@method_decorator(group_required("Resource Person","Administrator"))
 	def dispatch(self, *args, **kwargs):
 		today = date.today()
-		
-		self.PaymentTransaction = PaymentTransaction.objects.all()
+		statenames = State.objects.filter(resourceperson__user_id=self.request.user, resourceperson__status=1).values('name')
+		self.PaymentTransaction = PaymentTransaction.objects.filter(paymentdetail__state__in=statenames).order_by('-created')
 		self.events = self.PaymentTransaction
 
 		self.header = {
@@ -656,13 +656,18 @@ class ParticipantTransactionsListView(ListView):
 		6: SortableHeader('transId', True, 'Transaction id'),
 		7: SortableHeader('refNo', True, 'Reference No.'),
 		8: SortableHeader('status', True, 'Status'),
-		8: SortableHeader('paymentdetail__purpose', True, 'Purpose'),
-		9: SortableHeader('amount', True, 'Amount'),
-		10: SortableHeader('created', True, 'Entry Date'),
+		9: SortableHeader('paymentdetail__purpose', True, 'Purpose'),
+		10: SortableHeader('requestType', True, 'RequestType'),
+		11: SortableHeader('amount', True, 'Amount'),
+		12: SortableHeader('created', True, 'Entry Date'),
 		}
 
-
 		self.raw_get_data = self.request.GET.get('o', None)
+		self.purpose = self.request.GET.get('paymentdetail__purpose')		
+
+		if self.purpose != 'cdcontent':
+			self.events= self.events.filter().exclude(paymentdetail__purpose='cdcontent')
+
 		self.queryset = get_sorted_list(
 			self.request,
 			self.events,
