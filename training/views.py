@@ -660,6 +660,7 @@ class ParticipantTransactionsListView(ListView):
 		10: SortableHeader('requestType', True, 'RequestType'),
 		11: SortableHeader('amount', True, 'Amount'),
 		12: SortableHeader('created', True, 'Entry Date'),
+		13: SortableHeader('paymentdetail__user', True, 'Phone'),
 		}
 
 		self.raw_get_data = self.request.GET.get('o', None)

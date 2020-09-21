@@ -113,6 +113,12 @@
             <td>{{ record.requestType }}</td>
             <td>{{ record.amount }}</td>
             <td>{{ record.created }}</td>
+             <td>
+              {% with phonenumber=record.paymentdetail.user|get_user_detail %}
+              
+                {{phonenumber}}
+              {% endwith %}
+             </td>
           </tr>
         {% endfor %}
       </table>

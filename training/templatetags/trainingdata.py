@@ -1,5 +1,6 @@
 from events.models import AcademicKey
 from training.models import *
+from cms.models import Profile
 from django import template
 from datetime import datetime,date
 register = template.Library()
@@ -113,6 +114,16 @@ def registartion_successful(user, event):
   if participant.filter(registartion_type__in=(1,3)).exists():
     return True
   return False 
+
+@register.filter
+def get_user_detail(user):
+  try:
+    profile = Profile.objects.get(user=user)
+    print(profile.phone)
+  except Profile.DoesNotExist:
+    return None
+
+  return profile.phone
 
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)
