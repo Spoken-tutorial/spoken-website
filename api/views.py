@@ -21,6 +21,7 @@ from spoken.config import FOSS_API_LIST
 from django.core.cache import cache
 from creation.templatetags.creationdata import instruction_sheet, installation_sheet, get_prerequisite
 from rest_framework import status
+from forums.models import Question
 
 @csrf_exempt
 def video_list(request):
@@ -228,9 +229,9 @@ class TutorialResourceAPI(APIView):
 
     def get(self, request, format='json'):
         context = {}
-        foss = request.query_params.get('foss', None)
-        tutorial = request.query_params.get('tutorial', None)
-        language = request.query_params.get('language', None)
+        foss = request.query_params.get('search_foss', None)
+        tutorial = request.query_params.get('search_tutorial', None)
+        language = request.query_params.get('search_language', None)
 
         if foss and tutorial and language:
             try:
@@ -243,14 +244,24 @@ class TutorialResourceAPI(APIView):
                 context['foss_id'] = tr.tutorial_detail.foss.pk
                 context['tutorial_id'] = tr.tutorial_detail.pk
                 context['language_id'] = tr.language.pk
-                context['instruction_sheet'] = request.build_absolute_uri(instruction_sheet(tr.tutorial_detail.foss, tr.language))
-                context['installation_sheet'] = request.build_absolute_uri(installation_sheet(tr.tutorial_detail.foss, tr.language))
-                context['prerequisite'] = request.build_absolute_uri("watch/" + get_prerequisite(tr, tr.tutorial_detail))
+                context['instruction_sheet'] = "https://spoken-tutorial.org/"+str(instruction_sheet(tr.tutorial_detail.foss, tr.language))
+                context['installation_sheet'] = "https://spoken-tutorial.org/"+str(installation_sheet(tr.tutorial_detail.foss, tr.language))
+                context['prerequisite'] = "https://spoken-tutorial.org/watch/" + str(get_prerequisite(tr, tr.tutorial_detail))
                 context['code_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.code)
                 context['assignment'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.assignment)
                 context['slide'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.slide)
                 context['script'] = "https://script.spoken-tutorial.org/index.php/" + tr.script
                 context['timed_script'] = "https://script.spoken-tutorial.org/index.php/" + tr.timed_script
+                questions = Question.objects.filter(category=tr.tutorial_detail.foss.foss.replace(' ', '-'), tutorial=tr.tutorial_detail.tutorial.replace(' ', '-')).order_by('-date_created')
+                questions_filtered = []
+                for q in questions:
+                    user = q.user() if q.uid != "" else None
+                    body = q.body
+                    minute_range = q.minute_range +"M" if q.minute_range != 'None' else None
+                    second_range = q.second_range +"S" if q.second_range != 'None' else None
+                    date = q.date_modified
+                    questions_filtered.append({'user': user, 'question': body, 'minute_range': minute_range, 'second_range': second_range, 'date':date})
+                context['questions'] = questions_filtered
                 return Response(context, status=status.HTTP_200_OK)
             except TutorialResource.DoesNotExist:
                 return Response(context, status=status.HTTP_400_BAD_REQUEST)
