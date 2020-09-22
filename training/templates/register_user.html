@@ -115,7 +115,7 @@
                       <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6" style="display: none;">
                       </select>
-                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later</span>
+                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later <br> Contact organiser if college name is not found in the list. </span>
                       </div>
                     </div>
                     {%else%}
@@ -143,8 +143,13 @@
                     <div class="col-lg-8">
                         {% render_field form.foss_language class+="form-control foss_language" tabindex="7" %}
                         {{ form.name.errors }}
-                         <span class="help-block">Language of Tutorial Instructions</span>
+                         <span class="help-block">Language of Tutorial Instructions
+                          <br>English language will be offered by default in CD-Content
+                         </span>
+
+
                     </div>
+
                     </div>
                     {% endif %}
                     {% if user|is_user_paid %}
