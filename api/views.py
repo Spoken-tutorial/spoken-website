@@ -256,11 +256,11 @@ class TutorialResourceAPI(APIView):
                 questions_filtered = []
                 for q in questions:
                     user = q.user() if q.uid != "" else None
-                    body = q.body
+                    title = q.title
                     minute_range = q.minute_range +"M" if q.minute_range != 'None' else None
                     second_range = q.second_range +"S" if q.second_range != 'None' else None
                     date = q.date_modified
-                    questions_filtered.append({'user': user, 'question': body, 'minute_range': minute_range, 'second_range': second_range, 'date':date})
+                    questions_filtered.append({'id': q.pk,'user': user, 'question': title, 'minute_range': minute_range, 'second_range': second_range, 'date':date})
                 context['questions'] = questions_filtered
                 return Response(context, status=status.HTTP_200_OK)
             except TutorialResource.DoesNotExist:
