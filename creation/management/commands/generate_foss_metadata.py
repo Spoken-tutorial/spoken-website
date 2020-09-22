@@ -52,7 +52,7 @@ class Command(BaseCommand):
                             metadata = [str(f.id), f.foss, self.convert(course_duration), deeplink_url, wiki_url, f.description, ", ".join(keywords), l.name, str(tr.count())]
                             metawriter.writerow(metadata)
             print("Metadata File Generated. Please find the file at location given below.")
-            print(settings.MEDIA_ROOT + metafile.name)
+            print(metafile.name)
 
     def convert(self, seconds): 
         seconds = seconds % (24 * 3600) 
