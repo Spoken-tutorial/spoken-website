@@ -323,11 +323,7 @@ class TrainingRequestFilter(django_filters.FilterSet):
 
 class ViewEventFilter(django_filters.FilterSet):
   state = django_filters.ChoiceFilter(choices=State.objects.none())
-  host_college = django_filters.ChoiceFilter(
-    choices= [('', '---------')] + list(
-      TrainingEvents.objects.filter().order_by('host_college__institution_name').values_list('host_college__id', 'host_college__institution_name').distinct()
-    )
-  )
+  host_college = django_filters.ChoiceFilter()
   foss = django_filters.ChoiceFilter(
     choices= [('', '---------')] + list(
       TrainingEvents.objects.filter().order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()
@@ -345,8 +341,16 @@ class ViewEventFilter(django_filters.FilterSet):
 
     super(ViewEventFilter, self).__init__(*args, **kwargs)
     choices = None
-    choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
+    tr_states = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)
+
+    choices = list(tr_states.filter().order_by('name').values_list('id', 'name'))
     self.filters['state'].extra.update({'choices' : choices})
+
+    all_events = TrainingEvents.objects.filter(state__in=tr_states)
+    host_choices = list(
+      all_events.filter().order_by('host_college__institution_name').values_list('host_college__id', 'host_college__institution_name').distinct()
+      )
+    self.filters['host_college'].extra.update({'choices' : host_choices})
   class Meta(object):
     model = TrainingEvents
     fields = ['state', 'foss', 'host_college']
