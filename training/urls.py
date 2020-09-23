@@ -49,4 +49,10 @@ urlpatterns = [
     ),
     url(r'^ajax_check_college/', ajax_check_college, name="ajax_check_college"),
     url(r'^upload_college_details/', upload_college_details, name="upload_college_details"),
+    # url(r'^participant-transactions/$', participant_transactions,name="participant_transactions"),
+    url(
+      r'^participant-transactions/$', 
+      ParticipantTransactionsListView.as_view(template_name="participant_transaction_list.html"), 
+      name="participant_transaction_list"
+    ),
     ]

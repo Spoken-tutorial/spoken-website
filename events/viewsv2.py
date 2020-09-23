@@ -2953,7 +2953,7 @@ def payment_reconciliation_update(request):
 
 @csrf_protect
 @login_required
-def academic_transactions(request):
+def academic_transactions(request):    
     user = User.objects.get(id=request.user.id)
     rp_states = ResourcePerson.objects.filter(status=1,user=user)
     state = State.objects.filter(id__in=rp_states.values('state'))

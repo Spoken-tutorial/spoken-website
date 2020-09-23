@@ -26,9 +26,10 @@ from creation.models import TutorialResource, Language
 from events.decorators import group_required
 from events.models import *
 from events.views import is_resource_person, is_administrator, get_page 
-from events.filters import ViewEventFilter
+from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
+from donate.models import *
 
 
 today = date.today()
@@ -220,16 +221,19 @@ def listevents(request, role, status):
 	if (not role ) or (not status):
 		raise PermissionDenied()
 
+	states = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)
+	TrMngerEvents = TrainingEvents.objects.filter(state__in=states).order_by('-event_start_date')
+	
 
 	status_list = {'ongoing': 0, 'completed': 1, 'closed': 2,}
 	roles = ['rp', 'em']
 	if role in roles and status in status_list:
 		if status == 'ongoing':
-			queryset = TrainingEvents.objects.filter(training_status__lte=1, event_end_date__gte=today)
+			queryset = TrMngerEvents.filter(training_status__lte=1, event_end_date__gte=today)
 		elif status == 'completed':
-			queryset = TrainingEvents.objects.filter(training_status=1, event_end_date__lt=today)
+			queryset =TrMngerEvents.filter(training_status=1, event_end_date__lt=today)
 		elif status == 'closed':
-			queryset = TrainingEvents.objects.filter(training_status=2)
+			queryset = TrMngerEvents.filter(training_status=2)
 
 		header = {
 		1: SortableHeader('#', False),
@@ -279,7 +283,7 @@ def listevents(request, role, status):
 			header,
 			raw_get_data
 		)
-		collection= ViewEventFilter(request.GET, queryset=queryset, user=user)
+		collection= TrEventFilter(request.GET, queryset=queryset, user=user)
       
 
 	else:
@@ -615,3 +619,78 @@ def add_Academic_key(ac_pay_status_object, subscription):
 	ac_key.hex_key = hex_key
 	ac_key.expiry_date = expiry_date
 	ac_key.save()
+
+
+class ParticipantTransactionsListView(ListView):
+	model = PaymentTransaction
+	raw_get_data = None
+	header = None
+	collection = None
+	@method_decorator(group_required("Resource Person","Administrator"))
+	def dispatch(self, *args, **kwargs):
+		today = date.today()
+		statenames = State.objects.filter(resourceperson__user_id=self.request.user, resourceperson__status=1).values('name')
+		self.PaymentTransaction = PaymentTransaction.objects.filter(paymentdetail__state__in=statenames).order_by('-created')
+		self.events = self.PaymentTransaction
+
+		self.header = {
+		1: SortableHeader('#', False),
+		2: SortableHeader(
+		  'paymentdetail__user__first_name',
+		  True,
+		  'First Name'
+		),
+		3: SortableHeader(
+		  'paymentdetail__user__last_name',
+		  True,
+		  'Last Name'
+		),
+		4: SortableHeader(
+		  'paymentdetail__email',
+		  True,
+		  'Email'
+		),
+		5: SortableHeader(
+		  'paymentdetail__state',
+		  True,
+		  'State'
+		),
+		
+		6: SortableHeader('transId', True, 'Transaction id'),
+		7: SortableHeader('refNo', True, 'Reference No.'),
+		8: SortableHeader('status', True, 'Status'),
+		9: SortableHeader('paymentdetail__purpose', True, 'Purpose'),
+		10: SortableHeader('requestType', True, 'RequestType'),
+		11: SortableHeader('amount', True, 'Amount'),
+		12: SortableHeader('created', True, 'Entry Date'),
+		13: SortableHeader('paymentdetail__user', True, 'Phone'),
+		}
+
+		self.raw_get_data = self.request.GET.get('o', None)
+		self.purpose = self.request.GET.get('paymentdetail__purpose')		
+
+		if self.purpose != 'cdcontent':
+			self.events= self.events.filter().exclude(paymentdetail__purpose='cdcontent')
+
+		self.queryset = get_sorted_list(
+			self.request,
+			self.events,
+			self.header,
+			self.raw_get_data
+		)
+
+		self.collection= PaymentTransFilter(self.request.GET, queryset=self.queryset, user=self.request.user)
+		return super(ParticipantTransactionsListView, self).dispatch(*args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(ParticipantTransactionsListView, self).get_context_data(**kwargs)
+		context['form'] = self.collection.form
+		page = self.request.GET.get('page')
+		collection = get_page(self.collection.qs, page)
+		context['collection'] =  collection
+		context['header'] = self.header
+		context['ordering'] = get_field_index(self.raw_get_data)
+		context['events'] =  self.events
+		if self.request.user:
+			context['user'] = self.request.user
+		return context

@@ -2,6 +2,7 @@ from builtins import object
 import django_filters
 from events.models import *
 from training.models import *
+from donate.models import *
 from django.core.exceptions import ObjectDoesNotExist
 
 class AcademicCenterFilter(django_filters.FilterSet):
@@ -319,7 +320,6 @@ class TrainingRequestFilter(django_filters.FilterSet):
     model = TrainingRequest
     fields = ['training_planner__academic__state', 'course__foss']
 
-
 class ViewEventFilter(django_filters.FilterSet):
   state = django_filters.ChoiceFilter(choices=State.objects.none())
   host_college = django_filters.ChoiceFilter(
@@ -351,3 +351,61 @@ class ViewEventFilter(django_filters.FilterSet):
     model = TrainingEvents
     fields = ['state', 'foss', 'host_college']
 
+
+class TrEventFilter(django_filters.FilterSet):
+  state = django_filters.ChoiceFilter(choices=State.objects.none())
+  host_college = django_filters.ChoiceFilter()
+  foss = django_filters.ChoiceFilter(
+    choices= [('', '---------')] + list(
+      TrainingEvents.objects.filter().order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()
+    )
+  )
+
+  event_start_date = django_filters.DateFromToRangeFilter()
+  event_end_date = django_filters.DateFromToRangeFilter()
+
+  def __init__(self, *args, **kwargs):
+    user = None
+    if 'user' in kwargs:
+      user = kwargs['user']
+      kwargs.pop('user')
+
+    super(TrEventFilter, self).__init__(*args, **kwargs)
+    choices = None
+    tr_states = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)
+
+    choices = list(tr_states.filter().order_by('name').values_list('id', 'name'))
+    self.filters['state'].extra.update({'choices' : choices})
+
+    all_events = TrainingEvents.objects.filter(state__in=tr_states)
+    host_choices = list(
+      all_events.filter().order_by('host_college__institution_name').values_list('host_college__id', 'host_college__institution_name').distinct()
+      )
+    self.filters['host_college'].extra.update({'choices' : host_choices})
+  class Meta(object):
+    model = TrainingEvents
+    fields = ['state', 'foss', 'host_college']
+
+
+class PaymentTransFilter(django_filters.FilterSet):
+  paymentdetail__state = django_filters.ChoiceFilter(choices=State.objects.none())
+  created = django_filters.DateFromToRangeFilter()
+  paymentdetail__purpose = django_filters.ChoiceFilter(choices= [('', 'Registration'), ('cdcontent', 'CD-Content')])
+  paymentdetail__email = django_filters.CharFilter(lookup_expr='icontains')
+  requestType = django_filters.ChoiceFilter(choices= [('I', 'Ongoing'), ('R', 'Reconciled')])
+
+  def __init__(self, *args, **kwargs):
+    user = None
+    if 'user' in kwargs:
+      user = kwargs['user']
+      kwargs.pop('user')
+
+    super(PaymentTransFilter, self).__init__(*args, **kwargs)
+    choices = None
+    choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('name', 'name').order_by('name'))
+    self.filters['paymentdetail__state'].extra.update({'choices' : choices})
+
+
+  class Meta(object):
+    model = PaymentTransaction
+    fields = []
