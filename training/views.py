@@ -26,7 +26,7 @@ from creation.models import TutorialResource, Language
 from events.decorators import group_required
 from events.models import *
 from events.views import is_resource_person, is_administrator, get_page 
-from events.filters import ViewEventFilter, PaymentTransFilter
+from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
 from donate.models import *
@@ -283,7 +283,7 @@ def listevents(request, role, status):
 			header,
 			raw_get_data
 		)
-		collection= ViewEventFilter(request.GET, queryset=queryset, user=user)
+		collection= TrEventFilter(request.GET, queryset=queryset, user=user)
       
 
 	else:
