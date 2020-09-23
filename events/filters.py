@@ -345,9 +345,7 @@ class ViewEventFilter(django_filters.FilterSet):
 
     super(ViewEventFilter, self).__init__(*args, **kwargs)
     choices = None
-    # choices = list(State.objects.values_list('id', 'name').order_by('name'))
     choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('id', 'name'))
-    choices.insert(0, ('', '---------'),)
     self.filters['state'].extra.update({'choices' : choices})
   class Meta(object):
     model = TrainingEvents
@@ -370,7 +368,6 @@ class PaymentTransFilter(django_filters.FilterSet):
     super(PaymentTransFilter, self).__init__(*args, **kwargs)
     choices = None
     choices = list(State.objects.filter(resourceperson__user_id=user, resourceperson__status=1).values_list('name', 'name').order_by('name'))
-    # choices.insert(0, ('', '---------'),)
     self.filters['paymentdetail__state'].extra.update({'choices' : choices})
 
 

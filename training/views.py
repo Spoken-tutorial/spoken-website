@@ -221,16 +221,19 @@ def listevents(request, role, status):
 	if (not role ) or (not status):
 		raise PermissionDenied()
 
+	states = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)
+	TrMngerEvents = TrainingEvents.objects.filter(state__in=states).order_by('-event_start_date')
+	
 
 	status_list = {'ongoing': 0, 'completed': 1, 'closed': 2,}
 	roles = ['rp', 'em']
 	if role in roles and status in status_list:
 		if status == 'ongoing':
-			queryset = TrainingEvents.objects.filter(training_status__lte=1, event_end_date__gte=today)
+			queryset = TrMngerEvents.filter(training_status__lte=1, event_end_date__gte=today)
 		elif status == 'completed':
-			queryset = TrainingEvents.objects.filter(training_status=1, event_end_date__lt=today)
+			queryset =TrMngerEvents.filter(training_status=1, event_end_date__lt=today)
 		elif status == 'closed':
-			queryset = TrainingEvents.objects.filter(training_status=2)
+			queryset = TrMngerEvents.filter(training_status=2)
 
 		header = {
 		1: SortableHeader('#', False),

@@ -110,17 +110,17 @@
                                     </div>
                   {% if user_college %}
                     <div class="form-group">
-                      <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
+                      <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School</label>
                       <div class="col-lg-8">
                       <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6" style="display: none;">
                       </select>
-                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later <br> Contact organiser if college name is not found in the list. </span>
+                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later <br> Contact organiser if college/school name is not found in the list. </span>
                       </div>
                     </div>
                     {%else%}
                     <div class="form-group">
-                      <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
+                      <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School</label>
                       <div class="col-lg-8">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6">
                     </select>
