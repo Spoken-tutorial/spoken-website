@@ -115,7 +115,7 @@
                       <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6" style="display: none;">
                       </select>
-                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later <br> Contact organiser if college/school name is not found in the list. </span>
+                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later <br> Contact Event Organiser if college/school name is not found in the list </span>
                       </div>
                     </div>
                     {%else%}
@@ -124,7 +124,7 @@
                       <div class="col-lg-8">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6">
                     </select>
-                    <span class="help-block">This option cannot be changed later</span>
+                    <span class="help-block">This option cannot be changed later <br>Contact Event Organiser if college/school name is not found in the list</span>
                       </div>
 			<div id="college-info" class="col-md-8 col-md-offset-4" style="display:none" >Please select your college</div>
 		<!-- 	<span class="help-block" style="text-align: center;">This option cannot be changed later</span> -->
@@ -143,8 +143,9 @@
                     <div class="col-lg-8">
                         {% render_field form.foss_language class+="form-control foss_language" tabindex="7" %}
                         {{ form.name.errors }}
-                         <span class="help-block">Language of Tutorial Instructions
-                          <br>English language will be offered by default in CD-Content
+                         <span class="help-block">Select Language of Tutorial Instructions
+                          <br>English language will be offered by default in CD-content.
+                          <br>In addition, you can choose any other language also.
                          </span>
 
 
