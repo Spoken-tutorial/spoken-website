@@ -16,7 +16,7 @@
     <div class="modal-content">
      <div class="modal-body">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <p>Open your csv file in Notepad(Windows OS) or in gedit(Linux OS) , It should look like below format :</p>
+        <p>Open your CSV file in Notepad(Windows OS) or in gedit(Linux OS). It should look like the format given below:</p>
         <img width="520px" src="/static/spoken/images/fdp_participants_csv_sample.png">
      </div>
     </div>
@@ -30,7 +30,7 @@
 
   {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
 
-<small>If you have used MS-EXCEL to create the CSV file please make sure that you have saved it with csv(ms-dos) file extention.</small>
+<small>If you have used MS-EXCEL to create the CSV file please make sure that you have saved it with csv(ms-dos) file extension.</small>
  <span><small style="color:red;">   
     {{form.csv_file.errors}}
 </small></spam>
