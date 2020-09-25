@@ -78,10 +78,11 @@
 				{% if record.participant.payment_status.status == 0 %}
 					Payment Initiated, not paid
 				{% elif record.participant.payment_status.status == 1 %}
-					Payment successfully completed
+					Payment successfully completed....
 				{% elif record.participant.payment_status.status == 2 %}
 					Payment failed
 				{% endif %}
+
 				</strong>
 			</td>
 		{% else %}
@@ -106,6 +107,8 @@
 					Payment successfully completed
 				{% elif record.payment_status.status == 2 %}
 					Payment failed
+				{% elif not record.participant.payment_status %}
+					CSV Upload
 				{% endif %}
 				</strong>
 			</td>
