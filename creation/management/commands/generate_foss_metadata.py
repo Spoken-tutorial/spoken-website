@@ -17,14 +17,14 @@ class Command(BaseCommand):
             metadata = []
             foss = FossCategory.objects.all()
             for f in foss:
-                course_duration = 0
+                course_duration_en = 0
                 keywords = []
                 tr_en= TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language__name='English')
                 for tr in tr_en:
                     #calculate course duration
                     video_path = settings.MEDIA_ROOT+'videos/'+str(tr.tutorial_detail.foss.pk)+'/'+str(tr.tutorial_detail.pk)+'/'+tr.video
                     video_info = get_video_info(video_path)
-                    course_duration += video_info['total']
+                    course_duration_en += video_info['total']
                     #keywords
                     try:
                         keywords += tr.tutorial_detail.tutorial_detail.keyword_as_list()
@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 deeplink_url="https://spoken-tutorial.org/tutorial-search/?search_foss={}&search_language={}".format(f.foss, 'English')
                 wiki_url = "https://script.spoken-tutorial.org/index.php/{}".format(f.foss.replace(" ", "_"))
                 if tr_en.count() >= 1:
-                    metadata = [str(f.id), f.foss, self.convert(course_duration), deeplink_url, wiki_url, f.description, ", ".join(keywords), 'English', str(tr_en.count())]
+                    metadata = [str(f.id), f.foss, self.convert(course_duration_en), deeplink_url, wiki_url, f.description, ", ".join(keywords), 'English', str(tr_en.count())]
                     metawriter.writerow(metadata)
                 
                 languages = Language.objects.all().exclude(name='English')
@@ -41,9 +41,10 @@ class Command(BaseCommand):
                     tr = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language=l)
                     deeplink_url="https://spoken-tutorial.org/tutorial-search/?search_foss={}&search_language={}".format(f.foss, l.name)
                     if tr.count() == tr_en.count() and tr.count() >=1:
-                        metadata = [str(f.id), f.foss, self.convert(course_duration), deeplink_url, wiki_url, f.description, ", ".join(keywords), l.name, str(tr.count())]
+                        metadata = [str(f.id), f.foss, self.convert(course_duration_en), deeplink_url, wiki_url, f.description, ", ".join(keywords), l.name, str(tr.count())]
                         metawriter.writerow(metadata)
                     else:
+                        course_duration = 0
                         for t in tr:
                             video_path = settings.MEDIA_ROOT+'videos/'+str(t.tutorial_detail.foss.pk)+'/'+str(t.tutorial_detail.pk)+'/'+t.video
                             video_info = get_video_info(video_path)
