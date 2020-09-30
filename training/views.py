@@ -680,6 +680,7 @@ class ParticipantTransactionsListView(ListView):
 		)
 
 		self.collection= PaymentTransFilter(self.request.GET, queryset=self.queryset, user=self.request.user)
+		self.total_amount = self.collection.qs.filter(requestType='R').aggregate(Sum('amount'))
 		return super(ParticipantTransactionsListView, self).dispatch(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):
@@ -691,6 +692,7 @@ class ParticipantTransactionsListView(ListView):
 		context['header'] = self.header
 		context['ordering'] = get_field_index(self.raw_get_data)
 		context['events'] =  self.events
+		context['total_amount']=self.total_amount
 		if self.request.user:
 			context['user'] = self.request.user
 		return context

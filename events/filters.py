@@ -393,6 +393,7 @@ class PaymentTransFilter(django_filters.FilterSet):
   paymentdetail__purpose = django_filters.ChoiceFilter(choices= [('', 'Registration'), ('cdcontent', 'CD-Content')])
   paymentdetail__email = django_filters.CharFilter(lookup_expr='icontains')
   requestType = django_filters.ChoiceFilter(choices= [('I', 'Ongoing'), ('R', 'Reconciled')])
+  status = django_filters.ChoiceFilter(choices= [('S', 'Successful'), ('F', 'Failed'), ('X', 'Undefind')])
 
   def __init__(self, *args, **kwargs):
     user = None

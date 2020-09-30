@@ -119,7 +119,6 @@ def registartion_successful(user, event):
 def get_user_detail(user):
   try:
     profile = Profile.objects.get(user=user)
-    print(profile.phone)
   except Profile.DoesNotExist:
     return None
 
