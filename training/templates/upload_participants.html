@@ -26,7 +26,7 @@
 <form action="" method="POST" enctype='multipart/form-data' class='form-horizontal'>{% csrf_token %}
 <div class='form-row'>
 <div class='col-xs-12 form-group required'>
-  <label class='control-label'>Csv File</label>&nbsp;&nbsp;<small>(Please upload your CSV file here.) </small><a class="csv-link" data-toggle="modal" data-target="#csvModal"><u>Sample CSV file</u></a></center>
+  <label class='control-label'>CSV File</label>&nbsp;&nbsp;<small>(Please upload your CSV file here.) </small><a class="csv-link" data-toggle="modal" data-target="#csvModal"><u>Sample CSV file</u></a></center>
 
   {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
 

@@ -114,6 +114,12 @@
             <td>{{ record.event_start_date }}</td>
             <td>{{ record.event_end_date }}</td>
             <td>
+              {% with pcount=record.id|get_participant_count %}
+                {{pcount}}
+              {% endwith %}
+
+            </td>
+            <td>
               {% if record.training_status == 0%}
                 <a href="{% url 'training:edit_event' record.id %}" >Edit Event</a> |
                 <a href="{% url 'training:upload_participants' record.id %}" >Upload Participants</a> |

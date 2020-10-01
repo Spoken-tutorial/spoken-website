@@ -124,6 +124,24 @@ def get_user_detail(user):
 
   return profile.phone
 
+@register.filter
+def get_participant_count(eventid):
+  try:
+    event = TrainingEvents.objects.get(id=eventid)
+    print()
+    if event.training_status == 1 :
+      #completed state
+      pcount = Participant.objects.filter(event_id=eventid, reg_approval_status=1).count()
+    elif event.training_status == 2:
+      #closed
+      pcount = EventAttendance.objects.filter(event_id=eventid).count()
+    else:
+      pcount = 0
+  except TrainingEvents.DoesNotExist:
+    return pcount
+
+  return pcount
+
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)
 register.filter('is_user_registered', is_user_registered)

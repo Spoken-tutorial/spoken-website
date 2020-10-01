@@ -273,7 +273,8 @@ def listevents(request, role, status):
 		  True,
 		  'Event End Date'
 		),
-		10: SortableHeader('Action', False)
+		10: SortableHeader('Participant Count', True),
+		11: SortableHeader('Action', False)
 		}
 
 		raw_get_data = request.GET.get('o', None)
@@ -314,7 +315,7 @@ def close_event(request, pk):
 		messages.success(request, 'Event has been closed successfully')
 	else:
 		messages.error(request, 'Request not sent.Please try again.')
-	return HttpResponseRedirect("/training/event/rp/completed/")
+	return HtsvtpResponseRedirect("/training/event/rp/completed/")
 
 
 def approve_event_registration(request, pk):
