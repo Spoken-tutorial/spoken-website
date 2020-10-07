@@ -28,7 +28,7 @@ PAYMENT_STATUS_CHOICES =(
     ('', '-----'), ('New', 'New'), ('Renewal', 'Renewal')
   )
 COLLEGE_TYPE_CHOICES =(
-    ('', '-----'), ('Engg', 'Engg'), ('ASC', 'ASC'), ('University', 'University')
+    ('', '-----'), ('Engg', 'Engg'), ('ASC', 'ASC'), ('University', 'University'), ('School', 'School')
   )
 SUBSCRIPTION_CHOICES = (
       ('', '-----'), ('365', 'One_Year'), ('182', 'Six_Months')
