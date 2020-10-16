@@ -244,14 +244,19 @@ class TutorialResourceAPI(APIView):
                 context['foss_id'] = tr.tutorial_detail.foss.pk
                 context['tutorial_id'] = tr.tutorial_detail.pk
                 context['language_id'] = tr.language.pk
-                context['instruction_sheet'] = "https://spoken-tutorial.org/"+str(instruction_sheet(tr.tutorial_detail.foss, tr.language))
-                context['installation_sheet'] = "https://spoken-tutorial.org/"+str(installation_sheet(tr.tutorial_detail.foss, tr.language))
-                context['prerequisite'] = "https://spoken-tutorial.org/watch/" + str(get_prerequisite(tr, tr.tutorial_detail))
-                context['code_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.code)
-                context['assignment'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.assignment)
-                context['slide'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.slide)
-                context['script'] = "https://script.spoken-tutorial.org/index.php/" + tr.script
-                context['timed_script'] = "https://script.spoken-tutorial.org/index.php/" + tr.timed_script
+                instruct_sheet = instruction_sheet(tr.tutorial_detail.foss, tr.language)
+                context['instruction_sheet'] = "https://spoken-tutorial.org"+str(instruct_sheet) if instruct_sheet else None
+                install_sheet = installation_sheet(tr.tutorial_detail.foss, tr.language)
+                context['installation_sheet'] = "https://spoken-tutorial.org/"+str(install_sheet) if install_sheet else None
+                prerequisite = get_prerequisite(tr, tr.tutorial_detail)
+                context['prerequisite'] = "https://spoken-tutorial.org/watch/" + str(prerequisite) if prerequisite else None
+                context['code_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.code) if tr.common_content.code_status == 4 else None
+                context['assignment'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.assignment) if tr.common_content.assignment_status ==4 else None
+                context['slide'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.slide) if tr.common_content.slide_status == 4 else None
+                context['script'] = "https://script.spoken-tutorial.org/index.php/" + tr.script if tr.script_status == 4 else None
+                context['timed_script'] = "https://script.spoken-tutorial.org/index.php/" + tr.timed_script if tr.timed_script else None
+                context['srt_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/" + tr.tutorial_detail.tutorial.replace(' ', '-') + "-" + tr.language.name + ".srt")
+                context['additional_resource'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.additional_material) if tr.common_content.additional_material_status == 4 else None
                 questions = Question.objects.filter(category=tr.tutorial_detail.foss.foss.replace(' ', '-'), tutorial=tr.tutorial_detail.tutorial.replace(' ', '-')).order_by('-date_created')
                 questions_filtered = []
                 for q in questions:
