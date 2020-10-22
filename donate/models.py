@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from .helpers import GENDER_CHOICES, PAY_FOR_CHOICES
+from .helpers import *
 from creation.models import FossCategory, Language, Level
 import uuid
 from datetime import datetime
@@ -68,3 +68,50 @@ class PaymentTransaction(models.Model):
 
     class Meta:
         unique_together = ('paymentdetail','requestType','amount')
+
+# abstract base class
+class TransactionCommonInfo(models.Model):
+    requestType = models.CharField(max_length=2)
+    amount = models.CharField(max_length=20)
+    reqId = models.CharField(max_length=50)
+    transId = models.CharField(max_length=100)
+    refNo = models.CharField(max_length=50)
+    provId = models.CharField(max_length=50)
+    status = models.CharField(max_length=2)
+    msg = models.CharField(max_length=100)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+# abstract base class 
+class PayeeCommonInfo(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255)
+    gender = models.CharField(choices=GENDER_CHOICES, max_length=6)
+    contact = models.CharField(max_length=255)
+    address = models.TextField()
+    created = models.DateTimeField(auto_now_add=True)
+    amount = models.DecimalField(max_digits=10,decimal_places=2)
+    country = models.CharField(max_length=6, choices=COUNTRY, default='India')
+
+    class Meta:
+        abstract = True
+
+class DonationPayee(PayeeCommonInfo):
+    pass
+   
+    
+class DonationTransaction(TransactionCommonInfo):
+    donationDetail = models.ForeignKey(DonationPayee, on_delete=models.PROTECT, related_name="payment_transaction" )
+
+
+class Goodies(PayeeCommonInfo):
+    item = models.CharField(max_length=6, choices=ITEM_CHOICES, default='tshirt')
+    size = models.CharField(max_length=6, choices=SIZE_CHOICES, default='m')
+
+class GoodiesTransaction(TransactionCommonInfo):
+    paymentdetail = models.ForeignKey(Goodies, on_delete=models.PROTECT, related_name="payment_transaction" )
+    
+

@@ -33,6 +33,28 @@ import os
 from events.models import AcademicKey
 import random
 from training.views import reg_success
+from .models import *
+from .forms import *
+# @csrf_exempt
+# def donatehome(request):
+#     form = PayeeForm(initial={'country': 'India'})
+#     if request.method == 'POST':
+#         type = request.POST.get("type", "")
+#         amount = request.POST.get("amount", "")
+#         if type == 'initiate':
+#             form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
+#             form.initial = {'amount': amount}
+#     else:
+#         form = DonateForm(initial={'country': 'India', 'amount': 50.00})
+#         form.fields['amount'].widget = forms.NumberInput(attrs={'min': 50.00, 'step': 50.00})
+
+#     context = {
+#         'form': form
+#     }
+#     context.update(csrf(request))
+#     # return render(request, 'donate/templates/cd_payment_success.html', context)
+#     return render(request, 'donate/donate.html', context)
+
 @csrf_exempt
 def donatehome(request):
     form = PayeeForm(initial={'country': 'India'})
@@ -43,14 +65,33 @@ def donatehome(request):
             form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
             form.initial = {'amount': amount}
     else:
-        form = PayeeForm(initial={'country': 'India', 'amount': 50.00})
-        form.fields['amount'].widget = forms.NumberInput(attrs={'min': 50.00, 'step': 50.00})
+        form = DonateForm()
 
     context = {
         'form': form
     }
     context.update(csrf(request))
-    return render(request, 'donate/templates/cd_payment_success.html', context)
+    # return render(request, 'donate/templates/cd_payment_success.html', context)
+    return render(request, 'donate/donate.html', context)
+
+@csrf_exempt
+def purchase(request):
+    form = PayeeForm(initial={'country': 'India'})
+    if request.method == 'POST':
+        type = request.POST.get("type", "")
+        amount = request.POST.get("amount", "")
+        if type == 'initiate':
+            form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
+            form.initial = {'amount': amount}
+    else:
+        form = GoodiesForm()
+
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    # return render(request, 'donate/templates/cd_payment_success.html', context)
+    return render(request, 'donate/purchase.html', context)
 
 def pay_now(request):
     purpose = 'Donate'

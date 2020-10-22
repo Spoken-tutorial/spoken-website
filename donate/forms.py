@@ -97,4 +97,24 @@ class TransactionForm(forms.ModelForm):
         self.fields['user'].widget = forms.HiddenInput()
         pass
 
+class DonateForm(forms.ModelForm):
+
+
+    class Meta:
+        model = DonationPayee
+        fields = ['name','email','gender','contact','address','amount']
+
+
+class GoodiesForm(forms.ModelForm):
+
+    amount = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    class Meta:
+        model = Goodies
+        fields = ['name','email','gender','contact','address','item','country','size','amount']
+        readonly = ('amount')
+
+
+
         
