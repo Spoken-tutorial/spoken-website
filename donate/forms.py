@@ -101,7 +101,14 @@ class DonateForm(forms.ModelForm):
 
     class Meta:
         model = DonationPayee
-        fields = ['name','email','gender','contact','address','amount','country']
+        fields = ['name','email','gender','contact','country','address','amount']
+        widgets = {
+          'address': forms.Textarea(attrs={'rows':4, 'cols':15}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['address'].required = False
 
 
 class GoodiesForm(forms.ModelForm):
