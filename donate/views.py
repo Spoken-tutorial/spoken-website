@@ -52,6 +52,10 @@ def donatehome(request):
     context.update(csrf(request))
     return render(request, 'donate/templates/cd_payment_success.html', context)
 
+def pay_now(request):
+    purpose = 'Donate'
+    data = get_final_data(request, form, purpose)
+    return render(request, 'payment_status.html', data)
 
 @csrf_exempt
 def form_valid(request, form, purpose):
