@@ -57,16 +57,13 @@ from .forms import *
 
 @csrf_exempt
 def donatehome(request):
-    form = PayeeForm(initial={'country': 'India'})
+    form = DonateForm()
     if request.method == 'POST':
         type = request.POST.get("type", "")
         amount = request.POST.get("amount", "")
         if type == 'initiate':
             form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
-            form.initial = {'amount': amount}
-    else:
-        form = DonateForm()
-
+            form.initial = {'amount': amount}        
     context = {
         'form': form
     }
@@ -76,16 +73,13 @@ def donatehome(request):
 
 @csrf_exempt
 def purchase(request):
-    form = PayeeForm(initial={'country': 'India'})
+    form = GoodiesForm()
     if request.method == 'POST':
         type = request.POST.get("type", "")
         amount = request.POST.get("amount", "")
         if type == 'initiate':
             form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
             form.initial = {'amount': amount}
-    else:
-        form = GoodiesForm()
-
     context = {
         'form': form
     }
@@ -93,8 +87,12 @@ def purchase(request):
     # return render(request, 'donate/templates/cd_payment_success.html', context)
     return render(request, 'donate/purchase.html', context)
 
+@csrf_exempt
 def pay_now(request):
     purpose = 'Donate'
+    print("\n\n",request.POST)
+    form = DonateForm(request.POST)
+    print("error",form.errors)
     data = get_final_data(request, form, purpose)
     return render(request, 'payment_status.html', data)
 
