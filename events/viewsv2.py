@@ -2802,34 +2802,38 @@ def payment_success(request):
           messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
           return HttpResponseRedirect('/software-training')
       else:
-        try:
-            training_participant = Participant.objects.get(
-                event=int(purpose.split("NEW")[0]), user=int(userId), 
-                payment_status_id = int(purpose.split("NEW")[1]))
-            #tp_values = training_participant.values('name','email','event__event_name')
-            #if status == 'S': update value of participant else delete
-            default_response = '/training/list_events/ongoing/'
-            template_name = 'reg_success.html'
-            context['user'] = User.objects.get(id=int(request.POST.get('userId')))
-            if status != 'S':
-             training_participant.delete()
-            else:
-              context['participant_obj'] = training_participant
-        except Exception as e1:
-          print("came here ",e1)
-          default_response = '/cdcontent/'
-          template_name = 'donate/templates/cd_payment_success.html'
-        try:
-          pd = get_payee_id(purpose)
-          if pd == 'incorrect_data':
-            messages.error(request, 'Incorrct Data')
-            return HttpResponseRedirect('/training/list_events/ongoing/')
-          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)          
-          context['form'] = get_updated_form(transaction)
-        except Exception as e:
-          print(e)
-          messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')
-          return HttpResponseRedirect(default_response)
+        if 'Donate' in purpose :
+          pd = DonationPayee.objects.get(id = purpose.split('Donate')[1])
+        if 'Goodie' in purpose:
+          pd = Goodies.objects.get(id = purpose.split('Goodie')[1])
+        transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+        else:  
+          try:
+              training_participant = Participant.objects.get(
+                  event=int(purpose.split("NEW")[0]), user=int(userId), 
+                  payment_status_id = int(purpose.split("NEW")[1]))
+              default_response = '/training/list_events/ongoing/'
+              template_name = 'reg_success.html'
+              context['user'] = User.objects.get(id=int(request.POST.get('userId')))
+              if status != 'S':
+               training_participant.delete()
+              else:
+                context['participant_obj'] = training_participant
+          except Exception as e1:
+            print("came here ",e1)
+            default_response = '/cdcontent/'
+            template_name = 'donate/templates/cd_payment_success.html'
+          try:
+            pd = get_payee_id(purpose)
+            if pd == 'incorrect_data':
+              messages.error(request, 'Incorrct Data')
+              return HttpResponseRedirect('/training/list_events/ongoing/')
+            transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)          
+            context['form'] = get_updated_form(transaction)
+          except Exception as e:
+            print(e)
+            messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')
+            return HttpResponseRedirect(default_response)
       update_status(pd, status)
       context['transId'] = transId
       context['refNo'] = refNo
@@ -2846,30 +2850,24 @@ def payment_success(request):
 def add_transaction(purpose, pid, requestType, userId, amount, reqId, transId, refNo, provId, status, msg):
   if purpose == 'Subscription':
     transaction = PaymentTransactionDetails()
-    transaction.paymentdetail_id  =  pid
-    transaction.requestType  =  requestType
-    transaction.userId_id  =  userId
-    transaction.amount  =  amount
-    transaction.reqId  = reqId
-    transaction.transId  = transId
-    transaction.refNo  =  refNo
-    transaction.provId  =  provId
-    transaction.status  =  status
-    transaction.msg  =  msg
-    transaction.save()
-  else :
+  elif 'Donate' in purpose :
+    transaction = DonationTransaction()
+  elif 'Goodie' in purpose:
+    transaction = GoodiesTransaction()
+  else:  
     transaction = PaymentTransaction()
-    transaction.paymentdetail_id  =  pid
-    transaction.requestType  =  requestType
-    transaction.userId_id  =  userId
-    transaction.amount  =  amount
-    transaction.reqId  = reqId
-    transaction.transId  = transId
-    transaction.refNo  =  refNo
-    transaction.provId  =  provId
-    transaction.status  =  status
-    transaction.msg  =  msg
-    transaction.save()
+
+  transaction.paymentdetail_id  =  pid
+  transaction.requestType  =  requestType
+  transaction.userId_id  =  userId
+  transaction.amount  =  amount
+  transaction.reqId  = reqId
+  transaction.transId  = transId
+  transaction.refNo  =  refNo
+  transaction.provId  =  provId
+  transaction.status  =  status
+  transaction.msg  =  msg
+  transaction.save()
   return transaction
 
 def get_payee_id(purpose):
