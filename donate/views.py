@@ -63,7 +63,11 @@ def donatehome(request):
         amount = request.POST.get("amount", "")
         if type == 'initiate':
             form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
+
             form.initial = {'amount': amount}        
+    else:
+        initial = {'amount': 100}
+        form = DonateForm(initial = initial)
     context = {
         'form': form
     }
@@ -80,6 +84,9 @@ def purchase(request):
         if type == 'initiate':
             form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
             form.initial = {'amount': amount}
+    else:
+        initial = {'amount': 1000}
+        form = GoodiesForm(initial=initial)
     context = {
         'form': form
     }
@@ -90,10 +97,11 @@ def purchase(request):
 @csrf_exempt
 def pay_now(request):
     purpose = 'Donate'
-    print("\n\n",request.POST)
+    print("\n\name",request.POST)
     form = DonateForm(request.POST)
     print("error",form.errors)
     data = get_final_data(request, form, purpose)
+    print("Completed")
     return render(request, 'payment_status.html', data)
 
 @csrf_exempt
@@ -179,6 +187,7 @@ def calculate_expiry():
 
 @csrf_exempt
 def encrypted_data(request, form, purpose):
+    print("Entred ")
     STdata = ''
     user_name = form.cleaned_data.get('name')
     amount = form.cleaned_data.get('amount')   
@@ -187,11 +196,13 @@ def encrypted_data(request, form, purpose):
     request_id = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
     STdata =  request_id + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
+    print("Exited")
     return s
 
 
 @csrf_exempt
 def get_final_data(request, form, purpose):
+    print("form :",form.errors)
     data = {
             'reqId' :  CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20]),
         'userId': str(request.user.id),

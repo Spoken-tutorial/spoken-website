@@ -1,8 +1,8 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}Payment Status{% endblock %}
-{% block content %}
+{% block title %}Donate{% endblock %}
+{% block content %}  
   
 <form id="donation_form" action="{% url 'donate:pay_now' %}" method="post">
           {% csrf_token %}
@@ -12,8 +12,43 @@
             {{ field.label_tag }}
             {% render_field field class="form-control" %}
         </div>
+        {% if field.name == 'amount' %}
+            <div>
+              <button type="button" class="btn btn-outline-secondary d-amount">500</button>
+              <button type="button" class="btn btn-outline-secondary d-amount">1000</button>
+              <button type="button" class="btn btn-outline-secondary d-amount">1500</button>
+              <button type="button" class="btn btn-outline-secondary d-amount">2000</button>
+              <button type="button" class="btn btn-outline-secondary d-amount">2500</button>
+            </div>
+            {% endif %}
+        
         {% endfor %}
 
-          <input type="submit" value="Pay">
+          <input type="submit" value="Donate">
       </form>
+
+      
 {%endblock%}
+{% block jsblock %}
+<script type="text/javascript">
+ $( document ).ready(function() {
+
+
+  
+
+
+  });
+
+ $( ".d-amount" ).click(function() {
+    var amount = $(this).text();
+     $("#id_amount").val(amount);
+  });
+ $( "#id_amount" )
+  .focusout(function() {
+    var amount  = parseInt($('#id_amount').val());
+    if (amount < 100) {
+      $("#id_amount").val("100");
+    }
+  })
+ </script>
+{% endblock %}
