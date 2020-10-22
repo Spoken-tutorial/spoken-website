@@ -99,13 +99,14 @@ class TransactionForm(forms.ModelForm):
 
 class DonateForm(forms.ModelForm):
 
-
     class Meta:
         model = DonationPayee
-        fields = ['name','email','gender','contact','address','amount']
+        fields = ['name','email','gender','contact','address','amount','country']
 
 
 class GoodiesForm(forms.ModelForm):
+
+
 
     amount = forms.CharField(
         widget=forms.TextInput(attrs={'readonly': 'readonly'}),
@@ -113,7 +114,10 @@ class GoodiesForm(forms.ModelForm):
     class Meta:
         model = Goodies
         fields = ['name','email','gender','contact','address','item','country','size','amount']
-        readonly = ('amount')
+        widgets = {
+          'address': forms.Textarea(attrs={'rows':4, 'cols':15}),
+        }
+
 
 
 

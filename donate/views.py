@@ -65,7 +65,8 @@ def donatehome(request):
             form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
             form.initial = {'amount': amount}
     else:
-        form = DonateForm()
+        initial = {'amount': 100}
+        form = DonateForm(initial = initial)
 
     context = {
         'form': form
@@ -84,7 +85,8 @@ def purchase(request):
             form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
             form.initial = {'amount': amount}
     else:
-        form = GoodiesForm()
+        initial = {'amount': 1000}
+        form = GoodiesForm(initial=initial)
 
     context = {
         'form': form
