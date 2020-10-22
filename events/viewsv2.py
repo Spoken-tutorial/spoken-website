@@ -2804,9 +2804,10 @@ def payment_success(request):
       else:
         if 'Donate' in purpose :
           pd = DonationPayee.objects.get(id = purpose.split('Donate')[1])
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
         if 'Goodie' in purpose:
           pd = Goodies.objects.get(id = purpose.split('Goodie')[1])
-        transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
         else:  
           try:
               training_participant = Participant.objects.get(
