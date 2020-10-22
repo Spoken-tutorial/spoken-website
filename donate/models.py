@@ -94,7 +94,6 @@ class PayeeCommonInfo(models.Model):
     address = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     amount = models.DecimalField(max_digits=10,decimal_places=2)
-    currency = models.CharField(max_length=6, choices=CURRENCY, default='INR')
     country = models.CharField(max_length=6, choices=COUNTRY, default='India')
 
     class Meta:

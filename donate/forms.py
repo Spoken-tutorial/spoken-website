@@ -102,7 +102,7 @@ class DonateForm(forms.ModelForm):
 
     class Meta:
         model = DonationPayee
-        fields = ['name','email','gender','contact','address','amount','currency']
+        fields = ['name','email','gender','contact','address','amount']
 
 
 class GoodiesForm(forms.ModelForm):
@@ -112,7 +112,7 @@ class GoodiesForm(forms.ModelForm):
     )
     class Meta:
         model = Goodies
-        fields = ['name','email','gender','contact','address','item','country','size','amount','currency']
+        fields = ['name','email','gender','contact','address','item','country','size','amount']
         readonly = ('amount')
 
 
