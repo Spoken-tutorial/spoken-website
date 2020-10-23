@@ -95,13 +95,12 @@ def purchase(request):
     return render(request, 'donate/purchase.html', context)
 
 @csrf_exempt
-def pay_now(request):
-    purpose = 'Donate'
-    print("\n\name",request.POST)
-    form = DonateForm(request.POST)
-    print("error",form.errors)
+def pay_now(request, purpose):
+    if 'Donate' in purpose:
+        form = DonateForm(request.POST)
+    if 'Goodie' in purpose:
+        form = GoodiesForm(request.POST)
     data = get_final_data(request, form, purpose)
-    print("Completed")
     return render(request, 'payment_status.html', data)
 
 @csrf_exempt
@@ -187,7 +186,6 @@ def calculate_expiry():
 
 @csrf_exempt
 def encrypted_data(request, form, purpose):
-    print("Entred ")
     STdata = ''
     user_name = form.cleaned_data.get('name')
     amount = form.cleaned_data.get('amount')   
@@ -196,13 +194,11 @@ def encrypted_data(request, form, purpose):
     request_id = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
     STdata =  request_id + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
-    print("Exited")
     return s
 
 
 @csrf_exempt
 def get_final_data(request, form, purpose):
-    print("form :",form.errors)
     data = {
             'reqId' :  CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20]),
         'userId': str(request.user.id),

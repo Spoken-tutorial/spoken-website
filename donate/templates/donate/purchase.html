@@ -32,7 +32,7 @@
 
 <div class="row">
   <div class="col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-1">
-  <form >
+  <form id="donation_form" action="{% url 'donate:pay_now' 'Goodie' %}" method="post">
           {% csrf_token %}
           {% for field in form %}
           {% if field != form.size and field != form.country and field != form.amount %}
