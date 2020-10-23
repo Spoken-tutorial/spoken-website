@@ -1,0 +1,101 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Donate{% endblock %}
+{% block compressinlinecssblock %}
+    <style>
+        label,.input-group-addon{
+          color: #286090;
+          font-size: 14px;
+          font-weight: bold;
+          }
+        .size{
+          border: 1px solid #286090;
+          padding: 5%;
+          border-radius: 5px;
+          margin-bottom: 1rem;
+        }
+        .bold-font{
+          font-weight: bold;
+          font-weight: 14px;
+        }
+        .inr-btn{
+          font-weight: bold;
+          color: darkgreen;
+        }
+        .btn-group{
+          margin-bottom: 1rem;
+        }
+        .donate-btn{
+          width: 250px;
+          font-size: 16px;
+
+        }
+        /*.btn{
+          width: 100%;
+          margin-top: 1rem;
+        }*/
+    </style>
+{% endblock %}
+{% block content %}
+
+<div class="row">
+
+  <div class="col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-1"> 
+  
+<form id="donation_form" action="{% url 'donate:pay_now' 'Donate' %}" method="post">
+          {% csrf_token %}
+          {% for field in form %}
+        <div class="form-group {%if field.errors %}alert alert-danger{%endif%}">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {% render_field field class="form-control" %}
+        </div>
+        {% if field.name == 'amount' %}
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-default disabled inr-btn">INR</button>
+          <button type="button" class="btn btn-default d-amount">1000</button>
+          <button type="button" class="btn btn-default d-amount">1500</button>
+          <button type="button" class="btn btn-default d-amount">2000</button>
+          <button type="button" class="btn btn-default d-amount">2500</button>
+          <button type="button" class="btn btn-default d-amount">5000</button>
+        </div>
+            {% endif %}
+        
+        {% endfor %}
+        <div>
+        <button type="submit" class="btn btn-success donate-btn">Donate</button>  
+        </div>
+        
+          
+      </form>
+
+  </div>
+</div> 
+      
+
+      
+{%endblock%}
+{% block jsblock %}
+<script type="text/javascript">
+ $( document ).ready(function() {
+
+
+  
+
+
+  });
+
+ $( ".d-amount" ).click(function() {
+    var amount = $(this).text();
+     $("#id_amount").val(amount);
+  });
+ $( "#id_amount" )
+  .focusout(function() {
+    var amount  = parseInt($('#id_amount').val());
+    if (amount < 500) {
+      $("#id_amount").val("500");
+    }
+  })
+ </script>
+{% endblock %}

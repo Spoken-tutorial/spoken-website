@@ -97,4 +97,129 @@ class TransactionForm(forms.ModelForm):
         self.fields['user'].widget = forms.HiddenInput()
         pass
 
+class DonateForm(forms.ModelForm):
+
+    class Meta:
+        model = DonationPayee
+        fields = ['name','email','gender','contact','country','address','amount']
+        widgets = {
+          'address': forms.Textarea(attrs={'rows':4, 'cols':15}),
+        }
+        labels = {
+        "amount": "Amount (INR - Indian Rupees)",
+        "contact": "Mobile Number"
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['address'].required = False
+
+
+class GoodiesForm(forms.ModelForm):
+
+
+
+    amount = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    class Meta:
+        model = Goodies
+        fields = ['name','email','gender','contact','address','item','country','size','amount']
+        widgets = {
+          'address': forms.Textarea(attrs={'rows':4, 'cols':15}),
+        }
+        labels = {
+        "contact": "Mobile Number"
+        }
+
+class DonationTransactionForm(forms.ModelForm):
+
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    email = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    country = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    state = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    key = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    expiry = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    user = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+        required = False,
+    )
+    amount = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}),)
+    reqId = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    transId = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    refNo = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    provId = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    msg = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    status = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False)
+
+    class Meta(object):
+        model = DonationTransaction
+        exclude = ['created','updated']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['user'].widget = forms.HiddenInput()
+        pass
+
+
+class GoodieTransactionForm(forms.ModelForm):
+
+    name = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    email = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    country = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    state = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    key = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    expiry = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+    )
+    user = forms.CharField(
+        widget=forms.TextInput(attrs={'readonly': 'readonly'}),
+        required = False,
+    )
+    amount = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}),)
+    reqId = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    transId = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    refNo = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    provId = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    msg = forms.CharField(widget=forms.TextInput(attrs={'readonly': 'readonly'}))
+    status = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False)
+    status = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False)
+
+    class Meta(object):
+        model = GoodiesTransaction
+        exclude = ['created','updated']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['user'].widget = forms.HiddenInput()
+        pass
+
         
