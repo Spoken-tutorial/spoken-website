@@ -104,7 +104,7 @@ class DonationPayee(PayeeCommonInfo):
    
     
 class DonationTransaction(TransactionCommonInfo):
-    donationDetail = models.ForeignKey(DonationPayee, on_delete=models.PROTECT, related_name="payment_transaction" )
+    paymentdetail = models.ForeignKey(DonationPayee, on_delete=models.PROTECT, related_name="donation_payment_transaction" )
 
 
 class Goodies(PayeeCommonInfo):
@@ -112,6 +112,6 @@ class Goodies(PayeeCommonInfo):
     size = models.CharField(max_length=6, choices=SIZE_CHOICES, default='m')
 
 class GoodiesTransaction(TransactionCommonInfo):
-    paymentdetail = models.ForeignKey(Goodies, on_delete=models.PROTECT, related_name="payment_transaction" )
+    paymentdetail = models.ForeignKey(Goodies, on_delete=models.PROTECT, related_name="goodie_payment_transaction" )
     
 

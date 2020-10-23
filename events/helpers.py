@@ -34,16 +34,11 @@ def get_updated_form(transaction):
     form.fields['email'].initial =  transaction.paymentdetail.email
     form.fields['country'].initial =  transaction.paymentdetail.country
     form.fields['amount'].initial  = transaction.amount
-    form.fields['expiry'].initial =  transaction.paymentdetail.expiry
     form.fields['reqId'].initial = transaction.reqId
     form.fields['transId'].initial =  transaction.transId
     form.fields['refNo'].initial =  transaction.refNo
     form.fields['provId'].initial =  transaction.provId
     form.fields['msg'].initial =  transaction.msg
     form.fields['status'].initial = transaction.status
-        
-    
-    if transaction.status == 'S':
-        form.fields[ 'selected_foss'].initial = transaction.paymentdetail.get_selected_foss()
         
     return form
