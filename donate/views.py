@@ -96,12 +96,21 @@ def purchase(request):
 
 @csrf_exempt
 def pay_now(request, purpose):
+    context ={}
+    data = ''
     if 'Donate' in purpose:
         form = DonateForm(request.POST)
     if 'Goodie' in purpose:
         form = GoodiesForm(request.POST)
-    data = get_final_data(request, form, purpose)
-    return render(request, 'payment_status.html', data)
+    
+    if form.is_valid():
+        data = get_final_data(request, form, purpose)
+    else:
+        messages.error(request,'Invalid Form')
+        return redirect('/donate')
+    context['form'] = form
+    context['data'] = data
+    return render(request, 'payment_status.html', context)
 
 @csrf_exempt
 def form_valid(request, form, purpose):
@@ -185,12 +194,12 @@ def calculate_expiry():
     return datetime.now() + timedelta(days = EXPIRY_DAYS)
 
 @csrf_exempt
-def encrypted_data(request, form, purpose):
+def encrypted_data(request, form, purpose, pk):
     STdata = ''
     user_name = form.cleaned_data.get('name')
     amount = form.cleaned_data.get('amount')   
     #amount = 1.00
-    purpose = purpose+"NEW"+str(form.save(commit=False).pk)
+    purpose = purpose+"NEW"+str(pk)
     request_id = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
     STdata =  request_id + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
@@ -199,16 +208,17 @@ def encrypted_data(request, form, purpose):
 
 @csrf_exempt
 def get_final_data(request, form, purpose):
+    pk = form.save().pk
     data = {
-            'reqId' :  CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20]),
+        'reqId' :  CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20]),
         'userId': str(request.user.id),
         'name': form.cleaned_data.get('name'),
         'amount':form.cleaned_data.get('amount'),
         #'amount': 1.00,
-        'purpose': purpose+"NEW"+str(form.save(commit=False).pk) ,
+        'purpose': purpose+"NEW"+str(pk) ,
         'channelId': CHANNEL_ID,
         'target': TARGET,
-        'random': encrypted_data(request, form, purpose)
+        'random': encrypted_data(request, form, purpose, pk)
     }
     return data
 
