@@ -24,7 +24,9 @@
         }
         .btn{
           width: 100%;
-          margin-top: 1rem;
+        }
+        .mb{
+          margin-bottom: 16px;
         }
     </style>
 {% endblock %}
@@ -63,7 +65,7 @@
         </div>
         </div>
         <div class="row">
-          <div class="col-xs-12 col-sm-8">
+          <div class="col-xs-12 col-sm-8 mb">
             <div class="input-group">
           <span class="input-group-addon" id="basic-addon1">Amount (INR - Indian Rupees)</span>
            <span class="bold-font">{% render_field form.amount class="form-control" %}</span> 
@@ -71,7 +73,7 @@
         </div>
           </div>
           <div class="col-xs-12 col-sm-4">
-            <button type="submit" class="btn btn-success">
+            <button type="submit" class="btn btn-success ">
               Pay <!-- <input type="submit" value="Pay"> -->
             </button>
             </div>

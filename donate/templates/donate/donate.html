@@ -2,7 +2,47 @@
 {% load widget_tweaks %}
 {% load static %}
 {% block title %}Donate{% endblock %}
-{% block content %}  
+{% block compressinlinecssblock %}
+    <style>
+        label,.input-group-addon{
+          color: #286090;
+          font-size: 14px;
+          font-weight: bold;
+          }
+        .size{
+          border: 1px solid #286090;
+          padding: 5%;
+          border-radius: 5px;
+          margin-bottom: 1rem;
+        }
+        .bold-font{
+          font-weight: bold;
+          font-weight: 14px;
+        }
+        .inr-btn{
+          font-weight: bold;
+          color: darkgreen;
+        }
+        .btn-group{
+          margin-bottom: 1rem;
+        }
+        .donate-btn{
+          width: 250px;
+          font-size: 16px;
+
+        }
+        /*.btn{
+          width: 100%;
+          margin-top: 1rem;
+        }*/
+    </style>
+{% endblock %}
+{% block content %}
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-1">
+    <form >
+
   
 <form id="donation_form" action="{% url 'donate:pay_now' 'Donate' %}" method="post">
           {% csrf_token %}
@@ -13,19 +53,27 @@
             {% render_field field class="form-control" %}
         </div>
         {% if field.name == 'amount' %}
-            <div>
-              <button type="button" class="btn btn-outline-secondary d-amount">500</button>
-              <button type="button" class="btn btn-outline-secondary d-amount">1000</button>
-              <button type="button" class="btn btn-outline-secondary d-amount">1500</button>
-              <button type="button" class="btn btn-outline-secondary d-amount">2000</button>
-              <button type="button" class="btn btn-outline-secondary d-amount">2500</button>
-            </div>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-default disabled inr-btn">INR</button>
+          <button type="button" class="btn btn-default d-amount">500</button>
+          <button type="button" class="btn btn-default d-amount">1000</button>
+          <button type="button" class="btn btn-default d-amount">1500</button>
+          <button type="button" class="btn btn-default d-amount">2000</button>
+          <button type="button" class="btn btn-default d-amount">2500</button>
+        </div>
             {% endif %}
         
         {% endfor %}
-
-          <input type="submit" value="Donate">
+        <div>
+        <button type="submit" class="btn btn-success donate-btn">Donate</button>  
+        </div>
+        
+          
       </form>
+
+  </div>
+</div> 
+      
 
       
 {%endblock%}
