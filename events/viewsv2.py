@@ -2797,7 +2797,6 @@ def payment_success(request):
           transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
           template_name = 'payment_success.html'
           default_response = '/software-training'
-          context['form'] = get_updated_form(transaction)
         except Exception as e:
           print(e)
           messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
@@ -2808,7 +2807,7 @@ def payment_success(request):
           try:
             pd = DonationPayee.objects.get(id = purpose.split('DonateNEW')[1])
             transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
-            context['form'] = get_updated_form(transaction)
+            context['form'] = get_updated_form(transaction, 'Donate')
           except:
             template_name = '/donate/templates/payment_response.html'
         
@@ -2817,7 +2816,7 @@ def payment_success(request):
           try:
             pd = Goodies.objects.get(id = purpose.split('GoodieNEW')[1])
             transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
-            context['form'] = get_updated_form(transaction)
+            context['form'] = get_updated_form(transaction, 'Goodie')
           except:
             template_name = '/donate/templates/payment_response.html'
         else:
@@ -2846,7 +2845,7 @@ def payment_success(request):
               messages.error(request, 'Incorrect Data')
               return HttpResponseRedirect('/training/list_events/ongoing/')
             transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)          
-            context['form'] = get_updated_form(transaction)
+            context['form'] = get_updated_form(transaction , 'CD-Events')
             form.fields['expiry'].initial =  transaction.paymentdetail.expiry
             if transaction.status == 'S':
               form.fields[ 'selected_foss'].initial = transaction.paymentdetail.get_selected_foss()

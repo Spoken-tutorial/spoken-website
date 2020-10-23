@@ -2,7 +2,7 @@
 from builtins import str
 from builtins import range
 import datetime as dt
-from donate.forms import TransactionForm
+from donate.forms import *
 from donate.models import CdFossLanguages
 
 # Third Party Stuff
@@ -27,9 +27,13 @@ def get_prev_semester_duration(semester_type, year):
         return start, end
     raise Exception("Invalid semester type, it must be either odd or even")
 
-def get_updated_form(transaction):
-    form = TransactionForm()
-    
+def get_updated_form(transaction, form_type):
+    if form_type == 'CD-Events':
+        form = TransactionForm()
+    if form_type == 'Donate':
+        form = DonationTransactionForm()
+    if form_type == 'Goodie':
+        form = GoodieTransactionForm()
     form.fields['name'].initial = transaction.paymentdetail.name
     form.fields['email'].initial =  transaction.paymentdetail.email
     form.fields['country'].initial =  transaction.paymentdetail.country
