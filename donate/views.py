@@ -96,11 +96,15 @@ def purchase(request):
 
 @csrf_exempt
 def pay_now(request, purpose):
-    if 'Donate' in purpose:
-        form = DonateForm(request.POST)
-    if 'Goodie' in purpose:
-        form = GoodiesForm(request.POST)
-    data = get_final_data(request, form, purpose)
+    if request.method=='POST':
+        if 'Donate' in purpose:
+            form = DonateForm(request.POST)
+        if 'Goodie' in purpose:
+            form = GoodiesForm(request.POST)
+        if form.is_valid():
+            data = get_final_data(request, form, purpose)
+        else:
+            messages.errors(request,'Invalid Form')
     return render(request, 'payment_status.html', data)
 
 @csrf_exempt
