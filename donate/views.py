@@ -66,7 +66,7 @@ def donatehome(request):
 
             form.initial = {'amount': amount}        
     else:
-        initial = {'amount': 100}
+        initial = {'amount': 500}
         form = DonateForm(initial = initial)
     context = {
         'form': form
