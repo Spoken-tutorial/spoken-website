@@ -106,7 +106,8 @@ class DonateForm(forms.ModelForm):
           'address': forms.Textarea(attrs={'rows':4, 'cols':15}),
         }
         labels = {
-        "amount": "Amount (INR - Indian Rupees)"
+        "amount": "Amount (INR - Indian Rupees)",
+        "contact": "Mobile Number"
         }
 
     def __init__(self, *args, **kwargs):
@@ -126,6 +127,9 @@ class GoodiesForm(forms.ModelForm):
         fields = ['name','email','gender','contact','address','item','country','size','amount']
         widgets = {
           'address': forms.Textarea(attrs={'rows':4, 'cols':15}),
+        }
+        labels = {
+        "contact": "Mobile Number"
         }
 
 class DonationTransactionForm(forms.ModelForm):
