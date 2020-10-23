@@ -30,6 +30,9 @@ def get_prev_semester_duration(semester_type, year):
 def get_updated_form(transaction, form_type):
     if form_type == 'CD-Events':
         form = TransactionForm()
+        form.fields['expiry'].initial =  transaction.paymentdetail.expiry
+        if transaction.status == 'S':
+            form.fields[ 'selected_foss'].initial = transaction.paymentdetail.get_selected_foss()
     if form_type == 'Donate':
         form = DonationTransactionForm()
     if form_type == 'Goodie':

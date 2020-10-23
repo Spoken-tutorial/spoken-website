@@ -2846,9 +2846,6 @@ def payment_success(request):
               return HttpResponseRedirect('/training/list_events/ongoing/')
             transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)          
             context['form'] = get_updated_form(transaction , 'CD-Events')
-            form.fields['expiry'].initial =  transaction.paymentdetail.expiry
-            if transaction.status == 'S':
-              form.fields[ 'selected_foss'].initial = transaction.paymentdetail.get_selected_foss()
           except :
             messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')
             return render(request,template_name,context)
