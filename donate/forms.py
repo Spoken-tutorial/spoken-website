@@ -105,6 +105,9 @@ class DonateForm(forms.ModelForm):
         widgets = {
           'address': forms.Textarea(attrs={'rows':4, 'cols':15}),
         }
+        labels = {
+        "amount": "Amount (INR - Indian Rupees)"
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
