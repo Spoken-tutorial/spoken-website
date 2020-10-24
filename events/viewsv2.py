@@ -2782,7 +2782,7 @@ def payment_success(request):
     STresponsedata = ''
     STresponsedata = reqId+str(userId)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
     STresponsedata_hexa = display.value(str(STresponsedata))
-    template_name = '' 
+    template_name = 'donate/templates/payment_response.html'
     if STresponsedata_hexa == random:
       #Subscription Responses
       if purpose == 'Subscription':
@@ -2801,54 +2801,57 @@ def payment_success(request):
           print(e)
           messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
           return HttpResponseRedirect('/software-training')
-      else:
-        # Donation Responses
-        if 'Donate' in purpose :
-          try:
-            pd = DonationPayee.objects.get(id = purpose.split('DonateNEW')[1])
-            transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
-            context['form'] = get_updated_form(transaction, 'Donate')
-          except:
-            template_name = '/donate/templates/payment_response.html'
-        
-        # Spoken Goodie Payment Responses 
-        if 'Goodie' in purpose:
-          try:
-            pd = Goodies.objects.get(id = purpose.split('GoodieNEW')[1])
-            transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
-            context['form'] = get_updated_form(transaction, 'Goodie')
-          except:
-            template_name = '/donate/templates/payment_response.html'
-        else:
-          if 'cdcontent' not in purpose:
-            # Participant of events
-            try:
-                # Getting the participant
-                # <event_id>NEW<pid>
-                training_participant = Participant.objects.get(
-                    event=int(purpose.split("NEW")[0]), user=int(userId), 
-                    payment_status_id = int(purpose.split("NEW")[1]))
-                default_response = '/training/list_events/ongoing/'
-                template_name = 'reg_success.html'
-                context['user'] = User.objects.get(id=int(request.POST.get('userId')))
-                if status != 'S':
-                 training_participant.delete()
-                else:
-                  context['participant_obj'] = training_participant
-            except:
-              template_name = 'donate/templates/payment_response.html'
 
-          # This part is common for CD Content Payments and Participant payment of events
+      # Donation Responses
+      elif 'Donate' in purpose :
+        try:
+          pd = DonationPayee.objects.get(id = purpose.split('DonateNEW')[1])
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          context['form'] = get_updated_form(transaction, 'Donate')
+        except:
+          messages.error(request, 'Validation of Donation transaction failed')
+          return render(request,template_name,context)
+        
+      # Spoken Goodie Payment Responses
+      elif 'Goodie' in purpose:
+        try:
+          pd = Goodies.objects.get(id = purpose.split('GoodieNEW')[1])
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          context['form'] = get_updated_form(transaction, 'Goodie')
+        except:
+          messages.error(request, 'Validation of Goodie Transaction failed')
+          return render(request,template_name,context)
+
+      else:
+        # Participant of events
+        if 'cdcontent' not in purpose:
           try:
-            pd = get_payee_id(purpose)
-            if pd == 'incorrect_data':
-              messages.error(request, 'Incorrect Data')
-              return HttpResponseRedirect('/training/list_events/ongoing/')
-            transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)          
-            context['form'] = get_updated_form(transaction , 'CD-Events')
-          except :
-            messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')
-            return render(request,template_name,context)
+            # Getting the participant
+            # <event_id>NEW<pid>
+            training_participant = Participant.objects.get(
+                event=int(purpose.split("NEW")[0]), user=int(userId),
+                payment_status_id = int(purpose.split("NEW")[1]))
+            default_response = '/training/list_events/ongoing/'
+            template_name = 'reg_success.html'
+            context['user'] = User.objects.get(id=int(request.POST.get('userId')))
+            if status != 'S':
+             training_participant.delete()
+            else:
+              context['participant_obj'] = training_participant
+          except:
+            messages.error(request, 'Validation of Participant data failed')
+
+        # This part is common for CD Content Payments and Participant payment of events
+        try:
+          pd = get_payee_id(purpose)
+          if pd == 'incorrect_data':
+            messages.error(request, 'Incorrect Data')
+            return HttpResponseRedirect('/training/list_events/ongoing/')
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          context['form'] = get_updated_form(transaction , 'CD-Events')
+        except :
+          messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')
+          return render(request,template_name,context)
       update_status(pd, status)
       return render(request,template_name,context)
     else:

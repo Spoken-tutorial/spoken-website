@@ -102,6 +102,7 @@ def pay_now(request, purpose):
         if 'Goodie' in purpose:
             form = GoodiesForm(request.POST)
         if form.is_valid():
+            form.save()
             data = get_final_data(request, form, purpose)
         else:
             messages.errors(request,'Invalid Form')
