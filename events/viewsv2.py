@@ -2778,11 +2778,12 @@ def payment_success(request):
     context['refNo'] = refNo
     context['msg'] = msg
     context['status'] = status
+    context['amount'] = amount
 
     STresponsedata = ''
     STresponsedata = reqId+str(userId)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
     STresponsedata_hexa = display.value(str(STresponsedata))
-    template_name = 'donate/templates/payment_response.html'
+    template_name = 'payment_success.html'
     if STresponsedata_hexa == random:
       #Subscription Responses
       if purpose == 'Subscription':
@@ -2795,7 +2796,6 @@ def payment_success(request):
         try:
           pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
           transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
-          template_name = 'payment_success.html'
           default_response = '/software-training'
         except Exception as e:
           print(e)
@@ -2808,6 +2808,7 @@ def payment_success(request):
           pd = DonationPayee.objects.get(id = purpose.split('DonateNEW')[1])
           transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
           context['form'] = get_updated_form(transaction, 'Donate')
+          #template_name = ''
         except:
           messages.error(request, 'Validation of Donation transaction failed')
           return render(request,template_name,context)
@@ -2818,11 +2819,13 @@ def payment_success(request):
           pd = Goodies.objects.get(id = purpose.split('GoodieNEW')[1])
           transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
           context['form'] = get_updated_form(transaction, 'Goodie')
+          #template_name = ''
         except:
           messages.error(request, 'Validation of Goodie Transaction failed')
           return render(request,template_name,context)
 
       else:
+        template_name = 'donate/templates/payment_response.html'
         # Participant of events
         if 'cdcontent' not in purpose:
           try:
