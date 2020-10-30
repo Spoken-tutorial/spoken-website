@@ -7,6 +7,18 @@ import os
 from string import Template
 import subprocess
 
+EVENT_TYPE_CHOICES =(
+	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
+), ('SSDP', 'School Students  Development Program')
+	)
+
+EVENT_AMOUNT = {
+     'FDP': '500', 'Workshop': '1000'
+    }
+
+REGISTRATION_TYPE_CHOICES =(
+    ('', '-----'),  (1, 'Subscribed College'),(2, 'Manual Registration')
+    )
 
 def is_user_paid(user_obj, academic_id):
     try:

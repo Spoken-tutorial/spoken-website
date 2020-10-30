@@ -53,5 +53,11 @@ urlpatterns = [
       r'^generate_training_certificate/$', 
       EventTrainingCertificateView.as_view(), \
         name="generate_training_certificate"
+        ),
+    # url(r'^participant-transactions/$', participant_transactions,name="participant_transactions"),
+    url(
+      r'^participant-transactions/$', 
+      ParticipantTransactionsListView.as_view(template_name="participant_transaction_list.html"), 
+      name="participant_transaction_list"
     ),
     ]

@@ -110,21 +110,21 @@
                                     </div>
                   {% if user_college %}
                     <div class="form-group">
-                      <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
+                      <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School</label>
                       <div class="col-lg-8">
                       <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6" style="display: none;">
                       </select>
-                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later</span>
+                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later <br> Contact Event Organiser if college/school name is not found in the list </span>
                       </div>
                     </div>
                     {%else%}
                     <div class="form-group">
-                      <label for="id_example_suggestion" class="col-lg-4 control-label">College</label>
+                      <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School</label>
                       <div class="col-lg-8">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6">
                     </select>
-                    <span class="help-block">This option cannot be changed later</span>
+                    <span class="help-block">This option cannot be changed later <br>Contact Event Organiser if college/school name is not found in the list</span>
                       </div>
 			<div id="college-info" class="col-md-8 col-md-offset-4" style="display:none" >Please select your college</div>
 		<!-- 	<span class="help-block" style="text-align: center;">This option cannot be changed later</span> -->
@@ -143,8 +143,14 @@
                     <div class="col-lg-8">
                         {% render_field form.foss_language class+="form-control foss_language" tabindex="7" %}
                         {{ form.name.errors }}
-                         <span class="help-block">Language of Tutorial Instructions</span>
+                         <span class="help-block">Select Language of Tutorial Instructions
+                          <br>English language will be offered by default in CD-content.
+                          <br>In addition, you can choose any other language also.
+                         </span>
+
+
                     </div>
+
                     </div>
                     {% endif %}
                     {% if user|is_user_paid %}
@@ -209,7 +215,7 @@
                           </table>
                         </div>
                         <div class="panel panel-info">
-                        <div class="panel-heading">Event</div>
+                        <div class="panel-heading">Event Organiser</div>
                           <table class="table table-bordered info-table">
                             <tbody>
                               <tr>
@@ -234,6 +240,14 @@
                           <div class="panel-body">
                             Click here for <a href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">Payment Flow via NEFT.</a>
                             <p class="help-block">You can pay by NEFT and contact your state Training Manager for registration</p>
+                            
+                          </div>
+                        </div>
+
+                        <div class="panel panel-info">
+                          <div class="panel-heading" style="font-weight: bold;">For any queries kindly contact our State Training Managers</div>
+                          <div class="panel-body">
+                            Click here for <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">Contact Details</a>
                             
                           </div>
                         </div>

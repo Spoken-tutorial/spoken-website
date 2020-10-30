@@ -26,7 +26,7 @@ from creation.models import TutorialResource, Language
 from events.decorators import group_required
 from events.models import *
 from events.views import is_resource_person, is_administrator, get_page 
-from events.filters import ViewEventFilter
+from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
 from certificate.views import _clean_certificate_certificate
@@ -45,6 +45,8 @@ from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from io import BytesIO
 from django.conf import settings
+from donate.models import *
+
 
 today = date.today()
 
@@ -235,16 +237,19 @@ def listevents(request, role, status):
 	if (not role ) or (not status):
 		raise PermissionDenied()
 
+	states = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)
+	TrMngerEvents = TrainingEvents.objects.filter(state__in=states).order_by('-event_start_date')
+	
 
 	status_list = {'ongoing': 0, 'completed': 1, 'closed': 2,}
 	roles = ['rp', 'em']
 	if role in roles and status in status_list:
 		if status == 'ongoing':
-			queryset = TrainingEvents.objects.filter(training_status__lte=1, event_end_date__gte=today)
+			queryset = TrMngerEvents.filter(training_status__lte=1, event_end_date__gte=today)
 		elif status == 'completed':
-			queryset = TrainingEvents.objects.filter(training_status=1, event_end_date__lt=today)
+			queryset =TrMngerEvents.filter(training_status=1, event_end_date__lt=today)
 		elif status == 'closed':
-			queryset = TrainingEvents.objects.filter(training_status=2)
+			queryset = TrMngerEvents.filter(training_status=2)
 
 		header = {
 		1: SortableHeader('#', False),
@@ -284,7 +289,8 @@ def listevents(request, role, status):
 		  True,
 		  'Event End Date'
 		),
-		10: SortableHeader('Action', False)
+		10: SortableHeader('Participant Count', True),
+		11: SortableHeader('Action', False)
 		}
 
 		raw_get_data = request.GET.get('o', None)
@@ -294,7 +300,7 @@ def listevents(request, role, status):
 			header,
 			raw_get_data
 		)
-		collection= ViewEventFilter(request.GET, queryset=queryset, user=user)
+		collection= TrEventFilter(request.GET, queryset=queryset, user=user)
       
 
 	else:
@@ -642,7 +648,7 @@ class FDPTrainingCertificate(object):
   def create_fdptraining_certificate(self, event, participantname):
     training_start = event.event_start_date
     training_end = event.event_end_date
-
+    event_type = event.event_type
     response = HttpResponse(content_type='application/pdf')
     filename = (participantname+'-'+event.foss.foss+"-Participant-Certificate").replace(" ", "-");
 
@@ -666,13 +672,12 @@ class FDPTrainingCertificate(object):
 
     #paragraphe
     text = "This is to certify that <b>"+participantname +"</b> has participated in \
-    <b>Faculty Development Programme</b> from <b>"\
+    <b>"+event.get_event_type_display()+"</b> from <b>"\
     + str(training_start) +"</b> to <b>"+ str(training_end) +\
     "</b> on <b>"+event.foss.foss+"</b> organized by <b>"+\
     event.host_college.institution_name+\
     "</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.\
-    <br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay, \
-    funded by the National Mission on Education through ICT, MHRD, Govt. of India."
+    <br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay."
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -686,7 +691,10 @@ class FDPTrainingCertificate(object):
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+    if event_type == "FDP":
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+    else:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).getPage(0)
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -719,3 +727,79 @@ class EventTrainingCertificateView(FDPTrainingCertificate, View):
     else:
       messages.error(self.request, "Permission Denied!")
     return HttpResponseRedirect("/")
+
+class ParticipantTransactionsListView(ListView):
+	model = PaymentTransaction
+	raw_get_data = None
+	header = None
+	collection = None
+	@method_decorator(group_required("Resource Person","Administrator"))
+	def dispatch(self, *args, **kwargs):
+		today = date.today()
+		statenames = State.objects.filter(resourceperson__user_id=self.request.user, resourceperson__status=1).values('name')
+		self.PaymentTransaction = PaymentTransaction.objects.filter(paymentdetail__state__in=statenames).order_by('-created')
+		self.events = self.PaymentTransaction
+
+		self.header = {
+		1: SortableHeader('#', False),
+		2: SortableHeader(
+		  'paymentdetail__user__first_name',
+		  True,
+		  'First Name'
+		),
+		3: SortableHeader(
+		  'paymentdetail__user__last_name',
+		  True,
+		  'Last Name'
+		),
+		4: SortableHeader(
+		  'paymentdetail__email',
+		  True,
+		  'Email'
+		),
+		5: SortableHeader(
+		  'paymentdetail__state',
+		  True,
+		  'State'
+		),
+		
+		6: SortableHeader('transId', True, 'Transaction id'),
+		7: SortableHeader('refNo', True, 'Reference No.'),
+		8: SortableHeader('status', True, 'Status'),
+		9: SortableHeader('paymentdetail__purpose', True, 'Purpose'),
+		10: SortableHeader('requestType', True, 'RequestType'),
+		11: SortableHeader('amount', True, 'Amount'),
+		12: SortableHeader('created', True, 'Entry Date'),
+		13: SortableHeader('paymentdetail__user', True, 'Phone'),
+		}
+
+		self.raw_get_data = self.request.GET.get('o', None)
+		self.purpose = self.request.GET.get('paymentdetail__purpose')		
+
+		if self.purpose != 'cdcontent':
+			self.events= self.events.filter().exclude(paymentdetail__purpose='cdcontent')
+
+		self.queryset = get_sorted_list(
+			self.request,
+			self.events,
+			self.header,
+			self.raw_get_data
+		)
+
+		self.collection= PaymentTransFilter(self.request.GET, queryset=self.queryset, user=self.request.user)
+		self.total_amount = self.collection.qs.filter(requestType='R').aggregate(Sum('amount'))
+		return super(ParticipantTransactionsListView, self).dispatch(*args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(ParticipantTransactionsListView, self).get_context_data(**kwargs)
+		context['form'] = self.collection.form
+		page = self.request.GET.get('page')
+		collection = get_page(self.collection.qs, page)
+		context['collection'] =  collection
+		context['header'] = self.header
+		context['ordering'] = get_field_index(self.raw_get_data)
+		context['events'] =  self.events
+		context['total_amount']=self.total_amount
+		if self.request.user:
+			context['user'] = self.request.user
+		return context

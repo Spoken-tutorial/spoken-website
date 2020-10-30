@@ -112,6 +112,16 @@
         </div>
         </div>
 
+        <div class="col-lg-4 col-md-4 col-sm-4"> 
+        <div class="form-group">
+          <label for="id_event_type" class="col-sm-4 control-label">Event Type</label>
+          <div class="col-sm-8">
+            {% render_field form.event_type class+="form-control event_type event_type" tabindex="1" %}
+            {{ form.event_type.errors }}
+          </div>
+        </div>
+        </div>
+
         <div class="col-lg-4 col-md-4 col-sm-4">
         <div class="form-group">
           <div class="col-sm-offset-4 col-sm-8">
@@ -145,6 +155,8 @@
             <div class="date">
                 <p><i class="fa fa-calendar"></i></p>
                 <p>{{ event.event.event_start_date}} - {{ event.event.event_end_date}}</p>
+                <p>{% if event.event_type == 'sdp' %} SDP {% else %}
+                {{ event.event_type}} {% endif %}</p>
             </div>
             <div class="content">
                 <h6>{{event.event.event_name}}</h6>
@@ -173,6 +185,8 @@
             <div class="date">
                 <p><i class="fa fa-calendar"></i></p>
                 <p>{{ event.event_start_date}} - {{ event.event_end_date}}</p>
+                <p>{% if event.event_type == 'sdp' %} SDP {% else %}
+                {{ event.event_type}} {% endif %}</p>
             </div>
             <div class="content">
                 <h6>{{event.event_name}}</h6>

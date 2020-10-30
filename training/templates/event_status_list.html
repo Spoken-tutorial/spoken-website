@@ -68,6 +68,16 @@
         </div>
         </div>
 
+        <div class="col-lg-4 col-md-4 col-sm-4"> 
+        <div class="form-group">
+          <label for="id_event_type" class="col-sm-4 control-label">Event Type</label>
+          <div class="col-sm-8">
+            {% render_field form.event_type class+="form-control event_type event_type" tabindex="1" %}
+            {{ form.event_type.errors }}
+          </div>
+        </div>
+        </div>
+
         <div class="col-lg-4 col-md-4 col-sm-4">
         <div class="form-group">
           <div class="col-sm-offset-4 col-sm-8">
@@ -103,6 +113,12 @@
             <td>{{ record.registartion_start_date}} - {{record.registartion_end_date}}</td>
             <td>{{ record.event_start_date }}</td>
             <td>{{ record.event_end_date }}</td>
+            <td>
+              {% with pcount=record.id|get_participant_count %}
+                {{pcount}}
+              {% endwith %}
+
+            </td>
             <td>
               {% if record.training_status == 0%}
                 <a href="{% url 'training:edit_event' record.id %}" >Edit Event</a> |

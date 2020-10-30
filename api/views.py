@@ -19,6 +19,9 @@ from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from spoken.config import FOSS_API_LIST
 from django.core.cache import cache
+from creation.templatetags.creationdata import instruction_sheet, installation_sheet, get_prerequisite
+from rest_framework import status
+from forums.models import Question
 
 @csrf_exempt
 def video_list(request):
@@ -221,3 +224,50 @@ class RelianceJioAPI(APIView):
         video_serializer = RelianceJioVideoSerializer(tr, context={'request':request}, many=True)
         language_serializer = RelianceJioLanguageSerializer(tr, context={'language':language, 'videos' : video_serializer.data})
         return language_serializer.data
+
+class TutorialResourceAPI(APIView):
+
+    def get(self, request, format='json'):
+        context = {}
+        foss = request.query_params.get('search_foss', None)
+        tutorial = request.query_params.get('search_tutorial', None)
+        language = request.query_params.get('search_language', None)
+
+        if foss and tutorial and language:
+            try:
+                tr = TutorialResource.objects.get(
+                    Q(status=1) | Q(status=2),
+                    tutorial_detail__foss__foss=foss, 
+                    tutorial_detail__tutorial=tutorial, 
+                    language__name=language
+                    )
+                context['foss_id'] = tr.tutorial_detail.foss.pk
+                context['tutorial_id'] = tr.tutorial_detail.pk
+                context['language_id'] = tr.language.pk
+                instruct_sheet = instruction_sheet(tr.tutorial_detail.foss, tr.language)
+                context['instruction_sheet'] = "https://spoken-tutorial.org"+str(instruct_sheet) if instruct_sheet else None
+                install_sheet = installation_sheet(tr.tutorial_detail.foss, tr.language)
+                context['installation_sheet'] = "https://spoken-tutorial.org/"+str(install_sheet) if install_sheet else None
+                prerequisite = get_prerequisite(tr, tr.tutorial_detail)
+                context['prerequisite'] = "https://spoken-tutorial.org/watch/" + str(prerequisite) if prerequisite else None
+                context['code_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.code) if tr.common_content.code_status == 4 else None
+                context['assignment'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.assignment) if tr.common_content.assignment_status ==4 else None
+                context['slide'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.slide) if tr.common_content.slide_status == 4 else None
+                context['script'] = "https://script.spoken-tutorial.org/index.php/" + tr.script if tr.script_status == 4 else None
+                context['timed_script'] = "https://script.spoken-tutorial.org/index.php/" + tr.timed_script if tr.timed_script else None
+                context['srt_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/" + tr.tutorial_detail.tutorial.replace(' ', '-') + "-" + tr.language.name + ".srt")
+                context['additional_resource'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.additional_material) if tr.common_content.additional_material_status == 4 else None
+                questions = Question.objects.filter(category=tr.tutorial_detail.foss.foss.replace(' ', '-'), tutorial=tr.tutorial_detail.tutorial.replace(' ', '-')).order_by('-date_created')
+                questions_filtered = []
+                for q in questions:
+                    user = q.user() if q.uid != "" else None
+                    title = q.title
+                    minute_range = q.minute_range +"M" if q.minute_range != 'None' else None
+                    second_range = q.second_range +"S" if q.second_range != 'None' else None
+                    date = q.date_modified
+                    questions_filtered.append({'id': q.pk,'user': user, 'question': title, 'minute_range': minute_range, 'second_range': second_range, 'date':date})
+                context['questions'] = questions_filtered
+                return Response(context, status=status.HTTP_200_OK)
+            except TutorialResource.DoesNotExist:
+                return Response(context, status=status.HTTP_400_BAD_REQUEST)
+        return Response(context, status=status.HTTP_400_BAD_REQUEST)
