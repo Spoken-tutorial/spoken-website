@@ -1,0 +1,105 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Order T-Shirt{% endblock %}
+{% block compressinlinecssblock %}
+    <style>
+        label,.input-group-addon{
+          color: #286090;
+          font-size: 14px;
+          font-weight: bold;
+
+
+        }
+        .size{
+          border: 1px solid #286090;
+          padding: 5%;
+          border-radius: 5px;
+          margin-bottom: 1rem;
+        }
+        .bold-font{
+          font-weight: bold;
+          font-weight: 14px;
+        }
+        .btn{
+          width: 100%;
+        }
+        .mb{
+          margin-bottom: 16px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+
+<div class="row">
+  <div class="col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-1">
+  <form id="donation_form" action="{% url 'donate:pay_now' 'Goodie' %}" method="post">
+          {% csrf_token %}
+          {% for field in form %}
+          {% if field != form.size and field != form.country and field != form.amount %}
+        <div class="form-group {%if field.errors %}alert alert-danger{%endif%}">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {% render_field field class="form-control" %}
+        </div>
+        {% endif %}
+        {% endfor %}
+        <div class="size">
+          <p class="bold-font">Choose Size <small>(Eg. USA-M , India-M)</small></p>
+        <div class="row">
+          <div class="col-xs-6">
+            <div class="form-group {%if field.errors %}alert alert-danger{%endif%}">
+            {{ form.country.errors }}
+            {{ form.country.label_tag }}
+            {% render_field form.country class="form-control" %}
+        </div>
+          </div>
+          <div class="col-xs-6">
+            <div class="form-group {%if field.errors %}alert alert-danger{%endif%}">
+            {{ form.size.errors }}
+            {{ form.size.label_tag }}
+            {% render_field form.size class="form-control" %}
+        </div>
+          </div>
+        </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-8 mb">
+            <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">Amount (INR - Indian Rupees)</span>
+           <span class="bold-font">{% render_field form.amount class="form-control" %}</span> 
+            
+        </div>
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <button type="submit" class="btn btn-success ">
+              Pay <!-- <input type="submit" value="Pay"> -->
+            </button>
+            </div>
+        </div>
+        
+      </form>
+      </div>
+</div>
+  
+    
+{%endblock%}
+{% block jsblock %}
+<script type="text/javascript">
+ $( document ).ready(function() {
+
+  $('#id_currency').change(function(){
+    
+
+    });
+
+  $('#id_country').change(function(){
+        var country  = $('#id_country').val();
+        country == "India" ? $("#id_amount").val("1000") : $("#id_amount").val("2500");
+    });
+
+
+  });
+
+ </script>
+{% endblock %}

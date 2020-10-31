@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'validate_user', validate_user, name='validate_user'),
     url(r'validate', validate, name='validate'),
     url(r'receipt', receipt, name='receipt'),
+    url(r'pay_now/(?P<purpose>\w+)/$', pay_now,name='pay_now'),
     ]
