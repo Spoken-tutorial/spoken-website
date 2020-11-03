@@ -560,7 +560,7 @@ def upload_college_details(request):
 			if row[11] == 'Engineering':
 				college_type = 'Engg'
 			day,mon,year = row[9].split('/')
-			payment_date = datetime.datetime(year=int(year), month=int(mon), day=int(day))
+			payment_date = datetime(year=int(year), month=int(mon), day=int(day))
 			try:
 				ac_payment_new = AcademicPaymentStatus.objects.create(
 					state = state,
