@@ -166,16 +166,19 @@
                     <b>FOSS :</b> <span >{{event.event.foss}}</span>
                               <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{event.get_foss_langs}}' style="display: none;">
                 </p>
-                {% if event.reg_approval_status == 1 and user|registartion_successful:event.event %}
+
                 <div style="text-align: right;">
-                 <button class="btn btn-primary" type="submit" 
-        formaction="{% url 'cdcontent:create_cd_download' 'general' %}">Download CD Content</button>
+                    {% if event.reg_approval_status == 1 and user|registartion_successful:event.event %}
+                        <button class="btn btn-primary" type="submit" 
+                        formaction="{% url 'cdcontent:create_cd_download' 'general' %}">Download CD Content</button>
+                    {% endif %}
+                    {% if event.event.id|is_event_closed and event.event.id|is_attendance_marked:event.id and user|registartion_successful:event.event %}    
+                        <input type="hidden" name="eventid" value="{{event.event.id}}">
+                        <button class="btn btn-info" type="submit" 
+                        formaction="{% url 'training:generate_training_certificate'%}">Download certificate</button>
+                    {% endif %} 
                 </div>
-                {% endif %}
-              <!--  {% if event.event.id|is_event_closed and user|registartion_successful:event.event %}
-    <a href="#" class="btn btn-info">Download Certificate</a>
-        	{% endif %} -->   
-	 </div>
+	       </div>
         </div>
         {% else %}
         <div class="activities-event ">

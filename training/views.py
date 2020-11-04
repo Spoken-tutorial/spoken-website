@@ -29,6 +29,22 @@ from events.views import is_resource_person, is_administrator, get_page
 from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
+from certificate.views import _clean_certificate_certificate
+from django.http import HttpResponse
+import os
+from string import Template
+import subprocess
+
+#pdf generate
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.lib.enums import TA_CENTER
+from PyPDF2 import PdfFileWriter, PdfFileReader
+from io import BytesIO
+from django.conf import settings
 from donate.models import *
 
 
@@ -315,7 +331,7 @@ def close_event(request, pk):
 		messages.success(request, 'Event has been closed successfully')
 	else:
 		messages.error(request, 'Request not sent.Please try again.')
-	return HtsvtpResponseRedirect("/training/event/rp/completed/")
+	return HttpResponseRedirect("/training/event/rp/completed/")
 
 
 def approve_event_registration(request, pk):
@@ -621,6 +637,96 @@ def add_Academic_key(ac_pay_status_object, subscription):
 	ac_key.expiry_date = expiry_date
 	ac_key.save()
 
+
+class FDPTrainingCertificate(object):
+  def custom_strftime(self, format, t):
+    return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
+
+  def suffix(self, d):
+    return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+
+  def create_fdptraining_certificate(self, event, participantname):
+    training_start = event.event_start_date
+    training_end = event.event_end_date
+    event_type = event.event_type
+    response = HttpResponse(content_type='application/pdf')
+    filename = (participantname+'-'+event.foss.foss+"-Participant-Certificate").replace(" ", "-");
+
+    response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+    imgTemp = BytesIO ()
+    imgDoc = canvas.Canvas(imgTemp)
+
+    # Title
+    imgDoc.setFont('Helvetica', 35, leading=None)
+    imgDoc.drawCentredString(405, 470, "Certificate of Participation")
+
+    #password
+    certificate_pass = ''
+    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFont('Helvetica', 10, leading=None)
+    imgDoc.drawString(10, 6, certificate_pass)
+
+    # Draw image on Canvas and save PDF in buffer
+    imgPath = settings.MEDIA_ROOT +"sign.jpg"
+    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+
+    #paragraphe
+    text = "This is to certify that <b>"+participantname +"</b> has participated in \
+    <b>"+event.get_event_type_display()+"</b> from <b>"\
+    + str(training_start) +"</b> to <b>"+ str(training_end) +\
+    "</b> on <b>"+event.foss.foss+"</b> organized by <b>"+\
+    event.host_college.institution_name+\
+    "</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.\
+    <br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay."
+
+    centered = ParagraphStyle(name = 'centered',
+      fontSize = 16,
+      leading = 30,
+      alignment = 0,
+      spaceAfter = 20
+    )
+
+    p = Paragraph(text, centered)
+    p.wrap(650, 200)
+    p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+    imgDoc.save()
+    # Use PyPDF to merge the image-PDF into the template
+    if event_type == "FDP":
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+    else:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
+    page.mergePage(overlay)
+
+    #Save the result
+    output = PdfFileWriter()
+    output.addPage(page)
+
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response
+
+
+class EventTrainingCertificateView(FDPTrainingCertificate, View):
+  template_name = ""
+  
+  def dispatch(self, *args, **kwargs):
+    return super(EventTrainingCertificateView, self).dispatch(*args, **kwargs)
+
+  def post(self, request, *args, **kwargs):
+    eventid = self.request.POST.get("eventid")
+    print(eventid)
+    event = TrainingEvents.objects.get(id=eventid)
+    participantname = self.request.user.first_name+" "+self.request.user.last_name    
+
+    if event:
+      return self.create_fdptraining_certificate(event, participantname)
+    else:
+      messages.error(self.request, "Permission Denied!")
+    return HttpResponseRedirect("/")
 
 class ParticipantTransactionsListView(ListView):
 	model = PaymentTransaction

@@ -127,8 +127,6 @@
 	{% if eventid|event_has_attendance %}
 	<a href="{% url 'training:close_event' eventid %}" class="btn btn-info">Close Event and Genearte Certificates</a>{% endif %}
 
-{% elif eventid|is_event_closed%}
-	<a href="#" class="btn btn-info">Download certificates</a>
 {% endif %}
 
 <h4>Unsuccessful Payee Details</h4>

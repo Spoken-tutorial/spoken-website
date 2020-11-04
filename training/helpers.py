@@ -1,5 +1,11 @@
 from events.models import AcademicKey, StudentBatch
+from training.models import TrainingEvents
 from datetime import datetime,date
+from certificate.views import _clean_certificate_certificate
+from django.http import HttpResponse
+import os
+from string import Template
+import subprocess
 
 EVENT_TYPE_CHOICES =(
 	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
@@ -59,3 +65,40 @@ def is_college_paid(college_id):
         college_paid = False
     
     return college_paid
+
+def create_certificate(eventid,pname):
+    response = HttpResponse(content_type='application/pdf')
+    event = TrainingEvents.objects.get(id=eventid)
+    try:        
+        file_name = pname
+        template = 'fdp_cert_template/training_certificate_template'
+        download_file_name = "ST_"+event.event_name+'.pdf'
+        certificate_path = os.path.dirname(os.path.realpath(__file__))+"/certificate/"
+        template_file = open('{0}{1}'.format
+                             (certificate_path, template), 'r')
+        content = Template(template_file.read())
+        template_file.close()
+
+        content_tex = content.safe_substitute(
+            name = pname,
+            event_name = event.event_name,
+            college = event.host_college.institution_name,
+            host_college = event.host_college.institution_name,
+            foss = event.foss.foss,
+            event_start_date = event.event_start_date
+            )
+        create_tex = open('{0}{1}.tex'.format
+                          (certificate_path, file_name), 'w')
+        create_tex.write(content_tex)
+        create_tex.close()
+        out = certificate_path
+        
+        subprocess.run(['pdflatex','--output-directory',certificate_path,certificate_path+file_name+'.tex'])
+        pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
+        response['Content-Disposition'] = 'attachment; \
+                    filename=%s' % (download_file_name)
+        response.write(pdf.read())
+        _clean_certificate_certificate(certificate_path, file_name)
+        return response
+    except Exception as e:
+        print("error is ",e)
