@@ -172,7 +172,7 @@
                         <button class="btn btn-primary" type="submit" 
                         formaction="{% url 'cdcontent:create_cd_download' 'general' %}">Download CD Content</button>
                     {% endif %}
-                    {% if event.event.id|is_event_closed and user|registartion_successful:event.event %}    
+                    {% if event.event.id|is_event_closed and event.event.id|is_attendance_marked:event.id and user|registartion_successful:event.event %}    
                         <input type="hidden" name="eventid" value="{{event.event.id}}">
                         <button class="btn btn-info" type="submit" 
                         formaction="{% url 'training:generate_training_certificate'%}">Download certificate</button>
