@@ -169,7 +169,7 @@ def feedback_status_likely(status):
 @register.filter
 def is_college_subscribed(college_id):
     try:
-        idcase = AcademicKey.objects.get(academic_id=college_id)
+        idcase = AcademicKey.objects.filter(academic_id=college_id, expiry_date__gte=date.today()).first()
         college_paid = True if (idcase.expiry_date >= date.today()) else False
         return college_paid
     except:
