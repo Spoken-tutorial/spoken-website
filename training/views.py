@@ -69,7 +69,7 @@ class TrainingEventCreateView(CreateView):
 		messages.success(self.request, "New Event created successfully.")
 		return HttpResponseRedirect(self.success_url)
 
-
+#ILW main page
 class TrainingEventsListView(ListView):
 	model = TrainingEvents
 	raw_get_data = None
@@ -228,6 +228,8 @@ class EventUpdateView(UpdateView):
 	form_class = CreateTrainingEventForm
 	success_url = "/training/event/rp/ongoing/"
 
+
+#used to display evnets to mngrs under dashboard link
 def listevents(request, role, status):
 	context = {}
 	user = request.user
@@ -764,13 +766,14 @@ class ParticipantTransactionsListView(ListView):
 		),
 		
 		6: SortableHeader('transId', True, 'Transaction id'),
-		7: SortableHeader('refNo', True, 'Reference No.'),
-		8: SortableHeader('status', True, 'Status'),
-		9: SortableHeader('paymentdetail__purpose', True, 'Purpose'),
-		10: SortableHeader('requestType', True, 'RequestType'),
-		11: SortableHeader('amount', True, 'Amount'),
-		12: SortableHeader('created', True, 'Entry Date'),
-		13: SortableHeader('paymentdetail__user', True, 'Phone'),
+		7: SortableHeader('paymentdetail__user_id', True, 'UserId'),
+		8: SortableHeader('refNo', True, 'Reference No.'),
+		9: SortableHeader('status', True, 'Status'),
+		10: SortableHeader('paymentdetail__purpose', True, 'Purpose'),
+		11: SortableHeader('requestType', True, 'RequestType'),
+		12: SortableHeader('amount', True, 'Amount'),
+		13: SortableHeader('created', True, 'Entry Date'),
+		14: SortableHeader('paymentdetail__user', True, 'Phone'),
 		}
 
 		self.raw_get_data = self.request.GET.get('o', None)

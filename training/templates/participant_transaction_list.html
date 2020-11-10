@@ -111,7 +111,7 @@
   <!-- Nav tabs -->
   
   <!-- Tab panes -->
-  <div class='table-responsive-xl'>
+  <div class='table-responsive' style="width:120%; margin-left:-10%;">
       {% if collection %}
       <table class="paleblue table table-striped table-hover table-bordered">
         {% get_sortable_header header ordering request.GET %}
@@ -123,6 +123,7 @@
             <td>{{ record.paymentdetail.email }}</td>
             <td>{{ record.paymentdetail.state }}</td>
             <td>{{ record.transId }}</td>
+            <td>{{ record.paymentdetail.user_id}}</td>
             <td>{{ record.refNo}}</td>
             <td>{{ record.status }}</td>
             <td>

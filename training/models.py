@@ -11,7 +11,8 @@ from donate.helpers import GENDER_CHOICES
 import json
 
 EVENT_TYPE_CHOICES =(
-	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme')
+	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
+), ('SSDP', 'School Students  Development Program')
 	)
 
 
