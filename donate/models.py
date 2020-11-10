@@ -22,7 +22,7 @@ class Payee(models.Model):
     expiry = models.DateTimeField(blank=True, null=True)
     user = models.ForeignKey(User,on_delete=models.PROTECT,related_name="payment_user" )
     purpose = models.CharField(max_length=255, null=True)
-    
+    reqId = models.CharField(max_length=50, default='')
     def get_selected_foss(self):
         selected_foss = {}
         c = 0
@@ -95,7 +95,7 @@ class PayeeCommonInfo(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     amount = models.DecimalField(max_digits=10,decimal_places=2)
     country = models.CharField(max_length=6, choices=COUNTRY, default='India')
-
+    reqId = models.CharField(max_length=50)
     class Meta:
         abstract = True
 
