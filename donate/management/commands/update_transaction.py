@@ -1,13 +1,13 @@
 # Third Party Stuff
 from django.core.management.base import BaseCommand
 from django.db import transaction as tx
-from datetime import datetime,timedelta
+from datetime import datetime
 from django.db.models import Q
 from donate.models import *
 import os
 import csv
 from django.conf import settings
-
+from django.utils import timezone
 
 class Command(BaseCommand):
 
@@ -33,6 +33,7 @@ class Command(BaseCommand):
                     try:
                         PaymentTransaction.objects.get(paymentdetail=payee, requestType=row[2].strip(), amount=row[3].strip())
                     except PaymentTransaction.DoesNotExist:
+                        date=timezone.make_aware(datetime.strptime(str(row[7].strip().split(" ")[0]+ " "+row[8].strip()), '%Y-%m-%d %H:%M:%S'))
                         paymenttrans = PaymentTransaction()
                         paymenttrans.paymentdetail = payee
                         paymenttrans.requestType = row[2].strip()
@@ -43,8 +44,9 @@ class Command(BaseCommand):
                         paymenttrans.provId = "PAYU"
                         paymenttrans.status = row[6].strip()
                         paymenttrans.msg = row[9].strip()
-                        paymenttrans.created = row[8].strip()
                         paymenttrans.save()
+                        paymenttrans.created = date
+                        paymenttrans.updated = date
                         print(row)
                         count+=1
         print(('>> Script Completed. data added',count))
