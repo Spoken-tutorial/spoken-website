@@ -104,8 +104,8 @@ def pay_now(request, purpose):
         if form.is_valid():
             form.save(commit=False)
             form.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
-            form.save()
-            data = get_final_data(request, form, purpose)
+            obj = form.save()
+            data = get_final_data(request, obj, purpose)
         else:
             messages.errors(request,'Invalid Form')
     return render(request, 'payment_status.html', data)
@@ -116,6 +116,7 @@ def form_valid(request, form, purpose):
     If the form is valid, save the associated model.
     """
     form_data = form.save(commit=False)
+    form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
     form_data.user = request.user
     form_data.status = 0
     form_data.expiry = calculate_expiry()
@@ -183,7 +184,7 @@ def controller(request, purpose):
             participant_form.save()
         except :
             return redirect('training:list_events', status='myevents')
-    data = get_final_data(request, form, purpose)
+    data = get_final_data(request, payee_obj_new, purpose)
     return render(request, 'payment_status.html', data)
 
 
@@ -192,30 +193,30 @@ def calculate_expiry():
     return datetime.now() + timedelta(days = EXPIRY_DAYS)
 
 @csrf_exempt
-def encrypted_data(request, form, purpose):
+def encrypted_data(request, obj, purpose):
     STdata = ''
-    user_name = form.cleaned_data.get('name')
-    amount = form.cleaned_data.get('amount')   
+    user_name = obj.name
+    amount = obj.amount
     #amount = 1.00
-    purpose = purpose+"NEW"+str(form.save(commit=False).pk)
-    request_id = form.reqId
+    purpose = purpose+"NEW"+str(obj.pk)
+    request_id = obj.reqId
     STdata =  request_id + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
     return s
 
 
 @csrf_exempt
-def get_final_data(request, form, purpose):
+def get_final_data(request, obj, purpose):
     data = {
-        'reqId' :  form.reqId,
+        'reqId' :  obj.reqId,
         'userId': str(request.user.id),
-        'name': form.cleaned_data.get('name'),
-        'amount':form.cleaned_data.get('amount'),
+        'name': obj.name,
+        'amount': obj.amount,
         #'amount': 1.00,
-        'purpose': purpose+"NEW"+str(form.save(commit=False).pk) ,
+        'purpose': purpose+"NEW"+str(obj.pk) ,
         'channelId': CHANNEL_ID,
         'target': TARGET,
-        'random': encrypted_data(request, form, purpose)
+        'random': encrypted_data(request, obj, purpose)
     }
     return data
 
