@@ -102,6 +102,7 @@ def pay_now(request, purpose):
         if 'Goodie' in purpose:
             form = GoodiesForm(request.POST)
         if form.is_valid():
+            form.save(commit=False)
             form.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
             form.save()
             data = get_final_data(request, form, purpose)
@@ -197,7 +198,7 @@ def encrypted_data(request, form, purpose):
     amount = form.cleaned_data.get('amount')   
     #amount = 1.00
     purpose = purpose+"NEW"+str(form.save(commit=False).pk)
-    request_id = form.cleaned_data.get(reqId)
+    request_id = form.reqId
     STdata =  request_id + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
     return s
@@ -206,7 +207,7 @@ def encrypted_data(request, form, purpose):
 @csrf_exempt
 def get_final_data(request, form, purpose):
     data = {
-            'reqId' :  form.cleaned_data.get(reqId),
+        'reqId' :  form.reqId,
         'userId': str(request.user.id),
         'name': form.cleaned_data.get('name'),
         'amount':form.cleaned_data.get('amount'),
