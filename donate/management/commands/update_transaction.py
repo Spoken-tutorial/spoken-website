@@ -51,6 +51,11 @@ class Command(BaseCommand):
                         paymenttrans.save()
                         paymenttrans.created = date
                         paymenttrans.updated = date
-                        print(row)
+                        paymenttrans.save()
+                        if paymenttrans.status == "S":
+                            payee.status = 1
+                        elif paymenttrans.status == "F":
+                            payee.status =2
+                        payee.save()
                         count+=1
         print(('>> Script Completed. data added',count))
