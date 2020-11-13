@@ -33,7 +33,11 @@ class Command(BaseCommand):
                     try:
                         PaymentTransaction.objects.get(paymentdetail=payee, requestType=row[2].strip(), amount=row[3].strip())
                     except PaymentTransaction.DoesNotExist:
-                        date=timezone.make_aware(datetime.strptime(str(row[7].strip().split(" ")[0]+ " "+row[8].strip()), '%Y-%m-%d %H:%M:%S'))
+                        if row[8].strip() != "NULL":
+                            time = str(row[7].strip().split(" ")[0]+ " "+row[8].strip())
+                        else:
+                            time = row[7].strip()
+                        date=timezone.make_aware(datetime.strptime(time, '%Y-%m-%d %H:%M:%S'))
                         paymenttrans = PaymentTransaction()
                         paymenttrans.paymentdetail = payee
                         paymenttrans.requestType = row[2].strip()

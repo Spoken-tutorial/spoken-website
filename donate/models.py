@@ -56,7 +56,7 @@ class CdFossLanguages(models.Model):
 class PaymentTransaction(models.Model):
     paymentdetail = models.ForeignKey(Payee, on_delete=models.PROTECT, related_name="payment_transaction" )
     requestType = models.CharField(max_length=2)
-    amount = models.CharField(max_length=20)
+    amount = models.DecimalField(max_digits=10,decimal_places=2)
     reqId = models.CharField(max_length=50)
     transId = models.CharField(max_length=100)
     refNo = models.CharField(max_length=50)
@@ -72,7 +72,7 @@ class PaymentTransaction(models.Model):
 # abstract base class
 class TransactionCommonInfo(models.Model):
     requestType = models.CharField(max_length=2)
-    amount = models.CharField(max_length=20)
+    amount = models.DecimalField(max_digits=10,decimal_places=2)
     reqId = models.CharField(max_length=50)
     transId = models.CharField(max_length=100)
     refNo = models.CharField(max_length=50)
