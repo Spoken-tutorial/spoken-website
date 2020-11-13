@@ -56,6 +56,7 @@ class Command(BaseCommand):
                             payee.status = 1
                         elif paymenttrans.status == "F":
                             payee.status =2
+                        payee.reqId = paymenttrans.reqId
                         payee.save()
                         count+=1
         print(('>> Script Completed. data added',count))
