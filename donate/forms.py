@@ -15,7 +15,6 @@ class PayeeForm(forms.ModelForm):
     foss_id = forms.CharField(widget=forms.HiddenInput(), required=True)
     language_id = forms.CharField(widget=forms.HiddenInput(), required=True)
     level_id = forms.CharField(widget=forms.HiddenInput(), required=True)
-
     class Meta:
         model = Payee
         fields = ['name', 'email', 'state', 'gender', 'amount']
@@ -98,7 +97,6 @@ class TransactionForm(forms.ModelForm):
         pass
 
 class DonateForm(forms.ModelForm):
-
     class Meta:
         model = DonationPayee
         fields = ['name','email','gender','contact','country','address','amount']

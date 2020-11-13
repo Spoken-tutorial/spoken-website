@@ -22,7 +22,7 @@ class Payee(models.Model):
     expiry = models.DateTimeField(blank=True, null=True)
     user = models.ForeignKey(User,on_delete=models.PROTECT,related_name="payment_user" )
     purpose = models.CharField(max_length=255, null=True)
-    
+    reqId = models.CharField(max_length=100, default='')
     def get_selected_foss(self):
         selected_foss = {}
         c = 0
@@ -56,7 +56,7 @@ class CdFossLanguages(models.Model):
 class PaymentTransaction(models.Model):
     paymentdetail = models.ForeignKey(Payee, on_delete=models.PROTECT, related_name="payment_transaction" )
     requestType = models.CharField(max_length=2)
-    amount = models.CharField(max_length=20)
+    amount = models.DecimalField(max_digits=10,decimal_places=2)
     reqId = models.CharField(max_length=50)
     transId = models.CharField(max_length=100)
     refNo = models.CharField(max_length=50)
@@ -72,7 +72,7 @@ class PaymentTransaction(models.Model):
 # abstract base class
 class TransactionCommonInfo(models.Model):
     requestType = models.CharField(max_length=2)
-    amount = models.CharField(max_length=20)
+    amount = models.DecimalField(max_digits=10,decimal_places=2)
     reqId = models.CharField(max_length=50)
     transId = models.CharField(max_length=100)
     refNo = models.CharField(max_length=50)
@@ -95,7 +95,7 @@ class PayeeCommonInfo(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     amount = models.DecimalField(max_digits=10,decimal_places=2)
     country = models.CharField(max_length=6, choices=COUNTRY, default='India')
-
+    reqId = models.CharField(max_length=100, default='')
     class Meta:
         abstract = True
 
