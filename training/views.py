@@ -624,15 +624,11 @@ def upload_college_details(request):
 	return render(request,'upload_college_details.html',context)
 
 def add_Academic_key(ac_pay_status_object, subscription):
-	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@", ac_pay_status_object)
 	u_key = uuid.uuid1()
 	hex_key = u_key.hex
 
-	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 11", subscription)
 	Subscription_time = int(subscription)
 	expiry_date = ac_pay_status_object.payment_date + timedelta(days=Subscription_time)
-
-	print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 11", expiry_date)
 
 	ac_key = AcademicKey()      
 	ac_key.ac_pay_status = ac_pay_status_object
