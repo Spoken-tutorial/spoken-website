@@ -542,19 +542,19 @@ def get_user_type(request):
     # 'RP':'Registered and Paid User'
     if request.user.is_authenticated():
         try:
-            AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
+            AcademicKey.objects.get(academic_id=request.user.organiser.academic_id, expiry_date__gte=date.today())
             return classification['registered_paid']
         except :
             user_type = classification['registered_not_paid']
 
         try:
-            AcademicKey.objects.get(academic_id=request.user.invigilator.academic_id)
+            AcademicKey.objects.get(academic_id=request.user.invigilator.academic_id, expiry_date__gte=date.today())
             return classification['registered_paid']
         except :
             user_type = classification['registered_not_paid']
 
         try:
-            AcademicKey.objects.get(academic_id=request.user.student.academic_id)
+            AcademicKey.objects.get(academic_id=request.user.student.academic_id, expiry_date__gte=date.today())
             return classification['registered_paid']
         except :
             user_type = classification['registered_not_paid']
@@ -583,7 +583,7 @@ def check_user_details(request, filesize):
 # return '1' if organizer belongs to paid college with valid expiry date, else '0'
 def is_organizer_paid(request):
     try:
-        idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id)
+        idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id, expiry_date__gte=date.today())
         organizer_paid = '1' if (idcase.expiry_date >= date.today()) else '0'
     except:
         organizer_paid = '0'
