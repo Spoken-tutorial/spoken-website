@@ -630,7 +630,6 @@ def add_Academic_key(ac_pay_status_object, subscription):
 	Subscription_time = int(subscription)
 	expiry_date = ac_pay_status_object.payment_date + timedelta(days=Subscription_time)
 
-
 	ac_key = AcademicKey()      
 	ac_key.ac_pay_status = ac_pay_status_object
 	ac_key.academic = ac_pay_status_object.academic
