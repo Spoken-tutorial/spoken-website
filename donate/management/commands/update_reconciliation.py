@@ -43,7 +43,8 @@ class Command(BaseCommand):
                 json_data = r.json()
                 count=0
                 for row in json_data:
-                    
+                    if "responseType" not in row:
+                        continue
                     if row["responseType"].strip() == 'NULL':
                         continue
                     try:
@@ -80,5 +81,5 @@ class Command(BaseCommand):
                             payee.save()
                             count+=1
                 print(('Script Completed. Transaction added',count))
-        except:
-            print("Request Failed.")
+        except requests.ConnectionError as e:
+            print("Request Failed.", e)
