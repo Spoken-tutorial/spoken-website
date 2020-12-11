@@ -5,14 +5,23 @@ from rest_framework.parsers import JSONParser
 from creation.models import TutorialResource,\
             TutorialDetail, FossSuperCategory, Language,\
              FossCategory, TutorialCommonContent, TutorialDuration
-from api.serializers import VideoSerializer, CategorySerializer, FossSerializer, LanguageSerializer
+from api.serializers import VideoSerializer, CategorySerializer, FossSerializer, LanguageSerializer, RelianceJioSerializer,\
+        RelianceJioVideoSerializer, RelianceJioCategorySerializer, RelianceJioLanguageSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, Q
 import json
 from django.conf import settings
 from creation.views import get_video_info
 import math
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from spoken.config import FOSS_API_LIST
+from django.core.cache import cache
+from creation.templatetags.creationdata import instruction_sheet, installation_sheet, get_prerequisite
+from rest_framework import status
+from forums.models import Question
 
 @csrf_exempt
 def video_list(request):
@@ -180,3 +189,85 @@ def get_tutorialdetails(request, tutid):
         
         tutdict = json.dumps(tutdict)
         return HttpResponse(tutdict, content_type='application/json')
+
+class RelianceJioAPI(APIView):
+
+    #@method_decorator(cache_page(60*60))
+    def get(self, request, format='json'):
+        jio_data = cache.get('jio_data')
+        if jio_data:
+            return Response(jio_data)
+        else:
+            foss = FOSS_API_LIST
+            lists=[]
+            category_list=[]
+            lang_en='English'
+            languages = Language.objects.all().exclude(name=lang_en)
+            for f in foss:
+                f = FossCategory.objects.get(pk=f)
+                tr_en = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language__name=lang_en)
+                lists.append(self.get_foss_serialized(request, tr_en, lang_en))
+                for l in languages:
+                    tr = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language=l)
+                    if tr.count() == tr_en.count():
+                        lists.append(self.get_foss_serialized(request, tr, l.name))
+                    else:
+                        continue
+                category_serializer = RelianceJioCategorySerializer(tr_en, context={'category':f.foss, 'lists': lists})
+                lists = []
+                category_list.append(category_serializer.data)
+            serializer = RelianceJioSerializer(tr_en, context={'spokentutorials' : category_list})
+            cache.set('jio_data', serializer.data)
+            return Response(serializer.data)
+    
+    def get_foss_serialized(self, request, tr, language):
+        video_serializer = RelianceJioVideoSerializer(tr, context={'request':request}, many=True)
+        language_serializer = RelianceJioLanguageSerializer(tr, context={'language':language, 'videos' : video_serializer.data})
+        return language_serializer.data
+
+class TutorialResourceAPI(APIView):
+
+    def get(self, request, format='json'):
+        context = {}
+        foss = request.query_params.get('search_foss', None)
+        tutorial = request.query_params.get('search_tutorial', None)
+        language = request.query_params.get('search_language', None)
+
+        if foss and tutorial and language:
+            try:
+                tr = TutorialResource.objects.get(
+                    Q(status=1) | Q(status=2),
+                    tutorial_detail__foss__foss=foss, 
+                    tutorial_detail__tutorial=tutorial, 
+                    language__name=language
+                    )
+                context['foss_id'] = tr.tutorial_detail.foss.pk
+                context['tutorial_id'] = tr.tutorial_detail.pk
+                context['language_id'] = tr.language.pk
+                instruct_sheet = instruction_sheet(tr.tutorial_detail.foss, tr.language)
+                context['instruction_sheet'] = "https://spoken-tutorial.org"+str(instruct_sheet) if instruct_sheet else None
+                install_sheet = installation_sheet(tr.tutorial_detail.foss, tr.language)
+                context['installation_sheet'] = "https://spoken-tutorial.org/"+str(install_sheet) if install_sheet else None
+                prerequisite = get_prerequisite(tr, tr.tutorial_detail)
+                context['prerequisite'] = "https://spoken-tutorial.org/watch/" + str(prerequisite) if prerequisite else None
+                context['code_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.code) if tr.common_content.code_status == 4 else None
+                context['assignment'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.assignment) if tr.common_content.assignment_status ==4 else None
+                context['slide'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.slide) if tr.common_content.slide_status == 4 else None
+                context['script'] = "https://script.spoken-tutorial.org/index.php/" + tr.script if tr.script_status == 4 else None
+                context['timed_script'] = "https://script.spoken-tutorial.org/index.php/" + tr.timed_script if tr.timed_script else None
+                context['srt_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/" + tr.tutorial_detail.tutorial.replace(' ', '-') + "-" + tr.language.name + ".srt")
+                context['additional_resource'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.additional_material) if tr.common_content.additional_material_status == 4 else None
+                questions = Question.objects.filter(category=tr.tutorial_detail.foss.foss.replace(' ', '-'), tutorial=tr.tutorial_detail.tutorial.replace(' ', '-')).order_by('-date_created')
+                questions_filtered = []
+                for q in questions:
+                    user = q.user() if q.uid != "" else None
+                    title = q.title
+                    minute_range = q.minute_range +"M" if q.minute_range != 'None' else None
+                    second_range = q.second_range +"S" if q.second_range != 'None' else None
+                    date = q.date_modified
+                    questions_filtered.append({'id': q.pk,'user': user, 'question': title, 'minute_range': minute_range, 'second_range': second_range, 'date':date})
+                context['questions'] = questions_filtered
+                return Response(context, status=status.HTTP_200_OK)
+            except TutorialResource.DoesNotExist:
+                return Response(context, status=status.HTTP_400_BAD_REQUEST)
+        return Response(context, status=status.HTTP_400_BAD_REQUEST)

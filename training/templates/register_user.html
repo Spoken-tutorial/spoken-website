@@ -1,0 +1,479 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{%load trainingdata%}
+{% block title %}User Registration{% endblock %}
+{% block compressinlinecssblock %}
+<style type="text/css">
+.info-icon{
+  color: #337AB7; 
+  margin-right: 10px;
+}
+.info-table td{
+  display: flex;
+}
+</style>
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+<!-- Event name starts -->
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title"><b><i class="fa fa-times" aria-hidden="true"></i>Welcome to the registration page of {{event_obj.event_name}}</b></h3>
+  </div>
+</div>
+<!-- Event name ends -->
+<!-- Event info starts -->
+<div class="panel panel-primary">
+    <div class="panel-body" style="background-color: #F5F5F5;">
+      <!-- registration form starts -->
+     <form method="post"  class="form-horizontal" action="{% url 'training:reg_success' 'paid' %}">
+      <div class="row well bs-component">
+{% csrf_token %}
+            <div class="col-md-7">
+              <fieldset>
+		              <input type="text"  id="event" name="event" value="{{event_obj.id}}" style="display:none">
+				<input type="text"  id="foss_id" name="foss_id" value="{{event_obj.foss.id}}" style="display:none">
+      				<input type="text"  id="language_id" name="language_id" value="{{event_obj.Language_of_workshop.id}}" style="display:none">
+      				<input type="text"  id="level_id" name="level_id" value="0" style="display:none">
+
+                  <div class="form-group">
+                    <label for="id_name" class="col-lg-4 control-label">Full Name </label>
+                    <div class="col-lg-8">
+                        {% render_field form.name class+="form-control name" tabindex="1" %}
+                        {{ form.name.errors }}
+                    </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="id_difficulty_level" class="col-lg-4 control-label">Email</label>
+                      <div class="col-lg-8">
+                            {% render_field form.email class+="form-control email" tabindex="2" %}
+                            {{ form.email.errors }}
+                        <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-top: 10px;">Send OTP</a>
+                        </div>
+                        
+                        <div id="email-info" class="col-md-8 col-md-offset-4"></div>
+                      </div>
+                    <div class="form-group " id="pwd" style="display: none;">
+                        <div style="display: flex;" class="col-sm-8 col-sm-offset-4">
+                            <input type="password" class="form-control" id="id_password" placeholder="Password">
+                                <i class="fa fa-check-circle" aria-hidden="true" style="display: none;" id="check-pwd"></i>
+                        </div>
+                        <div class="row">
+                          <div class="col-sm-8 col-sm-offset-4">
+                            <p>
+                              <a href="{% url 'cms:password_reset' %}" id="forgot_pwd" target="_blank">Forgot Password ?</a>
+                            </p>
+                          </div>
+                        </div>
+                        <div id="invalid_credentials" class="col-sm-8 col-sm-offset-4">
+                        </div>
+                      </div>
+                      <div class="form-group" id="organizer_info" style="display: none;">
+                        <div class="col-md-8 col-md-offset-4">
+                          <p id="organizer_paid_msg" class="text-muted">Congratulations! You are a part of a Registered College & are entitled to free download.
+                          <br>
+                         <span class="organizer_paid_info text-muted">You are logged in successfully. Please proceed on cd content page.</span>
+                          </p>
+                        </div>
+                      </div>
+                      <p style="display: none;"> User is from paid college : {{user|is_user_paid}}</p>
+                        <div class="form-group  text-center" id="logged_success" style="display: none;">
+                          <span style="color: #43A047;" class="col-sm-8 col-sm-offset-4">Logged In Successfully </span>
+                        </div>
+                        <div class="form-group" id="otp_wrapper">
+                          <div class="col-lg-4"></div>
+                          <div class="col-lg-8">
+                            <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 80%;" tabindex="3">
+                            <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
+                          </div>
+                        </div>
+                        <div class="form-group" id="registered-success-msg" style="display: none">
+                          <div class="col-md-offset-4 col-md-8">
+                            <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
+                          </div>
+                        </div>
+                    <!-- </div> -->
+                      <div class="form-group">
+                        <label for="id_state" class="col-lg-4 control-label">Gender</label>
+                        <div class="col-lg-8">
+                            {% render_field form.gender class+="form-control gender" tabindex="4" %}
+                            {{ form.gender.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_state" class="col-lg-4 control-label">State</label>
+                        <div class="col-lg-8">
+                            {% render_field form.state class+="form-control state" tabindex="5" %}
+                            {{ form.state.errors }}
+                        </div>
+                                    </div>
+                  {% if user_college %}
+                    <div class="form-group">
+                      <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School</label>
+                      <div class="col-lg-8">
+                      <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
+                      <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6" style="display: none;">
+                      </select>
+                      <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later <br> Contact Event Organiser if college/school name is not found in the list </span>
+                      </div>
+                    </div>
+                    {%else%}
+                    <div class="form-group">
+                      <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School</label>
+                      <div class="col-lg-8">
+                      <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6">
+                    </select>
+                    <span class="help-block">This option cannot be changed later <br>Contact Event Organiser if college/school name is not found in the list</span>
+                      </div>
+			<div id="college-info" class="col-md-8 col-md-offset-4" style="display:none" >Please select your college</div>
+		<!-- 	<span class="help-block" style="text-align: center;">This option cannot be changed later</span> -->
+                    </div>
+
+                		{% endif %}
+                    <div class="form-group">
+                    <label for="id_foss" class="col-lg-4 control-label">FOSS </label>
+                    <div class="col-lg-8">
+                        <div class="form-control" style="font-size:1vw;">{{event_obj.foss}}</div>
+                    </div>
+                    </div>
+                    {% if langs %}
+                    <div class="form-group">
+                    <label for="id_foss_language" class="col-lg-4 control-label">Language </label>
+                    <div class="col-lg-8">
+                        {% render_field form.foss_language class+="form-control foss_language" tabindex="7" %}
+                        {{ form.name.errors }}
+                         <span class="help-block">Select Language of Tutorial Instructions
+                          <br>English language will be offered by default in CD-content.
+                          <br>In addition, you can choose any other language also.
+                         </span>
+
+
+                    </div>
+
+                    </div>
+                    {% endif %}
+                    {% if user|is_user_paid %}
+                    <div class="form-group" id="paid-info">
+                      <div class="panel panel-primary col-lg-8 col-md-offset-4">
+                        <div class="panel-body">You are a part of a paid college.</div>
+                      </div>
+                    </div>
+			<div class="form-group" style="display:none" id=""amount_back">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
+                        <div class="col-lg-8">
+                            {% render_field form.amount class+="form-control amount" tabindex="9" %}
+                            {{ form.amount.errors }}
+			 * (including 18% GST)
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <div class="form-group">
+                        <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
+                        <div class="col-lg-8">
+                            {% render_field form.amount class+="form-control amount"  %}
+                            {{ form.amount.errors }}
+			* (including 18% GST)
+                        </div>
+                    </div>
+                    {% endif %}
+                    </fieldset>
+                        <div class="row">
+                          <div class=" col-md-offset-4 col-md-4">
+                            {% if  user|is_user_paid %}
+                            <!-- if user belongs to a paid college -->
+                            <button type="submit"  value="Submit" class="btn btn-success" tabindex="8" id="register_paid" disabled>Register
+                            </button>
+        <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled tabindex="8" style="display:none;">Make Payment</button>
+                            {% else %}
+                            <!-- all other -->
+                            <button type="submit"  value="Submit" class="btn btn-success" tabindex="8" id="register_paid" style="display:none;">Register
+                            </button>
+                            <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled tabindex="8">Make Payment</button>
+                            {% endif %}
+                          </div>
+                        </div>
+                    
+                    </div>
+                    <div class="col-md-4">
+                      <div class="panel panel-info">
+                        <div class="panel-heading"><i class="fa fa-calendar" aria-hidden="true" style="margin-right: 10px;"></i>Important Dates</div>
+                          <table class="table table-bordered">
+                            <tbody>
+                              <tr>
+                                <td><strong>Registration</strong></td>
+                                <td>{{ event_obj.registartion_start_date|format_date:event_obj.registartion_end_date }}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td><strong>Event</strong></td>
+                                <td>{{ event_obj.event_start_date|format_date:event_obj.event_end_date }}
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="panel panel-info">
+                        <div class="panel-heading">Event Organiser</div>
+                          <table class="table table-bordered info-table">
+                            <tbody>
+                              <tr>
+                                <td><i class="fa fa-map-marker info-icon" aria-hidden="true" ></i>
+                                   {{event_obj.host_college}}{{event_obj.state.name}} 
+                                </td>
+                              </tr>
+                              <tr>
+                               <td><i class="fa fa-user info-icon" aria-hidden="true" ></i> {{event_obj.event_coordinator_name}}</td>
+                              </tr>
+                              <tr>
+                               <td><i class="fa fa-envelope info-icon" aria-hidden="true"></i> {{event_obj.event_coordinator_email}}</td>
+                              </tr>
+                              <tr>
+                               <td><i class="fa fa-phone info-icon" aria-hidden="true"></i> {{event_obj.event_coordinator_contact_no}}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="panel panel-info">
+                          <div class="panel-heading" style="font-weight: bold;">NEFT Payment Information</div>
+                          <div class="panel-body">
+                            Click here for <a href="https://process.spoken-tutorial.org/images/4/45/Payment_Flow_NEFT.pdf" target="_blank">Payment Flow via NEFT.</a>
+                            <p class="help-block">You can pay by NEFT and contact your state Training Manager for registration</p>
+                            
+                          </div>
+                        </div>
+
+                        <div class="panel panel-info">
+                          <div class="panel-heading" style="font-weight: bold;">For any queries kindly contact our State Training Managers</div>
+                          <div class="panel-body">
+                            Click here for <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">Contact Details</a>
+                            
+                          </div>
+                        </div>
+                    </div>
+                
+            </div>
+        </div>
+    </form>
+                </div>
+              </div>
+
+  
+{%endblock%}
+{% block jsblock %}
+<script type="text/javascript">
+ $( document ).ready(function() {
+
+  // If state exists, get college list
+  if($('#id_state').val()){
+    show_clg_list();
+  }
+
+$('#id_email').on('focusout',function(){
+  var isReadOnly = $('#id_email').is('[readonly]');
+      if (!isReadOnly) {
+      var username = $('#id_name').val();
+      var email = $('#id_email').val();
+      $.ajax({
+          url:'/donate/send_onetime/',
+          type:"POST",
+          data:{
+              'username': username,
+              'email': email,
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+          },
+        success: function(data) {
+            if (data['valid_email']=='1') {
+            $('#email-info').html('');
+            if(data['message']=="active_user"){
+                $("#send_otp").hide();
+                $("#pwd").show();
+                $("#forgot_pwd").show();
+                $("#otp_value").hide();
+                $("#otp_sent_msg").hide();
+                $("#email-info").html('This Email Id is already registered with Spoken Tutorials. Please enter your password to proceed.');
+                document.getElementById("email-info").style.color = "green";
+            }
+            else if(data['message']=='inactive_user'){
+                document.getElementById("otp_sent_msg").innerHTML = "OTP Re-sent";
+                document.getElementById('otp_sent_msg').className = 'label label-success';
+                $("#send_otp").show();
+                $("#pwd").hide();
+                // $('#id_country').parent().hide();
+                // $("#otp_sent_msg").show().delay(10000).fadeOut();
+            }
+            else{
+              $("#send_otp").show();
+              $("#pwd").hide();
+            }
+            }else{
+                $('#email-info').html(data['email_validation']);
+            }
+        }
+    });
+
+      }
+      
+  });
+
+
+$('#pwd').on('focusout',function(){
+        $('#invalid_credentials').html('');
+        var username = $('#id_name').val();
+        var email = $('#id_email').val();
+        var password = $('#id_password').val();
+        $.ajax({
+            url:'/donate/validate_user/',
+            type:"POST",
+            data:{
+                'username': username,
+                'email': email,
+                'password': password,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            success: function(data) {
+              if (data['msg']=='') {
+                $("#logged_success").show();
+              $.ajax({
+                type : "POST",
+                url: '/training/register_user/',
+                dataType : "json",
+                data: {
+                  'event_id_info' : "{{event_obj.id}}",
+    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+    error: function(data){
+      alert("Pulling up your data ... Hold on !!!");
+                  location.reload();
+                },
+    });
+                var r = data['organizer_paid'];
+                if (data['organizer_paid']=='1') {
+                  $('#organizer_info').show();
+                  $('#download_btn').show();
+                  $('#make_payment').hide();
+                  
+                  $('#id_country').parent().hide();
+                  
+                  $('#registered-success-msg').hide();
+                  $('#otp_value').parent().hide();
+                  $('#forgot_pwd').hide();
+                  $("#email-info").hide();
+                }
+              }else{
+                  $('#invalid_credentials').html(data['msg']);
+              }
+            }
+            });
+        });
+
+$('#id_state').change(function(){
+   	show_clg_list()
+});
+
+function show_clg_list(){
+  var stateid  = $('#id_state').val();
+    $.ajax({
+                type : "POST",
+                url:"/software-training/ajax-state-collage/",
+                dataType : "json",
+                data: {
+                  'state' : stateid,
+                },
+                success: function(data)
+                {
+                    $('#id_college').html(data);
+        $('#college-info').show();  
+                }
+              });
+}
+
+function payment_btn_activate(){
+var make_payment_btn = document.getElementById('make_payment');
+var user_loggedin = "{{user.is_authenticated|yesno:"True,False"}}";
+if($('#make_payment').length > 0 && user_loggedin == 'True'){
+      $('#make_payment').removeAttr('disabled');
+}
+}
+function payment_btn_hide(){
+  $('#make_payment').hide();
+  $('#register_paid').show();
+}
+$('#id_gender').change(function(){
+    var stateid = $('#id_state').val();
+    var college = $('#id_college').val();
+    var saved_college = $('#college_user_details').val();
+    if( stateid && (college||saved_college))
+    {
+
+$('#amount_back').show();
+payment_btn_activate();
+}
+try{
+document.getElementById('register_paid').disabled = false;
+}
+catch{}
+});
+
+
+$( "#edit_clg" ).click(function() {
+  $('#college_user_details').hide();
+  $('#id_college').show();
+  var state = $('#id_state').val();
+  $('#id_state').val(state).trigger('change');
+});
+
+$('#id_college').change(function(){
+var collegeid = $('#id_college').val();
+$.ajax({
+                type : "POST",
+                url:"/training/ajax_check_college/",
+                dataType : "json",
+                data: {
+                  'college_id' : collegeid,
+                },
+                success: function(data)
+                {
+                    if(!data){
+      			$('#make_payment').show()
+			$('#register_paid').hide();
+			try{
+			document.getElementById('college_user_details').value = '';
+			}catch{}
+			$('#paid-info').hide();
+			payment_btn_activate();
+		}
+		else{
+		payment_btn_hide();
+		try{
+		document.getElementById('register_paid').style.display = 'block';
+		}
+		catch{}
+		}
+                }
+              });
+
+
+});
+
+});
+
+
+
+function check_college(control){
+if(control.value=='None'){
+document.getElementById('college-info').style.display = "block";
+payment_btn_activate();
+}
+else{
+try{
+document.getElementById('college-info').style.display = "none";
+payment_btn_hide();
+}
+catch{}
+}
+}
+</script>
+<script type="text/javascript" src="{% static 'cdcontent/js/cdcontent.js' %}"></script>
+{% endblock %}

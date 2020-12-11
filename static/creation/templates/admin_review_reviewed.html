@@ -9,6 +9,36 @@
 {% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> Tutorials reviewed{% endblock %}
 {% block content %}
+
+<form action="" method="post" class='form-horizontal'>
+    <div class='row' >
+      {% csrf_token %}
+      <div class="col-lg-4 col-md-4 col-sm-4">    
+          <div class="form-group">
+              <label for="id_foss" class="col-sm-4 control-label">FOSS Course</label>
+              <div class="col-sm-8">
+                {% render_field form.tutorial_detail__foss class+="form-control foss" tabindex="1" %}
+                {{ form.tutorial_detail__foss.errors }}                      
+              </div>         
+          </div>          
+        </div>  
+    <div class="col-lg-4 col-md-4 col-sm-4">    
+         <div class="form-group">
+              <label for="id_language" class="col-sm-4">Language</label>
+              <div class="col-sm-8">
+                  {% render_field form.language class+="form-control language" tabindex="2" %}
+                  {{ form.language.errors }}
+              </div>
+          </div>
+      </div>
+
+      <div class="form-group col-sm-12">
+        <div class="col-sm-offset-4 col-sm-8">
+           <input class="btn btn-success" type="submit" value="Filter" />
+           <a class="btn btn-success" href="{{request.path}}?{{request.GET|reset_get_values}}">Reset Filter</a>
+        </div>
+      </div>
+      </div>
     <ul class="breadcrumb">
         <li><a href="/creation/admin-review/">Tutorials waiting for Admin review</a></li>
         <li class="active">Tutorials reviewed</li>
@@ -69,6 +99,7 @@
         {% endif %}
         </table>
     </div>
+  </form>
 {% endblock %}
 {% block uncompressjsblock %}
     <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>

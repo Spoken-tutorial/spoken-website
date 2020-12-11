@@ -24,6 +24,16 @@ from events.signals import revoke_student_permission
 from creation.models import FossCategory, Language, \
   FossAvailableForWorkshop, FossAvailableForTest
 
+PAYMENT_STATUS_CHOICES =(
+    ('', '-----'), ('New', 'New'), ('Renewal', 'Renewal')
+  )
+COLLEGE_TYPE_CHOICES =(
+    ('', '-----'), ('Engg', 'Engg'), ('ASC', 'ASC'), ('University', 'University'), ('School', 'School')
+  )
+SUBSCRIPTION_CHOICES = (
+      ('', '-----'), ('365', 'One_Year'), ('182', 'Six_Months')
+    )
+
 
 # Create your models here.
 @python_2_unicode_compatible
@@ -563,9 +573,7 @@ class StudentBatch(models.Model):
   department = models.ForeignKey(Department, on_delete=models.PROTECT )
   year = models.PositiveIntegerField() # 2010-2014
   stcount = models.PositiveIntegerField(default=0)
-
-  class Meta(object):
-    unique_together = ("academic", "year", "department")
+  batch_name = models.CharField(max_length=200, null=True)
 
   def __str__(self):
     return '%s, %s Batch' % (self.department.name, self.year)
@@ -601,6 +609,20 @@ class StudentBatch(models.Model):
     if self.trainingrequest_set.exists():
        return False
     return True
+
+  def create_batch_name(self):
+    batch_query = StudentBatch.objects.filter(department_id=self.department_id, year=self.year, organiser=self.organiser)
+    b_count = batch_query.count()
+    name =  str(self.department)+"-"+str(self.year)+"-"+str(b_count)
+
+    for a in range(b_count+1):
+      name =  str(self.department)+"-"+str(self.year)+"-"+str(a+1)
+    
+      if not batch_query.filter(batch_name=name).exists():
+        self.batch_name = name
+        self.save()
+        break
+    return name
 
 
 class StudentMaster(models.Model):
@@ -824,6 +846,8 @@ class TrainingRequest(models.Model):
   training_planner = models.ForeignKey(TrainingPlanner, on_delete=models.PROTECT )
   department = models.ForeignKey(Department, on_delete=models.PROTECT )
   sem_start_date = models.DateField()
+  training_start_date = models.DateField(default=datetime.now)
+  training_end_date = models.DateField(default=datetime.now)
   course = models.ForeignKey(CourseMap, on_delete=models.PROTECT )
   batch = models.ForeignKey(StudentBatch, null = True, on_delete=models.PROTECT )
   participants = models.PositiveIntegerField(default=0)
@@ -918,9 +942,7 @@ class TrainingRequest(models.Model):
     return '(%d / %d)' % (training_attend_count, student_master_count)
 
   def can_edit(self):
-    if self.status == 1 or TrainingAttend.objects.filter(
-      training_id=self.id
-    ).exists():
+    if self.status == 1 or TrainingAttend.objects.filter(training_id=self.id).exclude(training__department_id=169).exists():
       return False
     return True
 
@@ -1723,3 +1745,42 @@ class PaymentTransactionDetails(models.Model):
 class topperlist(models.Model):
   emailid = models.EmailField(max_length = 100)
   userid = models.PositiveIntegerField()
+
+class AcademicPaymentStatus(models.Model):
+
+  state = models.ForeignKey(State, on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
+  name_of_the_payer = models.CharField(max_length=200)
+  email = models.EmailField(null=True)
+  phone = models.CharField(max_length = 100, null=True)
+  amount = models.CharField(max_length=20)
+  subscription =  models.CharField(max_length = 50, choices = SUBSCRIPTION_CHOICES)
+  transactionid = models.CharField(max_length=100, null=True)
+  payment_date = models.DateField()
+  payment_status = models.CharField(max_length = 50, choices = PAYMENT_STATUS_CHOICES)
+  college_type = models.CharField(max_length = 50, choices = COLLEGE_TYPE_CHOICES)
+  pan_number = models.CharField(max_length = 100, null=True)
+  gst_number = models.CharField(max_length=15, null=True)
+  customer_id = models.CharField(max_length = 50, null=True)
+  invoice_no = models.CharField(max_length = 100, null=True)
+  remarks = models.CharField(max_length = 200, null=True)
+  entry_date = models.DateTimeField(auto_now_add = True)
+  entry_user = models.ForeignKey(User, on_delete=models.PROTECT )
+  
+  def __str__(self):
+    return self.academic.institution_name
+
+  class Meta(object):
+    unique_together = (("academic","transactionid","payment_date"),)
+
+
+class AcademicKey(models.Model):
+  ac_pay_status = models.ForeignKey(AcademicPaymentStatus, on_delete=models.PROTECT )
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT ) 
+  u_key = models.CharField(max_length = 50)
+  hex_key = models.CharField(max_length = 50)
+  expiry_date = models.DateField()
+  entry_date = models.DateTimeField(auto_now_add = True)
+  
+  def __str__(self):
+    return self.academic.institution_name

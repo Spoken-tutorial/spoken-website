@@ -34,7 +34,7 @@
           </td>
           <td>
             {% with student_master=batch.id|get_student_master:record.id %}
-              <a class="btn btn-default" href="{% url 'eventsv2:student_delete' batch.id student_master.id %}">Delete</a>
+              <a class="btn btn-default" href="{% url 'eventsv2:student_delete' batch.id student_master.id %}" target="_blank">Delete</a>
             {% endwith %}
           </td>
         </tr>

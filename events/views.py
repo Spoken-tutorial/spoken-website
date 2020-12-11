@@ -717,7 +717,8 @@ def ac(request):
         4: SortableHeader('institution_name', True, 'Institution Name'),
         5: SortableHeader('university__name', True, 'University'),
         6: SortableHeader('institution_type__name', True, 'Institute Type'),
-        7: SortableHeader('Action', False)
+        7: SortableHeader('academickey__expiry_date', True, 'Subscription Status'),
+        8: SortableHeader('Action', False)
     }
 
     collectionSet = AcademicCenter.objects.filter(state__in = user.resource_person.filter(resourceperson__status=1))
@@ -1102,7 +1103,7 @@ def rp_invigilator(request, status, code, userid):
 def rp_accountexecutive(request, status, code, userid):
     """ Resource person: active accountexecutive """
     user = request.user
-    accountexecutive_in_rp_state = Accountexecutive.objects.filter(user_id=userid, academic=AcademicCenter.objects.filter(state=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
+    accountexecutive_in_rp_state = Accountexecutive.objects.filter(user_id=userid, academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
     if not (user.is_authenticated() and accountexecutive_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page')
 
@@ -1856,6 +1857,7 @@ def test_request(request, role, rid = None):
             if rid:
                 t = Test.objects.get(pk = rid)
             else:
+                print("New Test.............")
                 t.organiser_id = user.organiser.id
                 t.academic = user.organiser.academic
             t.test_category_id = request.POST['test_category']
@@ -1878,37 +1880,43 @@ def test_request(request, role, rid = None):
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
             error = 0
+            errmsg = ""
             try:
                 t.save()
-                if t and t.training_id:
-                    tras = TrainingAttend.objects.filter(training=t.training)
-                    for tra in tras:
-                        user = tra.student.user
-                        mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
-                        if mdluser:
-                            fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
-                            try:
-                                instance = TestAttendance.objects.get(test_id=t.id, mdluser_id=mdluser.id)
-                            except:
-                                instance = TestAttendance()
-                            instance.student = tra.student
-                            instance.test_id = t.id
-                            instance.mdluser_id = mdluser.id
-                            instance.mdlcourse_id = fossmdlcourse.mdlcourse_id
-                            instance.mdlquiz_id = fossmdlcourse.mdlquiz_id
-                            instance.mdlattempt_id = 0
-                            instance.status = 0
-                            instance.save()
             except IntegrityError:
                 error = 1
+                errmsg = "Test already created"
                 prev_test = Test.objects.filter(organiser = t.organiser_id, academic = t.academic, foss = t.foss_id, tdate = t.tdate, ttime = t.ttime)
                 if prev_test:
                     messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
-            except Exception as e:
-                print(e)
-                messages.error(request, "Sorry, Something went wrong. try again!")
-                error = 1
+                
+            if t and t.training_id:
+                tras = TrainingAttend.objects.filter(training=t.training)
+                fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
+                for tra in tras:
+                    user = tra.student.user
+                    mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
+                    
+                    if mdluser:
+                        print("mdluser present", mdluser.id)                       
+                        try:
+                            instance = TestAttendance.objects.get(test_id=t.id, mdluser_id=mdluser.id)
+                        except Exception as e:
+                            print(e)
+                            instance = TestAttendance()
+                        instance.student_id = tra.student.id
+                        instance.test_id = t.id
+                        instance.mdluser_id = mdluser.id
+                        instance.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                        instance.mdlquiz_id = fossmdlcourse.mdlquiz_id
+                        instance.mdlattempt_id = 0
+                        instance.status = 0
+                        instance.save()
 
+                        print("test_attendance created for ",tra.student.id)
+                    else:
+                        print("mdluser not found for", user.email)
+                        error = 1
             if not error:
                 t.department.clear()
                 t.department.add(test_training_dept)
@@ -2284,9 +2292,9 @@ def test_participant_ceritificate(request, wid, participant_id):
     # Title
     #imgDoc.setFont('Helvetica', 40, leading=None)
     #imgDoc.drawCentredString(415, 480, "Certificate for Completion of c ")
-
-    imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
+    if ta.test.training.department.id != 169:
+        imgDoc.setFont('Helvetica', 18, leading=None)
+        imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
 
     #password
     imgDoc.setFillColorRGB(211, 211, 211)
@@ -2300,7 +2308,10 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 80, 150, 76)    ## at (399,760) with size 160x160
 
     #paragraphe
-    text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay.  <br /><br /><p>Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India.</b></p>"
+    if ta.test.training.department.id == 169:
+        text = " This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b>  has successfully completed <b>"+w.foss.foss+"</b> test on <b>"+str(w.tdate)+"</b> organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at I<b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay."
+    else:
+        text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay.</p>"
 
     centered = ParagraphStyle(name = 'centered',
         fontSize = 16,
@@ -2310,26 +2321,29 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     p = Paragraph(text, centered)
     p.wrap(700, 200)
-    p.drawOn(imgDoc, 4.2 * cm, 6 * cm)
+    p.drawOn(imgDoc, 3 * cm, 7 * cm)
 
     #paragraphe
-    text = "Certificate for Completion of "+w.foss.foss+" Training"
+    text = "Certificate for Completion of <br/>"+w.foss.foss+" Training"
 
     centered = ParagraphStyle(name = 'centered',
-        fontSize = 30,
-        leading = 50,
+        fontSize = 25,
+        leading = 25,
         alignment = 1,
         spaceAfter = 15)
 
     p = Paragraph(text, centered)
-    p.wrap(500,50)
-    p.drawOn(imgDoc, 6.2 * cm, 16 * cm)
+    p.wrap(400,30)
+    p.drawOn(imgDoc, 6.2 * cm, 15.5 * cm)
 
 
     imgDoc.save()
 
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    if ta.test.training.department.id == 169:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdp-test-certificate.pdf","rb")).getPage(0)
+    else:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -2381,8 +2395,9 @@ def test_participant_ceritificate_all(request, testid):
         imgTemp = BytesIO()
         imgDoc = canvas.Canvas(imgTemp)
 
-        imgDoc.setFont('Helvetica', 18, leading=None)
-        imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
+        if ta.test.training.department.id != 169:
+            imgDoc.setFont('Helvetica', 18, leading=None)
+            imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
 
         #password
         imgDoc.setFillColorRGB(211, 211, 211)
@@ -2396,7 +2411,10 @@ def test_participant_ceritificate_all(request, testid):
         imgDoc.drawImage(imgPath, 600, 80, 150, 76)    ## at (399,760) with size 160x160
 
         #paragraphe
-        text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay.  <br /><br /><p>Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the <b>Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, MHRD, Govt., of India.</b></p>"
+        if ta.test.training.department.id == 169:
+            text = " This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b>  has successfully completed <b>"+w.foss.foss+"</b> test on <b>"+str(w.tdate)+"</b> organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at I<b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay."
+        else:
+            text = "This is to certify that <b>"+ta.mdluser_firstname +" "+ta.mdluser_lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay.</p>"
 
         centered = ParagraphStyle(name = 'centered',
             fontSize = 16,
@@ -2406,26 +2424,29 @@ def test_participant_ceritificate_all(request, testid):
 
         p = Paragraph(text, centered)
         p.wrap(700, 200)
-        p.drawOn(imgDoc, 4.2 * cm, 6 * cm)
+        p.drawOn(imgDoc, 3 * cm, 7 * cm)
 
         #paragraphe
-        text = "Certificate for Completion of "+w.foss.foss+" Training"
+        text = "Certificate for Completion of <br/>"+w.foss.foss+" Training"
 
         centered = ParagraphStyle(name = 'centered',
-            fontSize = 30,
-            leading = 50,
+            fontSize = 25,
+            leading = 25,
             alignment = 1,
             spaceAfter = 15)
 
         p = Paragraph(text, centered)
-        p.wrap(500,50)
-        p.drawOn(imgDoc, 6.2 * cm, 16 * cm)
+        p.wrap(400,30)
+        p.drawOn(imgDoc, 6.2 * cm, 15.5 * cm)
 
 
         imgDoc.save()
 
         # Use PyPDF to merge the image-PDF into the template
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+        if ta.test.training.department.id == 169:
+            page = PdfFileReader(open(settings.MEDIA_ROOT +"fdp-test-certificate.pdf","rb")).getPage(0)
+        else:
+            page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
         overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
         page.mergePage(overlay)
 

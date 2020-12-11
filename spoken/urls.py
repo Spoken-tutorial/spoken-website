@@ -21,7 +21,7 @@ urlpatterns = [
     url(r'^sitemap\.html$', sitemap, name='sitemap'),
     # Examples:
     url(r'^addu/$', add_user, name='addu'),
-    url(r'^NMEICT-Intro/$', nmeict_intro, name="nmeict_intro"),
+    # url(r'^NMEICT-Intro/$', nmeict_intro, name="nmeict_intro"),
     url(r'^tutorial-search/$', tutorial_search, name="tutorial-search"),
     url(r'^series/$', series_foss, name="series"),
     url(r'^series_tutorial-search/$',  series_tutorial_search, name="series-tutorial-search"),
@@ -30,7 +30,7 @@ urlpatterns = [
     url(r'^news/(?P<cslug>[\w-]+)/$',  news, name="news"),
     url(r'^news/(?P<cslug>[\w-]+)/(?P<slug>[\w-]+)/$',  news_view, name="news_view"),
     url(r'^keyword-search/$',  keyword_search, name="keyword-search"),
-    url(r'^watch/([0-9a-zA-Z-+%\(\)., ]+)/([0-9a-zA-Z-+%\(\)., ]+)/([a-zA-Z-]+)/$',  watch_tutorial, name="watch_tutorial"),
+    url(r'^watch/([0-9a-zA-Z-+%\(\).,\' ]+)/([0-9a-zA-Z-+%\(\).,\' ]+)/([a-zA-Z-]+)/$',  watch_tutorial, name="watch_tutorial"),
     url(r'^What_is_a_Spoken_Tutorial/$',  what_is_spoken_tutorial, name="what_is_spoken_tutorial"),
     url(r'^get-language/(?P<tutorial_type>[\w-]+)/$',  get_language, name="get_language"),
     url(r'^testimonials/new/$',  testimonials_new, name="testimonials_new"),
@@ -93,6 +93,9 @@ urlpatterns = [
     #api
     url(r'^api/', include('api.urls', namespace='api')),
 
+    #training
+    url(r'^training/', include('training.urls', namespace='training')),
+
     # certificate
     url(r'^certificate/', include('certificate.urls', namespace='certificate')),
 
@@ -124,6 +127,10 @@ urlpatterns = [
 
     # events2
     # url(r'^events2/', include('events2.urls', namespace='events2')),
+    url(r'^cron/', include('cron.urls', namespace='cron')),
+
+    #donation
+    url(r'^donate/', include('donate.urls', namespace='donate')),
 
     # cms
     url(r'^', include('cms.urls', namespace='cms')),

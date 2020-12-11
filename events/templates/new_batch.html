@@ -81,7 +81,11 @@
                       </ul>
                       {% endif %}
                       <div class='form-row'>
+			<div class="control-label" style="display:none; font-size: 200%; color: red; text-align: center;" id="ajax-loader"><i> Your data is being processed. <br> 
+                        Please DONOT refresh the page</i>
+		        <img  src="{% static 'spoken/images/ajax-loader.gif' %}" ></div>
                         <div class='col-xs-12 form-group required'>
+			
                           <label class='control-label'>Department</label>
                             {% if user.organiser.academic.institution_type.id == 5 or  user.organiser.academic.institution_type.id == 13 or  user.organiser.academic.institution_type.id == 15 %}
                               <select class="form-control department field-required" id="id_department" name="department" tabindex="1">
@@ -108,7 +112,7 @@
                         <div class='col-xs-12 form-group required'>
                           <label class='control-label'>Master Batch Student List - Csv File</label>&nbsp;&nbsp;<small>(Please upload your CSV file here.)<br> Click Browse to select the spreadsheet containing student details.</small>
                           {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
-                          {{ form.csv_file.errors }}
+                          <span style="color:red" >{{ form.csv_file.errors|linebreaks }}</span>
 			  <small>If you have used MS-EXCEL to create the CSV file please make sure that you have saved it with csv(ms-dos) file extention.</small>
                         </div>
                       </div>
@@ -121,7 +125,7 @@
                             </div>
                             <div class="modal-footer">
                               <button type="button" class="btn btn-default" data-dismiss="modal">NO</button>
-                              <a type ="submit" class="btn btn-primary" onclick="document.forms['form-id'].submit();" %}">Yes</a>
+			      <a type ="submit" class="btn btn-primary" onclick=make_submit_call(document.forms['form-id']) %}">Yes</a>
                             </div>
                           </div>
                         </div>
@@ -129,6 +133,7 @@
                       <div class="form-group">
                           <div class="col-xs-12 form-group">
                               <input class="btn btn-primary" id="upload_button" type="button" value="Upload Master Batch" />
+			      
                               <a class="btn btn-danger" href="{% url 'eventsv2:batch_list' %}">Cancel</a>
                           </div>
                       </div>
@@ -268,5 +273,28 @@
         }
       });
 
+
+$('#id_csv_file').on('change', function() {
+file = $("#id_csv_file").val();
+var parts = file.split('.');
+extn = parts[parts.length - 1];
+if(extn!='csv'){
+alert("Invalid file format");
+}
+
+});
+function make_submit_call(form_id){
+file = $("#id_csv_file").val();
+var parts = file.split('.');
+extn = parts[parts.length - 1];
+if(extn!='csv'){
+alert("Invalid file format");
+}
+else{
+$("#ajax-loader").show();
+$("#confirmModal").hide();
+form_id.submit();
+}
+}
   </script>
 {% endblock %}

@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'forums',
     'cms',
     'creation',
+    'donate',
     'statistics',
     'cdcontent',
     'events',
@@ -89,12 +90,14 @@ INSTALLED_APPS = [
     'team',
     'certificate',
     'api',
+    'training',
     'rest_framework',
     'workshop',
     'django_filters',
     'impersonate',
     'corsheaders',
-    'ckeditor'
+    'ckeditor',
+    'cron',
 ]
 
 
@@ -134,42 +137,43 @@ DATABASES = {
         'PORT': '',    
     
     },
-        'moodle': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': MDB,                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': MDB_USER,
-        'PASSWORD': MDB_PASS,
-        'HOST': MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                  # Set to empty string for default.
-    },
-    # 'cdeep': {
-    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-    #     'NAME': CDB,                      # Or path to database file if using sqlite3.
-    #     # The following settings are not used with sqlite3:
-    #     'USER': CDB_USER,
-    #     'PASSWORD': CDB_PASS,
-    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-    #     'PORT': '',                  # Set to empty string for default.
-    # },
-    # 'workshop_info': {
-    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-    #     'NAME': WDB,                      # Or path to database file if using sqlite3.
-    #     # The following settings are not used with sqlite3:
-    #     'USER': WDB_USER,
-    #     'PASSWORD': WDB_PASS,
-    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-    #     'PORT': '',                  # Set to empty string for default.
-    # },
-    'forums': {
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': FDB,                      # Or path to database file if using sqlite3.
-        # The following settings are not used with sqlite3:
-        'USER': FDB_USER,
-        'PASSWORD': FDB_PASS,
-        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',                  # Set to empty string for default.
+    'moodle': {	
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
+        'NAME': MDB,                      # Or path to database file if using sqlite3.	
+        # The following settings are not used with sqlite3:	
+        'USER': MDB_USER,	
+        'PASSWORD': MDB_PASS,	
+        'HOST': MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
+        'PORT': '',                  # Set to empty string for default.	
+    },	
+    # 'cdeep': {	
+    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
+    #     'NAME': CDB,                      # Or path to database file if using sqlite3.	
+    #     # The following settings are not used with sqlite3:	
+    #     'USER': CDB_USER,	
+    #     'PASSWORD': CDB_PASS,	
+    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
+    #     'PORT': '',                  # Set to empty string for default.	
+    # },	
+    # 'workshop_info': {	
+    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
+    #     'NAME': WDB,                      # Or path to database file if using sqlite3.	
+    #     # The following settings are not used with sqlite3:	
+    #     'USER': WDB_USER,	
+    #     'PASSWORD': WDB_PASS,	
+    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
+    #     'PORT': '',                  # Set to empty string for default.	
+    # },	
+    'forums': {	
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
+        'NAME': FDB,                      # Or path to database file if using sqlite3.	
+        # The following settings are not used with sqlite3:	
+        'USER': FDB_USER,	
+        'PASSWORD': FDB_PASS,	
+        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
+        'PORT': '',                  # Set to empty string for default.	
     }
+        
 }
 
 
@@ -338,4 +342,30 @@ CACHES = {
         'LOCATION': 'localhost:11211',
         'TIMEOUT': 3600 * 24,
     }
+}
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+
+CRON_ROOT = os.path.join(MEDIA_ROOT, 'emails/')
+
+CKEDITOR_CONFIGS = {
+    'default': {
+        'height': 150,
+        'width': 600,
+        'toolbar': 'Full'
+    }
+}
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = DATA_UPLOAD_MAX_NUMBER_FIELDS
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
 }

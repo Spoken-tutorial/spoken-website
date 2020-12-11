@@ -3,10 +3,28 @@
 {% load static %}
 {% load mdldata %}
 {% load eventsdata %}
+{% load announcements %}
 {% block title %}Student Dashboard{% endblock %}
 {% block cssblock %}<link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />{% endblock %}
 {% block heading %}
         <i class="fa fa-list-ul"></i> Student Dashboard
+{% endblock %}
+{% block announcement %}
+    <div id="slideshow">
+            {% get_notifications as notifications %}
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
+                        <div class="inner">
+                            <div class="text-container">
+                                {{ notification.body|safe }}
+                                <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+    </div>
 {% endblock %}
 {% block content %}
     <!-- Nav tabs -->
@@ -39,8 +57,10 @@
                         <td>
                             | <a href="{% url 'mdldjango:feedback' record.training.id %}">Feedback</a> | 
                             <a href="{% url 'events:training_participant_language_feedback' record.training.id mdluserid %}">Language Feedback</a> |
-                            {% if record.training.is_training_certificate_allowed %}
-                              <a href="{% url 'events:student_training_certificate' record.id %}">Certificate</a> |
+                            {% if record.training.is_learners_allowed and record.training.cert_status == 1 %}
+                              <a href="{% url 'eventsv2:student_training_certificate' record.id %}">Certificate</a> |
+                            {% elif record.training.is_learners_allowed and record.training.cert_status == 2 %}
+                                Request sent for Participation Certificate | 
                             {% endif %}
                         </td>
                     </tr>
@@ -203,4 +223,32 @@
             {% endif %}
         </div>
     </div>
+{% endblock %}
+{% block jsblock %}
+    <script>
+        /* Slideshow */
+        var stop = 1
+        $('#slideshow').hover(function(){
+            stop = 0
+        }, function(){
+            stop = 1
+        });
+        if($(".announcement").length > 1){
+            $("#slideshow > div:gt(0)").hide();
+            setInterval(function() {
+              if(stop){
+                  $('#slideshow > div:first')
+                    .fadeOut(0)
+                    .next()
+                    .fadeIn(0)
+                    .end()
+                    .appendTo('#slideshow');
+                 }
+            },  5000);
+        }
+        $('.close').click(function(){
+            $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
+            $("#header-wrapper").css({'height' : '0px'});
+        });
+    </script>
 {% endblock %}

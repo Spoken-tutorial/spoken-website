@@ -20,3 +20,10 @@ class ContributorRatingFilter(django_filters.FilterSet):
     class Meta:
         model = ContributorRating
         fields = ['language', 'user']
+
+
+class ReviewerFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = TutorialResource
+        fields = ['tutorial_detail__foss', 'language']

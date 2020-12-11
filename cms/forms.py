@@ -9,14 +9,25 @@ from django.utils.translation import ugettext_lazy as _
 from nicedit.widgets import NicEditWidget
 from ckeditor.widgets import CKEditorWidget
 from validate_email import validate_email
-
+from django.contrib.auth.validators import ASCIIUsernameValidator
 # Spoken Tutorial Stuff
 from cms.models import *
 from events.models import *
+from cms.validators import ASCIIValidator
+
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField(required=True)
+    username = forms.CharField(
+        required=True,
+        validators = [
+            ASCIIUsernameValidator(
+                message = 'Enter a valid username. 30 characters or fewer. \
+                    Letters, digits and ./-/_ only. Please do not copy paste here.',
+                code = 'invalid_username'
+            ),
+        ]
+        )
     password = forms.CharField(widget=forms.PasswordInput, required=True)
 
 
@@ -27,16 +38,37 @@ class RegisterFormHome(forms.Form):
         widget = forms.TextInput(),
         required = True,
         validators = [
-            RegexValidator(
-                regex = '^[a-zA-Z0-9-_.]*$',
-                message = 'Username required. 30 characters or fewer. \
-                    Letters, digits and ./-/_ only.',
+            ASCIIUsernameValidator(
+                message = 'Enter a valid username. 30 characters or fewer. \
+                    Letters, digits and ./-/_ only. Please do not copy paste here.',
                 code = 'invalid_username'
             ),
         ]
     )
-    first_name = forms.CharField()
-    last_name = forms.CharField()
+    first_name = forms.CharField(
+        validators = [
+            ASCIIValidator(
+                message = _(
+                        'Please enter a valid first name.'
+                        'This field may contain only English letters.'
+                        ' Please do not copy paste here.'
+                    ),
+                code = 'invalid_first_name',
+            ), 
+        ]
+    )
+    last_name = forms.CharField(
+        validators = [
+            ASCIIValidator(
+                message = _(
+                        'Please enter a valid last name.'
+                        'This field may contain only English letters.'
+                        ' Please do not copy paste here.'
+                    ),
+                code = 'invalid_last_name',
+            ), 
+        ]
+    )
     phone = forms.CharField(max_length=20)
     password = forms.CharField(
         label = _("Password"),

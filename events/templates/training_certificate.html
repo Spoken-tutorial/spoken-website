@@ -5,19 +5,41 @@
 {% load static %}
 {% block title %}Participant List{% endblock %}
 {% block heading %}<i class="home-page-title-i">Participant List</i>{% endblock %}
+{% load announcements %}
+{% block announcement %}
+    <div id="slideshow">
+            {% get_notifications as notifications %}
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
+                        <div class="inner">
+                            <div class="text-container">
+                                {{ notification.body|safe }}
+                                <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+    </div>
+{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
 <form action="{{ action }}" id="form-id" method="post">
 <div><a class="btn btn-success" href="{% url 'eventsv2:training_planner' %}">Go Back to Training Planner</a><br><br></div>
 {% if object_list %}
-<div style="float: right;"><a class="btn btn-success" 
-  href="{% url 'eventsv2:alltraining_certificate' training.id %}">Download all certificates</a><br><br></div>
+<div style="float: right;">
+  {% if training.is_learners_allowed and training.cert_status == 1 and training.status == 1  %}
+  <a class="btn btn-success" 
+  href="{% url 'eventsv2:alltraining_certificate' training.id %}">Download all certificates</a><br><br>
+  {% endif %}
+</div>
   <table class="table table-striped table-hover table-bordered">
     <tr>
       <th>Name</th>
       <th>Email</th>
       <th>Gender</th>
-      {% if training.is_learners_allowed and training.cert_status == 1 %}
+      {% if training.is_learners_allowed and training.cert_status == 1 and training.status == 1  %}
         <th>Certificate</th>
       {% endif %}
     </tr>
@@ -29,7 +51,7 @@
                   <td>{{ record.student.student_fullname }}</td>
                   <td>{{ record.student.user.email }}</td>
                   <td>{{ record.student.gender }}</td>
-                  {% if training.is_learners_allowed and training.cert_status == 1 %}
+                  {% if training.is_learners_allowed and training.cert_status == 1 and training.status == 1 %}
                     <td><a href="{% url 'eventsv2:organiser_training_certificate' training_attendance.id %}">Download Certificate</a></td>
                   {% endif %}
                 {% endif %}
@@ -40,4 +62,32 @@
   </table>
   {% endif %}
 </form>
+{% endblock %}
+{% block jsblock %}
+    <script>
+        /* Slideshow */
+        var stop = 1
+        $('#slideshow').hover(function(){
+            stop = 0
+        }, function(){
+            stop = 1
+        });
+        if($(".announcement").length > 1){
+            $("#slideshow > div:gt(0)").hide();
+            setInterval(function() {
+              if(stop){
+                  $('#slideshow > div:first')
+                    .fadeOut(0)
+                    .next()
+                    .fadeIn(0)
+                    .end()
+                    .appendTo('#slideshow');
+                 }
+            },  5000);
+        }
+        $('.close').click(function(){
+            $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
+            $("#header-wrapper").css({'height' : '0px'});
+        });
+    </script>
 {% endblock %}

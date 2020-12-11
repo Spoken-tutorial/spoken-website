@@ -2,6 +2,7 @@
 {% load cmsdata %}
 {% load static %}
 {% load creationdata %}
+{% load announcements %}
 {% block uncompresscssblock %}
     <link href="{% static 'spoken/css/video-js.min.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
@@ -82,18 +83,19 @@
 {% block heading %}<i class="home-page-title-i">spoken tutorial</i>{% endblock %}
 {% block announcement %}
     <div id="slideshow">
-        {% if notifications %}
-            {% for notification in notifications %}
-                <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
-                    <div class="inner">
-                        <div class="text-container">
-                            {{ notification.body|safe }}
-                            <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+            {% get_notifications as notifications %}
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
+                        <div class="inner">
+                            <div class="text-container">
+                                {{ notification.body|safe }}
+                                <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% endfor %}
-        {% endif %}
+                {% endfor %}
+            {% endif %}
     </div>
 {% endblock %}
 
@@ -129,7 +131,13 @@
         {% endfor %}
     {% endif %}
 {% endblock %}
-
+{% block info %}
+<div class="row block-info">
+  <div class="col-sm-12">
+    <span>AICTE chairman Prof. Anil D. Sahasrabudhe encouraging to use opensource software. Click <a href="https://spoken-tutorial.org/media/AICTE-Chairman-Dr-Anil-Sahasrabudhe-Scilab-Toolbox-Hackathon-Inauguration.mp4" target="_blank">here</a> to see the video.</span>
+  </div>
+</div>
+{% endblock info %}
 {% block banner %}
     <div class="page1">
         <div id="banner-wrapper">
@@ -140,8 +148,7 @@
                 </div>
                 <div class="awards">
                     <ul>
-                        <li class="awards-item col-sm-3 col-md-3"><a class="" href="https://googleresearch.blogspot.in/2015/03/announcing-google-mooc-focused-research.html" target="_blank">Google MOOCs <br>Research Award 2015</a></li>
-                        <li class="awards-item col-sm-3 col-md-3"><a class="" href="/ht-for-mumbai-nomination">Nomination for <br>HT for Mumbai Awards 2015  </a></li>
+                        <li class="awards-item col-sm-3 col-md-3"><a class="" href="https://googleresearch.blogspot.in/2015/03/announcing-google-mooc-focused-research.html" onclick="caller();">Google MOOCs <br>Research Award 2015</a></li>                        <li class="awards-item col-sm-3 col-md-3"><a class="" href="/ht-for-mumbai-nomination">Nomination for <br>HT for Mumbai Awards 2015  </a></li>
                         <li class="awards-item col-sm-3 col-md-3"><a class="" href="http://application.reimagine-education.com/the-winners-individual/2015/132/2193b0ae3841f24da1464d4b6b70ee0f/Indian+Institute+of+Technology+Bombay" target="_blank">Reimagine Education <br>Award 2015</a></li>
                         <li class="awards-item col-sm-3 col-md-3"><a class="blink" href="/media/cms/images/kannan-deen-dayal.jpeg" target="_blank">Re-Engineering India <br>Award 2020</a></li>
                     </ul>
@@ -306,6 +313,7 @@
                     <div><span class="fa fa-2 fa-youtube"></span> <a href="https://www.youtube.com/user/SpokenTutorialIITB/" target="_blank">ST YouTube channel</a></div>
                     <div><span class="fa fa-2 fa-youtube"></span> <a href="https://www.youtube.com/channel/UCmyV3lKT1Gs1AfgtV8pp__Q" target="_blank">Health YouTube channel</a></div>
                     <div><span class="fa fa-2 fa-facebook-square"></span> <a href="https://www.facebook.com/SpokenTutorial.org" target="_blank">Facebook page</a></div>
+                    <div><span class="fa fa-2 fa-linkedin-square"></span> <a href="http://linkedin.com/company/spokentutorial" target="_blank">LinkedIn Account</a></div>
                     <div><span class="fa fa-2 fa-skype"></span> st-iitb</div>
                     <!--<div><span class="fa fa-2 fa-twitter"></span> <a href="#">Twitter</a></div>-->
                 </div>
@@ -379,23 +387,23 @@
         /* Slideshow */
         var stop = 1
         $('#slideshow').hover(function(){
-	        stop = 0
+          stop = 0
         }, function(){
-	        stop = 1
+          stop = 1
         });
         if($(".announcement").length > 1){
-		    $("#slideshow > div:gt(0)").hide();
-		    setInterval(function() {
-		      if(stop){
-		          $('#slideshow > div:first')
-		            .fadeOut(0)
-		            .next()
-		            .fadeIn(0)
-		            .end()
-		            .appendTo('#slideshow');
-		         }
-		    },  5000);
-		}
+        $("#slideshow > div:gt(0)").hide();
+        setInterval(function() {
+          if(stop){
+              $('#slideshow > div:first')
+                .fadeOut(0)
+                .next()
+                .fadeIn(0)
+                .end()
+                .appendTo('#slideshow');
+             }
+        },  5000);
+    }
         $('.close').click(function(){
             $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
             $("#header-wrapper").css({'height' : '0px'});

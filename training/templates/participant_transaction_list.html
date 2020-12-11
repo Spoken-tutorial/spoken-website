@@ -1,0 +1,196 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load trainingdata %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Participants Details {% endblock %}
+{% block uncompresscssblock %}
+  <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.pack.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block compresscssblock %}
+  <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock%}
+{% block search %}{% endblock %}
+{% block content %}
+<div class= 'filters row'>
+<div class="col-lg-9 col-md-9 col-sm-9" >
+    <form action="" method="get" class='form-horizontal'>
+      <div class= 'filters row'>
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_paymentdetail__state" class="col-sm-4 control-label">State</label>
+          <div class="col-sm-8">
+            {% render_field form.paymentdetail__state class+="form-control paymentdetail__state paymentdetail__state" tabindex="1" %}
+            {{ form.paymentdetail__state.errors }}
+          </div>
+        </div>
+     </div>
+
+     <div class="col-lg-4 col-md-4 col-sm-4">
+     <div class="form-group">
+          <label for="id_paymentdetail__email" class="col-sm-4 control-label">Email</label>
+          <div class="col-sm-8">
+            {% render_field form.paymentdetail__email class+="form-control paymentdetail__email" tabindex="1" %}
+            {{ form.paymentdetail__email.errors }}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-4 col-sm-4">
+     <div class="form-group">
+          <label for="id_requestType" class="col-sm-4 control-label">Request Type</label>
+          <div class="col-sm-8">
+            {% render_field form.requestType class+="form-control requestType" tabindex="1" %}
+            {{ form.requestType.errors }}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <div class= 'filters row'>  
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_paymentdetail__purpose" class="col-sm-4 control-label">Purpose</label>
+          <div class="col-sm-8">
+            {% render_field form.paymentdetail__purpose class+="form-control paymentdetail__purpose paymentdetail__purpose" tabindex="1" %}
+            {{ form.paymentdetail__purpose.errors }}
+          </div>
+        </div>
+     </div>
+
+      <div class="col-lg-4 col-md-4 col-sm-4">
+       <div class="form-group">
+          <label for="id_tdate" class="col-sm-4 control-label">Transaction Date Range</label>
+          <div class="col-sm-8">
+            {% render_field form.created class+="form-control created date" tabindex="1" %}
+            {{ form.created.errors }}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_status" class="col-sm-4 control-label">Status</label>
+          <div class="col-sm-8">
+            {% render_field form.status class+="form-control status status" tabindex="1" %}
+            {{ form.status.errors }}
+          </div>
+        </div>
+     </div>
+
+
+        <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <div class="col-sm-offset-4">
+           <input class="btn btn-success" type="submit" value="Filter" />
+           <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    </form>
+</div>
+
+<div class="col-lg-3 col-md-3 col-sm-3 ">
+  <div class="form-group" id="total">
+    <label for="id_tdate" class="col-sm-3 control-label">Total Amount</label>
+    <div class="col-sm-9" >
+        <input class="form-control" type="text" disabled value={{total_amount.amount__sum}}>
+    </div>
+  </div>
+
+</div>
+
+</div>
+  
+  <!-- Nav tabs -->
+  
+  <!-- Tab panes -->
+  <div class='table-responsive' style="width:120%; margin-left:-10%;">
+      {% if collection %}
+      <table class="paleblue table table-striped table-hover table-bordered">
+        {% get_sortable_header header ordering request.GET %}
+        {% for record in collection %}
+          <tr>
+            <td>{{ forloop.counter }}
+            <td>{{ record.paymentdetail.user.first_name }}</td>
+            <td>{{ record.paymentdetail.user.last_name }}</td>
+            <td>{{ record.paymentdetail.email }}</td>
+            <td>{{ record.paymentdetail.state }}</td>
+            <td>{{ record.transId }}</td>
+            <td>{{ record.paymentdetail.user_id}}</td>
+            <td>{{ record.refNo}}</td>
+            <td>{{ record.status }}</td>
+            <td>
+              {% ifnotequal record.paymentdetail.purpose 'cdcontent'%}
+                Registration
+              {% else %}
+                CD-Content
+              {% endifnotequal %}
+            </td>
+            <td>{{ record.requestType }}</td>
+            <td>{{ record.amount }}</td>
+            <td>{{ record.created }}</td>
+             <td>
+              {% with phonenumber=record.paymentdetail.user|get_user_detail %}
+              
+                {{phonenumber}}
+              {% endwith %}
+             </td>
+          </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+        <p class='no-record'>No record found!</p>
+      {% endif %}
+  </div>
+{% endblock %}
+
+{% block uncompressjsblock %}
+  <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+  <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+{% endblock %}
+{% block compressjsblock %}
+  <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+   <script src="{% static 'spoken/js/events.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+<script type="text/javascript">
+
+  $('.date').datetimepicker({
+      lang:'en',
+      timepicker:false,
+      format:'Y-m-d',
+      formatDate:'Y/m/d',
+      maxDate:'+1970/06/31', // tommorow date with in 6 month
+  });
+
+  $(document).ready(function(){      
+    $status = $(".requestType");
+    if ($status.val()!='R') {
+      $("#total").hide();
+    }
+    $status.change(function() {
+      var status = $(this).val();
+      if (status=='R') {
+      $("#spanner1").css("display", "none");
+      $("#spanner2").css("display", "none");
+      $("#spanner3").css("display", "none");
+      $("#total").show();
+      }
+      else{
+       $("#total").hide();
+       $("#spanner1").css("display", "block");
+       $("#spanner2").css("display", "block");
+       $("#spanner3").css("display", "block");
+      }
+      
+    });
+    });
+</script>
+{% endblock %}

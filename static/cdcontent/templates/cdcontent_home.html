@@ -1,203 +1,546 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
+{% load tz %}
 {% load static %}
 {% block title %}CD Content Creation{% endblock %}
 {% block cssblock %}
-    <style type="text/css">
-        .add-foss{
-            margin-right: 15px;
-        }
-        #id_language {
-            min-height: 180px;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'cdcontent/css/cdcontent.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
-{% block heading %}CD Content Creation{% endblock %}
+<!-- {% load announcements %} -->
+{% block heading %}
+<span>CD Content Creation</span>
+
+{% if user.is_authenticated and organizer_paid == '0' %}
+<span>
+  <a data-toggle="collapse" href="#collapseKey" role="button" aria-expanded="false" aria-controls="collapseKey" id="key-btn">
+    Past FOSS Purchase
+  </a>
+</span>
+{% endif %}
+
+{% endblock %}
+{% block announcement %}
+    <div id="slideshow">
+            {% get_notifications as notifications %}
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
+                        <div class="inner">
+                            <div class="text-container">
+                                {{ notification.body|safe }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+    </div>
+{% endblock %}
 {% block search %} {% endblock %}
+
 {% block content %}
-    <form role="form" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
-        <div class="row well bs-component">
-            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                <div class="alert alert-danger" role="alert">
-                  <strong>Note:</strong> The maximum file size to download is 1 GB.
-                </div>
-                <fieldset>
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
-                            {{ form.selected_foss.errors }}
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_foss_category" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">FOSS Category:</label>
-                        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
-                            {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
-                            {{ form.foss_category.errors }}
-                            <small>Please select FOSS</small>
-                            {% render_field form.selected_foss class+='selected_foss' %}
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_level" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">Level:</label>
-                        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
-                            {% render_field form.level class+="form-control level" tabindex="2" %}
-                            {{ form.level.errors }}
-                            <small>Please select the Level</small>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="id_language" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">Languages: <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
-                        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
-                            {% render_field form.language class+="form-control language" tabindex="3" %}
-                            {{ form.language.errors }}
-                            <small>For selecting multiple languages, please use </small>
-                            <small><b>&lt;CTRL&gt; + Click</b>.</small>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
-                            <span class='ajax-refresh ajax-refresh-add-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
-                            <input type="button" class="add_foss_lang btn btn-primary" value="Add selected FOSS"  tabindex="4" />
-                            <input type="submit" class="btn btn-primary" value="Create ZIP file"  tabindex="5" />
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-                <div class="table-responsive">
-                    <table class="added-foss table table-condensed table-bordered table-hover">
-                    </table>
-                </div>
-                <div class="download-link"></div>
-            </div>
+<div class="row">
+<div class="col-sm-12">
+<div class="collapse" id="collapseKey">
+<div class="card card-body">
+{% if payee_list%}
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Date Of Purchase</th>
+      <th scope="col">FOSS Courses <span class="text-muted" style="font-style: italic;"> (Level , Language)</span> </th>
+      <th scope="col">Expiry</th>
+      <th scope="col">Receipt</th>
+      <th scope="col">Download Link</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in payee_list %}
+    <tr>
+      <th scope="row">{{forloop.counter}}</th>
+      <td>{{item.created}}</td>
+      <td>
+          {% for p in item.cdfosslanguages_set.all %}
+          {% if forloop.last %}
+          {% if p.level %}
+          {{p.foss}} <span class="text-muted" style="font-style: italic;">({{p.level}} , {{p.lang}})</span>
+          {% else %}
+          {{p.foss}} <span class="text-muted" style="font-style: italic;">(All , {{p.lang}})</span>
+          {% endif %}
+          
+          {% else %}
+          {% if p.level %}
+          {{p.foss}} <span class="text-muted" style="font-style: italic;">({{p.level}} , {{p.lang}})</span> ,
+          {% else %}
+          {{p.foss}} <span class="text-muted" style="font-style: italic;">(All , {{p.lang}})</span> ,
+          {% endif %}
+          
+          {% endif %}
+    {% endfor  %}
+      </td>
+      <td>{{item.expiry}}</td>
+      <td>
+          {%for pay_tr_obj in item.payment_transaction.all%}
+          <form id="receipt{{pay_tr_obj.id}}" action="{% url 'donate:receipt' %}" method="post">
+            {% csrf_token %}
+            <input type="text" id="name{{pay_tr_obj.paymentdetail.id}}" name="name" value="{{pay_tr_obj.paymentdetail.name}}" style="display: none">
+            <input type="text" id="email{{pay_tr_obj.paymentdetail.id}}" name="email" value="{{pay_tr_obj.paymentdetail.email}}" style="display: none">
+            <input type="text" id="amount{{pay_tr_obj.paymentdetail.id}}" name="amount" value="{{pay_tr_obj.amount}}" style="display: none">
+            <input type="text" id="reqId{{pay_tr_obj.paymentdetail.id}}" name="reqId" value="{{pay_tr_obj.reqId}}" style="display: none">
+            <input type="text" id="transId{{pay_tr_obj.paymentdetail.id}}" name="transId" value="{{pay_tr_obj.transId}}" style="display: none">
+            <input type="text" id="provId{{pay_tr_obj.paymentdetail.id}}" name="provId" value="{{pay_tr_obj.provId}}" style="display: none">
+            <input type="text" id="status{{pay_tr_obj.paymentdetail.id}}" name="status" value="{{pay_tr_obj.status}}" style="display: none">
+            <input type="text" id="expiry{{pay_tr_obj.paymentdetail.id}}" name="expiry" value="{{pay_tr_obj.expiry}}" style="display: none">
+        </form>
+        <button type="submit" form="receipt{{pay_tr_obj.id}}" value="Submit" class="custom-btn">Receipt</button>
+{%endfor%}
+      </td>
+
+      
+      {% if item.is_past_due and item.status == 1 %}
+	<form id="cdcontent_download{{item.id}}" action="{% url 'cdcontent:create_cd_download' 'general' %}" method="post">
+    {% csrf_token %}
+          <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{item.get_selected_foss}}' style="display: none">
+  </form>
+      <td>
+        <button type="submit" form="cdcontent_download{{item.id}}" value="Submit" class="custom-btn">Download</button>
+      </td>
+      {% elif item.status == 2 %}
+      <td>Payment Unsuccessful</td>
+      {% elif item.status == 0 %}
+      <td>Payment Incomplete</td>
+	{% else %}
+      <td>Expired</td>
+      {% endif %}
+    </tr>
+    {% endfor  %}
+    {% else %}
+    <tr><p class="no-past-foss">No Past FOSS Purchases !</p></tr>
+    {% endif %}
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+<div class="sidebar-box">
+    <div class="row" id="info" >
+    <div>
+    </div>
+    <div class="col-md-7 c-card">
+        <div class="c-card-header c-blue">Academic Institute (College/School)</div>
+        <div class="c-card-body">
+            <h2 class="c-card-title">Free</h2>
+        <ul class="list-unstyled mt-3 mb-4">
+          <li><i class="fa fa-check "></i>Unlimited access to Course Downloads</li>
+          <li><i class="fa fa-check "></i>All course content is free for use for 1 calendar year
+(both online and offline)</li>
+          <li><i class="fa fa-check "></i>Upload student batches for end-of-course tests</li>
+          <li><i class="fa fa-check "></i>Receive certificates on successful completion of tests</li>
+          <li><i class="fa fa-check "></i>Top performing students get calls for Job Fairs</li>
+          <li><i class="fa fa-check "></i>For more details on academic subscription, pls contact training@spoken-tutorial.org</li>
+        </ul>
+        <a href="https://spoken-tutorial.org/change-in-policy/" class="c-btn" style="float: left;" target="_blank">Know More</a>
+        <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" class="c-btn" style="float: right;" target="_blank">Contact State Manager</a>
         </div>
+    </div>
+    <div class="col-md-4 c-card" style="float: right;">
+        <div class="c-card-header c-blue" >Individual Learner</div>
+        <div class="c-card-body">
+          <h6 class="c-card-title l-blue ">
+          <span> < 100 MB  - <i class="fas fa-rupee-sign"></i> <small>INR</small> 99*</span><br>
+            <span>> 100 MB  - <i class="fas fa-rupee-sign"></i> <small>INR</small> 250</span>
+        </h6>
+        <ul class="list-unstyled mt-3 mb-4">
+          <li><i class="fa fa-check"></i>Download specific course content for as less as Rs.99 (+ GST) for upto 100MB and Rs.250 (+GST) upto 1 GB</li>
+          <br>
+          <li class="text-muted"><i class="fa fa-times no-allow "></i>Eligible for Certificates</li>
+        </ul>
+        </div>
+    </div>
+</div>
+<div class="ball"></div>
+    <p class="read-more">
+    <i class="fa fa-chevron-down bounce" aria-hidden="true"></i>  <a href="#" class="button">Read More</a>        
+    </p>
+</div>
+
+
+
+
+<div class="policy-title">
+    <button class="collapsible" style="background-color: rgb(1, 87, 155);">Why New Payment Policy of Spoken Tutorials ? <i class="fa fa-chevron-down" aria-hidden="true" style="float: right;"></i> </button>
+<div class="content row" style="padding: 0;width: 1110px;margin-left: 0px;">
+    <div class="col-md-6" style="padding: 0; width: 550px;">
+        <div class="embed-responsive embed-responsive-16by9">
+         <iframe width="853" height="480" src="https://www.youtube.com/embed/LN7RETLzies" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+    <div class="col-md-6" style="padding: 0 32px;display: flex;justify-content: center;align-items: center;align-content: center;height: 309px;">
+        <p>
+            Hello learner!
+            <br/>
+            Thank you for being an ardent supporter of the Spoken Tutorial project.  Because of the pandemic and difficult conditions, the funding available to this project has gone down.  And, we have been asked to raise the funds required to run this project on our own.  We request you to pay a small contribution for bulk downloads.  This facility is available free of cost to institutions that pay a nominal amount as annual subscription.
+            <br/>
+            Either way, your contribution will help us continue to serve you through Spoken Tutorials.
+            <br/>
+            We look forward to your support.
+        </p>
+    </div>
+</div>
+</div>
+
+
+
+
+<form role="form" id="main_cddownload" method="post" enctype="multipart/form-data" class="cdcontentform form-horizontal">
+  <div class="row well bs-component" style="margin-top: 20px;">
+  <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+    <div class="alert alert-danger" role="alert">
+    <strong>Note:</strong> The maximum file size to download is 1 GB.
+    </div>
+    <fieldset>
+    {% csrf_token %}
+    <div class="form-group">
+    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
+        {{ form.selected_foss.errors }}
+    </div>
+    </div>
+    <div class="form-group">
+    <label for="id_foss_category" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">FOSS Category:</label>
+    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+        {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
+        {{ form.foss_category.errors }}
+        <small>Please select FOSS</small>
+        {% render_field form.selected_foss class+='selected_foss' %}
+    </div>
+    </div>
+    <div class="form-group">
+    <label for="id_level" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">Level:</label>
+    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+        {% render_field form.level class+="form-control level" tabindex="2" %}
+        {{ form.level.errors }}
+        <small>Please select the Level</small>
+    </div>
+    </div>
+    <div class="form-group">
+    <label for="id_language" class="col-lg-3 col-md-3 col-sm-3 col-xs-3 control-label">Languages: <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9">
+        {% render_field form.language class+="form-control language" tabindex="3" %}
+        {{ form.language.errors }}
+        <small>For selecting multiple languages, please use </small>
+        <small><b>&lt;CTRL&gt; + Click</b>.</small>
+    </div>
+    </div>
+    <div class="form-group">
+    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
+        <span class='ajax-refresh ajax-refresh-add-foss'><i class="fa fa-2 fa-refresh fa-spin"></i></span>
+        <input type="button" class="add_foss_lang btn btn-primary" value="Add selected FOSS"  tabindex="4" />
+        <input type="submit" class="btn btn-primary create_zip" value="Create ZIP file" tabindex="5" />
+    </div>
+    </div>
+    </fieldset>
+    </div>
+    <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+    <div class="table-responsive">
+    <table class="added-foss table table-condensed table-bordered table-hover" id="added-foss">
+    </table>
+    </div>
+    <div id="rate-div" style="display: none">
+    <table class="rate-chart table table-condensed table-bordered table-hover">
+    <thead>
+    <tr>
+    <th >File Size</th>
+    <th >Rate</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td >< 100 mb</td>
+    <td >99 INR</td>
+    </tr>
+    <tr>
+    <td > > 100 mb</td>
+    <td >250 INR</td>
+    </tr>
+    </tbody>
+    <thead>
+    <tr>
+    <th id ="user_file_size">Total Foss Purchase (INR) : <br>*<small style="font-weight: normal;"> (including 18% GST)</small></th>
+    <th>
+    <span><input class="form-control" type="text" id="amount_to_pay" type="number" readonly>
+    </span>
+    </th>
+    </tr>
+    </thead>
+    <thead >
+    <tr>
+    <td></td>
+    <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymodal">
+    Proceed
+    </button>
+    </td>
+
+    </tr>
+    </thead>
+    </table>
+    </div>
+    <div class="download-link">        
+    </div>
+    <div class="user-message" >         
+    </div> 
+  </div>
+  </div>
+</form>
+
+<!-- Modal -->
+<div class="modal fade paymodal" id="paymodal" tabindex="-2" role="dialog" aria-labelledby="PaymentModal" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-content">
+
+  <div class="modal-header">
+    <h5 class="modal-title">Payment Details</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+    </button>
+  </div> 
+
+
+  <div class="modal-body"> 
+    <div class="row">
+    <div class="col-sm-12">
+    <form method="post" id="quickpay_form" action="{% url 'donate:initiate_payment' 'cdcontent' %}" class="form-horizontal">
+      {% csrf_token %}
+      <div class="form-group col-sm-10">
+      {{ payment_form.name }}
+      <div class="invalid-feedback">
+      {{ payment_form.name.errors }}
+      </div>
+      </div>
+
+      <div class="form-group col-sm-10">
+      <div style="display: flex;">
+      {{ payment_form.email }}
+      <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-left: 16px;">Send OTP</a> 
+      </div>
+
+      <div class="invalid-feedback">
+      {{ payment_form.email.errors }}
+      </div>
+      <div id="email-info">
+
+      </div>
+      </div>
+
+      <div class="form-group col-sm-10" id="pwd" style="display: none;">
+        <div style="display: flex;">
+        <input type="password" class="form-control" id="id_password" placeholder="Password">
+        <i class="fa fa-check-circle" aria-hidden="true" style="display: none;" id="check-pwd"></i>
+        </div>
+        <!-- <div>
+        <span id="forgot_pwd"> -->
+        <a href="{% url 'cms:password_reset' %}" id="forgot_pwd" target="_blank">Forgot Password ?</a>
+        <div id="invalid_credentials"></div>
+      </div>
+
+
+      <div class="form-group col-sm-10 text-center" id="organizer_info" style="display: none;">
+        <p id="organizer_paid_msg">Congratulations! You are a part of a Registered College & are entitled to free download.
+        <br>
+        <span class="organizer_paid_info text-muted">You are logged in successfully. Please proceed on cd content page.</span>
+        </p>
+      </div>
+
+      <div class="form-group col-sm-10 text-center" id="logged_success" style="display: none;">
+      <span style="color: #43A047;">Logged In Successfully </span>
+      </div>
+
+      <div class="form-group col-sm-10">
+      <input type="text" class="form-control" id="otp_value" aria-describedby="emailHelp" placeholder="Enter OTP send to above Email" style="display: none; margin-bottom: 16px;width: 50%;">
+      <span class="label label-success" id="otp_sent_msg" style="display: none; margin-top: 16px; padding: 5px 10px;" ></span>
+      </div>
+
+      <div class="form-group col-sm-10" id="registered-success-msg">
+      <p>Congratulations ! You are now registered on Spoken Tutorial. Please Check your mail for details. </p>
+      </div>
+
+      <div class="form-group col-sm-10">
+        {{ payment_form.state }}
+        <div class="invalid-feedback">
+        {{ payment_form.state.errors }}
+        </div>
+      </div>
+
+      <div class="form-group col-sm-10">
+        {{ payment_form.gender }}
+        <div class="invalid-feedback">
+        {{ payment_form.gender.errors }}
+        </div>
+      </div>
+
+      <div class="form-group col-sm-10">
+      {{ payment_form.amount }}
+      <div class="invalid-feedback">
+      {{ payment_form.amount.errors }}
+      </div>
+      </div>
+
+      <div class="form-group col-sm-10">
+      {{ payment_form.foss_id }}
+      </div>
+
+      <div class="form-group col-sm-10">
+      {{ payment_form.language_id }}
+      </div>
+
+      <div class="form-group col-sm-10">
+      {{ payment_form.level_id }}
+      </div>
+
+      <table id ="display-foss" class="added-foss table table-condensed table-bordered table-hover">
+      </table>
+
+      <div class="col-sm-10">
+        {% if user.is_authenticated %}
+        <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment_auth">Make Payment</button>
+        {% else %}
+        <button  type= "submit" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled>Make Payment</button>
+        {% endif %}
+        <button type="submit" form="main_cddownload" class="btn btn-primary mb-2 make-payment-btn" id="download_btn" style="display: none;">Close</button>
+      </div>
+
     </form>
+    </div> 
+    </div>    
+
+  </div>
+  <div class="modal-footer">
+  </div>
+  </div>
+  </div>
+</div>
+
+
+
+<!-- Modal -->
+  <div class="modal fade alertmodal" id="alertmodal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+           <ul>
+              <li>CD Content Download is now a paid service.</li>
+              <li>If your college has already made the payment , please <a href="/accounts/login">Login</a> with your registered email address</li>
+          <ul><li>There is <b>NO Restriction</b> on your download size</li></ul>
+              <li>If you are an individual , then we charge very nominal amount for download.</li>
+              <ul>
+        <li> Add your FOSS and make your payment accordingly</li>
+        <li> This download will be available for <b>1 day</b> from the date of successful payment</li></ul>
+           </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
+
+
 {% block jsblock %}
-    <script type="text/javascript">
-        $(document).ready(function(){
-            if($('.foss_category').val() == '') {
-                $('.level').attr("disabled", "disabled");
-                $('.language').attr("disabled", "disabled");
+<script type="text/javascript" src="{% static 'cdcontent/js/cdcontent.js' %}"></script>
+<script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
+<script type="text/javascript">
+  $(document).ready(function(){
+      if($('.foss_category').val() == '') {
+          $('.level').attr("disabled", "disabled");
+          $('.language').attr("disabled", "disabled");
+      }
+      $('#id_email').on('focusout',function(){
+       var isReadOnly = $('#id_email').is('[readonly]');
+      if (!isReadOnly) {
+        var username = $('#id_name').val();
+      var email = $('#id_email').val();
+      $.ajax({
+          url:'/donate/send_onetime/',
+          type:'POST',
+          data:{
+              'username': username,
+              'email': email,
+              csrfmiddlewaretoken: '{{ csrf_token }}',
+          },
+        success: function(data) {
+            if (data['valid_email']=='1') {
+            $('#email-info').html('');
+            if(data['message']=="active_user"){
+                $("#send_otp").hide();
+                $("#pwd").show();
+                $("#forgot_pwd").show();
+                $("#email-info").html('This Email Id is already registered with Spoken Tutorials. Please enter your password to proceed.');
+                document.getElementById("email-info").style.color = "green";
             }
-            $('.foss_category').on("change", function(){
-                $('.level').val('');
-                $('.language').html('');
-                if($('.foss_category').val() == '') {
-                    $('.level').attr("disabled", "disabled");
-                    $('.language').attr("disabled", "disabled");
-                }else {
-                    $('.level').removeAttr('disabled');
+            else if(data['message']=='inactive_user'){
+                document.getElementById("otp_sent_msg").innerHTML = "OTP Re-sent";
+                document.getElementById('otp_sent_msg').className = 'label label-success';
+                $("#otp_sent_msg").show().delay(10000).fadeOut();
+            }
+            else{
+              $("#send_otp").show();
+            }
+            }else{
+                $('#email-info').html(data['email_validation']);
+            }      
+        }
+    });
+      } 
+      
+    });
+    $('#pwd').on('focusout',function(){
+        $('#invalid_credentials').html('');
+        document.getElementById("make_payment").disabled = false;
+        var username = $('#id_name').val();
+        var email = $('#id_email').val();
+        var password = $('#id_password').val();
+        $.ajax({
+            url:'/donate/validate_user/',
+            type:'POST',
+            data:{
+                'username': username,
+                'email': email,
+                'password': password,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+            },
+            success: function(data) {
+              if (data['error_msg']=='') {
+                var r = data['organizer_paid'];
+                if (data['organizer_paid']=='1') {
+                  $('#organizer_info').show();
+                  $('#download_btn').show();
+                  $('#make_payment').hide();
+                  $('#id_amount').parent().hide();
+                  $('#id_country').parent().hide();
+                  $('#id_state').parent().hide();
+                  $('#id_gender').parent().hide();
+                  $('#id_gender').parent().hide();
+                  $('#registered-success-msg').hide();
+                  $('#otp_value').parent().hide();
+                  $('#forgot_pwd').hide();
+                  $("#email-info").hide();
                 }
-            });
-
-            $(".cdcontentform").on( "submit", function(event) {
-                event.preventDefault();
-                var url = $(location).attr('href');
-                $('.download-link').html('<i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> please do not refresh the page, we are preparing your download link');
-                var posting = $.post(url, $(this).serialize());
-
-                posting.done(function(data) {
-                    console.log(data.status);
-                    if(data.status) {
-                        var downloadLink = '<a href="' + data.path + '" title="Download cd content zip">Click here</a> to download the cd content zip file';
-                        $('.download-link').html(downloadLink);
-                    } else {
-                        var message = 'Something went wrong! please refresh the page and try again.'
-                        $('.download-link').html(message);
-                    }
-                });
-                posting.fail(function() {
-                    var message = 'Something went wrong! please refresh the page and try again.'
-                    $('.download-link').html(message);
-                });
-            });
-
-            $('.level').on("change", function(){
-                var foss = $('.foss_category').val();
-                var level = $(this).val();
-                $('.language').html('');
-                $('.language').attr("disabled", "disabled");
-                if(foss && level) {
-                    $.ajax({
-                        url: "/cdcontent/ajax-fill-languages/",
-                        type: "POST",
-                        data: {
-                            foss: foss,
-                            level: level
-                        },
-                        beforeSend: function() {
-                            $('.ajax-refresh-language').show();
-                        },
-                        success: function(data) {
-                            // loading languages
-                            if(data) {
-                                $('.language').html(data);
-                                $('.language').removeAttr('disabled');
-                            }
-                            $('.ajax-refresh-language').hide();
-                        }
-                    });
-                }
-            });
-            $('.add_foss_lang').on("click", function(){
-                foss = $('.foss_category').val();
-                level = $('.level').val();
-                langs = JSON.stringify($('.language').val());
-                console.log(langs)
-                selectedfoss = $('.selected_foss').val();
-                if(foss && langs && level) {
-                    $.ajax({
-                        url: "/cdcontent/ajax-add-foss/",
-                        type: "POST",
-                        data: {
-                            foss: foss,
-                            langs: langs,
-                            level: level,
-                            selectedfoss: selectedfoss,
-                        },
-                        beforeSend: function() {
-                            $('.add_foss_lang').css('display', 'none');
-                            $('.ajax-refresh-add-foss').show();
-                        },
-                        success: function(data) {
-                            data = JSON.parse(data);
-                            if(data) {
-                                data = JSON.stringify(data);
-                                if(data != '{}') {
-                                    $('.selected_foss').val(data);
-                                } else {
-                                    $('.selected_foss').val('');
-                                }
-                            }
-                            $.ajax({
-                                url: "/cdcontent/ajax-show-added-foss/",
-                                type: "POST",
-                                data: {
-                                    selectedfoss: $('.selected_foss').val(),
-                                },
-                                beforeSend: function() {
-                                    $('.add_foss_lang').css('display', 'none');
-                                    $('.ajax-refresh-add-foss').show();
-                                },
-                                success: function(data) {
-                                    //data = JSON.parse(data);
-                                    header = '<caption class="col-left"><b>Selected FOSS List:<span class="pull-right"> ~ Total Size : '+data[1]+'</span></b></caption><tr><th>FOSS</th><th>Languages</th><th>Size</th>';
-                                    if(data) {
-                                        $('.added-foss').html(header + data[0]);
-                                        console.log(data);
-                                    }
-                                    $('.ajax-refresh-add-foss').hide();
-                                }
-                            });
-                            $('.ajax-refresh-add-foss').hide();
-                            $('.add_foss_lang').show();
-                        }
-                    });
-                    $('.add_foss_lang').show();
-                    $('.ajax-refresh-add-foss').hide();
-                }
+              }else{
+                  $('#invalid_credentials').html(data['error_msg']);
+              }       
+            }
             });
         });
-    </script>
+});
+
+if ($.cookie('modal_status') != '1'){
+    $('.alertmodal').modal('show');
+    $.cookie('modal_status', '1',{ expires: null}); 
+}
+</script>
+
 {% endblock %}
+

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Participants{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> Upload Participants : {{event.event_name}}
+{% endblock %}
+{% block search %}{% endblock %}
+
+ {% block content %}
+{{message.tags}}
+
+
+<div class="modal fade" id="csvModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"style=" color:#0052A3; font-size:15px;" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+     <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <p>Open your CSV file in Notepad(Windows OS) or in gedit(Linux OS). It should look like the format given below:</p>
+        <img width="520px" src="/static/spoken/images/fdp_participants_csv_sample.png">
+     </div>
+    </div>
+   </div>
+</div>
+
+<form action="" method="POST" enctype='multipart/form-data' class='form-horizontal'>{% csrf_token %}
+<div class='form-row'>
+<div class='col-xs-12 form-group required'>
+  <label class='control-label'>CSV File</label>&nbsp;&nbsp;<small>(Please upload your CSV file here.) </small><a class="csv-link" data-toggle="modal" data-target="#csvModal"><u>Sample CSV file</u></a></center>
+
+  {% render_field form.csv_file class+="file csv_file" tabindex="1" %}
+
+<small>If you have used MS-EXCEL to create the CSV file please make sure that you have saved it with csv(ms-dos) file extension.</small>
+ <span><small style="color:red;">   
+    {{form.csv_file.errors}}
+</small></spam>
+</div>
+</div>
+
+<div class='form-row'>
+<div class='col-xs-12 form-group required'>
+  <label class='control-label'>Registration Type</label>
+  {% render_field form.registartion_type  tabindex="1" %}
+  <small>{{form.registartion_type.errors}}</small>
+</div>
+</div>
+
+
+<div class="form-group">
+			<div class="col-sm-offset-5 col-sm-9">
+			<button type="submit" class="btn btn-warning btn-lg">Submit</button>
+			</div>
+		</div>
+</form>
+{% endblock %}

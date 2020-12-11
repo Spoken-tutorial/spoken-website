@@ -4,15 +4,18 @@ from builtins import object
 from django.shortcuts import render
 import time
 from datetime import datetime
+from datetime import date 
 from datetime import timedelta
 import re
 from django.conf import settings
 
-from config import CHANNEL_KEY
+from config import TARGET, CHANNEL_ID, CHANNEL_KEY
 # Create your views here.
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from events.models import *
+from donate.models import *
+from training.models import *
 from events.filters import TrainingRequestFilter
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
@@ -43,7 +46,7 @@ from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
 from mdldjango.models import MdlUser, MdlQuizGrades
 from django.contrib.auth.mixins import UserPassesTestMixin
-from events.formsv2 import StudentGradeFilterForm
+from events.formsv2 import StudentGradeFilterForm, AcademicPaymentStatusForm
 from django.views.generic import FormView
 
 #pdf generate
@@ -56,10 +59,14 @@ from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from events.views import get_page
 from io import BytesIO
+from django.db.models import Q
+
+import uuid 
 
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
-from events.helpers import get_prev_semester_duration
+from events.helpers import get_prev_semester_duration, get_updated_form
+
 class JSONResponseMixin(object):
   """
   A mixin that can be used to render a JSON response.
@@ -235,31 +242,20 @@ class StudentBatchCreateView(CreateView):
 
       if not this_organiser_dept.exists() and department.exists():
         messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
-        print("form invalid: dept present ")
         return self.form_invalid(form)
-      try:
-        form_data = StudentBatch.objects.get(year=form_data.year, academic=form_data.academic, department=form_data.department)
-        print(" batch already exist")
-      except StudentBatch.DoesNotExist:
-        form_data.save()
+      form_data.save()
+      batch_name = StudentBatch.objects.get(pk=form_data.id).create_batch_name()
 
 
+    # StudentBatch.objects.get(pk=batch_id).update_student_count()
+    
     skipped, error, warning, write_flag = \
-      self.csv_email_validate(self.request.FILES['csv_file'], form_data.id , studentcount)
+      self.csv_email_validate(form.cleaned_data['csv_file'], form_data.id , studentcount)
     context = {'error' : error, 'warning' : warning, 'batch':form_data}
 
     if error or warning:
       return render(self.request, self.template_name, context)
-#    messages.success(self.request, "Student Batch added successfully.")
     return HttpResponseRedirect('/software-training/student-batch/%s/new/'%(str(form_data.id)))
-
-#  def get(self, request, *args, **kwargs):
-#    self.user = request.user
-#    form_class = self.get_form_class()
-#    form = self.get_form(form_class)
-#    context = {}
-#    context['form'] = form
-#    return self.render_to_response(context)
 
   def email_validator(self, email):
     if email and email.strip():
@@ -315,19 +311,16 @@ class StudentBatchCreateView(CreateView):
         return student
     return False
 
-  def csv_email_validate(self, file_path, batch_id , studentcount):
+  def csv_email_validate(self, file_data, batch_id , studentcount):
     skipped = []
     error = []
     warning = []
     write_flag = False
     stu_row_count = 0
     try:
-      file_data = file_path.read().decode('utf-8').splitlines()
       rowcsv = csv.reader(file_data, delimiter=',', quotechar='|')
       rowcount = len(list(rowcsv))
       gencount = studentcount + rowcount
-      print(('gencount',gencount))
-      print(('printing csv length',rowcount))
       if rowcount > 500:
         messages.warning(self.request, "MB will accept only 500 students, if number is more than 500, divide the batch and upload under different departments eg. Chemistry1 & Chemistry2")
       if gencount > 500:
@@ -336,7 +329,6 @@ class StudentBatchCreateView(CreateView):
         csvdata = csv.reader(file_data, delimiter=',', quotechar='|')
         for row in csvdata:
           stu_row_count = stu_row_count+1
-          print (stu_row_count)
           if len(row) < 4:
             skipped.append(row)
             continue
@@ -380,24 +372,24 @@ class StudentBatchUpdateView(UpdateView):
       return context
 
     def form_valid(self, form, **kwargs):
-      # Check if all student participate in selected foss
       try:
         if str(self.sb.year) == str(form.cleaned_data['year']) and str(self.sb.department) == str(form.cleaned_data['department']):
           return HttpResponseRedirect(self.success_url)
+        print('****************',form.cleaned_data['year'], self.request.user.organiser.academic.id)
+        print('****************',str(form.cleaned_data['department']))
 
-        sb = StudentBatch.objects.filter(
-          academic_id=self.request.user.organiser.academic.id,
+        sb = StudentBatch.objects.filter(~Q(organiser_id=self.request.user.organiser.id),
           department=form.cleaned_data['department'],
-          year = form.cleaned_data['year']
+          year = form.cleaned_data['year'],          
+          academic_id=self.request.user.organiser.academic.id
         )
-        if (sb.exists()):
-          sb = sb.first()
-          messages.warning(self.request, "%s - %s Batch is already chosen by Organiser %s in your College." % (sb.department, sb.year, sb.organiser))
+        print(sb)
+        if sb:
+          messages.warning(self.request, "%s - %s Batch is already chosen by another Organiser in your College." % (sb.department, sb.year))
           return self.form_invalid(form)
-        # Not sure do we wnat this option
-        # if sb.trainingrequest_set.exists():
-        #   messages.warning(self.request, '%s - %s Batch has Training. You can not edit this batch'% (sb.department, sb.year))
         form.save()
+        batch_name = StudentBatch.objects.get(pk=self.sb.id).create_batch_name()
+
 
       except:
         pass
@@ -418,11 +410,12 @@ class StudentBatchListView(ListView):
     self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id)
     self.header = {
       1: SortableHeader('#', False),
-      2: SortableHeader('academic', True, 'Institution'),
-      3: SortableHeader('department', True, 'Department'),
-      4: SortableHeader('year', True, 'Year'),
-      5: SortableHeader('stcount', True, 'Student Count'),
-      6: SortableHeader('', False, ''),
+      2: SortableHeader('batch_name', True, 'Batch Name'),
+      3: SortableHeader('academic', True, 'Institution'),
+      4: SortableHeader('department', True, 'Department'),
+      5: SortableHeader('year', True, 'Year'),
+      6: SortableHeader('stcount', True, 'Student Count'),
+      7: SortableHeader('', False, ''),
     }
     self.raw_get_data = self.request.GET.get('o', None)
     self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
@@ -631,6 +624,8 @@ class TrainingRequestEditView(CreateView):
 
       if self.training.batch.is_foss_batch_acceptable(selectedCourse):
         self.training.sem_start_date = form.cleaned_data['sem_start_date']
+        self.training.training_start_date = form.cleaned_data['training_start_date']
+        self.training.training_end_date = form.cleaned_data['training_end_date']
         self.training.course_id = selectedCourse
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
@@ -655,57 +650,6 @@ class TrainingRequestEditView(CreateView):
       return self.form_invalid(form)
     return HttpResponseRedirect('/software-training/select-participants/')
 
-"""class TrainingRequestEditView(CreateView):
-  form_class = TrainingRequestEditForm
-  template_name = None
-  user = None
-  training = None
-  @method_decorator(group_required("Organiser"))
-  def dispatch(self, *args, **kwargs):
-    if 'trid' in self.kwargs:
-      self.training = TrainingRequest.objects.get(pk=self.kwargs['trid'])
-    if not self.training.can_edit():
-      messages.error(self.request, "Training has attendance, edit is not permitted for training.")
-      return HttpResponseRedirect('/software-training/training-planner/')
-    return super(TrainingRequestEditView, self).dispatch(*args, **kwargs)
-
-  def get_form_kwargs(self):
-    kwargs = super(TrainingRequestEditView, self).get_form_kwargs()
-    kwargs.update({'training' : self.training})
-    kwargs.update({'user' : self.request.user})
-    return kwargs
-
-  def get_context_data(self, **kwargs):
-    context = super(TrainingRequestEditView, self).get_context_data(**kwargs)
-    context['training'] = self.training
-    return context
-
-  def form_valid(self, form, **kwargs):
-    # Check if all student participate in selected foss
-    try:
-      if self.training.batch.is_foss_batch_acceptable(form.cleaned_data['course']):
-        self.training.sem_start_date = form.cleaned_data['sem_start_date']
-        self.training.course_id = form.cleaned_data['course']
-        self.training.save()
-      else:
-        messages.error(self.request, 'This student batch already taken the selected course.')
-        return self.form_invalid(form)
-    except Exception as e:
-      print(e)
-      messages.error(self.request, 'Something went wrong, Contact site administrator.')
-      return self.form_invalid(form)
-    context = {}
-    return HttpResponseRedirect('/software-training/training-planner/')
-
-  def post(self, request, *args, **kwargs):
-    self.object = None
-    self.user = request.user
-    form_class = self.get_form_class()
-    form = self.get_form(form_class)
-    if form.is_valid():
-      return self.form_valid(form)
-    else:
-      return self.form_invalid(form)"""
 
 class TrainingAttendanceListView(ListView):
   queryset = StudentMaster.objects.none()
@@ -858,12 +802,13 @@ class TrainingCertificate(object):
     imgDoc = canvas.Canvas(imgTemp)
 
     # Title
-    imgDoc.setFont('Helvetica', 40, leading=None)
-    imgDoc.drawCentredString(415, 480, "Certificate of Participation")
+    imgDoc.setFont('Helvetica', 35, leading=None)
+    imgDoc.drawCentredString(405, 470, "Certificate of Participation")
 
     #date
-    imgDoc.setFont('Helvetica', 18, leading=None)
-    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+    if ta.training.department.id != 169:
+      imgDoc.setFont('Helvetica', 18, leading=None)
+      imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
 
     #password
     certificate_pass = ''
@@ -876,10 +821,11 @@ class TrainingCertificate(object):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #paragraphe
-    text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
+    text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay."
     if ta.training.department.id == 24:
-      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
-
+      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay."
+    if ta.training.department.id == 169:
+      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> has participated in <b>Faculty Development Programme</b> from <b>"+ str(ta.training.training_start_date) +"</b> to <b>"+ str(ta.training.training_end_date) +"</b> on <b>"+ta.training.course.foss.foss+"</b> organized by <b>"+ta.training.training_planner.academic.institution_name+"</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.<br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay."
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -893,7 +839,10 @@ class TrainingCertificate(object):
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
-    page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+    if ta.training.department.id == 169:
+      page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+    else:
+      page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -1149,7 +1098,10 @@ class GetBatchOptionView(JSONResponseMixin, View):
     )
     batch_option = "<option value=''>---------</option>"
     for batch in batches:
-      batch_option += "<option value=" + str(batch.id) + ">" + str(batch) + "</option>"
+      if batch.batch_name:
+        batch_option += "<option value=" + str(batch.id) + ">" + str(batch.batch_name) + " Batch</option>"
+      else:
+        batch_option += "<option value=" + str(batch.id) + ">" + str(batch) + "</option>"
     context = {
       'batch_option' : batch_option,
     }
@@ -1216,14 +1168,15 @@ class GetDepartmentOrganiserStatusView(JSONResponseMixin, View):
     msg = ""
 
     try:
-      resultdata = StudentBatch.objects.get(
+      resultdata = StudentBatch.objects.filter(
+        ~Q(organiser_id = request.user.organiser.id),
         academic_id=request.user.organiser.academic.id,
         department_id=department_id,
         year = year
       )
-      dept_status = False
-      org_name = resultdata.organiser.user.first_name+" "+resultdata.organiser.user.last_name
-      msg = "This department with selected year is already chosen by another Organiser "+org_name+" in your College."
+      if resultdata:
+        dept_status = False
+        msg = "This department with selected year is already chosen by another Organiser in your College."
     except ObjectDoesNotExist:
       pass
 
@@ -2723,7 +2676,7 @@ def payment_home(request):
 @login_required
 def payment_status(request):
   context ={}
-  academic_year = 2018
+  academic_year =  datetime.datetime.today().year
 
   if request.method == 'POST':
     user = User.objects.get(id = request.user.id)
@@ -2739,15 +2692,7 @@ def payment_status(request):
     else:
         amount = "25000"
 
-    STdata = ''
-    user_name = user.first_name+' '+user.last_name
-    STdata = str(user.id)+str(user_name)+str(amount)+"Subscription"+"SOLOSTW"+CHANNEL_KEY
-    print(STdata)
-    s = display.value(str(STdata))
-
-    data = {'userId':user.id,'name':user_name,'amount':amount,'purpose':'Subscription','channelId':'SOLOSTW','random':s.hexdigest()}
-
-
+    reqId = 0
     try:
         paymentdetails = PaymentDetails()
         paymentdetails.user = user
@@ -2759,10 +2704,12 @@ def payment_status(request):
         paymentdetails.academic_year = academic_year
         paymentdetails.gstno = request.POST['id_gstin']
         paymentdetails.save()
+        reqId = paymentdetails.id
 
     except Exception as e:
         try:
           paymentdetails = PaymentDetails.objects.get(academic_id = accountexecutive.academic.id, academic_year = academic_year)
+          reqId = paymentdetail.id
         except:
           return HttpResponseRedirect('/software-training/payment-home')
 
@@ -2775,25 +2722,34 @@ def payment_status(request):
         messages.error(request, 'This college has aready initiated the payment.')
         return HttpResponseRedirect('/software-training/payment-home')
 
+
+    STdata = ''
+    user_name = user.first_name+' '+user.last_name
+    STdata = CHANNEL_IDstr(reqId)+str(user.id)+str(user_name)+str(amount)+"Subscription"+CHANNEL_ID+CHANNEL_KEY
+    print(STdata)
+    s = display.value(str(STdata))
+
+    data = {
+    'reqId' : CHANNEL_ID+str(reqId),
+    'userId':user.id,
+    'name':user_name,
+    'amount':amount,
+    'purpose':'Subscription',
+    'channelId':CHANNEL_ID,
+    'target':TARGET,
+    'random':s
+    }
     return render(request,'payment_status.html',data)
   #not post
   else:
     return HttpResponseRedirect('/software-training')
 
 @csrf_exempt
-@login_required
 def payment_success(request):
   context = {}
-  user = User.objects.get(id = request.user.id)
-  try:
-    accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
-  except:
-    messages.error(request, 'Permission denied. You are not an Account Executive.')
-    return HttpResponseRedirect('/software-training')
-
-  context['user'] = user
+  default_response = '/'
   if request.method == 'POST':
-     # requestType    // I/R/J  (I - Immediate response,R- Reconciled & J - Transaction rejected)
+    # requestType    // I/R/J  (I - Immediate response,R- Reconciled & J - Transaction rejected)
     # userId;        // Id of the user
     # amount;        // amount which is to be paid
     # reqId;         // Unique request id of the transaction
@@ -2802,8 +2758,8 @@ def payment_success(request):
     # provId;        // Payment method like Credit Card/Net Banking etc..
     # status;        // S/F (Status of the transaction)
     # msg;           // Detailed transaction message
+    # purpose        // Short Description 
     # random;        // Hash string
-
 
     requestType = request.POST.get('requestType')
     userId = request.POST.get('userId')
@@ -2814,56 +2770,139 @@ def payment_success(request):
     provId = request.POST.get('provId')
     status = request.POST.get('status')
     msg = request.POST.get('msg')
+    purpose = request.POST.get('purpose')
     random = request.POST.get('random')
 
+    # Update Context
+    context['transId'] = transId
+    context['refNo'] = refNo
+    context['msg'] = msg
+    context['status'] = status
+    context['amount'] = amount
 
     STresponsedata = ''
-    STresponsedata = str(user.id)+transId+refNo+amount+status+msg+CHANNEL_KEY
-    s = display.value(str(STresponsedata))
-    STresponsedata_hexa = s.hexdigest()
-
+    STresponsedata = reqId+str(userId)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
+    STresponsedata_hexa = display.value(str(STresponsedata))
+    template_name = 'payment_success.html'
     if STresponsedata_hexa == random:
-      #save transaction details in db
-      pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
-      print(('pd id',pd.id))
+      #Subscription Responses
+      if purpose == 'Subscription':
+        try:
+          accountexecutive = Accountexecutive.objects.get(user_id = user,status=1)
+        except:
+          messages.error(request, 'Permission denied. You are not an Account Executive.')
+          return HttpResponseRedirect('/software-training')
+        
+        try:
+          pd = PaymentDetails.objects.get(user = user.id, academic_id = accountexecutive.academic.id)
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          default_response = '/software-training'
+        except Exception as e:
+          print(e)
+          messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
+          return HttpResponseRedirect('/software-training')
 
-      try:
-        transactiondetails = PaymentTransactionDetails()
-        transactiondetails.paymentdetail_id  =  pd.id
-        transactiondetails.requestType  =  requestType
-        transactiondetails.userId_id  =  userId
-        transactiondetails.amount  =  amount
-        transactiondetails.reqId  = reqId
-        transactiondetails.transId  = transId
-        transactiondetails.refNo  =  refNo
-        transactiondetails.provId  =  provId
-        transactiondetails.status  =  status
-        transactiondetails.msg  =  msg
-        transactiondetails.save()
-      except Exception as e:
-        messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly contact your state resource person.')
-        return HttpResponseRedirect('/software-training')
+      # Donation Responses
+      elif 'Donate' in purpose :
+        try:
+          pd = DonationPayee.objects.get(id = purpose.split('DonateNEW')[1])
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          context['form'] = get_updated_form(transaction, 'Donate')
+          #template_name = ''
+        except:
+          messages.error(request, 'Validation of Donation transaction failed')
+          return render(request,template_name,context)
+        
+      # Spoken Goodie Payment Responses
+      elif 'Goodie' in purpose:
+        try:
+          pd = Goodies.objects.get(id = purpose.split('GoodieNEW')[1])
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          context['form'] = get_updated_form(transaction, 'Goodie')
+          #template_name = ''
+        except:
+          messages.error(request, 'Validation of Goodie Transaction failed')
+          return render(request,template_name,context)
 
+      else:
+        template_name = 'donate/templates/payment_response.html'
+        # Participant of events
+        if 'cdcontent' not in purpose:
+          try:
+            # Getting the participant
+            # <event_id>NEW<pid>
+            training_participant = Participant.objects.get(
+                event=int(purpose.split("NEW")[0]), user=int(userId),
+                payment_status_id = int(purpose.split("NEW")[1]))
+            default_response = '/training/list_events/ongoing/'
+            template_name = 'reg_success.html'
+            context['user'] = User.objects.get(id=int(request.POST.get('userId')))
+            if status != 'S':
+             training_participant.delete()
+            else:
+              context['participant_obj'] = training_participant
+          except:
+            messages.error(request, 'Validation of Participant data failed')
 
-      if status == 'S':
-        pd.status = 1
-        pd.description = 'Payment successfull'
-      elif status == 'F':
-        pd.status = 2
-        pd.description = 'Payment fail'
-      pd.save()
-
-      context['transId'] = transId
-      context['refNo'] = refNo
-      context['msg'] = msg
-      context['status'] = status
-      return render(request,'payment_success.html',context)
+        # This part is common for CD Content Payments and Participant payment of events
+        try:
+          pd = get_payee_id(purpose)
+          if pd == 'incorrect_data':
+            messages.error(request, 'Incorrect Data')
+            return HttpResponseRedirect('/training/list_events/ongoing/')
+          transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          context['form'] = get_updated_form(transaction , 'CD-Events')
+        except :
+          messages.error(request, 'Something went wrong. Can not collect your transaction details. Kindly try again in some time.')
+          return render(request,template_name,context)
+      update_status(pd, status)
+      return render(request,template_name,context)
     else:
       messages.error(request, 'Invalid Transaction')
-      return HttpResponseRedirect('/software-training')
+      return HttpResponseRedirect(default_response)
   else:
-    return HttpResponseRedirect('/software-training')
-    # return render(request,'payment_success.html',context)
+    messages.error(request, 'Invalid Request')
+    return HttpResponseRedirect(default_response)
+
+def add_transaction(purpose, pid, requestType, userId, amount, reqId, transId, refNo, provId, status, msg):
+  if purpose == 'Subscription':
+    transaction = PaymentTransactionDetails()
+  elif 'Donate' in purpose :
+    transaction = DonationTransaction()
+  elif 'Goodie' in purpose:
+    transaction = GoodiesTransaction()
+  else:  
+    transaction = PaymentTransaction()
+
+  transaction.paymentdetail_id  =  pid
+  transaction.requestType  =  requestType
+  transaction.userId_id  =  userId
+  transaction.amount  =  amount
+  transaction.reqId  = reqId
+  transaction.transId  = transId
+  transaction.refNo  =  refNo
+  transaction.provId  =  provId
+  transaction.status  =  status
+  transaction.msg  =  msg
+  transaction.save()
+  return transaction
+
+def get_payee_id(purpose):
+  try:
+    payee_id = purpose.split('NEW')[1]
+    pd = Payee.objects.get(id=int(payee_id))
+    return pd  
+  except :
+    return 'incorrect_data'
+
+def update_status(pd, status):
+  if status == 'S':
+      pd.status = 1
+      pd.description = 'Payment successfull'
+  elif status == 'F':
+      pd.status = 2
+      pd.description = 'Payment fail'
+  pd.save()
 
 def payment_details(request,choice):
   academic_id = Accountexecutive.objects.filter(user = request.user).values('academic_id','academic_id__institution_name')
@@ -2894,56 +2933,42 @@ def payment_reconciliation_update(request):
   provId = request.GET.get('provId')
   status = request.GET.get('status')
   msg = request.GET.get('msg')
+  purpose = request.GET.get('purpose')
   random = request.GET.get('random')
 
   STresponsedata = ''
-  STresponsedata = userId+transId+refNo+amount+status+msg+CHANNEL_KEY
-  s = display.value(str(STresponsedata))
-  STresponsedata_hexa = s.hexdigest()
+  STresponsedata = str(reqId)+str(userId)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
+  STresponsedata_hexa = display.value(str(STresponsedata))
 
   if STresponsedata_hexa == random:
+    if purpose == 'Subscription':
+      try:
+        accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
+      except:
+        print("no ac")
+        pass
+      try:
+        pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
+      except:
+        return HttpResponseRedirect("Failed1")
+    else:
+      pd = get_payee_id(purpose)
+      if pd == 'incorrect_data':
+        messages.error(request, 'Incorrect Data')
+        return HttpResponseRedirect('/training/list_events/ongoing/')
     try:
-      accountexecutive = Accountexecutive.objects.get(user_id = userId,status__gt=0)
-    except:
-      print("no ac")
-      pass
-    try:
-      print((userId, accountexecutive.academic_id))
-      pd = PaymentDetails.objects.get(user_id = userId, academic_id_id = accountexecutive.academic_id)
-    except:
-      return HttpResponseRedirect("Failed1")
-
-    try:
-      transactiondetails = PaymentTransactionDetails()
-      transactiondetails.paymentdetail_id  =  pd.id
-      transactiondetails.requestType  =  requestType
-      transactiondetails.userId_id  =  userId
-      transactiondetails.amount  =  amount
-      transactiondetails.reqId  = reqId
-      transactiondetails.transId  = transId
-      transactiondetails.refNo  =  refNo
-      transactiondetails.provId  =  provId
-      transactiondetails.status  =  status
-      transactiondetails.msg  =  msg
-      transactiondetails.save()
+      transaction = add_transaction(purpose, pd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
       print("saved")
     except:
       return HttpResponseRedirect("Failed2")
-
-    if status == 'S':
-      pd.status = 1
-      pd.description = 'Payment successfull'
-    elif status == 'F':
-      pd.status = 2
-      pd.description = 'Payment fail'
-    pd.save()
+    update_status(pd, status)
   else:
     return HttpResponseRedirect("Invalid")
   return HttpResponse("OK")
 
 @csrf_protect
 @login_required
-def academic_transactions(request):
+def academic_transactions(request):    
     user = User.objects.get(id=request.user.id)
     rp_states = ResourcePerson.objects.filter(status=1,user=user)
     state = State.objects.filter(id__in=rp_states.values('state'))
@@ -3276,12 +3301,13 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       imgDoc = canvas.Canvas(imgTemp)
 
       # Title
-      imgDoc.setFont('Helvetica', 40, leading=None)
-      imgDoc.drawCentredString(415, 480, "Certificate of Participation")
+      imgDoc.setFont('Helvetica', 35, leading=None)
+      imgDoc.drawCentredString(405, 480, "Certificate of Participation")
 
       #date
-      imgDoc.setFont('Helvetica', 18, leading=None)
-      imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+      if ta.training.department.id != 169:
+        imgDoc.setFont('Helvetica', 18, leading=None)
+        imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
 
       #password
       certificate_pass = ''
@@ -3294,9 +3320,11 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
       #paragraphe
-      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
+      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training."
       if ta.training.department.id == 24:
-        text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by the National Mission on Education through ICT, MHRD, Govt. of India."
+        text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training."
+      if ta.training.department.id == 169:
+        text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> has participated in <b>Faculty Development Programme</b> from <b>"+ str(ta.training.training_start_date) +"</b> to <b>"+ str(ta.training.training_end_date) +"</b> on <b>"+ta.training.course.foss.foss+"</b> organized by <b>"+ta.training.training_planner.academic.institution_name+"</b> with  course material provided by Spoken Tutorial Project, IIT Bombay."
 
 
       centered = ParagraphStyle(name = 'centered',
@@ -3311,7 +3339,11 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
       imgDoc.save()
       # Use PyPDF to merge the image-PDF into the template
-      page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+      if ta.training.department.id == 169:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+      else:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+      
       overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
       page.mergePage(overlay)
 
@@ -3387,5 +3419,41 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
       except FossMdlCourses.DoesNotExist:
         return None
     return None
+
+
+
+class AcademicKeyCreateView(CreateView):
+    form_class = AcademicPaymentStatusForm
+    model = AcademicPaymentStatus
+    template_name = "academic_payment_details_form.html"
+    success_url = "/software-training/academic_payment_details/"
+
+    @method_decorator(group_required("Resource Person"))
+    def get(self, request, *args, **kwargs):
+        return render(self.request, self.template_name, {'form': self.form_class()})
+
+    def form_valid(self, form, **kwargs):
+      self.object = form.save(commit=False)
+      self.object.entry_user = self.request.user
+      self.object.save()
+      
+
+      u_key = uuid.uuid1()
+      hex_key = u_key.hex
+
+
+      Subscription_time = int(self.object.subscription)
+      expiry_date = datetime.date.today() + timedelta(days=Subscription_time)
+
+      ac_key = AcademicKey()      
+      ac_key.ac_pay_status = self.object
+      ac_key.academic = self.object.academic
+      ac_key.u_key = u_key
+      ac_key.hex_key = hex_key
+      ac_key.expiry_date = expiry_date
+      ac_key.save()
+
+      messages.success(self.request, "Payment Details for academic is added successfully.")
+      return HttpResponseRedirect(self.success_url)
 
 

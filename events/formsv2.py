@@ -6,7 +6,7 @@ from django import forms
 
 from events.models import *
 from events.helpers import get_academic_years
-
+from cms.validators import validate_csv_file
 
 class StudentBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())
@@ -17,14 +17,24 @@ class StudentBatchForm(forms.ModelForm):
 
   class Meta(object):
     model = StudentBatch
-    exclude = ['academic', 'stcount', 'organiser']
+    exclude = ['academic', 'stcount', 'organiser', 'batch_name']
+  
+  def clean_csv_file(self):
+    data = self.cleaned_data["csv_file"]
+    file_data = validate_csv_file(data)
+    return file_data
 
 class NewStudentBatchForm(forms.ModelForm):
   csv_file = forms.FileField(required = True)
 
   class Meta(object):
     model = StudentBatch
-    exclude = ['academic', 'year', 'department', 'stcount', 'organiser']
+    exclude = ['academic', 'year', 'department', 'stcount', 'organiser', 'batch_name']
+  
+  def clean_csv_file(self):
+    data = self.cleaned_data["csv_file"]
+    file_data = validate_csv_file(data)
+    return file_data
 
 class UpdateStudentBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())
@@ -33,13 +43,13 @@ class UpdateStudentBatchForm(forms.ModelForm):
   )
   class Meta(object):
     model = StudentBatch
-    exclude = ['academic', 'stcount', 'organiser']
+    exclude = ['academic', 'stcount', 'organiser','batch_name']
 
 class UpdateStudentYearBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())
   class Meta(object):
     model = StudentBatch
-    exclude = ['academic', 'stcount', 'organiser','department']
+    exclude = ['academic', 'stcount', 'organiser','department','batch_name']
 
 class TrainingRequestForm(forms.ModelForm):
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
@@ -72,6 +82,21 @@ class TrainingRequestForm(forms.ModelForm):
         print((start_date, end_date, self.cleaned_data['sem_start_date']))
         if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
           raise forms.ValidationError("Invalid semester start date")
+
+
+      if self.cleaned_data and 'training_start_date' in self.cleaned_data and self.cleaned_data['training_start_date']:
+        start_date, end_date =tp.get_current_semester_date_duration()
+        print((start_date, end_date, self.cleaned_data['sem_start_date']))
+        if not (self.cleaned_data['training_start_date'] <= end_date and self.cleaned_data['training_start_date'] >= start_date):
+          raise forms.ValidationError("Invalid training start date")
+
+      if self.cleaned_data and 'training_end_date' in self.cleaned_data and self.cleaned_data['training_end_date']:
+        start_date, end_date =tp.get_current_semester_date_duration()
+        print((start_date, end_date, self.cleaned_data['training_end_date']))
+        if not (self.cleaned_data['training_end_date'] <= end_date and self.cleaned_data['training_end_date'] >= start_date):
+          raise forms.ValidationError("Invalid training end date")
+
+
     return self.cleaned_data
 
   def __init__(self, *args, **kwargs):
@@ -108,6 +133,18 @@ class TrainingRequestEditForm(forms.ModelForm):
       start_date, end_date =tp.get_current_semester_date_duration_new()
       if not (self.cleaned_data['sem_start_date'] <= end_date and self.cleaned_data['sem_start_date'] >= start_date):
         raise forms.ValidationError("Invalid semester start date")
+
+    if self.cleaned_data and 'training_start_date' in self.cleaned_data and self.cleaned_data['training_start_date']:
+      tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
+      start_date, end_date =tp.get_current_semester_date_duration()
+      if not (self.cleaned_data['training_start_date'] <= end_date and self.cleaned_data['training_start_date'] >= start_date):
+        raise forms.ValidationError("Invalid training start date")
+
+    if self.cleaned_data and 'training_end_date' in self.cleaned_data and self.cleaned_data['training_end_date']:
+      tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
+      start_date, end_date =tp.get_current_semester_date_duration()
+      if not (self.cleaned_data['training_end_date'] <= end_date and self.cleaned_data['training_end_date'] >= start_date):
+        raise forms.ValidationError("Invalid training end date")
     return self.cleaned_data
 
   def __init__(self, *args, **kwargs):
@@ -131,6 +168,8 @@ class TrainingRequestEditForm(forms.ModelForm):
       flag = False
     if not flag and training:
       self.fields['sem_start_date'].initial = training.sem_start_date
+      self.fields['training_start_date'].initial = training.training_start_date
+      self.fields['training_end_date'].initial = training.training_end_date
 
     self.fields['course_type'].initial = training.course_type
     self.fields['course'].initial = training.course_id
@@ -605,3 +644,22 @@ class StudentGradeFilterForm(forms.Form):
     self.fields['activation_status'].widget.attrs.update({'class': 'form-control'})
     self.fields['from_date'].widget.attrs.update({'class': 'form-control'})
     self.fields['to_date'].widget.attrs.update({'class': 'form-control'})
+
+
+class AcademicPaymentStatusForm(forms.ModelForm):
+  email = forms.CharField(required = False)
+  phone = forms.CharField(required = False)
+  transactionid = forms.CharField(required = False)
+  pan_number = forms.CharField(required = False)
+  gst_number = forms.CharField(required = False)
+  customer_id = forms.CharField(required = False)
+  invoice_no = forms.CharField(required = False)
+  remarks = forms.CharField(required = False)
+  class Meta(object):
+    model = AcademicPaymentStatus
+    exclude = ['entry_user']
+    widgets = {
+    'payment_date':DateInput(),
+    'phone':forms.NumberInput(),
+    'amount':forms.NumberInput()
+    }
