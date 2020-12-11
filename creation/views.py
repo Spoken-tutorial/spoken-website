@@ -4058,8 +4058,9 @@ def get_languages(request, uid):
 
     lang_qs = \
         Language.objects.filter(id__in = RoleRequest.objects.filter(
-            user_id = uid,status = 1,role_type = ROLES_DICT['contributor']
-            ).values('language')).values_list('id', 'name')
+            user_id = uid,status = 1,role_type__in = (
+                ROLES_DICT['contributor'], ROLES_DICT['external-contributor'])
+                ).values('language')).values_list('id', 'name')
     for a_lang in lang_qs:
         data += '<option value = ' + str(a_lang[0]) + '>' \
             + str(a_lang[1]) + '</option>'
