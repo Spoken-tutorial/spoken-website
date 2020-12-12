@@ -3523,7 +3523,7 @@ def generate_contributor_receipt(code, contributor, foss, amount, email, tutoria
         Generates honorarium receipts in docx format based on existing template using python-docx 0.8.6 ( https://python-docx.readthedocs.io/en/stable/ )
     """
     doc = Document('media/hr-receipts/contributor-receipt-template.docx')
-    tutorials_comma_separted = ''
+    tutorials_comma_separted = '-'
     total_time = timedelta(seconds=0)
     for table in doc.tables:
         for row in table.rows:
@@ -3534,13 +3534,13 @@ def generate_contributor_receipt(code, contributor, foss, amount, email, tutoria
     cell01 = table.cell(0, 1)
     cell01.text = contributor
     cell11 = table.cell(1,1)    
-    cell11.text = foss
-    cell11._parent.table.style.font.bold = True
-    cell21 = table.cell(2,1)    
-    cell21.text = tutorials_comma_separted
+    cell11.text = foss + tutorials_comma_separted
+    # cell11._parent.table.style.font.bold = True
+    # cell21 = table.cell(2,1)    
+
     #cell12 = table.cell(0,2)
     # cell12.text = total_time
-    cell41 =table.cell(4,1)
+    cell41 =table.cell(3,1)
     cell41.text = email
 
     for paragraph in doc.paragraphs:        
@@ -3566,7 +3566,7 @@ def generate_agreement_receipt(code, contributor, foss, amount, email, tutorials
         Generates honorarium receipts in docx format based on existing template using python-docx 0.8.6 ( https://python-docx.readthedocs.io/en/stable/ )
     """
     doc = Document('media/hr-receipts/Agreement-Form-template.docx')
-    tutorials_comma_separted = ''
+    tutorials_comma_separted = '-'
     for tut in tutorials:
         tutorials_comma_separted=tutorials_comma_separted+str(tut[0])+'('+str(tut[1])+'),'
         #total_time+=int(tut[1])
@@ -3577,15 +3577,13 @@ def generate_agreement_receipt(code, contributor, foss, amount, email, tutorials
     cell01 = table.cell(0, 1)
     cell01.text = contributor
     cell11 = table.cell(1,1)    
-    cell11.text = foss
-    cell11._parent.table.style.font.bold
-    cell21 = table.cell(2,1)    
-    cell21.text = tutorials_comma_separted
+    cell11.text = foss + tutorials_comma_separted
+    #cell11._parent.table.style.font.bold
     #cell12 = table.cell(0,2)
     #cell12.text = total_time
-    cell41 =table.cell(4,1)
+    cell41 =table.cell(3,1)
     cell41.text = email
-    cell71 = table.cell(7,1)
+    cell71 = table.cell(6,1)
 
     curr_dt = datetime.now()
     formated_dt =  curr_dt.strftime("%d %B, %Y") # 01 January, 2018
