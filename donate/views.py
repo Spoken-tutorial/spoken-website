@@ -325,7 +325,7 @@ def receipt(request):
     try:
         download_file_name = None
         template = 'receipt_template'
-        download_file_name = "ST_"+file_name+'.pdf'
+        download_file_name = "ST_" + file_name + '.pdf'
         certificate_path = os.path.dirname(os.path.realpath(__file__))+"/receipt/"
         template_file = open('{0}{1}'.format
                              (certificate_path, template), 'r')
@@ -351,17 +351,16 @@ def receipt(request):
         out = certificate_path
         command = 'user_receipt'
         process = subprocess.Popen('make -C {0} {1} file_name={2}'.format(certificate_path, command, file_name),
-                               stderr=subprocess.PIPE, shell=True)
+            stderr=subprocess.PIPE, shell=True)
         
         err = process.communicate()[1]
-        print("process.returncode :",process.returncode)
         if process.returncode == 0:
             pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
             response['Content-Disposition'] = 'attachment; \
                         filename=%s' % (download_file_name)
             response.write(pdf.read())
             clean_process = subprocess.Popen('make -C {0} clean file_name={1}'.format(
-                certificate_path, file_name),shell=True)
+                certificate_path, file_name), shell=True)
             return response
     except Exception as e:
         print("error is ",e)
