@@ -4760,6 +4760,50 @@ def honorarium_receipt(request,hono_id):
         messages.error(request, 'latex or data error')
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
+def honorarium(request,hono_id):
+    tpi = TutorialPayment.objects.filter(payment_honorarium_id=hono_id
+        ).values('tutorial_resource__tutorial_detail__foss__foss',
+        'tutorial_resource__tutorial_detail__tutorial',
+        'seconds','user_id__username','user_id__email','user_id__first_name',
+        'user_id__last_name','created','amount','seconds')
+    response = HttpResponse(content_type='application/pdf')
+    file_name = tpi[0]['user_id__username']
+    hono_date = tpi[0]['created'].strftime("%b %d %Y ")
+    name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
+    amount = 0.0
+    secs = 0
+    ft = ''
+    i = 0
+    for instance in tpi:
+        i +=1
+        ft += str(i) + '&' + str(instance['tutorial_resource__tutorial_detail__foss__foss']) +\
+        '&' + str(instance['tutorial_resource__tutorial_detail__tutorial'])+\
+        '&' + str(timedelta(seconds=instance['seconds'])) +r'\\'
+        amount += float(instance['amount'])
+        secs += instance['seconds']
+    total = '&&'+'Total Time&'+str(timedelta(seconds=secs))+r'\\'
+    download_file_name = ''
+    template = 'honorarium'
+    certificate_path = os.path.dirname(os.path.realpath(__file__))+"/hr-receipts/"
+    template_file = open('{0}{1}'.format
+                         (certificate_path, template), 'r')
+    content = Template(template_file.read())
+    template_file.close()
+    content_tex = content.safe_substitute(
+        amount = amount,
+        money_as_text = money_as_text(amount),
+        date = hono_date,
+        name = name,
+        rows = ft,
+        total = total
+        )
+    response = make_latex(certificate_path, file_name, content_tex)
+    if response:
+        return response
+    else:
+        messages.error(request, 'latex or data error')
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
 
 def make_latex(certificate_path, file_name, content_tex):
     download_file_name = "ST_" + file_name + '.pdf'
