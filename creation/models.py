@@ -286,6 +286,8 @@ class TutorialPayment(models.Model):
     seconds = models.PositiveIntegerField(default=0, help_text="Tutorial duration in seconds")
     amount = models.DecimalField(default=0, max_digits=7, decimal_places=2)
     status = models.PositiveSmallIntegerField(default=1, choices=PAYMENT_STATUS)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = (('tutorial_resource', 'user'),)

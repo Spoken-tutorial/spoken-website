@@ -6,7 +6,7 @@ import time
 import collections
 from django.utils import timezone
 from decimal import Decimal
-
+from string import Template
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 try:
@@ -3317,9 +3317,9 @@ def initiate_payment(request):
         foss = tr_pay.tutorial_resource.tutorial_detail.foss.foss
         manager = request.user.first_name+" "+request.user.last_name # currrent logged in user - manager
         email = user.email
-        generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials, total_time)
-        generate_contributor_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
-        generate_agreement_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
+        #generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials, total_time)
+        #generate_contributor_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
+        #generate_agreement_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
         messages.success(request,"Payment Honorarium (#"+str(honorarium.code)+") worth Rs. \
             "+str(amount)+" for contributor "+user.first_name+" "+user.last_name+" initiated for \
             "+str(len(tr_pay_ids))+" tutorials")
@@ -4720,3 +4720,65 @@ def grant_role(request):
             contrib_roles.update(status = 0, updated = timezone.now())
             data = "Role Deleted"
     return HttpResponse(json.dumps(data),content_type='application/json')
+
+
+def honorarium_receipt(request,hono_id):
+    tpi = TutorialPayment.objects.filter(payment_honorarium_id=hono_id
+        ).values('tutorial_resource__tutorial_detail__foss__foss',
+        'tutorial_resource__tutorial_detail__tutorial',
+        'seconds','user_id__username','user_id__email','user_id__first_name',
+        'user_id__last_name','created')
+    response = HttpResponse(content_type='application/pdf')
+    file_name = tpi[0]['user_id__username']
+    hono_date = tpi[0]['created'].strftime("%b %d %Y ")
+    email = tpi[0]['user_id__email']
+    name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
+    ft = ''
+    for instance in tpi:
+        ft += str(instance['tutorial_resource__tutorial_detail__foss__foss']) + \
+        '&' +  str(instance['tutorial_resource__tutorial_detail__tutorial']) + '('\
+        + str(instance['seconds']) + ')'+r'\\'
+
+    download_file_name = ''
+    template = 'hono_receipt_template'
+    certificate_path = os.path.dirname(os.path.realpath(__file__))+"/hr-receipts/"
+    template_file = open('{0}{1}'.format
+                         (certificate_path, template), 'r')
+    content = Template(template_file.read())
+    template_file.close()
+    content_tex = content.safe_substitute(
+        image_dir = certificate_path+"images/",
+        date = hono_date,
+        name = name,
+        tut1 = ft,
+        email = email
+        )
+    response = make_latex(certificate_path, file_name, content_tex)
+    if response:
+        return response
+    else:
+        messages.error(request, 'latex or data error')
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+
+def make_latex(certificate_path, file_name, content_tex):
+    download_file_name = "ST_" + file_name + '.pdf'
+    response = HttpResponse(content_type='application/pdf')
+    create_tex = open('{0}{1}.tex'.format
+                      (certificate_path, file_name), 'w')
+    create_tex.write(content_tex)
+    create_tex.close()
+    command = 'user_receipt'
+    process = subprocess.Popen('make -C {0} {1} file_name={2}'.format(certificate_path, command, file_name),
+        stderr=subprocess.PIPE, shell=True)
+    err = process.communicate(timeout=10)[1]
+    if process.returncode == 0:
+        pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
+        response['Content-Disposition'] = 'attachment; \
+                    filename=%s' % (download_file_name)
+        response.write(pdf.read())
+        clean_process = subprocess.Popen('make -C {0} clean file_name={1}'.format(
+           certificate_path, file_name), shell=True)
+        return response
+    else:
+        return False

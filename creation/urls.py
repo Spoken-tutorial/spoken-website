@@ -108,6 +108,8 @@ urlpatterns = [
     url(r'payment/due/$',  list_all_due_tutorials, name="payment_due_tutorials"),
     url(r'payment/honorarium/$',  list_payment_honorarium, name="payment_honorarium_list"),
     url(r'payment/honorarium/detail/(\d+)/$',  detail_payment_honorarium, name="payment_honorarium_detail"),
+    url(r'hono_receipt/(?P<hono_id>\d+)/',honorarium_receipt,name='honorarium_receipt'),
+
 
 
     #Bidding Module

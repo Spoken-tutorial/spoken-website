@@ -90,7 +90,7 @@
 			<td>₹ {{ honorarium.amount }}</td>
 			<td>{{ honorarium.updated }}</td>
 			<td class="text-center">Download<a class="btn btn-xs btn-link" href="/media/hr-receipts/{{ honorarium.code }}.docx" target="blank">Honorarium</a>
-            <a class="btn btn-xs btn-link" href="/media/hr-receipts/{{ honorarium.code }}-receipt.docx" target="blank">Receipt</a>
+            <a class="btn btn-xs btn-link" href="{% url 'creation:honorarium_receipt' honorarium.id %}" class="btn btn-primary btn-sm" title="Receipt" target="blank">Receipt</a>
             <a class="btn btn-xs btn-link" href="/media/hr-receipts/{{ honorarium.code }}-agreement.docx" target="blank">Agreement</a></td>
 			<td class="text-center">
 				<form method="POST">
