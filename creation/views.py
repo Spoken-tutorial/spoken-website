@@ -4804,7 +4804,7 @@ def honorarium(request,hono_id):
         messages.error(request, 'latex or data error')
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
-def hono_receipt(request,hono_id):
+def honorarium_receipt(request,hono_id):
     tpi = TutorialPayment.objects.filter(payment_honorarium_id=hono_id
         ).values('tutorial_resource__tutorial_detail__foss__foss',
         'tutorial_resource__tutorial_detail__tutorial',
@@ -4818,16 +4818,19 @@ def hono_receipt(request,hono_id):
     ft = ''
     i = 0
     cur_foss = tpi[0]['tutorial_resource__tutorial_detail__foss__foss']
-    ft = str(instance['tutorial_resource__tutorial_detail__foss__foss']) +'-'+
+    ft = str(tpi[0]['tutorial_resource__tutorial_detail__foss__foss']) +':'+'&'+r'\\'
     for instance in tpi:
         i +=1
-        if instance['tutorial_resource__tutorial_detail__foss__foss'] != cur_foss:
-            ft += str(instance['tutorial_resource__tutorial_detail__tutorial'])+ r'\\'
-            amount += float(instance['amount'])
-            secs += instance['seconds']
-            cur_foss = instance['tutorial_resource__tutorial_detail__foss__foss']
+        if instance['tutorial_resource__tutorial_detail__foss__foss'] == cur_foss:
+            ft += '-'+str(instance['tutorial_resource__tutorial_detail__tutorial'])
+            ft += '&' + str(timedelta(seconds=instance['seconds']))+r'\\'
         else:
-
+            cur_foss = instance['tutorial_resource__tutorial_detail__foss__foss']
+            ft += str(cur_foss) +':'+'&'+r'\\'
+            ft += '-'+str(instance['tutorial_resource__tutorial_detail__tutorial'])
+            ft += '&' + str(timedelta(seconds=instance['seconds']))+r'\\'
+        amount += float(instance['amount'])
+        secs += instance['seconds']
     total = '&&'+'Total Time&'+str(timedelta(seconds=secs))+r'\\'
     download_file_name = ''
     template = 'receipt'
@@ -4840,8 +4843,7 @@ def hono_receipt(request,hono_id):
         amount = amount,
         money_as_text = money_as_text(amount),
         name = name,
-        rows = ft,
-        total = total
+        rows = ft
         )
     response = make_latex(certificate_path, file_name, content_tex)
     if response:
