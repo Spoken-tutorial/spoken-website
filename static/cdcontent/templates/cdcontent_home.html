@@ -86,11 +86,11 @@
             <input type="text" id="name{{pay_tr_obj.paymentdetail.id}}" name="name" value="{{pay_tr_obj.paymentdetail.name}}" style="display: none">
             <input type="text" id="email{{pay_tr_obj.paymentdetail.id}}" name="email" value="{{pay_tr_obj.paymentdetail.email}}" style="display: none">
             <input type="text" id="amount{{pay_tr_obj.paymentdetail.id}}" name="amount" value="{{pay_tr_obj.amount}}" style="display: none">
-            <input type="text" id="reqId{{pay_tr_obj.paymentdetail.id}}" name="reqId" value="{{pay_tr_obj.reqId}}" style="display: none">
+            <input type="text" id="reqId{{pay_tr_obj.paymentdetail.id}}" name="refNo" value="{{pay_tr_obj.refNo}}" style="display: none">
             <input type="text" id="transId{{pay_tr_obj.paymentdetail.id}}" name="transId" value="{{pay_tr_obj.transId}}" style="display: none">
             <input type="text" id="provId{{pay_tr_obj.paymentdetail.id}}" name="provId" value="{{pay_tr_obj.provId}}" style="display: none">
-            <input type="text" id="status{{pay_tr_obj.paymentdetail.id}}" name="status" value="{{pay_tr_obj.status}}" style="display: none">
-            <input type="text" id="expiry{{pay_tr_obj.paymentdetail.id}}" name="expiry" value="{{pay_tr_obj.expiry}}" style="display: none">
+            <input type="text" id="status{{pay_tr_obj.paymentdetail.id}}" name="msg" value="{{pay_tr_obj.msg}}" style="display: none">
+            <input type="text" id="expiry{{pay_tr_obj.paymentdetail.id}}" name="expiry" value="{{pay_tr_obj.paymentdetail.expiry}}" style="display: none">
         </form>
         <button type="submit" form="receipt{{pay_tr_obj.id}}" value="Submit" class="custom-btn">Receipt</button>
 {%endfor%}
