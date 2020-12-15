@@ -4722,7 +4722,7 @@ def grant_role(request):
     return HttpResponse(json.dumps(data),content_type='application/json')
 
 
-def honorarium_receipt(request,hono_id):
+def honorarium_agreement(request,hono_id):
     tpi = TutorialPayment.objects.filter(payment_honorarium_id=hono_id
         ).values('tutorial_resource__tutorial_detail__foss__foss',
         'tutorial_resource__tutorial_detail__tutorial',
@@ -4740,7 +4740,7 @@ def honorarium_receipt(request,hono_id):
         + str(instance['seconds']) + ')'+r'\\'
 
     download_file_name = ''
-    template = 'hono_receipt_template'
+    template = 'hono_agreement_template'
     certificate_path = os.path.dirname(os.path.realpath(__file__))+"/hr-receipts/"
     template_file = open('{0}{1}'.format
                          (certificate_path, template), 'r')
@@ -4793,6 +4793,52 @@ def honorarium(request,hono_id):
         amount = amount,
         money_as_text = money_as_text(amount),
         date = hono_date,
+        name = name,
+        rows = ft,
+        total = total
+        )
+    response = make_latex(certificate_path, file_name, content_tex)
+    if response:
+        return response
+    else:
+        messages.error(request, 'latex or data error')
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+def hono_receipt(request,hono_id):
+    tpi = TutorialPayment.objects.filter(payment_honorarium_id=hono_id
+        ).values('tutorial_resource__tutorial_detail__foss__foss',
+        'tutorial_resource__tutorial_detail__tutorial',
+        'seconds','user_id__username','user_id__email','user_id__first_name',
+        'user_id__last_name','created','amount','seconds')
+    response = HttpResponse(content_type='application/pdf')
+    file_name = tpi[0]['user_id__username']
+    name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
+    amount = 0.0
+    secs = 0
+    ft = ''
+    i = 0
+    cur_foss = tpi[0]['tutorial_resource__tutorial_detail__foss__foss']
+    ft = str(instance['tutorial_resource__tutorial_detail__foss__foss']) +'-'+
+    for instance in tpi:
+        i +=1
+        if instance['tutorial_resource__tutorial_detail__foss__foss'] != cur_foss:
+            ft += str(instance['tutorial_resource__tutorial_detail__tutorial'])+ r'\\'
+            amount += float(instance['amount'])
+            secs += instance['seconds']
+            cur_foss = instance['tutorial_resource__tutorial_detail__foss__foss']
+        else:
+
+    total = '&&'+'Total Time&'+str(timedelta(seconds=secs))+r'\\'
+    download_file_name = ''
+    template = 'receipt'
+    certificate_path = os.path.dirname(os.path.realpath(__file__))+"/hr-receipts/"
+    template_file = open('{0}{1}'.format
+                         (certificate_path, template), 'r')
+    content = Template(template_file.read())
+    template_file.close()
+    content_tex = content.safe_substitute(
+        amount = amount,
+        money_as_text = money_as_text(amount),
         name = name,
         rows = ft,
         total = total
