@@ -7,7 +7,7 @@ import collections
 from django.utils import timezone
 from decimal import Decimal
 from string import Template
-from docx import Document
+#from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 try:
     from urllib.parse import quote, unquote_plus
