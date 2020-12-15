@@ -4730,7 +4730,7 @@ def honorarium_agreement(request,hono_id):
         'seconds','user_id__username','user_id__email','user_id__first_name',
         'user_id__last_name','created')
     response = HttpResponse(content_type='application/pdf')
-    file_name = tpi[0]['user_id__username']
+    file_name = tpi[0]['user_id__username']+'_agreement'
     hono_date = tpi[0]['created'].strftime("%b %d %Y ")
     email = tpi[0]['user_id__email']
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
@@ -4738,7 +4738,7 @@ def honorarium_agreement(request,hono_id):
     for instance in tpi:
         ft += str(instance['tutorial_resource__tutorial_detail__foss__foss']) + \
         '&' +  str(instance['tutorial_resource__tutorial_detail__tutorial']) + '('\
-        + str(instance['seconds']) + ')'+r'\\'
+        + str(timedelta(seconds=instance['seconds'])) + ')'+r'\\'
 
     download_file_name = ''
     template = 'hono_agreement_template'
@@ -4768,7 +4768,7 @@ def honorarium(request,hono_id):
         'seconds','user_id__username','user_id__email','user_id__first_name',
         'user_id__last_name','created','amount','seconds')
     response = HttpResponse(content_type='application/pdf')
-    file_name = tpi[0]['user_id__username']
+    file_name = tpi[0]['user_id__username'] + '_honorarium'
     hono_date = tpi[0]['created'].strftime("%b %d %Y ")
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
     amount = 0.0
@@ -4812,7 +4812,7 @@ def honorarium_receipt(request,hono_id):
         'seconds','user_id__username','user_id__email','user_id__first_name',
         'user_id__last_name','created','amount','seconds')
     response = HttpResponse(content_type='application/pdf')
-    file_name = tpi[0]['user_id__username']
+    file_name = tpi[0]['user_id__username']+ '_receipt'
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
     amount = 0.0
     secs = 0
@@ -4844,7 +4844,8 @@ def honorarium_receipt(request,hono_id):
         amount = amount,
         money_as_text = money_as_text(amount),
         name = name,
-        rows = ft
+        rows = ft,
+        email = tpi[0]['user_id__email']
         )
     response = make_latex(certificate_path, file_name, content_tex)
     if response:

@@ -91,7 +91,7 @@
 			<td>{{ honorarium.updated }}</td>
 			<td class="text-center">Download<a class="btn btn-xs btn-link" href="{% url 'creation:honorarium' honorarium.id %}" class="btn btn-primary btn-sm" title="Honorarium" target="blank">Honorarium</a>
             <a class="btn btn-xs btn-link" href="{% url 'creation:honorarium_receipt' honorarium.id %}" class="btn btn-primary btn-sm" title="Receipt" target="blank">Receipt</a>
-            <a class="btn btn-xs btn-link" href="/media/hr-receipts/{{ honorarium.code }}-agreement.docx" target="blank">Agreement</a></td>
+            <a class="btn btn-xs btn-link" href="{% url 'creation:honorarium_agreement' honorarium.id %}" class="btn btn-primary btn-sm" title="Receipt" target="blank">Agreement</a></td>
 			<td class="text-center">
 				<form method="POST">
 					{% csrf_token %}
