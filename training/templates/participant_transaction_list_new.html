@@ -75,15 +75,18 @@
     </div>
     </div>
 
+    {% if total.amount__sum > 0.0 %}
     <div class="form-group" id="total">
     <label for="id_tdate" class="col-sm-3 control-label">Total</label>
     <div class="col-sm-9" >
-    <input class="form-control" type="text" disabled value={{total.amount__sum}}>
+    <input class="form-control" type="text"  value={{total.amount__sum}}>
     </div>
     </div>
+    {% endif %}
   </div>
-{% if purpose != 'cdcontent'%}
-  <div class="col-lg-3 col-md-3 col-sm-3" s>
+
+  <div class="col-lg-3 col-md-3 col-sm-3" >
+    {% if purpose != 'cdcontent'%}
     <div class="form-group ">
     <label for="id_events" class="col-sm-3 control-label events">Events</label>
     <div class="col-sm-9">
@@ -91,8 +94,17 @@
     
     </div>
     </div>
+    {% endif %}
+
+     <div class="form-group">
+          <label for="id_user_email" class="col-sm-2 control-label">Email</label>
+          <div class="col-sm-10">
+            {% render_field form.user_email class+="form-control user_email" tabindex="1" %}
+            {{ form.user_email.errors }}
+          </div>
+        </div>
   </div>
-  {% endif %}
+  
 
 
 </form>
@@ -223,26 +235,6 @@
               });
     });
 
-    $status = $(".request_type");
-    if ($status.val()!='R') {
-      $("#total").hide();
-    }
-    $status.change(function() {
-      var status = $(this).val();
-      if (status=='R') {
-      $("#spanner1").css("display", "none");
-      $("#spanner2").css("display", "none");
-      $("#spanner3").css("display", "none");
-      $("#total").show();
-      }
-      else{
-       $("#total").hide();
-       $("#spanner1").css("display", "block");
-       $("#spanner2").css("display", "block");
-       $("#spanner3").css("display", "block");
-      }
-      
-    });
     });
 </script>
 {% endblock %}

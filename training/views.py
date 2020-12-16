@@ -841,6 +841,10 @@ def participant_transactions(request, purpose):
 	
 
 	if request.method == 'POST':
+		form = TrainingManagerPaymentForm(user,request.POST)
+
+
+
 		if purpose == 'cdcontent':
 			allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose='cdcontent', paymentdetail__state__in=state).order_by('-created')
 			
@@ -848,7 +852,7 @@ def participant_transactions(request, purpose):
 			rp_events = TrainingEvents.objects.filter(state__name__in = state)
 			allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose__in=rp_events).exclude(paymentdetail__purpose='cdcontent').order_by('-created')
 
-		form = TrainingManagerPaymentForm(user,request.POST)
+		
 		
 		selected_state = request.POST.get('state')
 		if selected_state:
@@ -877,6 +881,11 @@ def participant_transactions(request, purpose):
 				paymentdetails=allpaydetails.filter(paymentdetail__state=get_state)
 			else:
 				paymentdetails=allpaydetails.filter(paymentdetail__state__in=state)
+			if request.POST.get('user_email'):
+				email=request.POST.get('user_email')
+				print(email, '@@@@@@@@@@@@@@@@')
+				paymentdetails = paymentdetails.filter(paymentdetail__email=email).order_by('-created')
+				print('1#####:', paymentdetails)
 
 		else:#purpose event
 			# allpaydetails = PaymentTransaction.objects.filter().exclude(paymentdetail__purpose='cdcontent').order_by('-created')
@@ -898,8 +907,12 @@ def participant_transactions(request, purpose):
 			else:
 				academic_centers = AcademicCenter.objects.filter(state__name__in=state)
 				events = TrainingEvents.objects.filter(host_college__in = academic_centers)
-				print(events)
+				
 				paymentdetails = allpaydetails.filter(paymentdetail__purpose__in=events)
+			if request.POST.get('user_email'):
+				email=request.POST.get('user_email')
+				paymentdetails = paymentdetails.filter(paymentdetail__email=email).order_by('-created')
+				
 
 
 		allpaydetails = paymentdetails

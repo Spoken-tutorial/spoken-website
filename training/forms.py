@@ -74,6 +74,7 @@ class TrainingManagerPaymentForm(forms.Form):
     fdate = forms.DateTimeField(required = False)
     tdate = forms.DateTimeField(required = False)
     events = forms.ChoiceField(choices=[('', '-- None --'), ], widget=forms.Select(attrs = {}), required = False)
+    user_email = forms.EmailField(max_length = 200, required = False)
 
     def __init__(self, user,*args, **kwargs):
         initial = ''
