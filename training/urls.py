@@ -55,9 +55,15 @@ urlpatterns = [
         name="generate_training_certificate"
         ),
     # url(r'^participant-transactions/$', participant_transactions,name="participant_transactions"),
+    # url(
+    #   r'^participant-transactions/$', 
+    #   ParticipantTransactionsListView.as_view(template_name="participant_transaction_list.html"), 
+    #   name="participant_transaction_list"
+    # ),
+    url(r'ajax-collage-event/$',  ajax_collage_event, name='ajax_collage_event'),
     url(
-      r'^participant-transactions/$', 
-      ParticipantTransactionsListView.as_view(template_name="participant_transaction_list.html"), 
-      name="participant_transaction_list"
+      r'^participant-transactions/(?P<purpose>\w+)/$',
+      participant_transactions, 
+      name='participant_transactions'
     ),
     ]
