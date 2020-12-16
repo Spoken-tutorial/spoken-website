@@ -846,8 +846,7 @@ def participant_transactions(request, purpose):
 			
 		else:
 			rp_events = TrainingEvents.objects.filter(state__name__in = state)
-
-		allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose__in=rp_events).exclude(paymentdetail__purpose='cdcontent').order_by('-created')
+			allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose__in=rp_events).exclude(paymentdetail__purpose='cdcontent').order_by('-created')
 
 		form = TrainingManagerPaymentForm(user,request.POST)
 		
@@ -883,7 +882,7 @@ def participant_transactions(request, purpose):
 			# allpaydetails = PaymentTransaction.objects.filter().exclude(paymentdetail__purpose='cdcontent').order_by('-created')
 
 			if get_state:
-				academic_centers = AcademicCenter.objects.filter(state=get_state)
+				academic_centers = AcademicCenter.objects.filter(state__name=get_state)
 
 				if academic_center:
 					events = TrainingEvents.objects.filter(host_college = academic_center)
@@ -899,6 +898,7 @@ def participant_transactions(request, purpose):
 			else:
 				academic_centers = AcademicCenter.objects.filter(state__name__in=state)
 				events = TrainingEvents.objects.filter(host_college__in = academic_centers)
+				print(events)
 				paymentdetails = allpaydetails.filter(paymentdetail__purpose__in=events)
 
 
