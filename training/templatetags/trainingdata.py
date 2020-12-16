@@ -140,6 +140,15 @@ def get_participant_count(eventid):
 
   return pcount
 
+@register.filter
+def get_event_details(eventid):
+  try:
+    event = TrainingEvents.objects.get(id=eventid)
+  except TrainingEvents.DoesNotExist:
+    return None
+
+  return event
+
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)
 register.filter('is_user_registered', is_user_registered)
