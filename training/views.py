@@ -316,6 +316,7 @@ def listevents(request, role, status):
 	context['role'] = role
 	context['status'] = status
 	context['header'] = header
+	context['today'] = today
 	context['ordering'] = get_field_index(raw_get_data)
 
 	return render(request,'event_status_list.html',context)
