@@ -820,7 +820,7 @@ def ajax_collage_event(request):
 		tmp = '<option value = None> --------- </option>'
 		if events:
 			for i in events:
-				tmp +='<option value='+str(i.id)+'>'+i.event_name+'</option>'
+				tmp +='<option value='+str(i.id)+'>'+i.event_name+', '+i.event_type+'</option>'
 		return HttpResponse(json.dumps(tmp), content_type='application/json')
 
 
@@ -838,16 +838,17 @@ def participant_transactions(request, purpose):
 	context = {}
 	context['user'] = user
 
-	if purpose == 'cdcontent':
-		allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose='cdcontent', paymentdetail__state__in=state).order_by('-created')
-		
-	else:
-		rp_events = TrainingEvents.objects.filter(state__name__in = state)
+	
+
+	if request.method == 'POST':
+		if purpose == 'cdcontent':
+			allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose='cdcontent', paymentdetail__state__in=state).order_by('-created')
+			
+		else:
+			rp_events = TrainingEvents.objects.filter(state__name__in = state)
 
 		allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose__in=rp_events).exclude(paymentdetail__purpose='cdcontent').order_by('-created')
 
-
-	if request.method == 'POST':
 		form = TrainingManagerPaymentForm(user,request.POST)
 		
 		selected_state = request.POST.get('state')
@@ -866,8 +867,8 @@ def participant_transactions(request, purpose):
 			academic_center = request.POST.get('college')
 
 		if selected_event in ('None','0',0):
-			print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			selected_event = False
+
 		else:
 			selected_event = request.POST.get('events')
 		

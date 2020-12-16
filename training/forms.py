@@ -73,7 +73,7 @@ class TrainingManagerPaymentForm(forms.Form):
     request_type = forms.ChoiceField(choices=[('', '-- None --'), ('I', 'Initiated at Bank'), ('R', 'Reconciled')], required = False)
     fdate = forms.DateTimeField(required = False)
     tdate = forms.DateTimeField(required = False)
-    events = forms.ChoiceField(choices=[('0', '-- None --'), ], widget=forms.Select(attrs = {}), required = False)
+    events = forms.ChoiceField(choices=[('', '-- None --'), ], widget=forms.Select(attrs = {}), required = False)
 
     def __init__(self, user,*args, **kwargs):
         initial = ''
