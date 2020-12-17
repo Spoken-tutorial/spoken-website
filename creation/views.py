@@ -4729,7 +4729,7 @@ def honorarium_agreement(request,hono_id):
         'tutorial_resource__tutorial_detail__tutorial',
         'seconds','user_id__username','user_id__email','user_id__first_name',
         'user_id__last_name','created','user__profile__address','user__profile__phone',
-        'user__profile__pincode')
+        'user__profile__pincode').order_by('tutorial_resource__tutorial_detail__foss__foss')
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username']+'_agreement'
     hono_date = tpi[0]['created'].strftime("%b %d %Y ")
@@ -4773,7 +4773,8 @@ def honorarium(request,hono_id):
         ).values('tutorial_resource__tutorial_detail__foss__foss',
         'tutorial_resource__tutorial_detail__tutorial',
         'seconds','user_id__username','user_id__email','user_id__first_name',
-        'user_id__last_name','created','amount','seconds')
+        'user_id__last_name','created','amount','seconds'
+        ).order_by('tutorial_resource__tutorial_detail__foss__foss')
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username'] + '_honorarium'
     hono_date = tpi[0]['created'].strftime("%b %d %Y ")
@@ -4818,7 +4819,8 @@ def honorarium_receipt(request,hono_id):
         'tutorial_resource__tutorial_detail__tutorial',
         'seconds','user_id__username','user_id__email','user_id__first_name',
         'user_id__last_name','created','amount','seconds','user__profile__address',
-        'user__profile__phone','user__profile__pincode')
+        'user__profile__phone','user__profile__pincode'
+        ).order_by('tutorial_resource__tutorial_detail__foss__foss')
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username']+ '_receipt'
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
