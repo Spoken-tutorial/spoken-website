@@ -4728,11 +4728,16 @@ def honorarium_agreement(request,hono_id):
         ).values('tutorial_resource__tutorial_detail__foss__foss',
         'tutorial_resource__tutorial_detail__tutorial',
         'seconds','user_id__username','user_id__email','user_id__first_name',
-        'user_id__last_name','created')
+        'user_id__last_name','created','user__profile__address','user__profile__phone',
+        'user__profile__pincode')
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username']+'_agreement'
     hono_date = tpi[0]['created'].strftime("%b %d %Y ")
     email = tpi[0]['user_id__email']
+    address = tpi[0]['user__profile__address']
+    if str(tpi[0]['user__profile__pincode']) not in address:
+        address = tpi[0]['user__profile__address']+' Pincode -'+str(tpi[0]['user__profile__pincode'])
+    phone = tpi[0]['user__profile__phone']
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
     ft = ''
     for instance in tpi:
@@ -4752,7 +4757,9 @@ def honorarium_agreement(request,hono_id):
         date = hono_date,
         name = name,
         tut1 = ft,
-        email = email
+        email = email,
+        phone = phone,
+        address = address
         )
     response = make_latex(certificate_path, file_name, content_tex)
     if response:
@@ -4810,10 +4817,16 @@ def honorarium_receipt(request,hono_id):
         ).values('tutorial_resource__tutorial_detail__foss__foss',
         'tutorial_resource__tutorial_detail__tutorial',
         'seconds','user_id__username','user_id__email','user_id__first_name',
-        'user_id__last_name','created','amount','seconds')
+        'user_id__last_name','created','amount','seconds','user__profile__address',
+        'user__profile__phone','user__profile__pincode')
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username']+ '_receipt'
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
+    email = tpi[0]['user_id__email']
+    address = tpi[0]['user__profile__address']
+    if str(tpi[0]['user__profile__pincode']) not in address:
+        address = tpi[0]['user__profile__address']+' Pincode -'+str(tpi[0]['user__profile__pincode'])
+    phone = tpi[0]['user__profile__phone']
     amount = 0.0
     secs = 0
     ft = ''
@@ -4845,7 +4858,9 @@ def honorarium_receipt(request,hono_id):
         money_as_text = money_as_text(amount),
         name = name,
         rows = ft,
-        email = tpi[0]['user_id__email']
+        email = email,
+        phone = phone,
+        address = address
         )
     response = make_latex(certificate_path, file_name, content_tex)
     if response:
