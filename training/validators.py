@@ -6,6 +6,7 @@ from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.core.validators import EmailValidator
 from django.core.exceptions import ValidationError
 import csv
+from validate_email import validate_email
 
 class ASCIIValidator(validators.RegexValidator):
     regex = r'^[\w .@+-]+\Z'
@@ -41,6 +42,8 @@ def validate_csv_file(csv_file):
                 try:
                     EmailValidator()(col[2].strip())
                     ASCIIUsernameValidator()(col[2].strip())
+                    if not validate_email(col[2].strip(), verify=True):
+                        error.update(dict(lname="Email: "+ col[2] +" has errors."))
                 except:
                     error.update(dict(lname="Email: "+ col[2] +" has errors."))
                 try:
