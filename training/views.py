@@ -48,6 +48,7 @@ from django.conf import settings
 from donate.models import *
 
 
+
 today = date.today()
 
 class TrainingEventCreateView(CreateView):
@@ -806,3 +807,139 @@ class ParticipantTransactionsListView(ListView):
 		if self.request.user:
 			context['user'] = self.request.user
 		return context
+
+
+@csrf_exempt
+def ajax_collage_event(request):
+	""" Ajax: Get the Colleges (Academic) based on District selected """
+	if request.method == 'POST':
+		college = request.POST.get('college')
+		print(college)
+		events = TrainingEvents.objects.filter(host_college_id=college).order_by('event_name')
+		print(events)
+		tmp = '<option value = None> --------- </option>'
+		if events:
+			for i in events:
+				tmp +='<option value='+str(i.id)+'>'+i.event_name+', '+i.event_type+'</option>'
+		return HttpResponse(json.dumps(tmp), content_type='application/json')
+
+
+
+@csrf_protect
+@login_required
+def participant_transactions(request, purpose):    
+	user = User.objects.get(id=request.user.id)
+	rp_states = ResourcePerson.objects.filter(status=1,user=user)
+
+	state = State.objects.filter(id__in=rp_states.values('state')).values('name')
+
+	get_state = ''
+	allpaydetails = ''
+	context = {}
+	context['user'] = user
+
+	
+
+	if request.method == 'POST':
+		form = TrainingManagerPaymentForm(user,request.POST)
+
+
+
+		if purpose == 'cdcontent':
+			allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose='cdcontent', paymentdetail__state__in=state).order_by('-created')
+			
+		else:
+			rp_events = TrainingEvents.objects.filter(state__name__in = state)
+			allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose__in=rp_events).exclude(paymentdetail__purpose='cdcontent').order_by('-created')
+
+		
+		
+		selected_state = request.POST.get('state')
+		if selected_state:
+			get_state = State.objects.filter(id=selected_state).values('name')
+
+		academic_center = request.POST.get('college')
+		selected_event = request.POST.get('events')
+		status = request.POST.get('status')
+		request_type = request.POST.get('request_type')
+
+
+		if academic_center in ('None','0',0):
+			academic_center = False
+		else:
+			academic_center = request.POST.get('college')
+
+		if selected_event in ('None','0',0):
+			selected_event = False
+
+		else:
+			selected_event = request.POST.get('events')
+		
+
+		if purpose == 'cdcontent':
+			if get_state:
+				paymentdetails=allpaydetails.filter(paymentdetail__state=get_state)
+			else:
+				paymentdetails=allpaydetails.filter(paymentdetail__state__in=state)
+			if request.POST.get('user_email'):
+				email=request.POST.get('user_email')
+				print(email, '@@@@@@@@@@@@@@@@')
+				paymentdetails = paymentdetails.filter(paymentdetail__email=email).order_by('-created')
+				print('1#####:', paymentdetails)
+
+		else:#purpose event
+			# allpaydetails = PaymentTransaction.objects.filter().exclude(paymentdetail__purpose='cdcontent').order_by('-created')
+
+			if get_state:
+				academic_centers = AcademicCenter.objects.filter(state__name=get_state)
+
+				if academic_center:
+					events = TrainingEvents.objects.filter(host_college = academic_center)
+					if selected_event:
+						e = TrainingEvents.objects.get(id=selected_event)
+						paymentdetails = allpaydetails.filter(paymentdetail__purpose=e.id)
+					else:
+						paymentdetails = allpaydetails.filter(paymentdetail__purpose__in=events)
+
+				else:
+					events = TrainingEvents.objects.filter(host_college__in = academic_centers)
+					paymentdetails = allpaydetails.filter(paymentdetail__purpose__in=events)
+			else:
+				academic_centers = AcademicCenter.objects.filter(state__name__in=state)
+				events = TrainingEvents.objects.filter(host_college__in = academic_centers)
+				
+				paymentdetails = allpaydetails.filter(paymentdetail__purpose__in=events)
+			if request.POST.get('user_email'):
+				email=request.POST.get('user_email')
+				paymentdetails = paymentdetails.filter(paymentdetail__email=email).order_by('-created')
+				
+
+
+		allpaydetails = paymentdetails
+
+		if status and status in ('S','F','X'):
+			
+			allpaydetails = allpaydetails.filter(status=status)
+
+		if request_type:
+			if request_type == 'R':
+				allpaydetails = allpaydetails.filter(requestType='R')
+			elif request_type == 'I':
+				allpaydetails = allpaydetails.filter(requestType='I')
+
+		if request.POST.get('fdate'):
+			if request.POST.get('tdate'):
+				allpaydetails = allpaydetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
+			else:
+				allpaydetails = allpaydetails.filter(created__gt=request.POST.get('fdate'))
+
+		
+		if request_type == 'R':
+		  context['total'] = allpaydetails.aggregate(Sum('amount'))
+
+	else:
+		form = TrainingManagerPaymentForm(user=request.user)
+	context['form'] = form
+	context['transactiondetails'] = allpaydetails
+	context['purpose'] = purpose
+	return render(request,'participant_transaction_list_new.html', context)

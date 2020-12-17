@@ -1,0 +1,240 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load trainingdata %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Participants Details {% endblock %}
+{% block uncompresscssblock %}
+  <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.pack.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block compresscssblock %}
+  <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock%}
+{% block search %}{% endblock %}
+{% block content %}
+<div class= 'filters row'>
+<div class="col-lg-16 col-md-16 col-sm-16" >
+    
+<form action=""  method="post" class='form-horizontal'>{% csrf_token %}
+  <div class="col-lg-3 col-md-4 col-sm-3" >
+    <div class="form-group">
+    <label for="id_state" class="col-sm-3 control-label">State</label>
+    <div class="col-sm-9">
+    {% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Choose State" %}
+    {{ form.state.errors }}
+    </div>
+    </div>
+
+    <div class="form-group">
+    <label for="id_college" class="col-sm-3 control-label">Institution <span class='ajax-refresh ajax-refresh-institution'> </span></label>
+    <div class="col-sm-9">
+    {% render_field form.college class+="form-control college" tabindex="1" data-placeholder="Choose Institution" %}
+
+    </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-3 col-sm-3" >
+    <div class="form-group">
+    <label for="id_fdate" class="col-sm-3 control-label">Date From</label>
+    <div class="col-sm-9">
+    {% render_field form.fdate class+="form-control fdate date" tabindex="1" %}
+    {{ form.fdate.errors }}
+    </div>
+    </div>
+    <div class="form-group">
+    <label for="id_tdate" class="col-sm-3 control-label">To</label>
+    <div class="col-sm-9">
+    {% render_field form.tdate class+="form-control tdate date" tabindex="1" %}
+    {{ form.tdate.errors }}
+    </div>
+    </div>
+    <div class="form-group">
+    <div class="col-sm-offset-1">
+    <input class="btn btn-success" type="submit" value="Filter" />
+    <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+    </div>
+    </div>
+  </div>
+
+  <div class="col-lg-3 col-md-3 col-sm-3">
+    <div class="form-group ">
+    <label for="id_status" class="col-sm-3 control-label status">Status</label>
+    <div class="col-sm-9">
+    {% render_field form.status class+="form-control status" tabindex="1" %}
+    {{ form.status.errors }}
+    </div>
+    </div>
+    <div class="form-group ">
+    <label for="id_request_type" class="col-sm-3 control-label request_type">Request Type</label>
+    <div class="col-sm-9">
+    {% render_field form.request_type class+="form-control request_type" tabindex="1" %}
+    {{ form.request_type.errors }}
+    </div>
+    </div>
+
+    {% if total.amount__sum > 0.0 %}
+    <div class="form-group" id="total">
+    <label for="id_tdate" class="col-sm-3 control-label">Total</label>
+    <div class="col-sm-9" >
+    <input class="form-control" type="text"  value={{total.amount__sum}}>
+    </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-3 col-md-3 col-sm-3" >
+    {% if purpose != 'cdcontent'%}
+    <div class="form-group ">
+    <label for="id_events" class="col-sm-3 control-label events">Events</label>
+    <div class="col-sm-9">
+    {% render_field form.events class+="form-control events" tabindex="1" %}
+    
+    </div>
+    </div>
+    {% endif %}
+
+     <div class="form-group">
+          <label for="id_user_email" class="col-sm-2 control-label">Email</label>
+          <div class="col-sm-10">
+            {% render_field form.user_email class+="form-control user_email" tabindex="1" %}
+            {{ form.user_email.errors }}
+          </div>
+        </div>
+  </div>
+  
+
+
+</form>
+</div>
+</div>
+            
+
+
+<!-- 
+<div class="row">  
+  {% if user|is_resource_person or user|get_administrator %}
+      <a target="_blank" class="pull-right btn btn-default " href="{% url 'reports:events_training_csv' %}{% if request.GET %}?{{ request.GET.urlencode }}&status={{ status_code }}{% else %}?status={{ status_code }} {% endif %}" class="addlink">Export to CSV</a>
+  {% endif %}
+</div> -->
+  
+  <!-- Nav tabs -->
+  
+  <!-- Tab panes -->
+  <div class='table-responsive' style="width:120%; margin-left:-10%;">
+      {% if transactiondetails %}
+      <table class="paleblue table table-striped table-hover table-bordered">
+        <tr>
+          <th>Sr No</th>
+          {% if purpose != 'cdcontent'%}
+            <th>Event Details</th>
+          {% endif %}
+          <th>Name</th>
+          <th>Email</th>
+          <th>State</th>
+          <th>User Id</th>
+          <th>Transaction Id</th>
+          <th>Reference No</th>
+          <th>Status</th>
+          <th>Request Type</th>
+          <th>Amount</th>
+          <th>Entry Created</th>
+          <th>Phone Number</th>
+          
+        </tr>
+        {% for record in transactiondetails %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            {% ifnotequal record.paymentdetail.purpose 'cdcontent'%}
+            <td>{% with event=record.paymentdetail.purpose|get_event_details %}
+              
+                {{event.event_name}} <br><br>
+                <b>{{event.foss.foss}}</b><br>
+                {{event.event_start_date}} - {{event.event_end_date}}
+              {% endwith %}
+            </td>
+            {% endifnotequal %}
+            <td>{{ record.paymentdetail.user.first_name }}&nbsp{{ record.paymentdetail.user.last_name }}</td>
+            <td>{{ record.paymentdetail.email }}</td>
+            <td>{{ record.paymentdetail.state }}</td>
+            <td>{{ record.paymentdetail.user_id}}</td>
+            <td>{{ record.transId }}</td>
+            <td>{{ record.refNo}}</td>
+            <td>{{ record.status }}</td>
+            <td>{{ record.requestType }}</td>
+            <td>{{ record.amount }}</td>
+            <td>{{ record.created }}</td>
+            <td>
+              {% with phonenumber=record.paymentdetail.user|get_user_detail %}
+              
+                {{phonenumber}}
+              {% endwith %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+      {% else %}
+        <p class='no-record'>No record found!</p>
+      {% endif %}
+  </div>
+{% endblock %}
+
+{% block uncompressjsblock %}
+  <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+  <script src="{% static 'spoken/js/jquery.mousewheel-3.0.6.pack.js' %}"></script>
+{% endblock %}
+{% block compressjsblock %}
+  <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+   <script src="{% static 'spoken/js/events.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+<script type="text/javascript">
+
+  $('.date').datetimepicker({
+      lang:'en',
+      timepicker:false,
+      format:'Y-m-d',
+      formatDate:'Y/m/d',
+      maxDate:'+1970/06/31', // tommorow date with in 6 month
+  });
+
+  $(document).ready(function(){
+
+
+  $('#id_state').change(function(){
+    var stateid  = $('#id_state').val();
+    $.ajax({
+                type : "POST",
+                url:"/software-training/ajax-state-collage/",
+                dataType : "json",
+                data: {
+                  'state' : stateid,
+                },
+                success: function(data)
+                {
+                    $('#id_college').html(data);
+                }
+              });
+    });
+
+    $('#id_college').change(function(){
+    var collegeid  = $('#id_college').val();
+    $.ajax({
+                type : "POST",
+                url:"/training/ajax-collage-event/",
+                dataType : "json",
+                data: {
+                  'college' : collegeid,
+                },
+                success: function(data)
+                {
+                    $('#id_events').html(data);
+                }
+              });
+    });
+
+    });
+</script>
+{% endblock %}
