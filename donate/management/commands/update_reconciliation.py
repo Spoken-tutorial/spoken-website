@@ -9,6 +9,7 @@ from django.utils import timezone
 import requests
 from spoken.config import RECONCILIATION_URL, CHANNEL_ID, CHANNEL_KEY
 from events import display
+import time
 
 class Command(BaseCommand):
 
@@ -24,6 +25,7 @@ class Command(BaseCommand):
         if total > 100:
             for f in range(1, flr+1):
                 self.run_reconciliation(reqids[(100*(f-1)):(100*f)])
+                time.sleep(10)
             if rem > 0:
                 self.run_reconciliation(reqids[(100*flr):((100*flr)+rem)])
         else:
