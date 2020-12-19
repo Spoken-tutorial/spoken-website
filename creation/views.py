@@ -7,8 +7,7 @@ import collections
 from django.utils import timezone
 from decimal import Decimal
 from string import Template
-#from docx import Document
-#from docx.enum.text import WD_ALIGN_PARAGRAPH
+from config import admin_email1,admin_email2,payment_manager1,payment_manager2
 try:
     from urllib.parse import quote, unquote_plus
     from urllib.request import urlopen
@@ -3317,6 +3316,21 @@ def initiate_payment(request):
         foss = tr_pay.tutorial_resource.tutorial_detail.foss.foss
         manager = request.user.first_name+" "+request.user.last_name # currrent logged in user - manager
         email = user.email
+        message = "Rs."+ str(honorarium.amount)+" is initiated for "+str(len(honorarium.tutorials.all()))+" tutorials"
+        # Admin Desk Notification
+        try:
+            QualityReviewerNotification.objects.create(user__email = admin_email1, title = honorarium.code, message = message, tutorial_resource = tr_rec)
+            QualityReviewerNotification.objects.create(user__email = admin_email2, title = honorarium.code, message = message, tutorial_resource = tr_rec) 
+        except :
+            message.warning(request, "Incorrect Admin email address")
+        # Payment Managers' Notofication
+        try:
+            QualityReviewerNotification.objects.create(user__email = payment_manager1, title = honorarium.code, message = message, tutorial_resource = tr_rec)
+            QualityReviewerNotification.objects.create(user__email = payment_manager2, title = honorarium.code, message = message, tutorial_resource = tr_rec) 
+        except :
+            message.warning(request, "Incorrect Payment Manager email address")
+
+        
         #generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials, total_time)
         #generate_contributor_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
         #generate_agreement_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
@@ -4768,29 +4782,45 @@ def honorarium_agreement(request,hono_id):
         messages.error(request, 'latex or data error')
         return HttpResponseRedirect(request.META['HTTP_REFERER'])
 
+hono_rate = {
+    1 : '1300',
+    2 : '700',
+    3 : '2000'
+}
+
 def honorarium(request,hono_id):
     tpi = TutorialPayment.objects.filter(payment_honorarium_id=hono_id
         ).values('tutorial_resource__tutorial_detail__foss__foss',
         'tutorial_resource__tutorial_detail__tutorial',
         'seconds','user_id__username','user_id__email','user_id__first_name',
-        'user_id__last_name','created','amount','seconds'
+        'user_id__last_name','created','amount','seconds','user_type'
         ).order_by('tutorial_resource__tutorial_detail__foss__foss')
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username'] + '_honorarium'
     hono_date = tpi[0]['created'].strftime("%b %d %Y ")
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
+    manager_name = ''
+    # Set the user to the main payment manager
+    try:
+        manager = User.objects.get(email=payment_manager1)
+        manager_name = manager.first_name+" "+manager.last_name
+    except :
+        print("Incorrect Payment Manager email address")
+    
     amount = 0.0
     secs = 0
     ft = ''
     i = 0
     for instance in tpi:
         i +=1
+        rate = hono_rate[instance['user_type']]
         ft += str(i) + '&' + str(instance['tutorial_resource__tutorial_detail__foss__foss']) +\
         '&' + str(instance['tutorial_resource__tutorial_detail__tutorial'])+\
-        '&' + str(timedelta(seconds=instance['seconds'])) +r'\\'
+        '&' + str(timedelta(seconds=instance['seconds']))+'&'+str(rate)+\
+        '&'+str(instance['amount'])+r'\\'
         amount += float(instance['amount'])
         secs += instance['seconds']
-    total = '&&'+'Total Time&'+str(timedelta(seconds=secs))+r'\\'
+    total = '&&'+'Total Time&'+str(timedelta(seconds=secs))+'&&'+str(amount)+r'\\'
     download_file_name = ''
     template = 'honorarium'
     certificate_path = os.path.dirname(os.path.realpath(__file__))+"/hr-receipts/"
@@ -4804,6 +4834,7 @@ def honorarium(request,hono_id):
         date = hono_date,
         name = name,
         rows = ft,
+        manager = manager_name,
         total = total
         )
     response = make_latex(certificate_path, file_name, content_tex)
