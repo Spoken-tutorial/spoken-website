@@ -4792,12 +4792,13 @@ def honorarium(request,hono_id):
     tpi = TutorialPayment.objects.filter(payment_honorarium_id=hono_id
         ).values('tutorial_resource__tutorial_detail__foss__foss',
         'tutorial_resource__tutorial_detail__tutorial',
+        'tutorial_resource__language__name',
         'seconds','user_id__username','user_id__email','user_id__first_name',
         'user_id__last_name','created','amount','seconds','user_type'
         ).order_by('tutorial_resource__tutorial_detail__foss__foss')
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username'] + '_honorarium'
-    hono_date = tpi[0]['created'].strftime("%b %d %Y ")
+    hono_date = tpi[0]['created'].strftime("%b %d, %Y ")
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
     manager_name = ''
     # Set the user to the main payment manager
@@ -4815,7 +4816,8 @@ def honorarium(request,hono_id):
         i +=1
         rate = hono_rate[instance['user_type']]
         ft += str(i) + '&' + str(instance['tutorial_resource__tutorial_detail__foss__foss']) +\
-        '&' + str(instance['tutorial_resource__tutorial_detail__tutorial'])+\
+        '&' + str(instance['tutorial_resource__tutorial_detail__tutorial'])+'('+\
+        str(instance['tutorial_resource__language__name'])+')'+\
         '&' + str(timedelta(seconds=instance['seconds']))+'&'+str(rate)+\
         '&'+str(instance['amount'])+r'\\'
         amount += float(instance['amount'])
