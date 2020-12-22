@@ -17,7 +17,7 @@
 <div class= 'filters row'>
 <div class="col-lg-16 col-md-16 col-sm-16" >
     
-<form action=""  method="post" class='form-horizontal'>{% csrf_token %}
+<form id='myform' action=""  method="get" class='form-horizontal'>
   <div class="col-lg-3 col-md-4 col-sm-3" >
     <div class="form-group">
     <label for="id_state" class="col-sm-3 control-label">State</label>
@@ -110,19 +110,15 @@
 </form>
 </div>
 </div>
-            
 
-
-<!-- 
 <div class="row">  
   {% if user|is_resource_person or user|get_administrator %}
-      <a target="_blank" class="pull-right btn btn-default " href="{% url 'reports:events_training_csv' %}{% if request.GET %}?{{ request.GET.urlencode }}&status={{ status_code }}{% else %}?status={{ status_code }} {% endif %}" class="addlink">Export to CSV</a>
+      <a id='exportcsv' target="_blank" class="pull-right btn btn-default " 
+      href="{% url 'training:transaction_csv' purpose %}">Export to CSV</a>
+
   {% endif %}
-</div> -->
+</div>
   
-  <!-- Nav tabs -->
-  
-  <!-- Tab panes -->
   <div class='table-responsive' style="width:120%; margin-left:-10%;">
       {% if transactiondetails %}
       <table class="paleblue table table-striped table-hover table-bordered">
@@ -201,6 +197,12 @@
   });
 
   $(document).ready(function(){
+
+    url = $('#exportcsv').attr('href');
+    reqgeturl = window.location.search;
+    newurl = url+reqgeturl
+
+    $('#exportcsv').attr('href', newurl);
 
 
   $('#id_state').change(function(){
