@@ -4794,12 +4794,19 @@ def honorarium(request,hono_id):
         'tutorial_resource__tutorial_detail__tutorial',
         'tutorial_resource__language__name',
         'seconds','user_id__username','user_id__email','user_id__first_name',
-        'user_id__last_name','created','amount','seconds','user_type'
+        'user_id__last_name','user__profile__address','created',
+        'amount','seconds','user_type','user__profile__pincode',
+        'user__profile__phone'
         ).order_by('tutorial_resource__tutorial_detail__foss__foss')
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username'] + '_honorarium'
     hono_date = tpi[0]['created'].strftime("%d %B %Y")
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
+    address = tpi[0]['user__profile__address']
+    pincode = tpi[0]['user__profile__pincode']
+    phone = tpi[0]['user__profile__phone']
+    if str(pincode) not in address:
+        address = tpi[0]['user__profile__address']+' Pincode -'+str(tpi[0]['user__profile__pincode'])
     manager_name = ''
     # Set the user to the main payment manager
     try:
@@ -4842,6 +4849,9 @@ def honorarium(request,hono_id):
         date = hono_date,
         name = name,
         rows = ft,
+        address = address,
+        pincode = pincode,
+        phone = phone,
         manager = manager_name,
         total = total
         )

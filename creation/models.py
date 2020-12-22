@@ -314,10 +314,12 @@ class BankDetail(models.Model):
         on_delete=models.CASCADE,
         limit_choices_to=Q(groups__name='External-Contributor')
     )
+    account_name = models.CharField(max_length=100,default=None)
     account_number = models.CharField(max_length=17)
     ifsc = models.CharField(max_length=11)
     bank = models.CharField(max_length=30)
     branch = models.CharField(max_length=100)
+    pincode = models.CharField(max_length=10,default=0)#India - 6, World -10
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
