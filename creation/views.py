@@ -4798,7 +4798,7 @@ def honorarium(request,hono_id):
         ).order_by('tutorial_resource__tutorial_detail__foss__foss')
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username'] + '_honorarium'
-    hono_date = tpi[0]['created'].strftime("%b %d, %Y ")
+    hono_date = tpi[0]['created'].strftime("%d %B %Y")
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
     manager_name = ''
     # Set the user to the main payment manager
@@ -4822,6 +4822,11 @@ def honorarium(request,hono_id):
         '&'+str(instance['amount'])+r'\\'
         amount += float(instance['amount'])
         secs += instance['seconds']
+        ending = ''
+        if instance['tutorial_resource__language__name'] == 'English' :
+            ending = 'for the creation of the following spoken tutorials.'
+        else:
+            ending = 'for translating and dubbing the following spoken tutorials.'
     total = '&&'+'Total Time&'+str(timedelta(seconds=secs))+'&&'+str(amount)+r'\\'
     download_file_name = ''
     template = 'honorarium'
@@ -4833,6 +4838,7 @@ def honorarium(request,hono_id):
     content_tex = content.safe_substitute(
         amount = amount,
         money_as_text = money_as_text(amount),
+        line_ending = ending, 
         date = hono_date,
         name = name,
         rows = ft,
