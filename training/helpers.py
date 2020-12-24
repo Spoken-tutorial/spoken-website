@@ -114,7 +114,7 @@ def get_transaction_details(request, purpose):
     allpaydetails = ''
 
     if purpose == 'cdcontent':
-            allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose='cdcontent', paymentdetail__state__in=state).order_by('-created')
+        allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose='cdcontent', paymentdetail__state__in=state).order_by('-created')
         
     else:
         rp_events = TrainingEvents.objects.filter(state__name__in = state)
@@ -128,6 +128,7 @@ def get_transaction_details(request, purpose):
     status = request.GET.get('status')
     request_type = request.GET.get('request_type')
     email=request.GET.get('user_email')
+    userid=request.GET.get('userid')
     fdate = request.GET.get('fdate')
     tdate = request.GET.get('tdate')
 
@@ -154,6 +155,9 @@ def get_transaction_details(request, purpose):
         if request.GET.get('user_email'):
             email=request.GET.get('user_email')
             paymentdetails = paymentdetails.filter(paymentdetail__email=email).order_by('-created')
+        if request.GET.get('userid'):
+            userid=request.GET.get('userid')
+            paymentdetails = paymentdetails.filter(paymentdetail__user_id=userid).order_by('-created')
 
     else:#purpose event
         # allpaydetails = PaymentTransaction.objects.filter().exclude(paymentdetail__purpose='cdcontent').order_by('-created')
@@ -180,6 +184,9 @@ def get_transaction_details(request, purpose):
         if request.GET.get('user_email'):
             email=request.GET.get('user_email')
             paymentdetails = paymentdetails.filter(paymentdetail__email=email).order_by('-created')
+        if request.GET.get('userid'):
+            userid=request.GET.get('userid')
+            paymentdetails = paymentdetails.filter(paymentdetail__user_id=userid).order_by('-created')
             
 
 
