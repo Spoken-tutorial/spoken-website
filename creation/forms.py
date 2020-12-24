@@ -1196,14 +1196,10 @@ class LanguageManagerForm(forms.ModelForm):
         exclude = ['created', 'updated']
 
 class DetailsForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(DetailsForm, self).__init__(*args, **kwargs)
-        if args:
-            if 'user' in args[0]:
-                print("-- ",args[0]['user'])
-                self.fields['user'].initial = args[0]['user']
-
+    user = forms.ModelChoiceField(
+        queryset = User.objects.filter(Q(groups__name =
+            'External-Contributor')).order_by('username'),
+    )
     class Meta():
         model = BankDetail
         exclude = ['created', 'updated']

@@ -4966,16 +4966,14 @@ def add_details(request):
     context = {}
     context['form']= form
     if request.method == 'POST':
-        b_details = BankDetail.objects.filter(user__username=request.POST.get('user')).values(
+        my_dict = dict()
+        this_user = User.objects.get(username = request.POST.get('user'))
+        details = BankDetail.objects.filter(user=this_user).values(
                     'account_name','account_number','ifsc','bank','branch','pincode')
-        if b_details:
-            form.fields['account_name'].initial = b_details[0]['account_name']
-            form.fields['account_number'].initial = b_details[0]['account_number']
-            form.fields['ifsc'].initial = b_details[0]['ifsc']
-            form.fields['bank'].initial = b_details[0]['bank']
-            form.fields['branch'].initial = b_details[0]['branch']
-            form.fields['pincode'].initial = b_details[0]['pincode']
-            return HttpResponse(json.dumps(b_details[0]), content_type = 'application/json')
+        if details:
+            my_dict = details[0]
+        my_dict['name'] = this_user.first_name +' '+ this_user.last_name
+        return HttpResponse(json.dumps(my_dict), content_type = 'application/json')
     context.update(csrf(request))
     return render(request, 'creation/templates/add_details.html', context)
 
@@ -4984,10 +4982,16 @@ def save_details(request):
     if request.method == 'POST':
         form = DetailsForm(request.POST)
         if form.is_valid():
-            instance = form.save(commit=False)
-            instance.account_name = form.cleaned_data['account_name']
-            instance.save()
-            messages.success(request, "Details updated successfully")
+            form.save()
+            messages.success(request, "Details saved successfully")
         else:
-            messages.error(request, "Details not saved !")
+            b_details = BankDetail.objects.get(user= request.POST.get('user'))
+            b_details.account_number = request.POST.get('account_number')
+            b_details.account_name = request.POST.get('account_name')
+            b_details.ifsc = request.POST.get('ifsc')
+            b_details.bank = request.POST.get('bank')
+            b_details.branch = request.POST.get('branch')
+            b_details.pincode = request.POST.get('pincode')
+            b_details.save()
+            messages.warning(request, "Details updated !")
     return HttpResponseRedirect('/creation/add_details')
