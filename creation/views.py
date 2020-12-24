@@ -4819,6 +4819,7 @@ def honorarium(request,hono_id):
     a_name = ''
     a_no = ''
     b_name = ''
+    b_branch = ''
     code = ''
 
     try:
@@ -4826,6 +4827,7 @@ def honorarium(request,hono_id):
         a_name = b_details.account_name
         a_no = b_details.account_number
         b_name = b_details.bank
+        b_branch = b_details.branch
         code = b_details.ifsc
     except BankDetail.DoesNotExist:
         print("Details not found")
@@ -4871,6 +4873,7 @@ def honorarium(request,hono_id):
         acc_no = a_no,
         b_name = b_name,
         b_code = code,
+        b_branch = b_branch,
         total = total
         )
     response = make_latex(certificate_path, file_name, content_tex)
