@@ -66,4 +66,5 @@ urlpatterns = [
       participant_transactions, 
       name='participant_transactions'
     ),
+    url(r'transaction_csv/(?P<purpose>\w+)/$', transaction_csv, name='transaction_csv'),
     ]
