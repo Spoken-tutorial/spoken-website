@@ -111,6 +111,8 @@ urlpatterns = [
     url(r'hono_agreement/(?P<hono_id>\d+)/',honorarium_agreement,name='honorarium_agreement'),
     url(r'honorarium/(?P<hono_id>\d+)/',honorarium,name='honorarium'),
     url(r'hono_receipt/(?P<hono_id>\d+)/',honorarium_receipt,name='honorarium_receipt'),
+    url(r'add_details/',add_details,name='add_details'),
+    url(r'save_details/',save_details,name='save_details'),
 
 
 

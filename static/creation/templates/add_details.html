@@ -1,0 +1,108 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Add Details{% endblock %}
+{% block compressinlinecssblock %}
+<style>
+  .mb{
+  margin-bottom: 16px;
+  }
+</style>
+{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> External Contributor Details{% endblock %}
+{% block content %}
+
+
+
+   <form role="form" method="post" action="{% url 'creation:save_details' %}">
+                    <div class="form-group mb">
+                        <label for="id_user" class="col-md-3 control-label">User: </label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.user class+="form-control ext-contrib" tabindex="2" %}
+                            {{ form.user.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-group mb">
+                        <label for="id_account_name" class="col-md-3 control-label">Account Name: </label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.account_name class+="form-control account_name" tabindex="2" %}
+                            {{ form.account_name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_account_number" class="col-md-3 control-label">Account number: </label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.account_number class+="form-control account_number" tabindex="2" %}
+                            {{ form.account_number.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_ifsc" class="col-md-3 control-label">IFSC: </label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.ifsc class+="form-control ifsc" tabindex="2" %}
+                            {{ form.ifsc.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_bank" class="col-md-3 control-label">Bank Name: </label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.bank class+="form-control bank" tabindex="2" %}
+                            {{ form.bank.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_branch" class="col-md-3 control-label">Branch Name: </label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.branch class+="form-control branch" tabindex="2" %}
+                            {{ form.branch.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_language" class="col-md-3 control-label">Pincode: </label>
+                        <div class="col-lg-9 col-md-9 col-sm-9">
+                            {% render_field form.pincode class+="form-control pincode" tabindex="2" %}
+                            {{ form.pincode.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-9 col-md-9 col-sm-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
+                            <input type="submit" class="btn btn-primary" value="Save"  tabindex="4" />
+                        </div>
+                    </div>
+    </form>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script type="text/javascript">
+        $(document).ready(
+            function() {
+                $('.ext-contrib').on("change", 
+                    function() {
+                        var sel_user = $('#id_user').find(":selected").text();
+                        // $('#user_selected:text').val(sel_user);
+                            $.ajax({
+                                url: "/creation/add_details/",
+                                type: "POST",
+                                data: {
+                                    user: sel_user
+                                },
+                                success: function(data) {
+                                    // loading tutorial names
+                                    if(data){
+                                        $('#id_account_name:text').val(data.account_name);
+                                        $('#id_account_number:text').val(data.account_number);
+                                        $('#id_ifsc:text').val(data.ifsc);
+                                        $('#id_bank:text').val(data.bank);
+                                        $('#id_branch:text').val(data.branch);
+                                        $('#id_pincode:text').val(data.pincode);
+
+
+                                    }
+                                }
+                            });
+                    }
+                );
+            }
+        );
+    </script>
+{% endblock %}

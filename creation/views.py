@@ -20,6 +20,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
+from django.core.serializers import serialize
 
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
@@ -4814,7 +4815,20 @@ def honorarium(request,hono_id):
         manager_name = manager.first_name+" "+manager.last_name
     except :
         print("Incorrect Payment Manager email address")
-    
+    #Bank Details
+    a_name = ''
+    a_no = ''
+    b_name = ''
+    code = ''
+
+    try:
+        b_details = BankDetail.objects.get(user__email = tpi[0]['user_id__email'])
+        a_name = b_details.account_name
+        a_no = b_details.account_number
+        b_name = b_details.bank
+        code = b_details.ifsc
+    except BankDetail.DoesNotExist:
+        print("Details not found")
     amount = 0.0
     secs = 0
     ft = ''
@@ -4853,6 +4867,10 @@ def honorarium(request,hono_id):
         pincode = pincode,
         phone = phone,
         manager = manager_name,
+        acc_name = a_name,
+        acc_no = a_no,
+        b_name = b_name,
+        b_code = code,
         total = total
         )
     response = make_latex(certificate_path, file_name, content_tex)
@@ -4942,3 +4960,34 @@ def make_latex(certificate_path, file_name, content_tex):
         return response
     else:
         return False
+@csrf_exempt
+def add_details(request):
+    form = DetailsForm()
+    context = {}
+    context['form']= form
+    if request.method == 'POST':
+        b_details = BankDetail.objects.filter(user__username=request.POST.get('user')).values(
+                    'account_name','account_number','ifsc','bank','branch','pincode')
+        if b_details:
+            form.fields['account_name'].initial = b_details[0]['account_name']
+            form.fields['account_number'].initial = b_details[0]['account_number']
+            form.fields['ifsc'].initial = b_details[0]['ifsc']
+            form.fields['bank'].initial = b_details[0]['bank']
+            form.fields['branch'].initial = b_details[0]['branch']
+            form.fields['pincode'].initial = b_details[0]['pincode']
+            return HttpResponse(json.dumps(b_details[0]), content_type = 'application/json')
+    context.update(csrf(request))
+    return render(request, 'creation/templates/add_details.html', context)
+
+@csrf_exempt
+def save_details(request):
+    if request.method == 'POST':
+        form = DetailsForm(request.POST)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.account_name = form.cleaned_data['account_name']
+            instance.save()
+            messages.success(request, "Details updated successfully")
+        else:
+            messages.error(request, "Details not saved !")
+    return HttpResponseRedirect('/creation/add_details')
