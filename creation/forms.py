@@ -1194,3 +1194,16 @@ class LanguageManagerForm(forms.ModelForm):
 
         model = LanguageManager
         exclude = ['created', 'updated']
+
+class DetailsForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(DetailsForm, self).__init__(*args, **kwargs)
+        if args:
+            if 'user' in args[0]:
+                print("-- ",args[0]['user'])
+                self.fields['user'].initial = args[0]['user']
+
+    class Meta():
+        model = BankDetail
+        exclude = ['created', 'updated']
