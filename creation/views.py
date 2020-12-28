@@ -3323,7 +3323,7 @@ def initiate_payment(request):
             QualityReviewerNotification.objects.create(user__email = admin_email1, title = honorarium.code, message = message, tutorial_resource = tr_rec)
             QualityReviewerNotification.objects.create(user__email = admin_email2, title = honorarium.code, message = message, tutorial_resource = tr_rec) 
         except :
-            message.warning(request, "Incorrect Admin email address")
+            messages.warning(request, "Incorrect Admin email address")
         # Payment Managers' Notofication
         try:
             QualityReviewerNotification.objects.create(user__email = payment_manager1, title = honorarium.code, message = message, tutorial_resource = tr_rec)
