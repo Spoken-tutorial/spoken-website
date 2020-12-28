@@ -316,6 +316,8 @@ class BankDetail(models.Model):
     )
     account_name = models.CharField(max_length=100,default=None)
     account_number = models.CharField(max_length=17)
+    bankaddress = models.CharField(max_length=255, default=None)
+    pancard = models.CharField(max_length=10, default=None)
     ifsc = models.CharField(max_length=11)
     bank = models.CharField(max_length=30)
     branch = models.CharField(max_length=100)

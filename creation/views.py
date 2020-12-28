@@ -4821,6 +4821,8 @@ def honorarium(request,hono_id):
     b_name = ''
     b_branch = ''
     code = ''
+    b_address = ''
+    pancard = ''
 
     try:
         b_details = BankDetail.objects.get(user__email = tpi[0]['user_id__email'])
@@ -4828,6 +4830,9 @@ def honorarium(request,hono_id):
         a_no = b_details.account_number
         b_name = b_details.bank
         b_branch = b_details.branch
+        b_address = b_details.bankaddress
+        pancard = b_details.pancard
+
         code = b_details.ifsc
     except BankDetail.DoesNotExist:
         print("Details not found")
@@ -4874,6 +4879,8 @@ def honorarium(request,hono_id):
         b_name = b_name,
         b_code = code,
         b_branch = b_branch,
+        b_address = b_address,
+        pancard = pancard,
         total = total
         )
     response = make_latex(certificate_path, file_name, content_tex)
@@ -4970,12 +4977,12 @@ def add_details(request):
     context['form']= form
     if request.method == 'POST':
         my_dict = dict()
-        this_user = User.objects.get(username = request.POST.get('user'))
+        this_user = User.objects.get(id = request.POST.get('user'))
         details = BankDetail.objects.filter(user=this_user).values(
-                    'account_name','account_number','ifsc','bank','branch','pincode')
+                    'account_name','account_number','ifsc','bank','branch','pincode',
+                    'pancard','bankaddress')
         if details:
             my_dict = details[0]
-        my_dict['name'] = this_user.first_name +' '+ this_user.last_name
         return HttpResponse(json.dumps(my_dict), content_type = 'application/json')
     context.update(csrf(request))
     return render(request, 'creation/templates/add_details.html', context)
@@ -4995,6 +5002,8 @@ def save_details(request):
             b_details.bank = request.POST.get('bank')
             b_details.branch = request.POST.get('branch')
             b_details.pincode = request.POST.get('pincode')
+            b_details.pancard = request.POST.get('pancard')
+            b_details.bankaddress = request.POST.get('bankaddress')
             b_details.save()
-            messages.warning(request, "Details updated !")
+            messages.success(request, "Details updated !")
     return HttpResponseRedirect('/creation/add_details')

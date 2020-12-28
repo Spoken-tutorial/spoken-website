@@ -15,13 +15,6 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="id_name" class="col-sm-3 control-label">Name: </label>
-                        <div class="col-sm-9">
-                            <input type="text" id="id_user_name" class="form-control" readonly>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
                         <label for="id_account_name" class="col-sm-3 control-label">Account Name: </label>
                         <div class="col-sm-9">
                             {% render_field form.account_name class+="form-control account_name" tabindex="2" %}
@@ -57,7 +50,21 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="id_language" class="col-sm-3 control-label">Pincode: </label>
+                        <label for="id_pancard" class="col-sm-3 control-label">Pancard: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.pancard class+="form-control pancard" tabindex="2" %}
+                            {{ form.pancard.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_bankaddress" class="col-sm-3 control-label">Bank Address: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.bankaddress class+="form-control bankaddress" tabindex="2" %}
+                            {{ form.bankaddress.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_pincode" class="col-sm-3 control-label">Pincode: </label>
                         <div class="col-sm-9">
                             {% render_field form.pincode class+="form-control pincode" tabindex="2" %}
                             {{ form.pincode.errors }}
@@ -76,7 +83,7 @@
             function() {
                 $('.ext-contrib').on("change", 
                     function() {
-                        var sel_user = $('#id_user').find(":selected").text();
+                        var sel_user = $('#id_user').find(":selected").val();
                             $.ajax({
                                 url: "/creation/add_details/",
                                 type: "POST",
@@ -93,6 +100,8 @@
                                         $('#id_bank:text').val(data.bank);
                                         $('#id_branch:text').val(data.branch);
                                         $('#id_pincode:text').val(data.pincode);
+                                        $('#id_pancard:text').val(data.pancard);
+                                        $('#id_bankaddress').val(data.bankaddress);
 
 
                                     }
