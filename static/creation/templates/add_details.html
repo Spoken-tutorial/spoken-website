@@ -7,7 +7,6 @@
 {% block heading %}<i class="fa fa-list-ul"></i> External Contributor Details{% endblock %}
 {% block content %}
    <form role="form" method="post" action="{% url 'creation:save_details' %}" class="form-horizontal"  name="bankDetailForm">
-    <!-- <form role="form" method="post" class="form-horizontal" onsubmit="return validateform()" name="bankDetailForm"> -->
                     <div class="form-group">
                         <label for="id_user" class="col-sm-3 control-label">User: </label>
                         <div class="col-sm-9">
@@ -115,11 +114,9 @@
             var errors = "";
             // check for account number
             var account_num =document.bankDetailForm.account_number.value; 
-            // alert(account_num); 
             let is_valid_account_num = /^\d+$/.test(account_num);
             if (!is_valid_account_num) {
                 errors = errors + "Error in account number. " ;
-                // alert(errors); 
             }
             // check for ifsc
             var ifsc =document.bankDetailForm.ifsc.value;  
