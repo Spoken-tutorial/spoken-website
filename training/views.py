@@ -21,7 +21,7 @@ import uuid
 from .models import *
 from .forms import *
 from .helpers import *
-from .templatetags.trainingdata import registartion_successful
+from .templatetags.trainingdata import registartion_successful, get_event_details, get_user_detail
 from creation.models import TutorialResource, Language
 from events.decorators import group_required
 from events.models import *
@@ -31,7 +31,7 @@ from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
 from certificate.views import _clean_certificate_certificate
 from django.http import HttpResponse
-import os
+import os, sys
 from string import Template
 import subprocess
 
@@ -46,6 +46,8 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 from io import BytesIO
 from django.conf import settings
 from donate.models import *
+
+import csv
 
 
 
@@ -833,113 +835,77 @@ def participant_transactions(request, purpose):
 
 	state = State.objects.filter(id__in=rp_states.values('state')).values('name')
 
-	get_state = ''
-	allpaydetails = ''
-	context = {}
-	context['user'] = user
-
 	
+	context = {}
 
-	if request.method == 'POST':
-		form = TrainingManagerPaymentForm(user,request.POST)
+	if request.method == 'GET':
+		form = TrainingManagerPaymentForm(user,request.GET)
 
-
-
-		if purpose == 'cdcontent':
-			allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose='cdcontent', paymentdetail__state__in=state).order_by('-created')
-			
-		else:
-			rp_events = TrainingEvents.objects.filter(state__name__in = state)
-			allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose__in=rp_events).exclude(paymentdetail__purpose='cdcontent').order_by('-created')
-
-		
-		
-		selected_state = request.POST.get('state')
-		if selected_state:
-			get_state = State.objects.filter(id=selected_state).values('name')
-
-		academic_center = request.POST.get('college')
-		selected_event = request.POST.get('events')
-		status = request.POST.get('status')
-		request_type = request.POST.get('request_type')
-
-
-		if academic_center in ('None','0',0):
-			academic_center = False
-		else:
-			academic_center = request.POST.get('college')
-
-		if selected_event in ('None','0',0):
-			selected_event = False
-
-		else:
-			selected_event = request.POST.get('events')
-		
-
-		if purpose == 'cdcontent':
-			if get_state:
-				paymentdetails=allpaydetails.filter(paymentdetail__state=get_state)
-			else:
-				paymentdetails=allpaydetails.filter(paymentdetail__state__in=state)
-			if request.POST.get('user_email'):
-				email=request.POST.get('user_email')
-				print(email, '@@@@@@@@@@@@@@@@')
-				paymentdetails = paymentdetails.filter(paymentdetail__email=email).order_by('-created')
-				print('1#####:', paymentdetails)
-
-		else:#purpose event
-			# allpaydetails = PaymentTransaction.objects.filter().exclude(paymentdetail__purpose='cdcontent').order_by('-created')
-
-			if get_state:
-				academic_centers = AcademicCenter.objects.filter(state__name=get_state)
-
-				if academic_center:
-					events = TrainingEvents.objects.filter(host_college = academic_center)
-					if selected_event:
-						e = TrainingEvents.objects.get(id=selected_event)
-						paymentdetails = allpaydetails.filter(paymentdetail__purpose=e.id)
-					else:
-						paymentdetails = allpaydetails.filter(paymentdetail__purpose__in=events)
-
-				else:
-					events = TrainingEvents.objects.filter(host_college__in = academic_centers)
-					paymentdetails = allpaydetails.filter(paymentdetail__purpose__in=events)
-			else:
-				academic_centers = AcademicCenter.objects.filter(state__name__in=state)
-				events = TrainingEvents.objects.filter(host_college__in = academic_centers)
-				
-				paymentdetails = allpaydetails.filter(paymentdetail__purpose__in=events)
-			if request.POST.get('user_email'):
-				email=request.POST.get('user_email')
-				paymentdetails = paymentdetails.filter(paymentdetail__email=email).order_by('-created')
-				
-
-
-		allpaydetails = paymentdetails
-
-		if status and status in ('S','F','X'):
-			
-			allpaydetails = allpaydetails.filter(status=status)
-
-		if request_type:
-			if request_type == 'R':
-				allpaydetails = allpaydetails.filter(requestType='R')
-			elif request_type == 'I':
-				allpaydetails = allpaydetails.filter(requestType='I')
-
-		if request.POST.get('fdate'):
-			if request.POST.get('tdate'):
-				allpaydetails = allpaydetails.filter(Q(created__gt=request.POST.get('fdate')) & Q(created__lt= request.POST.get('tdate')))
-			else:
-				allpaydetails = allpaydetails.filter(created__gt=request.POST.get('fdate'))
-
-		
+		allpaydetails = get_transaction_details(request, purpose)	
+		request_type = request.GET.get('request_type')
 		if request_type == 'R':
 		  context['total'] = allpaydetails.aggregate(Sum('amount'))
 
-	else:
-		form = TrainingManagerPaymentForm(user=request.user)
+	# else:
+	# 	form = TrainingManagerPaymentForm(user=request.user)
 	context['form'] = form
+	context['user'] = user
 	context['transactiondetails'] = allpaydetails
 	context['purpose'] = purpose
 	return render(request,'participant_transaction_list_new.html', context)
+
+
+
+def transaction_csv(request, purpose):
+# export statistics training data as csv
+	collectionSet = None
+	collection = get_transaction_details(request, purpose)
+
+	# Create the HttpResponse object with the appropriate CSV header.
+	response = HttpResponse(content_type='text/csv')
+	response['Content-Disposition'] = 'attachment; filename="training-statistics-data.csv"'
+
+	writer = csv.writer(response)
+
+	# header
+	if purpose != 'cdcontent':
+		writer.writerow(['Sr No', 'Event Details','Name', 'Email','State','User Id','Transaction Id',\
+		'Reference No','Status','Request Type','Amount','Entry Created','Phone Number'])
+	else:
+		writer.writerow(['Sr No', 'Name', 'Email','State','User Id','Transaction Id',\
+		'Reference No','Status','Request Type','Amount','Entry Created','Phone Number'])
+
+	count = 0
+	# records
+	for record in collection:
+		count=count+1
+		phone = get_user_detail(record.paymentdetail.user)
+		if purpose != 'cdcontent':
+			event  = get_event_details(record.paymentdetail.purpose)
+			writer.writerow([count,
+	            event.event_name+','+event.foss.foss,
+	            record.paymentdetail.user.first_name+' '+record.paymentdetail.user.first_name,
+	            record.paymentdetail.email,
+	            record.paymentdetail.state,
+	            record.paymentdetail.user_id,
+	            record.transId,
+	            record.refNo,
+	            record.status,
+	            record.requestType,
+	            record.amount,
+	            record.created,
+	            phone])
+		else:
+			writer.writerow([count,
+				record.paymentdetail.user.first_name+' '+record.paymentdetail.user.first_name,
+				record.paymentdetail.email,
+				record.paymentdetail.state,
+				record.paymentdetail.user_id,
+				record.transId,
+				record.refNo,
+				record.status,
+				record.requestType,
+				record.amount,
+				record.created,
+				phone])
+	return response

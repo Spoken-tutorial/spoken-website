@@ -1196,13 +1196,26 @@ class LanguageManagerForm(forms.ModelForm):
         exclude = ['created', 'updated']
 
 class DetailsForm(forms.ModelForm):
+    bankaddress = forms.CharField( widget=forms.Textarea )
 
     def __init__(self, *args, **kwargs):
         super(DetailsForm, self).__init__(*args, **kwargs)
-        if args:
-            if 'user' in args[0]:
-                print("-- ",args[0]['user'])
-                self.fields['user'].initial = args[0]['user']
+        ext_contribs = self.fields['user'].queryset.values('id',
+            'first_name','last_name','username').order_by('first_name','last_name','username')
+        c_list = []
+        for contributor in ext_contribs:
+            if contributor['first_name'] == '' and contributor['last_name'] == '':
+                c_list.append((contributor['id'],contributor['username']))
+            else:
+                c_list.append((contributor
+                    ['id'],contributor['first_name']+' '+contributor['last_name']
+                    +' ('+contributor['username']+')'))
+
+
+        contributor_list = c_list
+        contributor_list.insert(0, ('', '--- Select Contributor ---'))
+        self.fields['user'].choices = contributor_list
+        #   self.fields['user'].queryset = name
 
     class Meta():
         model = BankDetail

@@ -3323,7 +3323,7 @@ def initiate_payment(request):
             QualityReviewerNotification.objects.create(user__email = admin_email1, title = honorarium.code, message = message, tutorial_resource = tr_rec)
             QualityReviewerNotification.objects.create(user__email = admin_email2, title = honorarium.code, message = message, tutorial_resource = tr_rec) 
         except :
-            message.warning(request, "Incorrect Admin email address")
+            messages.warning(request, "Incorrect Admin email address")
         # Payment Managers' Notofication
         try:
             QualityReviewerNotification.objects.create(user__email = payment_manager1, title = honorarium.code, message = message, tutorial_resource = tr_rec)
@@ -4819,13 +4819,20 @@ def honorarium(request,hono_id):
     a_name = ''
     a_no = ''
     b_name = ''
+    b_branch = ''
     code = ''
+    b_address = ''
+    pancard = ''
 
     try:
         b_details = BankDetail.objects.get(user__email = tpi[0]['user_id__email'])
         a_name = b_details.account_name
         a_no = b_details.account_number
         b_name = b_details.bank
+        b_branch = b_details.branch
+        b_address = b_details.bankaddress
+        pancard = b_details.pancard
+
         code = b_details.ifsc
     except BankDetail.DoesNotExist:
         print("Details not found")
@@ -4871,6 +4878,9 @@ def honorarium(request,hono_id):
         acc_no = a_no,
         b_name = b_name,
         b_code = code,
+        b_branch = b_branch,
+        b_address = b_address,
+        pancard = pancard,
         total = total
         )
     response = make_latex(certificate_path, file_name, content_tex)
@@ -4966,16 +4976,14 @@ def add_details(request):
     context = {}
     context['form']= form
     if request.method == 'POST':
-        b_details = BankDetail.objects.filter(user__username=request.POST.get('user')).values(
-                    'account_name','account_number','ifsc','bank','branch','pincode')
-        if b_details:
-            form.fields['account_name'].initial = b_details[0]['account_name']
-            form.fields['account_number'].initial = b_details[0]['account_number']
-            form.fields['ifsc'].initial = b_details[0]['ifsc']
-            form.fields['bank'].initial = b_details[0]['bank']
-            form.fields['branch'].initial = b_details[0]['branch']
-            form.fields['pincode'].initial = b_details[0]['pincode']
-            return HttpResponse(json.dumps(b_details[0]), content_type = 'application/json')
+        my_dict = dict()
+        this_user = User.objects.get(id = request.POST.get('user'))
+        details = BankDetail.objects.filter(user=this_user).values(
+                    'account_name','account_number','ifsc','bank','branch','pincode',
+                    'pancard','bankaddress')
+        if details:
+            my_dict = details[0]
+        return HttpResponse(json.dumps(my_dict), content_type = 'application/json')
     context.update(csrf(request))
     return render(request, 'creation/templates/add_details.html', context)
 
@@ -4984,10 +4992,18 @@ def save_details(request):
     if request.method == 'POST':
         form = DetailsForm(request.POST)
         if form.is_valid():
-            instance = form.save(commit=False)
-            instance.account_name = form.cleaned_data['account_name']
-            instance.save()
-            messages.success(request, "Details updated successfully")
+            form.save()
+            messages.success(request, "Details saved successfully")
         else:
-            messages.error(request, "Details not saved !")
+            b_details = BankDetail.objects.get(user= request.POST.get('user'))
+            b_details.account_number = request.POST.get('account_number')
+            b_details.account_name = request.POST.get('account_name')
+            b_details.ifsc = request.POST.get('ifsc')
+            b_details.bank = request.POST.get('bank')
+            b_details.branch = request.POST.get('branch')
+            b_details.pincode = request.POST.get('pincode')
+            b_details.pancard = request.POST.get('pancard')
+            b_details.bankaddress = request.POST.get('bankaddress')
+            b_details.save()
+            messages.success(request, "Details updated !")
     return HttpResponseRedirect('/creation/add_details')
