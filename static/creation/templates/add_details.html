@@ -6,7 +6,7 @@
 {% endblock %}
 {% block heading %}<i class="fa fa-list-ul"></i> External Contributor Details{% endblock %}
 {% block content %}
-   <form role="form" method="post" action="{% url 'creation:save_details' %}" class="form-horizontal">
+   <form role="form" method="post" action="{% url 'creation:save_details' %}" class="form-horizontal"  name="bankDetailForm">
                     <div class="form-group">
                         <label for="id_user" class="col-sm-3 control-label">User: </label>
                         <div class="col-sm-9">
@@ -14,6 +14,7 @@
                             {{ form.user.errors }}
                         </div>
                     </div>
+
                     <div class="form-group">
                         <label for="id_account_name" class="col-sm-3 control-label">Account Name: </label>
                         <div class="col-sm-9">
@@ -72,7 +73,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-9 col-md-9 col-sm-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
-                            <input type="submit" class="btn btn-primary" value="Save"  tabindex="4" />
+                            <input type="submit" class="btn btn-primary" value="Save"  tabindex="4" onclick="return validateform()" />
                         </div>
                     </div>
     </form>
@@ -102,8 +103,6 @@
                                         $('#id_pincode:text').val(data.pincode);
                                         $('#id_pancard:text').val(data.pancard);
                                         $('#id_bankaddress').val(data.bankaddress);
-
-
                                     }
                                 }
                             });
@@ -111,5 +110,38 @@
                 );
             }
         );
+        function validateform(){
+            var errors = "";
+            // check for account number
+            var account_num =document.bankDetailForm.account_number.value; 
+            let is_valid_account_num = /^\d+$/.test(account_num);
+            if (!is_valid_account_num) {
+                errors = errors + "Error in account number. " ;
+            }
+            // check for ifsc
+            var ifsc =document.bankDetailForm.ifsc.value;  
+            var ifsc_regex = new RegExp("^[A-Z]{4}0[A-Z0-9]{6}$");
+            let is_valid_ifsc = ifsc_regex.test(ifsc);
+            if (!is_valid_ifsc) {
+                errors = errors + "Error in IFSC. " ;
+            }
+            // check for pancard
+            var pan =document.bankDetailForm.pancard.value;  
+            var pan_regex = new RegExp("[A-Z]{5}[0-9]{4}[A-Z]{1}");
+            let is_valid_pan = pan_regex.test(pan);
+            if (!is_valid_pan) {
+                errors = errors + "Error in PAN. " ;
+            }
+            // check for pincode
+            var pin =document.bankDetailForm.pincode.value; 
+            let is_valid_pin = /^\d+$/.test(pin);
+            if (!is_valid_pin) {
+                errors = errors + "Error in Pincode. " ;
+            }
+            if (!errors.length == 0) {
+                alert(errors);
+                return false;
+            }
+        }
     </script>
 {% endblock %}
