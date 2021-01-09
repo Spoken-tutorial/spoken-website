@@ -78,6 +78,13 @@ def is_tr_ongoing(eventid):
     return False
 
 @register.filter
+def is_tr_expired(eventid):
+    event = TrainingEvents.objects.get(id=eventid)
+    if event.training_status == 0 and event.event_end_date < today:
+        return True
+    return False
+
+@register.filter
 def event_has_attendance(eventid):
   if EventAttendance.objects.filter(event_id=eventid).exists():
     return True

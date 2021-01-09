@@ -246,7 +246,7 @@ def listevents(request, role, status):
 	TrMngerEvents = TrainingEvents.objects.filter(state__in=states).order_by('-event_start_date')
 	
 
-	status_list = {'ongoing': 0, 'completed': 1, 'closed': 2,}
+	status_list = {'ongoing': 0, 'completed': 1, 'closed': 2, 'expired': 3}
 	roles = ['rp', 'em']
 	if role in roles and status in status_list:
 		if status == 'ongoing':
@@ -255,6 +255,8 @@ def listevents(request, role, status):
 			queryset =TrMngerEvents.filter(training_status=1, event_end_date__lt=today)
 		elif status == 'closed':
 			queryset = TrMngerEvents.filter(training_status=2)
+		elif status == 'expired':
+			queryset = TrMngerEvents.filter(training_status=0, event_end_date__lt=today)
 
 		header = {
 		1: SortableHeader('#', False),
