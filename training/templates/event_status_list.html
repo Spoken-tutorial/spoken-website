@@ -124,7 +124,7 @@ Today is : {{today}}
             <td>
               {% if record.training_status == 0%}
                 {% if not record.id|is_tr_expired%}
-                <a href="{% url 'training:edit_event' record.id %}" >Edit Event</a> |
+                <a href="{% url 'training:edit_event' record.id %}">Edit Event</a> |
                 {% endif %}
                 <a href="{% url 'training:upload_participants' record.id %}" >Upload Participants</a> |
               {% endif %}
@@ -134,6 +134,9 @@ Today is : {{today}}
                   <a style="color: orange;" href="{% url 'training:event_attendance' record.id %}" >Participant List</a>
               {% else %}
                   <a style="color: green;" href="{% url 'training:event_attendance' record.id %}" >Participant List</a>
+              {% endif %}
+              {% if record.id|is_tr_completed %}
+                <a style="color: green;" href="{% url 'training:reopen_event' record.id %}" >| Re-open</a>
               {% endif %}
 
             </td>

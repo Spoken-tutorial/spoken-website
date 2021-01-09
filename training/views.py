@@ -911,3 +911,19 @@ def transaction_csv(request, purpose):
 				record.created,
 				phone])
 	return response
+
+def reopen_event(request, eventid):
+	context = {}
+	user = request.user
+	if not (user.is_authenticated() and is_resource_person(user)):
+		raise PermissionDenied()
+	
+	event = TrainingEvents.objects.get(id=eventid)
+	if event:
+		event.training_status = 0 #close event
+		event.save()
+		messages.success(request, 'Event reopened successfully. As the event date over you will find this entry under expired tab.')
+	else:
+		messages.error(request, 'Request not sent.Please try again.')
+	return HttpResponseRedirect("/training/event/rp/completed/")
+
