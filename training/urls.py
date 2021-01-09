@@ -67,4 +67,5 @@ urlpatterns = [
       name='participant_transactions'
     ),
     url(r'transaction_csv/(?P<purpose>\w+)/$', transaction_csv, name='transaction_csv'),
+    url(r'reopen-event/(?P<eventid>\w+)/$', reopen_event, name='reopen_event'),
     ]
