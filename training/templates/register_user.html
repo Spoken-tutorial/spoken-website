@@ -38,14 +38,14 @@
       				<input type="text"  id="level_id" name="level_id" value="0" style="display:none">
 
                   <div class="form-group">
-                    <label for="id_name" class="col-lg-4 control-label">Full Name </label>
+                    <label for="id_name" class="col-lg-4 control-label">Full Name* </label>
                     <div class="col-lg-8">
                         {% render_field form.name class+="form-control name" tabindex="1" %}
                         {{ form.name.errors }}
                     </div>
                     </div>
                     <div class="form-group">
-                      <label for="id_difficulty_level" class="col-lg-4 control-label">Email</label>
+                      <label for="id_difficulty_level" class="col-lg-4 control-label">Email*</label>
                       <div class="col-lg-8">
                             {% render_field form.email class+="form-control email" tabindex="2" %}
                             {{ form.email.errors }}
@@ -54,6 +54,17 @@
                         
                         <div id="email-info" class="col-md-8 col-md-offset-4"></div>
                       </div>
+
+                      <div class="form-group">
+                        <label for="id_phone" class="col-lg-4 control-label">Phone Number* </label>
+                        <div class="col-lg-8">
+                            {% render_field form.phone class+="form-control phone" tabindex="1" %}
+                            {{ form.phone.errors }}
+                            <small>(Please provide a valid phone number. It will help us to contact you for any updates.)</small>
+                        </div>
+
+                      </div>
+
                     <div class="form-group " id="pwd" style="display: none;">
                         <div style="display: flex;" class="col-sm-8 col-sm-offset-4">
                             <input type="password" class="form-control" id="id_password" placeholder="Password">
@@ -95,14 +106,14 @@
                         </div>
                     <!-- </div> -->
                       <div class="form-group">
-                        <label for="id_state" class="col-lg-4 control-label">Gender</label>
+                        <label for="id_state" class="col-lg-4 control-label">Gender*</label>
                         <div class="col-lg-8">
                             {% render_field form.gender class+="form-control gender" tabindex="4" %}
                             {{ form.gender.errors }}
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="id_state" class="col-lg-4 control-label">State</label>
+                        <label for="id_state" class="col-lg-4 control-label">State*</label>
                         <div class="col-lg-8">
                             {% render_field form.state class+="form-control state" tabindex="5" %}
                             {{ form.state.errors }}
@@ -110,7 +121,7 @@
                                     </div>
                   {% if user_college %}
                     <div class="form-group">
-                      <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School</label>
+                      <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School*</label>
                       <div class="col-lg-8">
                       <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6" style="display: none;">
@@ -120,7 +131,7 @@
                     </div>
                     {%else%}
                     <div class="form-group">
-                      <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School</label>
+                      <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School*</label>
                       <div class="col-lg-8">
                       <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" tabindex="6">
                     </select>
@@ -132,14 +143,14 @@
 
                 		{% endif %}
                     <div class="form-group">
-                    <label for="id_foss" class="col-lg-4 control-label">FOSS </label>
+                    <label for="id_foss" class="col-lg-4 control-label">FOSS* </label>
                     <div class="col-lg-8">
                         <div class="form-control" style="font-size:1vw;">{{event_obj.foss}}</div>
                     </div>
                     </div>
                     {% if langs %}
                     <div class="form-group">
-                    <label for="id_foss_language" class="col-lg-4 control-label">Language </label>
+                    <label for="id_foss_language" class="col-lg-4 control-label">Language* </label>
                     <div class="col-lg-8">
                         {% render_field form.foss_language class+="form-control foss_language" tabindex="7" %}
                         {{ form.name.errors }}

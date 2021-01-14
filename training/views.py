@@ -29,6 +29,7 @@ from events.views import is_resource_person, is_administrator, get_page
 from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
+from cms.models import Profile
 from certificate.views import _clean_certificate_certificate
 from django.http import HttpResponse
 import os, sys
@@ -132,8 +133,10 @@ def register_user(request):
 	
 	if request.user.is_authenticated():
 		user = request.user
+		profile = Profile.objects.get(user=user)
 		form.fields["name"].initial = user.get_full_name()
 		form.fields["email"].initial = getattr(user, 'email')
+		form.fields["phone"].initial = profile.phone
 		form.fields['email'].widget.attrs['readonly'] = True
 		if user.profile_set.all():
 			try:
@@ -166,6 +169,7 @@ def reg_success(request, user_type):
 	if request.method == 'POST':
 		name = request.POST.get('name')
 		email = request.POST.get('email')
+		phone = request.POST.get('phone')
 		event_obj = request.POST.get('event')
 		event = TrainingEvents.objects.get(id=event_obj)
 		form = RegisterUser(request.POST)
@@ -194,6 +198,9 @@ def reg_success(request, user_type):
 
 				form_data.save()
 			event_name = event.event_name
+			userprofile = Profile.objects.get(user=request.user)
+			userprofile.phone = phone
+			userprofile.save()
 			if user_type == 'paid':
 				context = {'participant_obj':form_data}
 				return render(request, template_name, context)
@@ -445,7 +452,7 @@ class ParticipantCreateView(CreateView):
 			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
 			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
 			user.save()
-			create_profile(user, '')
+			create_profile(user, row[8].strip())
 			send_registration_confirmation(user)
 			return user
 
