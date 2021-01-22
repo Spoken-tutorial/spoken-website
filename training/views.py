@@ -306,7 +306,8 @@ def listevents(request, role, status):
 		10: SortableHeader('Participant Count', True),
 		11: SortableHeader('Action', False)
 		}
-
+		event_type = request.GET.get('event_type', None)
+		pcount, mcount, fcount = get_all_events_detail(queryset, event_type) if event_type else get_all_events_detail(queryset)
 		raw_get_data = request.GET.get('o', None)
 		queryset = get_sorted_list(
 			request,
@@ -329,6 +330,9 @@ def listevents(request, role, status):
 	context['header'] = header
 	context['today'] = today
 	context['ordering'] = get_field_index(raw_get_data)
+	context['pcount'] = pcount
+	context['mcount'] = mcount
+	context['fcount'] = fcount
 
 	return render(request,'event_status_list.html',context)
 
