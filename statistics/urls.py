@@ -25,5 +25,6 @@ urlpatterns =  [ # noqa
         name="academic_center_view"),
     url(r'^learners/$',  learners, name="learners"),
     url(r'^pmmmnmtt/fdp/$',  fdp_training, name="fdp_training"),
+    url(r'^ilw/$',  ilw_stats, name="ilw_stats"),
 
 ]

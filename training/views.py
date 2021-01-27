@@ -934,3 +934,32 @@ def reopen_event(request, eventid):
 		messages.error(request, 'Request not sent.Please try again.')
 	return HttpResponseRedirect("/training/event/rp/completed/")
 
+
+class EventParticipantsListView(ListView):
+	queryset = ""
+	unsuccessful_payee = ""
+	paginate_by = 500
+	success_url = ""
+
+	def dispatch(self, *args, **kwargs):
+		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
+		main_query = Participant.objects.filter(event_id=kwargs['eventid'])
+
+		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)))
+		# self.unsuccessful_payee = main_query.filter(payment_status__status__in=(0,2))
+
+		
+		if self.event.training_status == 1:
+			self.queryset = main_query.filter(reg_approval_status=1)
+
+		if self.event.training_status == 2:
+			self.queryset = self.event.eventattendance_set.all()
+		return super(EventParticipantsListView, self).dispatch(*args, **kwargs)
+
+
+	def get_context_data(self, **kwargs):
+		context = super(EventParticipantsListView, self).get_context_data(**kwargs)
+		
+		context['event'] = self.event
+		context['eventid'] = self.event.id
+		return context
