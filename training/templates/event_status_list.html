@@ -86,6 +86,24 @@ Today is : {{today}}
            <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
           </div>
         </div>
+        <table class="table table-bordered table-hover" style="margin-bottom:0px;">
+          <tr>
+              <th>Total number of Events</th>
+              <td>{{ collection.paginator.count }}</td>
+          </tr>
+          <tr>
+              <th>Participants Count</th>
+              <td>{{ pcount }}</td>
+          </tr> 
+          <tr>
+              <th>Total female participants</th>
+              <td>{{ fcount }}</td>
+          </tr>
+          <tr>
+              <th>Total male participants</th>
+              <td>{{ mcount }}</td>
+          </tr>
+      </table>
       </div>
       
     </form>
