@@ -13,7 +13,7 @@ from django.utils.timezone import now
 
 # Spoken Tutorial Stuff
 from cms.sortable import *
-from events.filters import AcademicCenterFilter, TestFilter, TrainingRequestFilter, TrEventFilter
+from events.filters import AcademicCenterFilter, TestFilter, TrainingRequestFilter, EventStatsFilter
 from events.models import *
 from training.models import *
 from creation.models import TutorialResource
@@ -619,7 +619,7 @@ def ilw_stats(request):
         header,
         raw_get_data
     )
-    collection= TrEventFilter(request.GET, queryset=queryset)
+    collection= EventStatsFilter(request.GET, queryset=queryset)
   
     femalecount =0
     malecount =0
