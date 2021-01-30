@@ -68,4 +68,9 @@ urlpatterns = [
     ),
     url(r'transaction_csv/(?P<purpose>\w+)/$', transaction_csv, name='transaction_csv'),
     url(r'reopen-event/(?P<eventid>\w+)/$', reopen_event, name='reopen_event'),
+    url(
+      r'^(?P<eventid>\d+)/eventparticipants$', 
+      EventParticipantsListView.as_view(template_name="stat_event_participants.html"), 
+      name="event_participants"
+    ),
     ]

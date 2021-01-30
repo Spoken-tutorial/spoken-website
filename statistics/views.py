@@ -13,8 +13,9 @@ from django.utils.timezone import now
 
 # Spoken Tutorial Stuff
 from cms.sortable import *
-from events.filters import AcademicCenterFilter, TestFilter, TrainingRequestFilter
+from events.filters import AcademicCenterFilter, TestFilter, TrainingRequestFilter, EventStatsFilter
 from events.models import *
+from training.models import *
 from creation.models import TutorialResource
 from creation.filters import CreationStatisticsFilter
 from events.views import get_page
@@ -88,6 +89,7 @@ def training(request):
     TRAINING_PENDING = '0'
     if request.method == 'GET':
         status = request.GET.get('status')
+        print('###################', status)
         if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
             status = TRAINING_COMPLETED
 
@@ -546,3 +548,108 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     context['ordering'] = ordering
 
     return render(request, template, context)
+
+
+
+def ilw_stats(request):
+    queryset =TrainingEvents.objects.filter(training_status=2).order_by('-event_start_date')
+    context = {} 
+
+    REG_COMPLETED = '1'
+    CLOSED_TRAINING = '2'
+
+    if request.method == 'GET':
+        status = request.GET.get('status')
+        if status not in [REG_COMPLETED, CLOSED_TRAINING]:
+            status = CLOSED_TRAINING
+    if status == REG_COMPLETED:
+        queryset = TrainingEvents.objects.filter(training_status=1).order_by('-event_start_date')
+    elif status == CLOSED_TRAINING:
+        queryset = TrainingEvents.objects.filter(training_status=2).order_by('-event_start_date')
+
+
+    header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader(
+          'state__name',
+          True,
+          'State'
+        ),
+        3: SortableHeader(
+          'host_college__academic_code',
+          True,
+          'Code'
+        ),
+        4: SortableHeader(
+          'host_college__institution_name',
+          True,
+          'Institution'
+        ),
+        5: SortableHeader('foss__foss', True, 'Foss Name'),
+        6: SortableHeader(
+          'event_coordinator_name',
+          True,
+          'Coordinator'
+        ),
+        7: SortableHeader(
+          'registartion_end_date',
+          True,
+          'Registration Period'
+        ),
+        8: SortableHeader(
+          'event_start_date',
+          True,
+          'Event Start Date'
+        ),
+        9: SortableHeader(
+          'event_end_date',
+          True,
+          'Event End Date'
+        ),
+        10: SortableHeader('Participant Count', True),
+        11: SortableHeader('Action', False)
+        }
+
+    raw_get_data = request.GET.get('o', None)
+
+
+    queryset = get_sorted_list(
+        request,
+        queryset,
+        header,
+        raw_get_data
+    )
+    collection= EventStatsFilter(request.GET, queryset=queryset)
+  
+    femalecount =0
+    malecount =0
+
+    if status == REG_COMPLETED:
+        participants = Participant.objects.filter(event_id__in=collection.qs, reg_approval_status=1)
+        pcount = participants.count()
+        female_list=list(participants.filter(gender__in=('f','F','female','Female','FEMALE')).values_list('id'))
+        male_list=list(participants.filter(gender__in=('m','M','male','Male','MALE')).values_list('id'))
+    
+    elif status == CLOSED_TRAINING:
+        participants = EventAttendance.objects.filter(event_id__in=collection.qs)
+        pcount=participants.count()
+        female_list = list(participants.filter(participant__gender__in=('f','F','female','Female','FEMALE')).values_list('id'))
+        male_list=list(participants.filter(participant__gender__in=('m','M','male','Male','MALE')).values_list('id'))
+
+    
+    
+    femalecount= len([i[0] for i in female_list])   
+    
+    malecount= len([i[0] for i in male_list])
+    
+    
+    context['form'] = collection.form
+    page = request.GET.get('page')
+    collection = get_page(collection.qs, page)
+    context['collection'] = collection
+    context['header'] = header
+    context['participants'] = pcount
+    context['femalecount'] = femalecount
+    context['malecount'] = malecount
+    context['status'] = status
+    return render(request, 'statistics/templates/ilw_stats.html', context)

@@ -414,3 +414,38 @@ class PaymentTransFilter(django_filters.FilterSet):
   class Meta(object):
     model = PaymentTransaction
     fields = []
+
+
+class EventStatsFilter(django_filters.FilterSet):
+  state = django_filters.ChoiceFilter(
+    choices= [('', '---------')] + list(
+      TrainingEvents.objects.filter().order_by('state__name').values_list('state__id', 'state__name').distinct()
+    )
+  )
+  host_college = django_filters.ChoiceFilter()
+  foss = django_filters.ChoiceFilter(
+    choices= [('', '---------')] + list(
+      TrainingEvents.objects.filter().order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()
+    )
+  )
+  event_type = django_filters.ChoiceFilter(choices=[('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
+), ('SSDP', 'School Students  Development Program')])
+  event_start_date = django_filters.DateFromToRangeFilter()
+  event_end_date = django_filters.DateFromToRangeFilter()
+
+  def __init__(self, *args, **kwargs):
+    user = None
+    if 'user' in kwargs:
+      user = kwargs['user']
+      kwargs.pop('user')
+
+    super(EventStatsFilter, self).__init__(*args, **kwargs)
+    
+    all_events = TrainingEvents.objects.all()
+    host_choices = list(
+      all_events.filter().order_by('host_college__institution_name').values_list('host_college__id', 'host_college__institution_name').distinct()
+      )
+    self.filters['host_college'].extra.update({'choices' : host_choices})
+  class Meta(object):
+    model = TrainingEvents
+    fields = ['state', 'foss', 'host_college', 'event_type']
