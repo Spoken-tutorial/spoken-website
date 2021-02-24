@@ -2297,7 +2297,7 @@ def test_participant_ceritificate(request, wid, participant_id):
         imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
 
     #password
-    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFillColorRGB(0, 0, 0)
     imgDoc.setFont('Helvetica', 10, leading=None)
     imgDoc.drawString(10, 6, certificate_pass)
     #imgDoc.drawString(100, 100, 'transparent')
@@ -2305,18 +2305,18 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     # Draw image on Canvas and save PDF in buffer
     imgPath = settings.MEDIA_ROOT +"sign.jpg"
-    imgDoc.drawImage(imgPath, 600, 80, 150, 76)    ## at (399,760) with size 160x160
+    imgDoc.drawImage(imgPath, 600, 95, 150, 76)    ## at (399,760) with size 160x160
 
     #paragraphe
     if ta.test.training.department.id == 169:
         text = " This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b>  has successfully completed <b>"+w.foss.foss+"</b> test on <b>"+str(w.tdate)+"</b> organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at I<b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay."
     elif ta.test.academic.institution_type_id == 18:
-        text = " This is to certify that <b><u>"+mdluser.firstname +" "+mdluser.lastname+"</u></b>  has successfully completed <b>"+w.foss.foss+"</b> test organized at "+w.academic.institution_name+" by <u>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</u> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training.<br/><br/><u>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</u> at "+w.academic.institution_name+" invigilated this examination.</br><br/>This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, Ministry of Education, Govt., of India."
+        text = "This is to certify that <b><u>"+mdluser.firstname +" "+mdluser.lastname+"</u></b>  has successfully completed <b>"+w.foss.foss+"</b> test organized at "+w.academic.institution_name+" by <u>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</u> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <u>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</u> at "+w.academic.institution_name+" invigilated this examination.<br/>This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, Ministry of Education, Govt., of India."
     else:
         text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay.</p>"
 
     centered = ParagraphStyle(name = 'centered',
-        fontSize = 16,
+        fontSize = 15,
         leading = 24,
         alignment = 0,
         spaceAfter = 20)
