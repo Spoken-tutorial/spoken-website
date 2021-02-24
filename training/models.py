@@ -93,3 +93,8 @@ class TrainingCertificate(models.Model):
     verified = models.IntegerField(default=0)
     serial_key = models.CharField(max_length=200, null=True)
     short_key = models.CharField(max_length=50, null=True)
+
+class ILWFossMdlCourses(models.Model):
+  foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+  mdlcourse_id = models.PositiveIntegerField()
+  mdlquiz_id = models.PositiveIntegerField()
