@@ -2310,6 +2310,8 @@ def test_participant_ceritificate(request, wid, participant_id):
     #paragraphe
     if ta.test.training.department.id == 169:
         text = " This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b>  has successfully completed <b>"+w.foss.foss+"</b> test on <b>"+str(w.tdate)+"</b> organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at I<b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay."
+    elif ta.test.academic.institution_type_id == 18:
+        text = " This is to certify that <b><u>"+mdluser.firstname +" "+mdluser.lastname+"</u></b>  has successfully completed <b>"+w.foss.foss+"</b> test organized at "+w.academic.institution_name+" by <u>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</u> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training.<br/><br/><u>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</u> at "+w.academic.institution_name+" invigilated this examination.</br><br/>This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, Ministry of Education, Govt., of India."
     else:
         text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay.</p>"
 
@@ -2342,8 +2344,10 @@ def test_participant_ceritificate(request, wid, participant_id):
     # Use PyPDF to merge the image-PDF into the template
     if ta.test.training.department.id == 169:
         page = PdfFileReader(open(settings.MEDIA_ROOT +"fdp-test-certificate.pdf","rb")).getPage(0)
+    elif ta.test.academic.institution_type_id == 18:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"Certificate_CSC_blank.pdf","rb")).getPage(0)
     else:
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)  
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
