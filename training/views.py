@@ -120,6 +120,7 @@ class TrainingEventsListView(ListView):
 		context['status'] =  self.status
 		context['events'] =  self.events
 		context['show_myevents'] = self.show_myevents
+		context['ONLINE_TEST_URL'] = settings.ONLINE_TEST_URL
 		if self.request.user:
 			context['user'] = self.request.user
 		return context

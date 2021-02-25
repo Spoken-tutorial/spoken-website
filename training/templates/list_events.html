@@ -176,6 +176,13 @@
                         <input type="hidden" name="eventid" value="{{event.event.id}}">
                         <button class="btn btn-info" type="submit" 
                         formaction="{% url 'training:generate_training_certificate'%}">Download certificate</button>
+                        {% with courseid=event.event.foss_id|get_ilw_mdlcourseid %}
+                          {% if courseid %}
+                            <a class="btn btn-success" href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid.mdlcourse_id}}" target="_blank"> Continue Test</a>
+                          {% else %}
+                              <a class="btn btn-success" href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Continue Test</a>
+                          {% endif %}
+                        {% endwith %}
                     {% endif %} 
                 </div>
 	       </div>
