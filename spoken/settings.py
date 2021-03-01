@@ -229,6 +229,7 @@ CONN_MAX_AGE = 100
 
 #events settings
 ONLINE_TEST_URL = ONLINE_TEST_URL
+ILW_ONLINE_TEST_URL = ILW_ONLINE_TEST_URL
 KEEP_LOGGED_DURATION = 604800
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
