@@ -176,6 +176,22 @@
                         <input type="hidden" name="eventid" value="{{event.event.id}}">
                         <button class="btn btn-info" type="submit" 
                         formaction="{% url 'training:generate_training_certificate'%}">Download certificate</button>
+                        {% with courseid=event.event.foss_id|get_ilw_mdlcourseid %}
+                          {% if courseid %}
+                          <!-- <input type="hidden" id="mdlcourseid" name="mdlcourseid" value="{{courseid}}"> -->
+
+                          <input type="hidden" id="testurl" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{courseid.mdlcourse_id}}">
+
+                          <button class="btn btn-info" type="button" 
+                          onclick="take_to_test({{event.id}}, {{courseid.mdlcourse_id}}, {{courseid.mdlquiz_id}}, {{event.event.foss_id}}, {{event.event_id}});"
+                          >Attempt test</button>
+                            
+
+                            <!-- <a id="test_button" class="btn btn-success" href="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{courseid.mdlcourse_id}}" target="_blank"> Continue Test</a>
+                          {% else %}
+                              <a class="btn btn-success" href="{{ ILW_ONLINE_TEST_URL }}course/" target="_blank"> Continue Test</a> -->
+                          {% endif %}
+                        {% endwith %}
                     {% endif %} 
                 </div>
 	       </div>
@@ -217,4 +233,37 @@
         {% endfor %}
     </div>
 </div>
+{% endblock %}
+
+
+{% block jsblock %}
+<script type="text/javascript">
+
+function take_to_test(partid, mdlcourseid, mdlquizid, fossid, eventid){
+  // var mdlcourseid  = $('#mdlcourseid').val();
+  var testurl = $('#testurl').val();
+  $.ajax({
+                type : "POST",
+                url:"/training/ajax_add_teststatus/",
+                dataType : "json",
+                data: {
+                  'partid' : partid,
+                  'mdlcourseid' : mdlcourseid,
+                  'mdlquizid' : mdlquizid,
+                  'fossid' : fossid,
+                  'eventid' : eventid,
+
+                },
+                success: function(data)
+                {
+                    
+                     window.location = testurl;
+
+
+                }
+});
+
+}
+
+</script>
 {% endblock %}

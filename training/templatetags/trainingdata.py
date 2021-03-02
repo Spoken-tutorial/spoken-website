@@ -156,6 +156,15 @@ def get_event_details(eventid):
 
   return event
 
+@register.filter
+def get_ilw_mdlcourseid(eventfossid):
+  try:
+    ilwcourse = ILWFossMdlCourses.objects.get(foss=eventfossid)
+  except ILWFossMdlCourses.DoesNotExist:
+    return None
+
+  return ilwcourse
+
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)
 register.filter('is_user_registered', is_user_registered)

@@ -93,3 +93,19 @@ class TrainingCertificate(models.Model):
     verified = models.IntegerField(default=0)
     serial_key = models.CharField(max_length=200, null=True)
     short_key = models.CharField(max_length=50, null=True)
+
+class ILWFossMdlCourses(models.Model):
+  foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+  mdlcourse_id = models.PositiveIntegerField()
+  mdlquiz_id = models.PositiveIntegerField()
+
+class EventTestStatus(models.Model):
+	participant = models.ForeignKey(Participant, on_delete=models.PROTECT)
+	event = models.ForeignKey(TrainingEvents, on_delete=models.PROTECT)
+	mdlemail = models.EmailField(max_length=255,null=True)
+	fossid = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+	mdlcourse_id = models.PositiveIntegerField(default=0)
+	mdlquiz_id = models.PositiveIntegerField(default=0)
+	part_status = models.PositiveSmallIntegerField(default=0)
+	created = models.DateTimeField(auto_now_add = True)
+	updated = models.DateTimeField(auto_now = True)

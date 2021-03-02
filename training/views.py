@@ -22,7 +22,7 @@ from .models import *
 from .forms import *
 from .helpers import *
 from .templatetags.trainingdata import registartion_successful, get_event_details, get_user_detail
-from creation.models import TutorialResource, Language
+from creation.models import TutorialResource, Language, FossCategory
 from events.decorators import group_required
 from events.models import *
 from events.views import is_resource_person, is_administrator, get_page 
@@ -120,6 +120,7 @@ class TrainingEventsListView(ListView):
 		context['status'] =  self.status
 		context['events'] =  self.events
 		context['show_myevents'] = self.show_myevents
+		context['ILW_ONLINE_TEST_URL'] = settings.ILW_ONLINE_TEST_URL
 		if self.request.user:
 			context['user'] = self.request.user
 		return context
@@ -967,3 +968,32 @@ class EventParticipantsListView(ListView):
 		context['event'] = self.event
 		context['eventid'] = self.event.id
 		return context
+
+
+
+
+@csrf_exempt
+def ajax_add_teststatus(request):
+	partid = int(request.POST.get("partid"))
+	mdlcourseid = int(request.POST.get("mdlcourseid"))
+	mdlquizid = int(request.POST.get("mdlquizid"))
+	fossid = int(request.POST.get("fossid"))
+	eventid = int(request.POST.get("eventid"))
+
+	useremail = request.user.email
+
+	testentry = EventTestStatus()
+	testentry.participant_id= partid	
+	testentry.event_id = eventid
+	testentry.mdlemail = useremail
+	testentry.fossid = FossCategory.objects.get(id=fossid)
+	testentry.mdlcourse_id = mdlcourseid
+	testentry.mdlquiz_id = mdlquizid
+
+	try:
+		testentry.save()
+		check = True
+	except:
+		check = False
+
+	return HttpResponse(json.dumps(check), content_type='application/json')
