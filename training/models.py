@@ -106,6 +106,7 @@ class EventTestStatus(models.Model):
 	fossid = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
 	mdlcourse_id = models.PositiveIntegerField(default=0)
 	mdlquiz_id = models.PositiveIntegerField(default=0)
+	mdlattempt_id = models.PositiveIntegerField(default=0)
 	part_status = models.PositiveSmallIntegerField(default=0)
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)

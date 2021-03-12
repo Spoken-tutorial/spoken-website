@@ -989,6 +989,7 @@ def ajax_add_teststatus(request):
 	testentry.fossid = FossCategory.objects.get(id=fossid)
 	testentry.mdlcourse_id = mdlcourseid
 	testentry.mdlquiz_id = mdlquizid
+	testentry.mdlattempt_id = 0
 
 	try:
 		testentry.save()
