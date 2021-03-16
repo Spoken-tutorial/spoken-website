@@ -979,6 +979,7 @@ def ajax_add_teststatus(request):
 	mdlquizid = int(request.POST.get("mdlquizid"))
 	fossid = int(request.POST.get("fossid"))
 	eventid = int(request.POST.get("eventid"))
+	fossId = FossCategory.objects.get(id=fossid)
 
 	useremail = request.user.email
 
@@ -986,15 +987,21 @@ def ajax_add_teststatus(request):
 	testentry.participant_id= partid	
 	testentry.event_id = eventid
 	testentry.mdlemail = useremail
-	testentry.fossid = FossCategory.objects.get(id=fossid)
+	testentry.fossid = fossId
 	testentry.mdlcourse_id = mdlcourseid
 	testentry.mdlquiz_id = mdlquizid
 	testentry.mdlattempt_id = 0
 
-	try:
-		testentry.save()
+	hasPrevEntry = EventTestStatus.objects.filter(participant_id=partid, event_id=eventid, mdlemail=useremail, fossid=fossId, mdlcourse_id=mdlcourseid, mdlquiz_id=mdlquizid, part_status__lt=2).first()
+
+	check = False
+	if not hasPrevEntry:
+		try:
+			testentry.save()
+			check = True
+		except:
+			check = False
+	else:
 		check = True
-	except:
-		check = False
 
 	return HttpResponse(json.dumps(check), content_type='application/json')
