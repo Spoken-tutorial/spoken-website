@@ -165,6 +165,28 @@ def get_ilw_mdlcourseid(eventfossid):
 
   return ilwcourse
 
+@register.filter
+def check_passgrade_exists(email,event):
+  fossid = event.foss_id
+
+  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event, fossid=fossid, mdlemail=email, part_status=2, mdlgrade__gte=40.00)
+  if ilwmdlgradeentry:
+    return True
+  else:
+    return False
+
+
+@register.filter
+def get_grade(email,event):
+  fossid = event.foss_id
+
+  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event, fossid=fossid, mdlemail=email, part_status=2, mdlgrade__gte=40.00).order_by('-mdlgrade').first()
+
+  return ilwmdlgradeentry.mdlgrade
+
+
+
+
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)
 register.filter('is_user_registered', is_user_registered)
