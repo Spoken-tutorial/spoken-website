@@ -169,7 +169,7 @@ def get_ilw_mdlcourseid(eventfossid):
 def check_passgrade_exists(email,event):
   fossid = event.foss_id
 
-  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event, fossid=fossid, mdlemail=email, part_status=2, mdlgrade__gte=40.00)
+  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event, fossid=fossid, mdlemail=email, part_status__gte=2, mdlgrade__gte=40.00)
   if ilwmdlgradeentry:
     return True
   else:
@@ -180,7 +180,7 @@ def check_passgrade_exists(email,event):
 def get_grade(email,event):
   fossid = event.foss_id
 
-  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event, fossid=fossid, mdlemail=email, part_status=2, mdlgrade__gte=40.00).order_by('-mdlgrade').first()
+  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event, fossid=fossid, mdlemail=email, part_status__gte=2, mdlgrade__gte=40.00).order_by('-mdlgrade').first()
 
   return ilwmdlgradeentry.mdlgrade
 

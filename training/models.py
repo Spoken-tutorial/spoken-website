@@ -108,6 +108,7 @@ class EventTestStatus(models.Model):
 	mdlquiz_id = models.PositiveIntegerField(default=0)
 	mdlattempt_id = models.PositiveIntegerField(default=0)
 	part_status = models.PositiveSmallIntegerField(default=0)
-	mdlgrade= models.DecimalField(max_digits = 10, decimal_places = 5, default=0.00) 
+	mdlgrade= models.DecimalField(max_digits = 10, decimal_places = 5, default=0.00)
+	cert_code= models.CharField(max_length = 100, null=True)
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
