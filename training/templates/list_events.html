@@ -174,8 +174,31 @@
                     {% endif %}
                     {% if event.event.id|is_event_closed and event.event.id|is_attendance_marked:event.id and user|registartion_successful:event.event %}    
                         <input type="hidden" name="eventid" value="{{event.event.id}}">
+                        
                         <button class="btn btn-info" type="submit" 
                         formaction="{% url 'training:generate_training_certificate'%}">Download certificate</button>
+                        
+                        
+                        {% if not event.email|check_passgrade_exists:event.event%}
+
+                            {% with courseid=event.event.foss_id|get_ilw_mdlcourseid %}
+                              {% if courseid %}
+                              <input type="hidden" id="testurl" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{courseid.mdlcourse_id}}">
+
+                            <button class="btn btn-info" type="button" 
+                              onclick="take_to_test({{event.id}}, {{courseid.mdlcourse_id}}, {{courseid.mdlquiz_id}}, {{event.event.foss_id}}, {{event.event_id}});">
+                              Attempt test
+                            </button>
+                              {% endif %}
+                            {% endwith %}
+
+                        {% else %}
+                            {% with grade=event.email|get_grade:event.event %}
+                            <button type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate'%}">Download Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
+                            {% endwith %}
+
+                        {% endif %}
+
                     {% endif %} 
                 </div>
 	       </div>
@@ -217,4 +240,37 @@
         {% endfor %}
     </div>
 </div>
+{% endblock %}
+
+
+{% block jsblock %}
+<script type="text/javascript">
+
+function take_to_test(partid, mdlcourseid, mdlquizid, fossid, eventid){
+  // var mdlcourseid  = $('#mdlcourseid').val();
+  var testurl = $('#testurl').val();
+  $.ajax({
+                type : "POST",
+                url:"/training/ajax_add_teststatus/",
+                dataType : "json",
+                data: {
+                  'partid' : partid,
+                  'mdlcourseid' : mdlcourseid,
+                  'mdlquizid' : mdlquizid,
+                  'fossid' : fossid,
+                  'eventid' : eventid,
+
+                },
+                success: function(data)
+                {
+                    
+                     window.location = testurl;
+
+
+                }
+});
+
+}
+
+</script>
 {% endblock %}

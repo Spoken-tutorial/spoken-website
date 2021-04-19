@@ -22,10 +22,10 @@ from .models import *
 from .forms import *
 from .helpers import *
 from .templatetags.trainingdata import registartion_successful, get_event_details, get_user_detail
-from creation.models import TutorialResource, Language
+from creation.models import TutorialResource, Language, FossCategory
 from events.decorators import group_required
 from events.models import *
-from events.views import is_resource_person, is_administrator, get_page 
+from events.views import is_resource_person, is_administrator, get_page, id_generator
 from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
@@ -120,6 +120,7 @@ class TrainingEventsListView(ListView):
 		context['status'] =  self.status
 		context['events'] =  self.events
 		context['show_myevents'] = self.show_myevents
+		context['ILW_ONLINE_TEST_URL'] = settings.ILW_ONLINE_TEST_URL
 		if self.request.user:
 			context['user'] = self.request.user
 		return context
@@ -967,3 +968,143 @@ class EventParticipantsListView(ListView):
 		context['event'] = self.event
 		context['eventid'] = self.event.id
 		return context
+
+
+
+
+@csrf_exempt
+def ajax_add_teststatus(request):
+	partid = int(request.POST.get("partid"))
+	mdlcourseid = int(request.POST.get("mdlcourseid"))
+	mdlquizid = int(request.POST.get("mdlquizid"))
+	fossid = int(request.POST.get("fossid"))
+	eventid = int(request.POST.get("eventid"))
+	fossId = FossCategory.objects.get(id=fossid)
+
+	useremail = request.user.email
+
+	testentry = EventTestStatus()
+	testentry.participant_id= partid	
+	testentry.event_id = eventid
+	testentry.mdlemail = useremail
+	testentry.fossid = fossId
+	testentry.mdlcourse_id = mdlcourseid
+	testentry.mdlquiz_id = mdlquizid
+	testentry.mdlattempt_id = 0
+
+	hasPrevEntry = EventTestStatus.objects.filter(participant_id=partid, event_id=eventid, mdlemail=useremail, fossid=fossId, mdlcourse_id=mdlcourseid, mdlquiz_id=mdlquizid, part_status__lt=2).first()
+
+	check = False
+	if not hasPrevEntry:
+		try:
+			testentry.save()
+			check = True
+		except:
+			check = False
+	else:
+		check = True
+
+	return HttpResponse(json.dumps(check), content_type='application/json')
+
+
+class ILWTestCertificate(object):
+  def custom_strftime(self, format, t):
+    return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
+
+  def suffix(self, d):
+    return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+
+  def create_ilwtest_certificate(self, event, participantname, teststatus):
+    training_start = event.event_start_date
+    training_end = event.event_end_date
+    event_type = event.event_type
+
+
+
+    response = HttpResponse(content_type='application/pdf')
+    filename = (participantname+'-'+event.foss.foss+"-Participant-Test-Certificate").replace(" ", "-");
+
+    response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+    imgTemp = BytesIO ()
+    imgDoc = canvas.Canvas(imgTemp)
+
+    # Title
+    imgDoc.setFont('Helvetica', 25, leading=None)
+    imgDoc.drawCentredString(405, 470, "Certificate for Completion of Training")
+
+    #password
+    certificate_pass = ''
+
+    if teststatus.cert_code:
+        certificate_pass = teststatus.cert_code
+        teststatus.part_status = 3 #certificate downloaded test over
+        teststatus.save()
+    else:
+        certificate_pass = str(teststatus.participant_id)+id_generator(10-len(str(teststatus.participant_id)))
+        teststatus.cert_code = certificate_pass
+        teststatus.part_status = 3 #certificate downloaded test over
+        teststatus.save()
+
+    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFont('Helvetica', 10, leading=None)
+    imgDoc.drawString(10, 6, certificate_pass)
+
+    # Draw image on Canvas and save PDF in buffer
+    imgPath = settings.MEDIA_ROOT +"sign.jpg"
+    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+
+    #paragraphe
+    text = "This is to certify that <b>"+participantname +"</b> successfully passed a \
+    <b>"+event.foss.foss+"</b> test, remotely conducted by the Spoken Tutorial project, IIT Bombay, under an honour invigilation system.\
+    <br /> Self learning through Spoken Tutorials and passing an online test completes the training programme."
+
+    centered = ParagraphStyle(name = 'centered',
+      fontSize = 16,
+      leading = 30,
+      alignment = 0,
+      spaceAfter = 20
+    )
+
+    p = Paragraph(text, centered)
+    p.wrap(650, 200)
+    p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+    imgDoc.save()
+    # Use PyPDF to merge the image-PDF into the template
+    if event_type == "FDP":
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+    else:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
+    page.mergePage(overlay)
+
+    #Save the result
+    output = PdfFileWriter()
+    output.addPage(page)
+
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response
+
+
+class EventTestCertificateView(ILWTestCertificate, View):
+  template_name = ""
+  
+  def dispatch(self, *args, **kwargs):
+    return super(EventTestCertificateView, self).dispatch(*args, **kwargs)
+
+  def post(self, request, *args, **kwargs):
+    eventid = self.request.POST.get("eventid")
+    print(eventid)
+    event = TrainingEvents.objects.get(id=eventid)
+    participantname = self.request.user.first_name+" "+self.request.user.last_name
+
+    teststatus = EventTestStatus.objects.get(event_id=eventid, mdlemail=self.request.user.email) 
+
+    if event:
+      return self.create_ilwtest_certificate(event, participantname, teststatus)
+    else:
+      messages.error(self.request, "Permission Denied!")
+    return HttpResponseRedirect("/")
