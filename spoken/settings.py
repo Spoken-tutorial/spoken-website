@@ -271,8 +271,8 @@ INTERNAL_IPS = ('127.0.0.1',)
 #Moodle Auth
 #AUTH_USER_MODEL = 'mdldjango.Users'
 DATABASE_ROUTERS = [
-    'ilwmoodle.router.ILWMoodleRouter',
     'mdldjango.router.MdlRouter',
+    'ilwmoodle.router.ILWMoodleRouter',
     'cdeep.router.CdeepRouter',
     'workshop.router.WorkshopRouter',
     'forums.router.ForumsRouter'
