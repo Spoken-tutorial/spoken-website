@@ -95,9 +95,10 @@ class TrainingCertificate(models.Model):
     short_key = models.CharField(max_length=50, null=True)
 
 class ILWFossMdlCourses(models.Model):
-	foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+	foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT, related_name='eventfoss', null=True)
 	mdlcourse_id = models.PositiveIntegerField()
 	mdlquiz_id = models.PositiveIntegerField()
+	testfoss = models.ForeignKey(FossCategory, on_delete=models.PROTECT, related_name='testfoss', null=True)
 
 	def __str__(self):
 		return self.foss.foss
