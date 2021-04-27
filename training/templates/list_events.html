@@ -194,7 +194,7 @@
                       {% else %}                    
 
                           {% with grade=event|get_grade:course.testfoss_id %}
-                          <button type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate'%}">Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
+                          <button type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate' course.testfoss_id%}">Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
                           {% endwith %}
                         
                       {% endif %}
