@@ -1022,7 +1022,7 @@ class ILWTestCertificate(object):
 
 
     response = HttpResponse(content_type='application/pdf')
-    filename = (participantname+'-'+event.foss.foss+"-Participant-Test-Certificate").replace(" ", "-");
+    filename = (participantname+'-'+teststatus.fossid.foss+"-Participant-Test-Certificate").replace(" ", "-");
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
     imgTemp = BytesIO ()
@@ -1055,7 +1055,7 @@ class ILWTestCertificate(object):
 
     #paragraphe
     text = "This is to certify that <b>"+participantname +"</b> successfully passed a \
-    <b>"+event.foss.foss+"</b> test, remotely conducted by the Spoken Tutorial project, IIT Bombay, under an honour invigilation system.\
+    <b>"+teststatus.fossid.foss+"</b> test, remotely conducted by the Spoken Tutorial project, IIT Bombay, under an honour invigilation system.\
     <br /> Self learning through Spoken Tutorials and passing an online test completes the training programme."
 
     centered = ParagraphStyle(name = 'centered',
@@ -1097,11 +1097,12 @@ class EventTestCertificateView(ILWTestCertificate, View):
 
   def post(self, request, *args, **kwargs):
     eventid = self.request.POST.get("eventid")
+
     print(eventid)
     event = TrainingEvents.objects.get(id=eventid)
     participantname = self.request.user.first_name+" "+self.request.user.last_name
 
-    teststatus = EventTestStatus.objects.get(event_id=eventid, mdlemail=self.request.user.email) 
+    teststatus = EventTestStatus.objects.get(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email) 
 
     if event:
       return self.create_ilwtest_certificate(event, participantname, teststatus)

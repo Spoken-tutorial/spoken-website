@@ -159,17 +159,22 @@ def get_event_details(eventid):
 @register.filter
 def get_ilw_mdlcourseid(eventfossid):
   try:
-    ilwcourse = ILWFossMdlCourses.objects.get(foss=eventfossid)
+    ilwcourse = ILWFossMdlCourses.objects.filter(foss=eventfossid)
   except ILWFossMdlCourses.DoesNotExist:
     return None
 
   return ilwcourse
 
 @register.filter
-def check_passgrade_exists(email,event):
-  fossid = event.foss_id
+def check_passgrade_exists(event,testfossid):
 
-  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event, fossid=fossid, mdlemail=email, part_status__gte=2, mdlgrade__gte=40.00)
+  # arg_list = [arg.strip() for arg in args.split(',')]
+  # email= arg_list[0]
+  # testfossid = arg_list[1]
+  # print("@@@@@@@@@@@@@@@",email, arg_list)
+
+
+  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event.event, fossid=testfossid, mdlemail=event.email, part_status__gte=2, mdlgrade__gte=40.00)
   if ilwmdlgradeentry:
     return True
   else:
@@ -177,10 +182,14 @@ def check_passgrade_exists(email,event):
 
 
 @register.filter
-def get_grade(email,event):
-  fossid = event.foss_id
+def get_grade(event, testfossid):
+  # fossid = event.foss_id
+  # email,event, testfossid
+  # arg_list = [arg.strip() for arg in args.split(',')]
 
-  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event, fossid=fossid, mdlemail=email, part_status__gte=2, mdlgrade__gte=40.00).order_by('-mdlgrade').first()
+  # email= arg_list[0]
+  # testfossid = arg_list[1]
+  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event.event, fossid=testfossid, mdlemail=event.email, part_status__gte=2, mdlgrade__gte=40.00).order_by('-mdlgrade').first()
 
   return ilwmdlgradeentry.mdlgrade
 
