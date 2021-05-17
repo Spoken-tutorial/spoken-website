@@ -1,41 +1,21 @@
-\documentclass{article}
-\usepackage[utf8]{inputenc}
-\usepackage{graphicx}
-\usepackage{wallpaper}
-\graphicspath{ {$image_dir} }
+* certificate template
 
-\title{
-\includegraphics[scale=0.5]{logo.png}   SPOKEN TUTORIALS
-}
-\author{CD Content Download Receipt}
+** Usage
+   - To generate a PDF file type,
+     #+BEGIN_SRC sh
+       make $command
+     #+END_SRC sh
+
+   - To clean the project
+     #+BEGIN_SRC sh
+       make clean
+     #+END_SRC sh
+
+** License
+   The tex file and all the images within this project are entirely
+   PRIVATE. It's usage outside the `Spoken-Tutorial Project` is an legal
+   offense and will be subject to suitable punishment by Indian law.
 
 
-\usepackage{natbib}
-\usepackage{hyperref}
-
-\begin{document}
-\TileWallPaper{22cm}{28cm}{back.png}
-\maketitle
-\centering
-\setlength{\tabcolsep}{10pt}
-\renewcommand{\arraystretch}{2.0}
-\large{
-\begin{tabular}{|c|c|}
-\hline
-\textbf{Name}           & \verb|$name| \\ \hline
-\textbf{Amount}         & $amount \\ \hline
-\textbf{Expiry}         & $expiry \\ \hline
-\textbf{Email}          & \verb|$email| \\ \hline
-\textbf{Transaction ID} & $transId \\ \hline
-\textbf{Provider}       & $provId \\ \hline
-\textbf{Status}         & $msg \\ \hline
-\end{tabular}
-}
-\\
-\vspace{10mm} %5mm vertical space
-\large{Thank You for choosing Spoken Tutorials}\\
-\vspace{10mm} %5mm vertical space
-\textbf{In a Journey to make India \\IT Literate}
-
-\bibliographystyle{plain}
-\end{document}
+** Website
+   [[https://spoken-tutorial.org]]

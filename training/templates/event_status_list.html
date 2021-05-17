@@ -14,6 +14,7 @@
 {% endblock%}
 {% block search %}{% endblock %}
 {% block content %}
+Today is : {{today}}
   <div class= 'filters row'>
     <form action="" method="get" class='form-horizontal'>
       <div class="col-lg-4 col-md-4 col-sm-4">
@@ -26,19 +27,31 @@
         </div>
      </div>
 
-<!--      <div class="col-lg-4 col-md-4 col-sm-4">
+     <div class="col-lg-4 col-md-4 col-sm-4">
         <div class="form-group">
-          <label for="id_resource_center" class="col-sm-4 control-label">Institution</label>
+          <label for="id_foss" class="col-sm-4 control-label">Foss</label>
           <div class="col-sm-8">
-            {% render_field form.host_college class+="form-control chosen host_college" tabindex="1" %}
+            {% render_field form.foss class+="form-control foss foss" tabindex="1" %}
+            {{ form.foss.errors }}
+          </div>
+        </div>
+     </div>
+
+     <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_host_college" class="col-sm-4 control-label">Host College</label>
+          <div class="col-sm-8">
+            {% render_field form.host_college class+="form-control host_college host_college" tabindex="1" %}
             {{ form.host_college.errors }}
           </div>
         </div>
-      </div> -->
+     </div>
+
+
 
       <div class="col-lg-4 col-md-4 col-sm-4">
        <div class="form-group">
-          <label for="id_tdate" class="col-sm-4 control-label">Start Date Range</label>
+          <label for="id_tdate" class="col-sm-4 control-label">Event Start Date Range</label>
           <div class="col-sm-8">
             {% render_field form.event_start_date class+="form-control event_start_date date" tabindex="1" %}
             {{ form.event_start_date.errors }}
@@ -48,10 +61,20 @@
 
       <div class="col-lg-4 col-md-4 col-sm-4"> 
         <div class="form-group">
-          <label for="id_tdate" class="col-sm-4 control-label">End Date Range</label>
+          <label for="id_tdate" class="col-sm-4 control-label">Event End Date Range</label>
           <div class="col-sm-8">
             {% render_field form.event_end_date class+="form-control event_end_date date" tabindex="1" %}
             {{ form.event_end_date.errors }}
+          </div>
+        </div>
+        </div>
+
+        <div class="col-lg-4 col-md-4 col-sm-4"> 
+        <div class="form-group">
+          <label for="id_event_type" class="col-sm-4 control-label">Event Type</label>
+          <div class="col-sm-8">
+            {% render_field form.event_type class+="form-control event_type event_type" tabindex="1" %}
+            {{ form.event_type.errors }}
           </div>
         </div>
         </div>
@@ -63,6 +86,24 @@
            <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
           </div>
         </div>
+        <table class="table table-bordered table-hover" style="margin-bottom:0px;">
+          <tr>
+              <th>Total number of Events</th>
+              <td>{{ collection.paginator.count }}</td>
+          </tr>
+          <tr>
+              <th>Participants Count</th>
+              <td>{{ pcount }}</td>
+          </tr> 
+          <tr>
+              <th>Total female participants</th>
+              <td>{{ fcount }}</td>
+          </tr>
+          <tr>
+              <th>Total male participants</th>
+              <td>{{ mcount }}</td>
+          </tr>
+      </table>
       </div>
       
     </form>
@@ -72,6 +113,7 @@
     <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/training/event/rp/ongoing/">Pending / Ongoing</a></li>
     <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/training/event/rp/completed/">Completed</a></li>
     <li {% if status == 'closed' %}{{ 'class="active"'}}{% endif %}><a href="/training/event/rp/closed/">Closed</a></li>
+    <li {% if status == 'expired' %}{{ 'class="active"'}}{% endif %}><a href="/training/event/rp/expired/">Expired</a></li>
     
   </ul>
   <!-- Tab panes -->
@@ -92,8 +134,16 @@
             <td>{{ record.event_start_date }}</td>
             <td>{{ record.event_end_date }}</td>
             <td>
+              {% with pcount=record.id|get_participant_count %}
+                {{pcount}}
+              {% endwith %}
+
+            </td>
+            <td>
               {% if record.training_status == 0%}
-                <a href="{% url 'training:edit_event' record.id %}" >Edit Event</a> |
+                {% if not record.id|is_tr_expired%}
+                <a href="{% url 'training:edit_event' record.id %}">Edit Event</a> |
+                {% endif %}
                 <a href="{% url 'training:upload_participants' record.id %}" >Upload Participants</a> |
               {% endif %}
               {% if record.id|is_tr_ongoing%}
@@ -102,6 +152,9 @@
                   <a style="color: orange;" href="{% url 'training:event_attendance' record.id %}" >Participant List</a>
               {% else %}
                   <a style="color: green;" href="{% url 'training:event_attendance' record.id %}" >Participant List</a>
+              {% endif %}
+              {% if record.id|is_tr_completed %}
+                <a style="color: green;" href="{% url 'training:reopen_event' record.id %}" >| Re-open</a>
               {% endif %}
 
             </td>

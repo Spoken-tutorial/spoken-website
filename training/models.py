@@ -6,10 +6,19 @@ from builtins import object
 from django.contrib.auth.models import User
 from creation.models import FossCategory, Language
 from events.models import *
-from .helpers import EVENT_TYPE_CHOICES, REGISTRATION_TYPE_CHOICES
 from donate.models import Payee
 from donate.helpers import GENDER_CHOICES
 import json
+
+EVENT_TYPE_CHOICES =(
+	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
+), ('SSDP', 'School Students  Development Program')
+	)
+
+
+REGISTRATION_TYPE_CHOICES =(
+    ('', '-----'),  (1, 'Subscribed College'),(2, 'Manual Registration')
+    )
 
 class TrainingEvents(models.Model):	
 
@@ -84,3 +93,26 @@ class TrainingCertificate(models.Model):
     verified = models.IntegerField(default=0)
     serial_key = models.CharField(max_length=200, null=True)
     short_key = models.CharField(max_length=50, null=True)
+
+class ILWFossMdlCourses(models.Model):
+	foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT, related_name='eventfoss', null=True)
+	mdlcourse_id = models.PositiveIntegerField()
+	mdlquiz_id = models.PositiveIntegerField()
+	testfoss = models.ForeignKey(FossCategory, on_delete=models.PROTECT, related_name='testfoss', null=True)
+
+	def __str__(self):
+		return self.foss.foss
+
+class EventTestStatus(models.Model):
+	participant = models.ForeignKey(Participant, on_delete=models.PROTECT)
+	event = models.ForeignKey(TrainingEvents, on_delete=models.PROTECT)
+	mdlemail = models.EmailField(max_length=255,null=True)
+	fossid = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+	mdlcourse_id = models.PositiveIntegerField(default=0)
+	mdlquiz_id = models.PositiveIntegerField(default=0)
+	mdlattempt_id = models.PositiveIntegerField(default=0)
+	part_status = models.PositiveSmallIntegerField(default=0)
+	mdlgrade= models.DecimalField(max_digits = 10, decimal_places = 5, default=0.00)
+	cert_code= models.CharField(max_length = 100, null=True)
+	created = models.DateTimeField(auto_now_add = True)
+	updated = models.DateTimeField(auto_now = True)

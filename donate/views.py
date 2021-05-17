@@ -33,9 +33,51 @@ import os
 from events.models import AcademicKey
 import random
 from training.views import reg_success
+from .models import *
+from .forms import *
+# @csrf_exempt
+# def donatehome(request):
+#     form = PayeeForm(initial={'country': 'India'})
+#     if request.method == 'POST':
+#         type = request.POST.get("type", "")
+#         amount = request.POST.get("amount", "")
+#         if type == 'initiate':
+#             form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
+#             form.initial = {'amount': amount}
+#     else:
+#         form = DonateForm(initial={'country': 'India', 'amount': 50.00})
+#         form.fields['amount'].widget = forms.NumberInput(attrs={'min': 50.00, 'step': 50.00})
+
+#     context = {
+#         'form': form
+#     }
+#     context.update(csrf(request))
+#     # return render(request, 'donate/templates/cd_payment_success.html', context)
+#     return render(request, 'donate/donate.html', context)
+
 @csrf_exempt
 def donatehome(request):
-    form = PayeeForm(initial={'country': 'India'})
+    form = DonateForm()
+    if request.method == 'POST':
+        type = request.POST.get("type", "")
+        amount = request.POST.get("amount", "")
+        if type == 'initiate':
+            form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
+
+            form.initial = {'amount': amount}        
+    else:
+        initial = {'amount': 500}
+        form = DonateForm(initial = initial)
+    context = {
+        'form': form
+    }
+    context.update(csrf(request))
+    # return render(request, 'donate/templates/cd_payment_success.html', context)
+    return render(request, 'donate/donate.html', context)
+
+@csrf_exempt
+def purchase(request):
+    form = GoodiesForm()
     if request.method == 'POST':
         type = request.POST.get("type", "")
         amount = request.POST.get("amount", "")
@@ -43,15 +85,30 @@ def donatehome(request):
             form.fields['amount'].widget = forms.NumberInput(attrs={'min': amount, 'step': 50.00})
             form.initial = {'amount': amount}
     else:
-        form = PayeeForm(initial={'country': 'India', 'amount': 50.00})
-        form.fields['amount'].widget = forms.NumberInput(attrs={'min': 50.00, 'step': 50.00})
-
+        initial = {'amount': 1000}
+        form = GoodiesForm(initial=initial)
     context = {
         'form': form
     }
     context.update(csrf(request))
-    return render(request, 'donate/templates/cd_payment_success.html', context)
+    # return render(request, 'donate/templates/cd_payment_success.html', context)
+    return render(request, 'donate/purchase.html', context)
 
+@csrf_exempt
+def pay_now(request, purpose):
+    if request.method=='POST':
+        if 'Donate' in purpose:
+            form = DonateForm(request.POST)
+        if 'Goodie' in purpose:
+            form = GoodiesForm(request.POST)
+        if form.is_valid():
+            form.save(commit=False)
+            form.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
+            obj = form.save()
+            data = get_final_data(request, obj, purpose)
+        else:
+            messages.errors(request,'Invalid Form')
+    return render(request, 'payment_status.html', data)
 
 @csrf_exempt
 def form_valid(request, form, purpose):
@@ -59,6 +116,7 @@ def form_valid(request, form, purpose):
     If the form is valid, save the associated model.
     """
     form_data = form.save(commit=False)
+    form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
     form_data.user = request.user
     form_data.status = 0
     form_data.expiry = calculate_expiry()
@@ -126,7 +184,7 @@ def controller(request, purpose):
             participant_form.save()
         except :
             return redirect('training:list_events', status='myevents')
-    data = get_final_data(request, form, purpose)
+    data = get_final_data(request, payee_obj_new, purpose)
     return render(request, 'payment_status.html', data)
 
 
@@ -135,30 +193,30 @@ def calculate_expiry():
     return datetime.now() + timedelta(days = EXPIRY_DAYS)
 
 @csrf_exempt
-def encrypted_data(request, form, purpose):
+def encrypted_data(request, obj, purpose):
     STdata = ''
-    user_name = form.cleaned_data.get('name')
-    amount = form.cleaned_data.get('amount')   
+    user_name = obj.name
+    amount = obj.amount
     #amount = 1.00
-    purpose = purpose+"NEW"+str(form.save(commit=False).pk)
-    request_id = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
+    purpose = purpose+"NEW"+str(obj.pk)
+    request_id = obj.reqId
     STdata =  request_id + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
     return s
 
 
 @csrf_exempt
-def get_final_data(request, form, purpose):
+def get_final_data(request, obj, purpose):
     data = {
-            'reqId' :  CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20]),
+        'reqId' :  obj.reqId,
         'userId': str(request.user.id),
-        'name': form.cleaned_data.get('name'),
-        'amount':form.cleaned_data.get('amount'),
+        'name': obj.name,
+        'amount': obj.amount,
         #'amount': 1.00,
-        'purpose': purpose+"NEW"+str(form.save(commit=False).pk) ,
+        'purpose': purpose+"NEW"+str(obj.pk) ,
         'channelId': CHANNEL_ID,
         'target': TARGET,
-        'random': encrypted_data(request, form, purpose)
+        'random': encrypted_data(request, obj, purpose)
     }
     return data
 
@@ -262,12 +320,12 @@ def validate(request):
 
 def receipt(request):
     response = HttpResponse(content_type='application/pdf')
-    file_name = request.POST.get("name")
+    file_name = request.POST.get("name").split(" ")[0]
     
     try:
         download_file_name = None
         template = 'receipt_template'
-        download_file_name = "ST_"+request.POST.get("name")+'.pdf'
+        download_file_name = "ST_" + file_name + '.pdf'
         certificate_path = os.path.dirname(os.path.realpath(__file__))+"/receipt/"
         template_file = open('{0}{1}'.format
                              (certificate_path, template), 'r')
@@ -284,7 +342,6 @@ def receipt(request):
             provId = request.POST.get("provId"),
             status = request.POST.get("status"),
             msg = request.POST.get("msg"),
-            key = request.POST.get("key"),
             expiry = request.POST.get("expiry"),
             email = request.POST.get("email"))
         create_tex = open('{0}{1}.tex'.format
@@ -292,14 +349,19 @@ def receipt(request):
         create_tex.write(content_tex)
         create_tex.close()
         out = certificate_path
+        command = 'user_receipt'
+        process = subprocess.Popen('make -C {0} {1} file_name={2}'.format(certificate_path, command, file_name),
+            stderr=subprocess.PIPE, shell=True)
         
-        subprocess.run(['pdflatex','--output-directory',certificate_path,certificate_path+file_name+'.tex'])
-        pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
-        response['Content-Disposition'] = 'attachment; \
-                    filename=%s' % (download_file_name)
-        response.write(pdf.read())
-        _clean_certificate_certificate(certificate_path, file_name)
-        return response
+        err = process.communicate()[1]
+        if process.returncode == 0:
+            pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
+            response['Content-Disposition'] = 'attachment; \
+                        filename=%s' % (download_file_name)
+            response.write(pdf.read())
+            clean_process = subprocess.Popen('make -C {0} clean file_name={1}'.format(
+                certificate_path, file_name), shell=True)
+            return response
     except Exception as e:
         print("error is ",e)
 

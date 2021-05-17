@@ -21,14 +21,35 @@ import uuid
 from .models import *
 from .forms import *
 from .helpers import *
-from .templatetags.trainingdata import registartion_successful
-from creation.models import TutorialResource, Language
+from .templatetags.trainingdata import registartion_successful, get_event_details, get_user_detail
+from creation.models import TutorialResource, Language, FossCategory
 from events.decorators import group_required
 from events.models import *
-from events.views import is_resource_person, is_administrator, get_page 
-from events.filters import ViewEventFilter
+from events.views import is_resource_person, is_administrator, get_page, id_generator
+from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
+from cms.models import Profile
+from certificate.views import _clean_certificate_certificate
+from django.http import HttpResponse
+import os, sys
+from string import Template
+import subprocess
+
+#pdf generate
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, landscape
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.lib.enums import TA_CENTER
+from PyPDF2 import PdfFileWriter, PdfFileReader
+from io import BytesIO
+from django.conf import settings
+from donate.models import *
+
+import csv
+
 
 
 today = date.today()
@@ -52,9 +73,12 @@ class TrainingEventCreateView(CreateView):
 		messages.success(self.request, "New Event created successfully.")
 		return HttpResponseRedirect(self.success_url)
 
-
+#ILW main page
 class TrainingEventsListView(ListView):
 	model = TrainingEvents
+	raw_get_data = None
+	header = None
+	collection = None
 
 	def dispatch(self, *args, **kwargs):
 		self.status = self.kwargs['status']
@@ -74,14 +98,29 @@ class TrainingEventsListView(ListView):
 				Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
 				user_id=self.request.user.id)
 			self.events = participant
+
+		self.raw_get_data = self.request.GET.get('o', None)
+		self.queryset = get_sorted_list(
+			self.request,
+			self.events,
+			self.header,
+			self.raw_get_data
+		)
+
+		self.collection= ViewEventFilter(self.request.GET, queryset=self.queryset, user=self.request.user)
 		return super(TrainingEventsListView, self).dispatch(*args, **kwargs)
 
 	def get_context_data(self, **kwargs):
 		context = super(TrainingEventsListView, self).get_context_data(**kwargs)
-
+		context['form'] = self.collection.form
+		page = self.request.GET.get('page')
+		collection = get_page(self.collection.qs, page)
+		context['collection'] =  collection
+		context['ordering'] = get_field_index(self.raw_get_data)
 		context['status'] =  self.status
 		context['events'] =  self.events
 		context['show_myevents'] = self.show_myevents
+		context['ILW_ONLINE_TEST_URL'] = settings.ILW_ONLINE_TEST_URL
 		if self.request.user:
 			context['user'] = self.request.user
 		return context
@@ -95,8 +134,10 @@ def register_user(request):
 	
 	if request.user.is_authenticated():
 		user = request.user
+		profile = Profile.objects.get(user=user)
 		form.fields["name"].initial = user.get_full_name()
 		form.fields["email"].initial = getattr(user, 'email')
+		form.fields["phone"].initial = profile.phone
 		form.fields['email'].widget.attrs['readonly'] = True
 		if user.profile_set.all():
 			try:
@@ -129,6 +170,7 @@ def reg_success(request, user_type):
 	if request.method == 'POST':
 		name = request.POST.get('name')
 		email = request.POST.get('email')
+		phone = request.POST.get('phone')
 		event_obj = request.POST.get('event')
 		event = TrainingEvents.objects.get(id=event_obj)
 		form = RegisterUser(request.POST)
@@ -157,6 +199,9 @@ def reg_success(request, user_type):
 
 				form_data.save()
 			event_name = event.event_name
+			userprofile = Profile.objects.get(user=request.user)
+			userprofile.phone = phone
+			userprofile.save()
 			if user_type == 'paid':
 				context = {'participant_obj':form_data}
 				return render(request, template_name, context)
@@ -194,6 +239,8 @@ class EventUpdateView(UpdateView):
 	form_class = CreateTrainingEventForm
 	success_url = "/training/event/rp/ongoing/"
 
+
+#used to display evnets to mngrs under dashboard link
 def listevents(request, role, status):
 	context = {}
 	user = request.user
@@ -203,16 +250,21 @@ def listevents(request, role, status):
 	if (not role ) or (not status):
 		raise PermissionDenied()
 
+	states = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)
+	TrMngerEvents = TrainingEvents.objects.filter(state__in=states).order_by('-event_start_date')
+	
 
-	status_list = {'ongoing': 0, 'completed': 1, 'closed': 2,}
+	status_list = {'ongoing': 0, 'completed': 1, 'closed': 2, 'expired': 3}
 	roles = ['rp', 'em']
 	if role in roles and status in status_list:
 		if status == 'ongoing':
-			queryset = TrainingEvents.objects.filter(training_status__lte=1, event_end_date__gte=today)
+			queryset = TrMngerEvents.filter(training_status__lte=1, event_end_date__gte=today)
 		elif status == 'completed':
-			queryset = TrainingEvents.objects.filter(training_status=1, event_end_date__lt=today)
+			queryset =TrMngerEvents.filter(training_status=1, event_end_date__lt=today)
 		elif status == 'closed':
-			queryset = TrainingEvents.objects.filter(training_status=2)
+			queryset = TrMngerEvents.filter(training_status=2)
+		elif status == 'expired':
+			queryset = TrMngerEvents.filter(training_status=0, event_end_date__lt=today)
 
 		header = {
 		1: SortableHeader('#', False),
@@ -252,9 +304,11 @@ def listevents(request, role, status):
 		  True,
 		  'Event End Date'
 		),
-		10: SortableHeader('Action', False)
+		10: SortableHeader('Participant Count', True),
+		11: SortableHeader('Action', False)
 		}
-
+		event_type = request.GET.get('event_type', None)
+		pcount, mcount, fcount = get_all_events_detail(queryset, event_type) if event_type else get_all_events_detail(queryset)
 		raw_get_data = request.GET.get('o', None)
 		queryset = get_sorted_list(
 			request,
@@ -262,7 +316,7 @@ def listevents(request, role, status):
 			header,
 			raw_get_data
 		)
-		collection= ViewEventFilter(request.GET, queryset=queryset, user=user)
+		collection= TrEventFilter(request.GET, queryset=queryset, user=user)
       
 
 	else:
@@ -275,7 +329,11 @@ def listevents(request, role, status):
 	context['role'] = role
 	context['status'] = status
 	context['header'] = header
+	context['today'] = today
 	context['ordering'] = get_field_index(raw_get_data)
+	context['pcount'] = pcount
+	context['mcount'] = mcount
+	context['fcount'] = fcount
 
 	return render(request,'event_status_list.html',context)
 
@@ -399,7 +457,7 @@ class ParticipantCreateView(CreateView):
 			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
 			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
 			user.save()
-			create_profile(user, '')
+			create_profile(user, row[8].strip())
 			send_registration_confirmation(user)
 			return user
 
@@ -531,14 +589,14 @@ def upload_college_details(request):
 			subscription = ''
 			payment_status = ''
 			college_type = ''
-			if '1 year Subscription' in row[7]:
+			if '1 year' in row[7]:
 				subscription = '365'
 			if '6 months' in row[7]:
 				subscription = '180'
 			if row[11] == 'Engineering':
 				college_type = 'Engg'
 			day,mon,year = row[9].split('/')
-			payment_date = datetime.datetime(year=int(year), month=int(mon), day=int(day))
+			payment_date = datetime(year=int(year), month=int(mon), day=int(day))
 			try:
 				ac_payment_new = AcademicPaymentStatus.objects.create(
 					state = state,
@@ -587,7 +645,6 @@ def add_Academic_key(ac_pay_status_object, subscription):
 	u_key = uuid.uuid1()
 	hex_key = u_key.hex
 
-
 	Subscription_time = int(subscription)
 	expiry_date = ac_pay_status_object.payment_date + timedelta(days=Subscription_time)
 
@@ -598,3 +655,457 @@ def add_Academic_key(ac_pay_status_object, subscription):
 	ac_key.hex_key = hex_key
 	ac_key.expiry_date = expiry_date
 	ac_key.save()
+
+
+class FDPTrainingCertificate(object):
+  def custom_strftime(self, format, t):
+    return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
+
+  def suffix(self, d):
+    return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+
+  def create_fdptraining_certificate(self, event, participantname):
+    training_start = event.event_start_date
+    training_end = event.event_end_date
+    event_type = event.event_type
+    response = HttpResponse(content_type='application/pdf')
+    filename = (participantname+'-'+event.foss.foss+"-Participant-Certificate").replace(" ", "-");
+
+    response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+    imgTemp = BytesIO ()
+    imgDoc = canvas.Canvas(imgTemp)
+
+    # Title
+    imgDoc.setFont('Helvetica', 35, leading=None)
+    imgDoc.drawCentredString(405, 470, "Certificate of Participation")
+
+    #password
+    certificate_pass = ''
+    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFont('Helvetica', 10, leading=None)
+    imgDoc.drawString(10, 6, certificate_pass)
+
+    # Draw image on Canvas and save PDF in buffer
+    imgPath = settings.MEDIA_ROOT +"sign.jpg"
+    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+
+    #paragraphe
+    text = "This is to certify that <b>"+participantname +"</b> has participated in \
+    <b>"+event.get_event_type_display()+"</b> from <b>"\
+    + str(training_start) +"</b> to <b>"+ str(training_end) +\
+    "</b> on <b>"+event.foss.foss+"</b> organized by <b>"+\
+    event.host_college.institution_name+\
+    "</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.\
+    <br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay."
+
+    centered = ParagraphStyle(name = 'centered',
+      fontSize = 16,
+      leading = 30,
+      alignment = 0,
+      spaceAfter = 20
+    )
+
+    p = Paragraph(text, centered)
+    p.wrap(650, 200)
+    p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+    imgDoc.save()
+    # Use PyPDF to merge the image-PDF into the template
+    if event_type == "FDP":
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+    else:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
+    page.mergePage(overlay)
+
+    #Save the result
+    output = PdfFileWriter()
+    output.addPage(page)
+
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response
+
+
+class EventTrainingCertificateView(FDPTrainingCertificate, View):
+  template_name = ""
+  
+  def dispatch(self, *args, **kwargs):
+    return super(EventTrainingCertificateView, self).dispatch(*args, **kwargs)
+
+  def post(self, request, *args, **kwargs):
+    eventid = self.request.POST.get("eventid")
+    print(eventid)
+    event = TrainingEvents.objects.get(id=eventid)
+    participantname = self.request.user.first_name+" "+self.request.user.last_name    
+
+    if event:
+      return self.create_fdptraining_certificate(event, participantname)
+    else:
+      messages.error(self.request, "Permission Denied!")
+    return HttpResponseRedirect("/")
+
+class ParticipantTransactionsListView(ListView):
+	model = PaymentTransaction
+	raw_get_data = None
+	header = None
+	collection = None
+	@method_decorator(group_required("Resource Person","Administrator"))
+	def dispatch(self, *args, **kwargs):
+		today = date.today()
+		statenames = State.objects.filter(resourceperson__user_id=self.request.user, resourceperson__status=1).values('name')
+		self.PaymentTransaction = PaymentTransaction.objects.filter(paymentdetail__state__in=statenames).order_by('-created')
+		self.events = self.PaymentTransaction
+
+		self.header = {
+		1: SortableHeader('#', False),
+		2: SortableHeader(
+		  'paymentdetail__user__first_name',
+		  True,
+		  'First Name'
+		),
+		3: SortableHeader(
+		  'paymentdetail__user__last_name',
+		  True,
+		  'Last Name'
+		),
+		4: SortableHeader(
+		  'paymentdetail__email',
+		  True,
+		  'Email'
+		),
+		5: SortableHeader(
+		  'paymentdetail__state',
+		  True,
+		  'State'
+		),
+		
+		6: SortableHeader('transId', True, 'Transaction id'),
+		7: SortableHeader('paymentdetail__user_id', True, 'UserId'),
+		8: SortableHeader('refNo', True, 'Reference No.'),
+		9: SortableHeader('status', True, 'Status'),
+		10: SortableHeader('paymentdetail__purpose', True, 'Purpose'),
+		11: SortableHeader('requestType', True, 'RequestType'),
+		12: SortableHeader('amount', True, 'Amount'),
+		13: SortableHeader('created', True, 'Entry Date'),
+		14: SortableHeader('paymentdetail__user', True, 'Phone'),
+		}
+
+		self.raw_get_data = self.request.GET.get('o', None)
+		self.purpose = self.request.GET.get('paymentdetail__purpose')		
+
+		if self.purpose != 'cdcontent':
+			self.events= self.events.filter().exclude(paymentdetail__purpose='cdcontent')
+
+		self.queryset = get_sorted_list(
+			self.request,
+			self.events,
+			self.header,
+			self.raw_get_data
+		)
+
+		self.collection= PaymentTransFilter(self.request.GET, queryset=self.queryset, user=self.request.user)
+		self.total_amount = self.collection.qs.filter(requestType='R').aggregate(Sum('amount'))
+		return super(ParticipantTransactionsListView, self).dispatch(*args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(ParticipantTransactionsListView, self).get_context_data(**kwargs)
+		context['form'] = self.collection.form
+		page = self.request.GET.get('page')
+		collection = get_page(self.collection.qs, page)
+		context['collection'] =  collection
+		context['header'] = self.header
+		context['ordering'] = get_field_index(self.raw_get_data)
+		context['events'] =  self.events
+		context['total_amount']=self.total_amount
+		if self.request.user:
+			context['user'] = self.request.user
+		return context
+
+
+@csrf_exempt
+def ajax_collage_event(request):
+	""" Ajax: Get the Colleges (Academic) based on District selected """
+	if request.method == 'POST':
+		college = request.POST.get('college')
+		print(college)
+		events = TrainingEvents.objects.filter(host_college_id=college).order_by('event_name')
+		print(events)
+		tmp = '<option value = None> --------- </option>'
+		if events:
+			for i in events:
+				tmp +='<option value='+str(i.id)+'>'+i.event_name+', '+i.event_type+'</option>'
+		return HttpResponse(json.dumps(tmp), content_type='application/json')
+
+
+
+@csrf_protect
+@login_required
+def participant_transactions(request, purpose):    
+	user = User.objects.get(id=request.user.id)
+	rp_states = ResourcePerson.objects.filter(status=1,user=user)
+
+	state = State.objects.filter(id__in=rp_states.values('state')).values('name')
+
+	
+	context = {}
+
+	if request.method == 'GET':
+		form = TrainingManagerPaymentForm(user,request.GET)
+
+		allpaydetails = get_transaction_details(request, purpose)	
+		request_type = request.GET.get('request_type')
+		if request_type == 'R':
+		  context['total'] = allpaydetails.aggregate(Sum('amount'))
+
+	# else:
+	# 	form = TrainingManagerPaymentForm(user=request.user)
+	context['form'] = form
+	context['user'] = user
+	context['transactiondetails'] = allpaydetails
+	context['purpose'] = purpose
+	return render(request,'participant_transaction_list_new.html', context)
+
+
+
+def transaction_csv(request, purpose):
+# export statistics training data as csv
+	collectionSet = None
+	collection = get_transaction_details(request, purpose)
+
+	# Create the HttpResponse object with the appropriate CSV header.
+	response = HttpResponse(content_type='text/csv')
+	response['Content-Disposition'] = 'attachment; filename="training-statistics-data.csv"'
+
+	writer = csv.writer(response)
+
+	# header
+	if purpose != 'cdcontent':
+		writer.writerow(['Sr No', 'Event Details','Name', 'Email','State','User Id','Transaction Id',\
+		'Reference No','Status','Request Type','Amount','Entry Created','Phone Number'])
+	else:
+		writer.writerow(['Sr No', 'Name', 'Email','State','User Id','Transaction Id',\
+		'Reference No','Status','Request Type','Amount','Entry Created','Phone Number'])
+
+	count = 0
+	# records
+	for record in collection:
+		count=count+1
+		phone = get_user_detail(record.paymentdetail.user)
+		if purpose != 'cdcontent':
+			event  = get_event_details(record.paymentdetail.purpose)
+			writer.writerow([count,
+	            event.event_name+','+event.foss.foss,
+	            record.paymentdetail.user.first_name+' '+record.paymentdetail.user.first_name,
+	            record.paymentdetail.email,
+	            record.paymentdetail.state,
+	            record.paymentdetail.user_id,
+	            record.transId,
+	            record.refNo,
+	            record.status,
+	            record.requestType,
+	            record.amount,
+	            record.created,
+	            phone])
+		else:
+			writer.writerow([count,
+				record.paymentdetail.user.first_name+' '+record.paymentdetail.user.first_name,
+				record.paymentdetail.email,
+				record.paymentdetail.state,
+				record.paymentdetail.user_id,
+				record.transId,
+				record.refNo,
+				record.status,
+				record.requestType,
+				record.amount,
+				record.created,
+				phone])
+	return response
+
+def reopen_event(request, eventid):
+	context = {}
+	user = request.user
+	if not (user.is_authenticated() and is_resource_person(user)):
+		raise PermissionDenied()
+	
+	event = TrainingEvents.objects.get(id=eventid)
+	if event:
+		event.training_status = 0 #close event
+		event.save()
+		messages.success(request, 'Event reopened successfully. As the event date over you will find this entry under expired tab.')
+	else:
+		messages.error(request, 'Request not sent.Please try again.')
+	return HttpResponseRedirect("/training/event/rp/completed/")
+
+
+class EventParticipantsListView(ListView):
+	queryset = ""
+	unsuccessful_payee = ""
+	paginate_by = 500
+	success_url = ""
+
+	def dispatch(self, *args, **kwargs):
+		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
+		main_query = Participant.objects.filter(event_id=kwargs['eventid'])
+
+		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)))
+		# self.unsuccessful_payee = main_query.filter(payment_status__status__in=(0,2))
+
+		
+		if self.event.training_status == 1:
+			self.queryset = main_query.filter(reg_approval_status=1)
+
+		if self.event.training_status == 2:
+			self.queryset = self.event.eventattendance_set.all()
+		return super(EventParticipantsListView, self).dispatch(*args, **kwargs)
+
+
+	def get_context_data(self, **kwargs):
+		context = super(EventParticipantsListView, self).get_context_data(**kwargs)
+		
+		context['event'] = self.event
+		context['eventid'] = self.event.id
+		return context
+
+
+
+
+@csrf_exempt
+def ajax_add_teststatus(request):
+	partid = int(request.POST.get("partid"))
+	mdlcourseid = int(request.POST.get("mdlcourseid"))
+	mdlquizid = int(request.POST.get("mdlquizid"))
+	fossid = int(request.POST.get("fossid"))
+	eventid = int(request.POST.get("eventid"))
+	fossId = FossCategory.objects.get(id=fossid)
+
+	useremail = request.user.email
+
+	testentry = EventTestStatus()
+	testentry.participant_id= partid	
+	testentry.event_id = eventid
+	testentry.mdlemail = useremail
+	testentry.fossid = fossId
+	testentry.mdlcourse_id = mdlcourseid
+	testentry.mdlquiz_id = mdlquizid
+	testentry.mdlattempt_id = 0
+
+	hasPrevEntry = EventTestStatus.objects.filter(participant_id=partid, event_id=eventid, mdlemail=useremail, fossid=fossId, mdlcourse_id=mdlcourseid, mdlquiz_id=mdlquizid, part_status__lt=2).first()
+
+	check = False
+	if not hasPrevEntry:
+		try:
+			testentry.save()
+			check = True
+		except:
+			check = False
+	else:
+		check = True
+
+	return HttpResponse(json.dumps(check), content_type='application/json')
+
+
+class ILWTestCertificate(object):
+  def custom_strftime(self, format, t):
+    return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
+
+  def suffix(self, d):
+    return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
+
+  def create_ilwtest_certificate(self, event, participantname, teststatus):
+    training_start = event.event_start_date
+    training_end = event.event_end_date
+    event_type = event.event_type
+
+
+
+    response = HttpResponse(content_type='application/pdf')
+    filename = (participantname+'-'+teststatus.fossid.foss+"-Participant-Test-Certificate").replace(" ", "-");
+
+    response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
+    imgTemp = BytesIO ()
+    imgDoc = canvas.Canvas(imgTemp)
+
+    # Title
+    imgDoc.setFont('Helvetica', 25, leading=None)
+    imgDoc.drawCentredString(405, 470, "Certificate for Completion of Training")
+
+    #password
+    certificate_pass = ''
+
+    if teststatus.cert_code:
+        certificate_pass = teststatus.cert_code
+        teststatus.part_status = 3 #certificate downloaded test over
+        teststatus.save()
+    else:
+        certificate_pass = str(teststatus.participant_id)+id_generator(10-len(str(teststatus.participant_id)))
+        teststatus.cert_code = certificate_pass
+        teststatus.part_status = 3 #certificate downloaded test over
+        teststatus.save()
+
+    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFont('Helvetica', 10, leading=None)
+    imgDoc.drawString(10, 6, certificate_pass)
+
+    # Draw image on Canvas and save PDF in buffer
+    imgPath = settings.MEDIA_ROOT +"sign.jpg"
+    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+
+    #paragraphe
+    text = "This is to certify that <b>"+participantname +"</b> successfully passed a \
+    <b>"+teststatus.fossid.foss+"</b> test, remotely conducted by the Spoken Tutorial project, IIT Bombay, under an honour invigilation system.\
+    <br /> Self learning through Spoken Tutorials and passing an online test completes the training programme."
+
+    centered = ParagraphStyle(name = 'centered',
+      fontSize = 16,
+      leading = 30,
+      alignment = 0,
+      spaceAfter = 20
+    )
+
+    p = Paragraph(text, centered)
+    p.wrap(650, 200)
+    p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+    imgDoc.save()
+    # Use PyPDF to merge the image-PDF into the template
+    if event_type == "FDP":
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+    else:
+        page = PdfFileReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).getPage(0)
+    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
+    page.mergePage(overlay)
+
+    #Save the result
+    output = PdfFileWriter()
+    output.addPage(page)
+
+    #stream to browser
+    outputStream = response
+    output.write(response)
+    outputStream.close()
+
+    return response
+
+
+class EventTestCertificateView(ILWTestCertificate, View):
+  template_name = ""
+  
+  def dispatch(self, *args, **kwargs):
+    return super(EventTestCertificateView, self).dispatch(*args, **kwargs)
+
+  def post(self, request, *args, **kwargs):
+    eventid = self.request.POST.get("eventid")
+
+    print(eventid)
+    event = TrainingEvents.objects.get(id=eventid)
+    participantname = self.request.user.first_name+" "+self.request.user.last_name
+
+    teststatus = EventTestStatus.objects.filter(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email).first()
+
+    if event:
+      return self.create_ilwtest_certificate(event, participantname, teststatus)
+    else:
+      messages.error(self.request, "Permission Denied!")
+    return HttpResponseRedirect("/")

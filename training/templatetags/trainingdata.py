@@ -1,5 +1,6 @@
 from events.models import AcademicKey
 from training.models import *
+from cms.models import Profile
 from django import template
 from datetime import datetime,date
 register = template.Library()
@@ -77,6 +78,13 @@ def is_tr_ongoing(eventid):
     return False
 
 @register.filter
+def is_tr_expired(eventid):
+    event = TrainingEvents.objects.get(id=eventid)
+    if event.training_status == 0 and event.event_end_date < today:
+        return True
+    return False
+
+@register.filter
 def event_has_attendance(eventid):
   if EventAttendance.objects.filter(event_id=eventid).exists():
     return True
@@ -113,6 +121,80 @@ def registartion_successful(user, event):
   if participant.filter(registartion_type__in=(1,3)).exists():
     return True
   return False 
+
+@register.filter
+def get_user_detail(user):
+  try:
+    profile = Profile.objects.get(user=user)
+  except Profile.DoesNotExist:
+    return None
+
+  return profile.phone
+
+@register.filter
+def get_participant_count(eventid):
+  try:
+    event = TrainingEvents.objects.get(id=eventid)
+    print()
+    if event.training_status <= 1 :
+      #completed state
+      pcount = Participant.objects.filter(event_id=eventid, reg_approval_status=1).count()
+    elif event.training_status == 2:
+      #closed
+      pcount = EventAttendance.objects.filter(event_id=eventid).count()
+  except TrainingEvents.DoesNotExist:
+    return pcount
+
+  return pcount
+
+@register.filter
+def get_event_details(eventid):
+  try:
+    event = TrainingEvents.objects.get(id=eventid)
+  except TrainingEvents.DoesNotExist:
+    return None
+
+  return event
+
+@register.filter
+def get_ilw_mdlcourseid(eventfossid):
+  try:
+    ilwcourse = ILWFossMdlCourses.objects.filter(foss=eventfossid)
+  except ILWFossMdlCourses.DoesNotExist:
+    return None
+
+  return ilwcourse
+
+@register.filter
+def check_passgrade_exists(event,testfossid):
+
+  # arg_list = [arg.strip() for arg in args.split(',')]
+  # email= arg_list[0]
+  # testfossid = arg_list[1]
+  # print("@@@@@@@@@@@@@@@",email, arg_list)
+
+
+  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event.event, fossid=testfossid, mdlemail=event.email, part_status__gte=2, mdlgrade__gte=40.00)
+  if ilwmdlgradeentry:
+    return True
+  else:
+    return False
+
+
+@register.filter
+def get_grade(event, testfossid):
+  # fossid = event.foss_id
+  # email,event, testfossid
+  # arg_list = [arg.strip() for arg in args.split(',')]
+
+  # email= arg_list[0]
+  # testfossid = arg_list[1]
+  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event.event, fossid=testfossid, mdlemail=event.email, part_status__gte=2, mdlgrade__gte=40.00).order_by('-mdlgrade').first()
+
+  return ilwmdlgradeentry.mdlgrade
+
+
+
 
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)

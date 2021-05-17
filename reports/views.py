@@ -15,6 +15,7 @@ from django.template.defaultfilters import slugify
 # Spoken Tutorial Stuff
 from creation.views import *
 from events.views import *
+from training.views import *
 
 
 def get_fk_model(model, fieldname):

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load trainingdata %}
+{% load eventsdata %}
+{% block title %}List Event Participants{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> List of Event Participants :
+{% endblock %}
+{% block search %}{% endblock %}
+
+{% block content %}
+<table class="paleblue table">
+	<tr>
+		<th>Sr. No.</th>
+		<th>Name</th>
+		<th>College Name</th>
+		<th>State</th>
+	</tr>
+{% for record in object_list %}
+	<tr>
+		<td>{{ forloop.counter }}</td>
+
+
+		{% if eventid|is_event_closed %}
+			<td>{{ record.participant.name}}</td>
+			<td>{{ record.participant.college.institution_name}}</td>
+			<td>{{ record.participant.state.name}}</td>
+		{% else %}
+
+			<td>{{ record.name}}</td>
+			<td>{{ record.college.institution_name}}</td>
+			<td>{{ record.state.name}}</td>
+		{% endif %}
+    </tr>
+{% endfor %}
+</table>
+
+{% endblock %}
+
