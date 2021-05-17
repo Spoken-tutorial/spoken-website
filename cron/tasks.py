@@ -23,6 +23,7 @@ from django.core.mail import BadHeaderError
 from rq.decorators import job
 from cron import REDIS_CLIENT
 from rq import Retry
+import time
 
 @job('default', connection=REDIS_CLIENT, timeout='24h', retry=Retry(max=2))
 def async_bulk_email(taskid, *args, **kwargs):
@@ -46,6 +47,9 @@ def async_bulk_email(taskid, *args, **kwargs):
                 email.attach_alternative(task.message, "text/html")
                 email.send()
                 sent += 1
+                if sent%10 == 0:
+                    print('Sent: ',sent)
+                    time.sleep(10)
                 log_file.write(str(row[0])+','+str(1)+'\n')
             except ValidationError as mail_error:
                 log_file.write(str(row[0])+','+str(0)+','+str(mail_error)+'\n')

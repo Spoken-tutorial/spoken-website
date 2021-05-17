@@ -8,6 +8,11 @@ from .tasks import async_bulk_email
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+import json
+import csv
+import uuid
+from django.http import HttpResponse
 
 class AsyncCronMailListCreateView(UserPassesTestMixin, CreateView):
     template_name = 'cron/cron_mail_list_create.html'
@@ -74,3 +79,19 @@ def update_task(request):
             task.save()
             return redirect('cron:mail_list_create')
     return redirect('cron:mail_list_create')
+
+@csrf_exempt
+@user_passes_test(lambda u: u.is_superuser)
+def upload_task(request):
+    if request.method == 'POST':
+        subject=request.POST['subject']
+        message=request.POST['message']
+        data = json.loads(request.POST.get('data'))
+        file_name = 'emails/'+str(uuid.uuid4())+'.csv'
+        with open('media/'+file_name,'w') as f:
+            write = csv.writer(f)
+            write.writerows(data['data'])
+            cron=AsyncCronMail.objects.create(subject=subject, message=message, uploaded_by=request.user, status=False)
+            cron.csvfile.name = file_name
+            cron.save()
+            return HttpResponse(request.build_absolute_uri('/cron/mail_list_create'))

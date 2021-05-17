@@ -14,5 +14,5 @@ class AsyncCronMailForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['subject'].widget.attrs.update({'class': 'form-control'})
         self.fields['csvfile'].widget.attrs.update({'class': 'form-control-file'})
-        self.fields['sender'].widget.attrs.update({'class': 'form-control', 'value':'administrator@spoken-tutorial.org'})
+        self.fields['sender'].widget.attrs.update({'class': 'form-control', 'value':'no-reply@spoken-tutorial.org'})
         self.fields['message'].widget.attrs.update({'class': 'form-control'})
