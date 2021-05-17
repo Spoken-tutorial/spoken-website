@@ -11,6 +11,6 @@ from cron import DEFAULT_QUEUE, REDIS_CLIENT
 class Command(BaseCommand):
     def handle(self, *args, **options):
         with Connection(REDIS_CLIENT):
-            w = Worker([DEFAULT_QUEUE], connection=REDIS_CLIENT, name='default')
+            w = Worker([DEFAULT_QUEUE], connection=REDIS_CLIENT, name='default_worker')
             w.work()
 
