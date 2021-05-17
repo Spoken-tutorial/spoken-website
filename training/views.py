@@ -1102,7 +1102,7 @@ class EventTestCertificateView(ILWTestCertificate, View):
     event = TrainingEvents.objects.get(id=eventid)
     participantname = self.request.user.first_name+" "+self.request.user.last_name
 
-    teststatus = EventTestStatus.objects.get(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email) 
+    teststatus = EventTestStatus.objects.filter(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email).first()
 
     if event:
       return self.create_ilwtest_certificate(event, participantname, teststatus)
