@@ -25,7 +25,7 @@ from cron import REDIS_CLIENT
 from rq import Retry
 import time
 
-@job('default', connection=REDIS_CLIENT, timeout='24h', retry=Retry(max=2))
+@job('default', connection=REDIS_CLIENT, timeout='72h')
 def async_bulk_email(taskid, *args, **kwargs):
     sent=0
     errors=0
@@ -35,6 +35,8 @@ def async_bulk_email(taskid, *args, **kwargs):
     with open(task.csvfile.path, newline='') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
         for row in csvreader:
+            if len(row) < 1:
+                continue
             email = EmailMultiAlternatives(
                         task.subject, task.message, task.sender,
                         to = [row[0]],

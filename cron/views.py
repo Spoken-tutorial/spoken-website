@@ -13,6 +13,7 @@ import json
 import csv
 import uuid
 from django.http import HttpResponse
+import datetime as dt
 
 class AsyncCronMailListCreateView(UserPassesTestMixin, CreateView):
     template_name = 'cron/cron_mail_list_create.html'
@@ -51,14 +52,22 @@ def run_cron_mail(request):
     if 'submit' in request.POST:
         submit = request.POST['submit']
         if submit == 'Run':
-            cron_id = request.POST['cron_id']
-            task = AsyncCronMail.objects.get(pk=cron_id)
-            task.started_at = timezone.now()
-            job=async_bulk_email.delay(cron_id)
-            task.job_id=job.id
-            task.save()
-            messages.success(request, "We are processing your request. Please wait a moment and refresh this page.")
-            return redirect('cron:mail_list_create')
+            if dt.time(17,30) < dt.datetime.now().time():
+                if AsyncCronMail.objects.filter(started_at__isnull=False,status=False).count() == 0:
+                    cron_id = request.POST['cron_id']
+                    task = AsyncCronMail.objects.get(pk=cron_id)
+                    task.started_at = timezone.now()
+                    job=async_bulk_email.delay(cron_id)
+                    task.job_id=job.id
+                    task.save()
+                    messages.success(request, "We are processing your request. Please wait a moment and refresh this page.")
+                    return redirect('cron:mail_list_create')
+                else:
+                    messages.error(request, "Cannot run task. A mass mail is already running.")
+                    return redirect('cron:mail_list_create')
+            else:
+                messages.error(request, "Cannot run task. You can run mails only after 5.30 pm")
+                return redirect('cron:mail_list_create')
         else:
             messages.success(request, "Invalid Request.")
             return redirect('cron:mail_list_create')
