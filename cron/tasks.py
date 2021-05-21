@@ -107,5 +107,5 @@ def bulk_email(taskid, *args, **kwargs):
             task.save()
 
 def async_bulk_email(task, *args, **kwargs):
-    DEFAULT_QUEUE.enqueue(bulk_email, task.pk, job_id=task.job_id)
+    DEFAULT_QUEUE.enqueue(bulk_email, task.pk, job_id=task.job_id, job_timeout='72h')
     print('working')
