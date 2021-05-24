@@ -25,6 +25,9 @@ from cron import REDIS_CLIENT, DEFAULT_QUEUE, TOPPER_QUEUE
 from rq import Retry
 import time
 from rq import get_current_job
+from django.core.cache import caches
+from mdldjango.models import MdlUser, MdlQuizGrades
+from events.models import FossMdlCourses, TestAttendance
 
 def bulk_email(taskid, *args, **kwargs):
     task = AsyncCronMail.objects.get(pk=taskid)
