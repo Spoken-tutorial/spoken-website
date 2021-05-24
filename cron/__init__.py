@@ -9,3 +9,4 @@ REDIS_CLIENT = Redis(
 from rq import Retry, Queue
 
 DEFAULT_QUEUE = Queue('default_queue', connection=REDIS_CLIENT, failure_ttl='72h')
+TOPPER_QUEUE = Queue('topper_queue', connection=REDIS_CLIENT, failure_ttl='72h')

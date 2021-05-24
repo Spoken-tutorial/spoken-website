@@ -3,7 +3,7 @@ import sys
 from rq import Connection, Worker
 from django.core.management.base import BaseCommand, CommandError
 # Preload libraries
-from cron import DEFAULT_QUEUE, REDIS_CLIENT
+from cron import DEFAULT_QUEUE, REDIS_CLIENT,TOPPER_QUEUE
 
 # Provide queue names to listen to as arguments to this script,
 # similar to rq worker
@@ -27,6 +27,6 @@ class Command(BaseCommand):
                     DEFAULT_QUEUE.enqueue_job(job)
                 except:
                     print('Job does not exist')
-            w = Worker([DEFAULT_QUEUE], connection=REDIS_CLIENT, name='default_worker')
+            w = Worker([DEFAULT_QUEUE,TOPPER_QUEUE], connection=REDIS_CLIENT, name='default_worker')
             w.work()
 

@@ -353,6 +353,11 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': 'localhost:11211',
         'TIMEOUT': 3600 * 24,
+    },
+    'file_cache': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+        'TIMEOUT': 3600 * 24 * 30,
     }
 }
 
