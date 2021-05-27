@@ -27,7 +27,7 @@ import time
 from rq import get_current_job
 from django.core.cache import caches
 from mdldjango.models import MdlUser, MdlQuizGrades
-from events.models import FossMdlCourses, TestAttendance
+from events.models import FossMdlCourses, TestAttendance, State, City, InstituteType
 
 def bulk_email(taskid, *args, **kwargs):
     task = AsyncCronMail.objects.get(pk=taskid)
@@ -146,7 +146,8 @@ def filter_student_grades(foss=None, state=None, city=None, grade=None, institut
       #return the result as dict
       result= {'mdl_user_grade': dictgrade, 'test_attendance': filter_ta, "count":len(filter_ta)}
       caches['file_cache'].set(key,result)
-      return
+      if not TOPPER_WORKER_STATUS:
+          return result
     except FossMdlCourses.DoesNotExist:
       return None
   return None

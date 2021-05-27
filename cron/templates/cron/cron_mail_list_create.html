@@ -67,6 +67,7 @@
                   <th>#</th>
                   <th>Subject</th>
                   <th>Message </th>
+                  <th>Job Id </th>
                   <th>Sender</th>
                   <th>Uploaded On</th>
                   <th>Uploaded by</th>
@@ -83,6 +84,7 @@
               <td>{{ forloop.counter }}</td>
               <td><a class="btn btn-link"  data-toggle="modal" data-target="#taskModal" data-taskid="{{t.pk}}" data-subject="{{t.subject}}" data-message="{{t.message}}" data-status="{{t.status}}"> {{t.subject|truncatewords:4}}</a></td>
               <td>{{t.message|safe|striptags|truncatewords:20}}</td>
+              <td>{{t.ers_job_id}}</td>
               <td>{{t.sender}}</td>
               <td>{{t.uploaded_at}}</td>
               <td>{{t.uploaded_by}}</td>

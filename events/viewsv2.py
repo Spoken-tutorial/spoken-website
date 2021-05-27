@@ -67,7 +67,8 @@ from rq.job import Job
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
 from events.helpers import get_prev_semester_duration, get_updated_form
-from cron.tasks import async_filter_student_grades
+from cron.tasks import async_filter_student_grades, filter_student_grades
+from spoken.config import TOPPER_WORKER_STATUS
 
 class JSONResponseMixin(object):
   """
@@ -3403,11 +3404,14 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
       key=''.join([str(f) for f in foss_ids])+''.join([str(s) for s in state_ids])+''.join([str(c) for c in city_ids])+str(grade)+str(activation_status)+''.join([str(t) for t in institution_type_ids])+str(from_date).replace(" ", "")+str(to_date).replace(" ", "")
       result=caches['file_cache'].get(key)
       if not result:
-        try:
-          Job.fetch(key, connection=REDIS_CLIENT)
-          messages.success(self.request, "We are wokring on filtering the results for you. Please refresh after some time.")
-        except:
-          async_filter_student_grades(foss, state, city, grade, institution_type, activation_status, from_date, to_date, key=key)
+        if TOPPER_WORKER_STATUS:
+          try:
+            Job.fetch(key, connection=REDIS_CLIENT)
+            messages.success(self.request, "We are wokring on filtering the results for you. Please refresh after some time.")
+          except:
+            async_filter_student_grades(foss, state, city, grade, institution_type, activation_status, from_date, to_date, key=key)
+        else:
+          result=filter_student_grades(foss, state, city, grade, institution_type, activation_status, from_date, to_date, key=key)
     return self.render_to_response(self.get_context_data(form=form, result=result))
 
 
