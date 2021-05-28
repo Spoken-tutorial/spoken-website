@@ -28,6 +28,7 @@ from rq import get_current_job
 from django.core.cache import caches
 from mdldjango.models import MdlUser, MdlQuizGrades
 from events.models import FossMdlCourses, TestAttendance, State, City, InstituteType
+from creation.models import FossCategory
 
 def bulk_email(taskid, *args, **kwargs):
     task = AsyncCronMail.objects.get(pk=taskid)
@@ -113,7 +114,16 @@ def async_bulk_email(task, *args, **kwargs):
     DEFAULT_QUEUE.enqueue(bulk_email, task.pk, job_id=task.job_id, job_timeout='72h')
 
 
-def filter_student_grades(foss=None, state=None, city=None, grade=None, institution_type=None, activation_status=None, from_date=None, to_date=None, key=None):
+def filter_student_grades(key=None):
+  key_array=key.split(':')
+  foss=FossCategory.objects.filter(pk__in=[int(f) for f in key_array[0].split(';')])
+  state=State.objects.filter(pk__in=[int(s) if s != '' else None  for s in key_array[1].split(';')])
+  city=City.objects.filter(pk__in=[int(c) if c != '' else None for c in key_array[2].split(';')])
+  institution_type=InstituteType.objects.filter(pk__in=[int(i) if i != '' else None for i in key_array[4].split(';')])
+  grade=int(key_array[3])
+  activation_status=int(key_array[5]) if key_array[5]!= '' else None
+  from_date= key_array[6] if key_array[6] != 'None' else None
+  to_date= key_array[7] if key_array[7] != 'None' else None
   if grade:
     #get the moodle id for the foss
     try:
@@ -153,5 +163,5 @@ def filter_student_grades(foss=None, state=None, city=None, grade=None, institut
   return None
 
 
-def async_filter_student_grades(foss=None, state=None, city=None, grade=None, institution_type=None, activation_status=None, from_date=None, to_date=None, key=None):
-    TOPPER_QUEUE.enqueue(filter_student_grades, (foss, state, city, grade, institution_type, activation_status, from_date, to_date, key), job_id=key, job_timeout='72h')
+def async_filter_student_grades(key):
+    TOPPER_QUEUE.enqueue(filter_student_grades, key, job_id=key, job_timeout='72h')

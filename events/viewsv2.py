@@ -3401,7 +3401,7 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
       city_ids.sort()
       institution_type_ids=[t.pk for t in institution_type]
       institution_type_ids.sort()
-      key=''.join([str(f) for f in foss_ids])+''.join([str(s) for s in state_ids])+''.join([str(c) for c in city_ids])+str(grade)+str(activation_status)+''.join([str(t) for t in institution_type_ids])+str(from_date).replace(" ", "")+str(to_date).replace(" ", "")
+      key=';'.join([str(f) for f in foss_ids])+':'+';'.join([str(s) for s in state_ids])+':'+';'.join([str(c) for c in city_ids])+':'+str(grade)+':'+';'.join([str(t) for t in institution_type_ids])+':'+str(activation_status)+':'+str(from_date).replace(" ", "")+':'+str(to_date).replace(" ", "")
       result=caches['file_cache'].get(key)
       if not result:
         if TOPPER_WORKER_STATUS:
@@ -3409,9 +3409,10 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
             Job.fetch(key, connection=REDIS_CLIENT)
             messages.success(self.request, "We are wokring on filtering the results for you. Please refresh after some time.")
           except:
-            async_filter_student_grades(foss, state, city, grade, institution_type, activation_status, from_date, to_date, key=key)
+            async_filter_student_grades(key)
+            messages.success(self.request, "We are wokring on filtering the results for you. Please refresh after some time.")
         else:
-          result=filter_student_grades(foss, state, city, grade, institution_type, activation_status, from_date, to_date, key=key)
+          result=filter_student_grades(key)
     return self.render_to_response(self.get_context_data(form=form, result=result))
 
 
