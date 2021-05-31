@@ -27,6 +27,7 @@ SEARCH_INDEX_DIR = os.path.join(BASE_DIR, INDEX_PATH)
 SECRET_KEY = 'qoeg0cta8pi$#a7i8t(ufzndy)50e+l465rm7y-k@lvt(s2yae'
 
 PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
@@ -34,7 +35,6 @@ PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.SHA1PasswordHasher',
     'django.contrib.auth.hashers.MD5PasswordHasher',
     'django.contrib.auth.hashers.CryptPasswordHasher',
-    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
 )
 # email errors and 404
 SERVER_EMAIL = 'error-report@spoken-tutorial.org'
@@ -98,6 +98,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'ckeditor',
     'cron',
+    'ilwmoodle',
 ]
 
 
@@ -145,6 +146,15 @@ DATABASES = {
         'PASSWORD': MDB_PASS,	
         'HOST': MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
         'PORT': '',                  # Set to empty string for default.	
+    },
+    'ilwmoodle': {	
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
+        'NAME': ILWMDB,                      # Or path to database file if using sqlite3.	
+        # The following settings are not used with sqlite3:	
+        'USER': ILW_MDB_USER,	
+        'PASSWORD': ILW_MDB_PASS,	
+        'HOST': ILW_MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
+        'PORT': ILW_MDB_PORT,                  # Set to empty string for default.	
     },	
     # 'cdeep': {	
     #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
@@ -219,6 +229,7 @@ CONN_MAX_AGE = 100
 
 #events settings
 ONLINE_TEST_URL = ONLINE_TEST_URL
+ILW_ONLINE_TEST_URL = ILW_ONLINE_TEST_URL
 KEEP_LOGGED_DURATION = 604800
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
@@ -261,6 +272,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 #AUTH_USER_MODEL = 'mdldjango.Users'
 DATABASE_ROUTERS = [
     'mdldjango.router.MdlRouter',
+    'ilwmoodle.router.ILWMoodleRouter',
     'cdeep.router.CdeepRouter',
     'workshop.router.WorkshopRouter',
     'forums.router.ForumsRouter'

@@ -147,74 +147,136 @@
 <!-- Tab panes -->
 <div class="tab-content">
     <div class="tab-pane active" id="pending">        
-        {% for event in collection %}
+{% for event in collection %}
 <form method="post" action = "{% url 'training:register_user' %}">
 {% csrf_token %}
-        {% if status == 'myevents'%}
-        <div class="activities-event ">
-            <div class="date">
-                <p><i class="fa fa-calendar"></i></p>
-                <p>{{ event.event.event_start_date}} - {{ event.event.event_end_date}}</p>
-                <p>{% if event.event_type == 'sdp' %} SDP {% else %}
-                {{ event.event_type}} {% endif %}</p>
-            </div>
-            <div class="content">
-                <h6>{{event.event.event_name}}</h6>
-                <p>
-                    <b>Host College :</b> <span>{{event.event.host_college}}{{event.event.state.name}}</span><br>
-                    <b>Event Coordinator Name :</b> <span>{{event.event.event_coordinator_name}}</span><br>
-                    <b>FOSS :</b> <span >{{event.event.foss}}</span>
-                              <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{event.get_foss_langs}}' style="display: none;">
-                </p>
 
-                <div style="text-align: right;">
-                    {% if event.reg_approval_status == 1 and user|registartion_successful:event.event %}
-                        <button class="btn btn-primary" type="submit" 
-                        formaction="{% url 'cdcontent:create_cd_download' 'general' %}">Download CD Content</button>
-                    {% endif %}
-                    {% if event.event.id|is_event_closed and event.event.id|is_attendance_marked:event.id and user|registartion_successful:event.event %}    
-                        <input type="hidden" name="eventid" value="{{event.event.id}}">
-                        <button class="btn btn-info" type="submit" 
-                        formaction="{% url 'training:generate_training_certificate'%}">Download certificate</button>
-                    {% endif %} 
-                </div>
-	       </div>
-        </div>
-        {% else %}
-        <div class="activities-event ">
-            <div class="date">
-                <p><i class="fa fa-calendar"></i></p>
-                <p>{{ event.event_start_date}} - {{ event.event_end_date}}</p>
-                <p>{% if event.event_type == 'sdp' %} SDP {% else %}
-                {{ event.event_type}} {% endif %}</p>
-            </div>
-            <div class="content">
-                <h6>{{event.event_name}}</h6>
-                <p>
-                    <b>Host College :</b> <span>{{event.host_college}}{{event.state.name}}</span><br>
-                    <b>Event Coordinator Name :</b> <span>{{event.event_coordinator_name}}</span><br>
-		    <b>FOSS :</b> <span >{{event.foss}}</span>
-                </p>
-                <p>                  
-                    Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
-                    {% if status == 'ongoing' %}
-                    <input type="event" id="event_id_info" name="event_id_info" value="{{event.id}}" style="display:none">
-                        {% if event.registartion_end_date|is_reg_valid %}
-                            {% if user.is_authenticated %}
-                                {% if not user|registartion_successful:event %}
-                                    <button type="submit" class="btn btn-info">Register Now</button>
-                                {% endif %}
-                            {% else %}
-                                <button type="submit" class="btn btn-info">Register Now</button>
-                        {% endif %}
-                    {% endif %}
-		{% endif %}
-                </p>        
-            </div>
-        </div> 
+{% if status == 'myevents'%}
+  <div class="activities-event ">
+      <div class="date">
+          <p><i class="fa fa-calendar"></i></p>
+          <p>{{ event.event.event_start_date}} - {{ event.event.event_end_date}}</p>
+          <p>{% if event.event_type == 'sdp' %} SDP {% else %}
+          {{ event.event_type}} {% endif %}</p>
+      </div>
+      <div class="content">
+          <h6>{{event.event.event_name}}</h6>
+          <p>
+              <b>Host College :</b> <span>{{event.event.host_college}}{{event.event.state.name}}</span><br>
+              <b>Event Coordinator Name :</b> <span>{{event.event.event_coordinator_name}}</span><br>
+              <b>FOSS :</b> <span >{{event.event.foss}}</span>
+                        <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{event.get_foss_langs}}' style="display: none;">
+          </p>
+
+          <div style="text-align: right;">
+              {% if event.reg_approval_status == 1 and user|registartion_successful:event.event %}
+                  <button class="btn btn-primary" type="submit" 
+                  formaction="{% url 'cdcontent:create_cd_download' 'general' %}">Download CD Content</button>
+              {% endif %}
+
+              {% if event.event.id|is_event_closed and event.event.id|is_attendance_marked:event.id and user|registartion_successful:event.event %}    
+                  <input type="hidden" name="eventid" value="{{event.event.id}}">
+
+                  <button class="btn btn-warning" type="submit" 
+                  formaction="{% url 'training:generate_training_certificate'%}">Download Training certificate</button>
+
+                  {% with fossmdlcourse=event.event.foss_id|get_ilw_mdlcourseid %}
+                    {% for course in fossmdlcourse %}
+
+                      {% if not event|check_passgrade_exists:course.testfoss_id%}
+
+                        <input type="hidden" id="testurl{{course.mdlcourse_id}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}">
+
+                        <button class="btn btn-info" type="button" 
+                        onclick="take_to_test({{event.id}}, {{course.mdlcourse_id}}, {{course.mdlquiz_id}}, {{course.testfoss_id}}, {{event.event_id}});">
+                        Attempt {{course.testfoss.foss}} test
+                        </button>
+                      {% else %}                    
+
+                          {% with grade=event|get_grade:course.testfoss_id %}
+                          <button type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate' course.testfoss_id%}">Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
+                          {% endwith %}
+                        
+                      {% endif %}
+
+                    {% endfor %}
+                  {% endwith %}
+
+
+              {% endif %} 
+          </div>
+   </div>
+  </div>
+{% else %}
+<div class="activities-event ">
+    <div class="date">
+        <p><i class="fa fa-calendar"></i></p>
+        <p>{{ event.event_start_date}} - {{ event.event_end_date}}</p>
+        <p>{% if event.event_type == 'sdp' %} SDP {% else %}
+        {{ event.event_type}} {% endif %}</p>
+    </div>
+    <div class="content">
+      <h6>{{event.event_name}}</h6>
+      <p>
+        <b>Host College :</b> <span>{{event.host_college}}{{event.state.name}}</span><br>
+        <b>Event Coordinator Name :</b> <span>{{event.event_coordinator_name}}</span><br>
+        <b>FOSS :</b> <span >{{event.foss}}</span>
+      </p>
+
+      <p>                  
+        Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
+        {% if status == 'ongoing' %}
+          <input type="event" id="event_id_info" name="event_id_info" value="{{event.id}}" style="display:none">
+          {% if event.registartion_end_date|is_reg_valid %}
+            {% if user.is_authenticated %}
+              {% if not user|registartion_successful:event %}
+              <button type="submit" class="btn btn-info">Register Now</button>
+              {% endif %}
+            {% else %}
+              <button type="submit" class="btn btn-info">Register Now</button>
+            {% endif %}
+          {% endif %}
         {% endif %}
+      </p>        
+    </div>
+</div> 
+{% endif %}
 </form>
-        {% endfor %}
+{% endfor %}
     </div>
 </div>
+{% endblock %}
+
+
+{% block jsblock %}
+<script type="text/javascript">
+
+function take_to_test(partid, mdlcourseid, mdlquizid, fossid, eventid){
+  // var mdlcourseid  = $('#mdlcourseid').val();
+  var testurl = $('#testurl'+mdlcourseid).val();
+  alert(testurl)
+  $.ajax({
+                type : "POST",
+                url:"/training/ajax_add_teststatus/",
+                dataType : "json",
+                data: {
+                  'partid' : partid,
+                  'mdlcourseid' : mdlcourseid,
+                  'mdlquizid' : mdlquizid,
+                  'fossid' : fossid,
+                  'eventid' : eventid,
+
+                },
+                success: function(data)
+                {
+                    
+                     window.location = testurl;
+
+
+                }
+});
+
+}
+
+</script>
 {% endblock %}

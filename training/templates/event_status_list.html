@@ -86,6 +86,24 @@ Today is : {{today}}
            <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
           </div>
         </div>
+        <table class="table table-bordered table-hover" style="margin-bottom:0px;">
+          <tr>
+              <th>Total number of Events</th>
+              <td>{{ collection.paginator.count }}</td>
+          </tr>
+          <tr>
+              <th>Participants Count</th>
+              <td>{{ pcount }}</td>
+          </tr> 
+          <tr>
+              <th>Total female participants</th>
+              <td>{{ fcount }}</td>
+          </tr>
+          <tr>
+              <th>Total male participants</th>
+              <td>{{ mcount }}</td>
+          </tr>
+      </table>
       </div>
       
     </form>
@@ -95,6 +113,7 @@ Today is : {{today}}
     <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/training/event/rp/ongoing/">Pending / Ongoing</a></li>
     <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/training/event/rp/completed/">Completed</a></li>
     <li {% if status == 'closed' %}{{ 'class="active"'}}{% endif %}><a href="/training/event/rp/closed/">Closed</a></li>
+    <li {% if status == 'expired' %}{{ 'class="active"'}}{% endif %}><a href="/training/event/rp/expired/">Expired</a></li>
     
   </ul>
   <!-- Tab panes -->
@@ -122,7 +141,9 @@ Today is : {{today}}
             </td>
             <td>
               {% if record.training_status == 0%}
-                <a href="{% url 'training:edit_event' record.id %}" >Edit Event</a> |
+                {% if not record.id|is_tr_expired%}
+                <a href="{% url 'training:edit_event' record.id %}">Edit Event</a> |
+                {% endif %}
                 <a href="{% url 'training:upload_participants' record.id %}" >Upload Participants</a> |
               {% endif %}
               {% if record.id|is_tr_ongoing%}
@@ -131,6 +152,9 @@ Today is : {{today}}
                   <a style="color: orange;" href="{% url 'training:event_attendance' record.id %}" >Participant List</a>
               {% else %}
                   <a style="color: green;" href="{% url 'training:event_attendance' record.id %}" >Participant List</a>
+              {% endif %}
+              {% if record.id|is_tr_completed %}
+                <a style="color: green;" href="{% url 'training:reopen_event' record.id %}" >| Re-open</a>
               {% endif %}
 
             </td>

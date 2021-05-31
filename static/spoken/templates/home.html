@@ -77,6 +77,74 @@
           from {color: white; }
           to {color: #F89021; }
       }
+      /*carousel style*/
+      .carousel,.carousel .item,.carousel .item .container{
+        height: 65px;
+      }
+      .carousel-indicators{
+        bottom: -20%!important;
+      }
+      
+      .block-info div{
+        background: #fff;
+        padding:2px;
+        background: #7F7F7F;
+        color: #fff;
+      }
+      .carousel-caption{
+        position: static;
+      }
+      .carousel-caption p{
+        margin-bottom: 0px;
+        text-shadow: none;
+        color: #fff;
+      }
+      .carousel-indicators li{
+    border: 1px solid orange;
+      }
+      .carousel-indicators .active{
+        background: orange;
+      }
+      .awards-sm{
+        display: block;
+      }
+      .awards-md{
+        display: none;
+      }
+      .awards a{
+        font-size: 1.2rem;
+        width: 100%;
+      }
+      .carousel-inner{
+        padding: 0!important;
+      }
+      @media (min-width: 768px) { 
+        .awards-sm{
+          display: none;
+        }
+      .awards-md{
+        display: block;
+      }
+      .awards a{
+        font-size: 1.2rem;
+        width: 100%;
+      }
+      }
+      @media (min-width: 992px) { 
+        .awards a{
+        font-size: 1.5rem;
+        width: 100%;
+      }
+      .carousel,.carousel .item,.carousel .item .container{
+        height: 65px;
+      }
+       }
+       @media (min-width: 1200px) { 
+        .carousel,.carousel .item,.carousel .item .container{
+        height: 50px;
+      }
+        }
+      
       </style>
 {% endblock %}
 {% block title %}Home{% endblock %}
@@ -134,9 +202,28 @@
 {% block info %}
 <div class="row block-info">
   <div class="col-sm-12">
-    <span>AICTE chairman Prof. Anil D. Sahasrabudhe encouraging to use opensource software. Click <a href="https://spoken-tutorial.org/media/AICTE-Chairman-Dr-Anil-Sahasrabudhe-Scilab-Toolbox-Hackathon-Inauguration.mp4" target="_blank">here</a> to see the video.</span>
+    <div id="myCarousel" class="carousel slide" data-ride="carousel" data-interval="2100">
+      <!-- Indicators -->
+      <ol class="carousel-indicators">
+        <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+        <li data-target="#myCarousel" data-slide-to="1"></li>
+      </ol>
+      <div class="carousel-inner" role="listbox">
+        <div class="item active">
+            <div class="carousel-caption">
+              <p><span>Fulbright Distinguished Awards in Teaching Program for International Teachers (FDAI 2020-21). Click <a href="https://spoken-tutorial.org/media/NAVODAYA_SAMACHAR.pdf" target="_blank">here</a>.</span></p>
+            </div>
+        </div>
+        <div class="item">
+            <div class="carousel-caption">
+              <p><span>AICTE chairman Prof. Anil D. Sahasrabudhe encouraging to use opensource software. Click <a href="https://spoken-tutorial.org/media/AICTE-Chairman-Dr-Anil-Sahasrabudhe-Scilab-Toolbox-Hackathon-Inauguration.mp4" target="_blank">here</a> to see the video.</span></p>
+            </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
 {% endblock info %}
 {% block banner %}
     <div class="page1">
@@ -146,11 +233,22 @@
                 <div class='go'>
                     <a href="/tutorial-search/" title="Search videos"><img class='go-image' alt="rounded arrow" src="/static/spoken/images/rounded-arrow.png"></a>
                 </div>
-                <div class="awards">
+                <div class="awards awards-md">
                     <ul>
-                        <li class="awards-item col-sm-3 col-md-3"><a class="" href="https://googleresearch.blogspot.in/2015/03/announcing-google-mooc-focused-research.html" onclick="caller();">Google MOOCs <br>Research Award 2015</a></li>                        <li class="awards-item col-sm-3 col-md-3"><a class="" href="/ht-for-mumbai-nomination">Nomination for <br>HT for Mumbai Awards 2015  </a></li>
-                        <li class="awards-item col-sm-3 col-md-3"><a class="" href="http://application.reimagine-education.com/the-winners-individual/2015/132/2193b0ae3841f24da1464d4b6b70ee0f/Indian+Institute+of+Technology+Bombay" target="_blank">Reimagine Education <br>Award 2015</a></li>
-                        <li class="awards-item col-sm-3 col-md-3"><a class="blink" href="/media/cms/images/kannan-deen-dayal.jpeg" target="_blank">Re-Engineering India <br>Award 2020</a></li>
+                      <li class="awards-item col-sm-3 col-md-3"><a class="blink" href="/media/cms/images/kannan-deen-dayal.jpeg" target="_blank">Re-Engineering India <br>Award 2020</a></li>
+                      <li class="awards-item col-sm-2 col-md-3"><a class="" href="http://application.reimagine-education.com/the-winners-individual/2015/132/2193b0ae3841f24da1464d4b6b70ee0f/Indian+Institute+of+Technology+Bombay" target="_blank">Reimagine Education <br>Award 2015</a></li>
+                      <li class="awards-item col-sm-3 col-md-3"><a class="" href="/ht-for-mumbai-nomination">Nomination for <br>HT for Mumbai Awards 2015  </a></li>
+                      <li class="awards-item col-sm-2 col-md-3"><a class="" href="https://googleresearch.blogspot.in/2015/03/announcing-google-mooc-focused-research.html" onclick="caller();">Google MOOCs <br>Research Award 2015</a></li>                        
+                    </ul>
+                </div>
+                <div class="awards awards-sm">
+                    <ul>
+                      <li class="awards-item col-sm-12 col-md-3">
+                        <span style="width: 100%;"><a class="blink" href="/media/cms/images/kannan-deen-dayal.jpeg" target="_blank">Re-Engineering India - Award 2020</a></span>
+                      </li>
+                      <li class="awards-item col-sm-12 col-md-3"><a class="" href="http://application.reimagine-education.com/the-winners-individual/2015/132/2193b0ae3841f24da1464d4b6b70ee0f/Indian+Institute+of+Technology+Bombay" target="_blank">Reimagine Education - Award 2015</a></li>
+                      <li class="awards-item col-sm-12 col-md-3"><a class="" href="/ht-for-mumbai-nomination">Nomination for HT for Mumbai - Awards 2015  </a></li>
+                      <li class="awards-item col-sm-12 col-md-3"><a class="" href="https://googleresearch.blogspot.in/2015/03/announcing-google-mooc-focused-research.html" onclick="caller();">Google MOOCs - Research Award 2015</a></li>                        
                     </ul>
                 </div>
             </div>
