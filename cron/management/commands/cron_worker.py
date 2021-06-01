@@ -10,6 +10,7 @@ from cron import DEFAULT_QUEUE, REDIS_CLIENT,TOPPER_QUEUE
 from rq.job import Job
 from rq.command import send_shutdown_command, send_kill_horse_command
 from cron.models import AsyncCronMail
+from rq.registry import FailedJobRegistry
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
@@ -27,6 +28,9 @@ class Command(BaseCommand):
                     DEFAULT_QUEUE.enqueue_job(job)
                 except:
                     print('Job does not exist')
+            topper_registry = FailedJobRegistry(queue=TOPPER_QUEUE)
+            for job_id in topper_registry.get_job_ids():
+                topper_registry.remove(job_id, delete_job=True)
             w = Worker([DEFAULT_QUEUE,TOPPER_QUEUE], connection=REDIS_CLIENT, name='default_worker')
             w.work()
 
