@@ -355,8 +355,8 @@ CACHES = {
         'TIMEOUT': 3600 * 24,
     },
     'file_cache': {
-        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/tmp/django_cache',
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'topper_cache_table',
         'TIMEOUT': 3600 * 24 * 30,
     }
 }
