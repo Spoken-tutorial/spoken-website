@@ -46,9 +46,9 @@ class AsyncCronMailListCreateView(UserPassesTestMixin, CreateView):
 
 
     def test_func(self):
-        return self.request.user.is_superuser
+        return self.request.user.is_superuser or self.request.user.groups.filter(name='HR').exists()
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_superuser or u.groups.filter(name='HR').exists())
 def run_cron_mail(request):
     if 'submit' in request.POST:
         submit = request.POST['submit']
@@ -82,7 +82,7 @@ def run_cron_mail(request):
 
 
 
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_superuser or u.groups.filter(name='HR').exists())
 def update_task(request):
     if request.method == 'POST':
         cron_id = int(request.POST['task_id'])
@@ -95,7 +95,7 @@ def update_task(request):
     return redirect('cron:mail_list_create')
 
 @csrf_exempt
-@user_passes_test(lambda u: u.is_superuser)
+@user_passes_test(lambda u: u.is_superuser or u.groups.filter(name='HR').exists())
 def upload_task(request):
     if request.method == 'POST':
         subject=request.POST['subject']
