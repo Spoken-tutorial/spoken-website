@@ -91,7 +91,7 @@
               <td>{{t.started_at}}</td>
               <td>{{t.completed_at}}</td>
               <td>{%if t.status %}<p style="color:green;">Completed</p>{% elif t.started_at %}<p style="color:orangered;">Running</p>{% else %} <p style="color:blue;">New Task</p> {% endif %}</td>
-              <td>{% if t.report %}{%if t.log_file %}<a href="{{t.log_file.url}}">Download</a>{% endif %}<br/>{{t.report}}{% else %} None {% endif %}</td>
+              <td>{% if t.report %}{% if user.is_superuser %}{%if t.log_file %}<a href="{{t.log_file.url}}">Download</a>{% endif %}<br/>{% endif %}{{t.report}}{% else %} None {% endif %}</td>
               <td>{% if t.status or  t.started_at %}Submitted{% else %}<form action="{% url 'cron:run_cron_mail'%}" method='post'>{% csrf_token %}<input type="hidden" name='cron_id' value={{t.id}} /><input class="btn btn-success" name="submit" type="submit" value="Run" /></form>{% endif %}</td>
             </tr>
           {% endfor %}
