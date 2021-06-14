@@ -101,3 +101,5 @@ cron/nohup.out
 cron/spoken_search/index
 static/spoken/images/*
 
+*.sql
+scriptmanager/static/scriptmanager/main.js

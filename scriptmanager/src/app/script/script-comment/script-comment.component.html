@@ -1,0 +1,45 @@
+<div class="timeline-item animated fadeInRight fixedSidebar">
+  <div class="columns">
+    <div class="column">
+
+      <div class="fixedComments" id="fixedComments">
+
+        <div *ngFor="let comment of comments; let i = index" class="timeline-content">
+          <app-script-comment-box [comment]="comment" [index]="i" (saveCommentEmitter)="saveComment($event)" (deleteCommentEmitter)="deleteComment($event)" (doneCommentEmitter)="doneComment($event)" (resolveCommentEmitter)="resolveComment($event)" [published]="published">
+          </app-script-comment-box>
+        </div>
+
+        <div *ngIf="comments == ''">
+          <article class="media">
+            <div class="media-content">
+              <div class="content">
+                <p>
+                  <strong>No comments for this slide right now.</strong>
+                  <br>
+                  <span class="is-divider" style="margin:10px 0 20px 0;"></span>
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <article class="media">
+          <div class="media-content" *ngIf="!published">
+            <div class="field">
+              <p class="control">
+                <textarea #textarea class="textarea" placeholder="Add a comment..." (keyup)="commentKey($event)"
+                  [(ngModel)]="comment_value" #commentValue="ngModel"></textarea>
+              </p>
+            </div>
+            <div class="field">
+              <p class="control">
+                <button class="button heading" (click)="addComment()" title="Click to post your comment">Post comment</button>
+              </p>
+            </div>
+          </div>
+        </article>
+      </div>
+
+    </div>
+  </div>
+</div>

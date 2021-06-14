@@ -1,0 +1,20 @@
+<div class="timeline-item animated fadeInRight fixedSidebar">
+  <div class="columns">
+    <div class="column">
+
+      <div class="fixedRevisions">
+        <article>
+          <div class="content" *ngIf="revisions">
+            <div *ngFor="let revision of revisions; let i = index">
+              <a [ngClass]="i == 0 ? 'button is-success is-outlined': 'button is-text'"
+                (click)="showRevisionModal(i)" title="Click to view this revision">Revision {{ revisions.length - i }}
+                ({{ revision.date_time }})</a>
+              <span class="is-divider" style="margin:10px 0 20px 0;"></span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+    </div>
+  </div>
+</div>

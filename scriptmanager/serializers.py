@@ -1,0 +1,210 @@
+from creation.models import ContributorRole, FossCategory, Language, TutorialDetail, TutorialResource
+from rest_framework import serializers
+from .models import Script, ScriptDetail, Comment
+from django.contrib.auth.models import User
+from rest_framework.response import Response
+from rest_framework import status
+from datetime import datetime, date, timedelta
+
+class FossCategorySerializer(serializers.ModelSerializer):
+  name = serializers.CharField(source='foss')
+
+  class Meta:
+    model = FossCategory
+    fields = ('id', 'name', 'description')
+
+
+class LanguageSerializer(serializers.ModelSerializer):
+
+  class Meta:
+    model = Language
+    fields = ('id', 'name')
+
+
+class ContributorRoleSerializer(serializers.ModelSerializer):
+  foss_category = FossCategorySerializer(read_only=True)
+  language = LanguageSerializer(read_only=True)
+  user = serializers.CharField()
+
+  class Meta:
+    model = ContributorRole
+    fields = ('foss_category', 'language', 'user', 'status')
+
+
+class TutorialDetailSerializer(serializers.ModelSerializer):
+  script_status = serializers.SerializerMethodField()
+  published = serializers.SerializerMethodField()
+  outline = serializers.SerializerMethodField()
+  language = serializers.SerializerMethodField()
+  published_by = serializers.SerializerMethodField()
+  published_on = serializers.SerializerMethodField()
+  created_by = serializers.SerializerMethodField()
+  foss = FossCategorySerializer(read_only=True)
+  suggested_title = serializers.SerializerMethodField()
+  versionNo = serializers.SerializerMethodField()
+
+  class Meta:
+    model = TutorialDetail
+    fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'script_status', 'outline', 'published', 'published_on', 'published_by', 'created_by', 'suggested_title', 'versionNo')
+
+  def get_script_status(self, instance):
+    if Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).exists():
+      return True
+    else:
+      return False
+  
+  def get_published(self, instance):
+    if self.get_script_status(instance):
+      return Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().status
+
+    return False
+
+  def get_published_on(self, instance):
+    if self.get_script_status(instance):
+      return Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().published_on
+
+    return None
+
+  def get_published_by(self, instance):
+    if self.get_script_status(instance):
+      user = Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().published_by
+
+      if (user):  return user.username
+
+    return None
+
+  def get_created_by(self, instance):
+    if self.get_script_status(instance):
+      user = Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().user
+
+      if (user):  return user.username
+
+    return None
+
+  def get_outline(self, instance):
+    lang = Language.objects.filter(id=self.context.get('lang'))
+    if TutorialResource.objects.filter(tutorial_detail=instance, language=lang).exists():
+      return TutorialResource.objects.filter(tutorial_detail=instance, language=lang)[0].outline
+    else:
+      return None
+
+  def get_language(self, instance):
+    lang_id = self.context.get('lang')
+    return int(lang_id)
+
+  def get_suggested_title(self, instance):
+    if self.get_script_status(instance):
+      suggested_title = Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().suggested_title
+
+      return suggested_title
+
+    return None
+
+  def get_versionNo(self, instance):
+    if self.get_script_status(instance):
+      versionNo = Script.objects.filter(tutorial_id=instance.id, language=self.context.get('lang')).order_by('-versionNo').first().versionNo
+
+      return versionNo
+
+    return None
+
+# class TutorialScriptDetailSerializer(serializers.ModelSerializer):
+#   outline = serializers.SerializerMethodField()
+#   language = serializers.SerializerMethodField()
+
+#   class Meta:
+#     model = TutorialDetail
+#     fields = ('id', 'foss', 'language', 'tutorial', 'level', 'order', 'outline')
+
+#   def get_outline(self, instance):
+#     script = self.context.get('script')
+#     lang = script.language
+#     if TutorialResource.objects.filter(tutorial_detail=instance, language=lang).exists():
+#       return TutorialResource.objects.filter(tutorial_detail=instance, language=lang)[0].outline
+#     else:
+#       return None
+
+#   def get_language(self, instance):
+#     script = self.context.get('script')
+#     lang_id = script.language.id
+#     return int(lang_id)
+
+class ScriptDetailSerializer(serializers.ModelSerializer):
+
+  class Meta:
+    model = ScriptDetail
+    fields = ('id', 'cue', 'narration', 'order', 'comment_status', 'script')
+
+
+class ScriptSerializer(serializers.ModelSerializer):
+  slides = serializers.SerializerMethodField()
+  versions = serializers.SerializerMethodField()
+
+  # def __init__(self, *args, **kwargs):
+  #   remove_fields = kwargs.pop('remove_fields', None)
+  #   super(ScriptSerializer, self).__init__(*args, **kwargs)
+
+  #   if remove_fields:
+  #       # for multiple fields in a list
+  #       for field_name in remove_fields:
+  #           self.fields.pop(field_name)
+
+  class Meta:
+    model = Script
+    fields = ('id', 'slides', 'status', 'tutorial', 'language', 'suggested_title', 'versionNo', 'versions', 'editable')
+
+  def get_slides(self, instance):
+    slides = []
+    row = ScriptDetail.objects.get(script=instance, prevRow=None)
+    slides.append(row)
+    while row.nextRow:
+      row = ScriptDetail.objects.get(pk=row.nextRow)
+      slides.append(row)
+
+    # slides = ScriptDetail.objects.filter(script=instance)
+    # ordering = instance.ordering
+    # if (len(ordering) != 0):
+    #   ordering = ordering.split(',')
+    #   ordering = list(map(int, ordering))
+    #   slides = sorted(slides, key=lambda s: ordering.index(s.pk))
+
+    return ScriptDetailSerializer(slides, many=True).data
+
+  def get_versions(self, instance):
+    versions = []
+    scripts = Script.objects.filter(tutorial=instance.tutorial, language=instance.language).order_by('-versionNo')
+    for scr in scripts:
+      versions.append(scr.versionNo)
+    return versions
+
+class CommentSerializer(serializers.ModelSerializer):
+  user = serializers.CharField()
+  time = serializers.SerializerMethodField()
+
+  class Meta:
+    model = Comment
+    fields = ('id', 'comment', 'user', 'script_details', 'time', 'done', 'resolved')
+
+  def get_time(self, instance):
+    time = datetime.now()
+    created = instance.created
+    if created.day == time.day and created.month == time.month and created.year == time.year and created.hour == time.hour:
+      return str(time.minute - created.minute) + " minute(s) ago"
+    elif created.day == time.day and created.month == time.month and created.year == time.year:
+      return str(time.hour - created.hour) + " hour(s) ago"
+    elif created.month == time.month and created.year == time.year:
+      return str(time.day - created.day) + " day(s) ago"
+    elif created.year == time.year:
+      return str(time.month - created.month) + " month(s) ago"
+    return date(day=created.day, month=created.month, year=created.year).strftime('%d %B %Y')
+
+
+class ReversionSerializer(serializers.Serializer):
+  reversion_id = serializers.IntegerField()
+  id = serializers.IntegerField()
+  cue = serializers.CharField()
+  narration = serializers.CharField()
+  order = serializers.CharField()
+  script_id = serializers.CharField()
+  date_time = serializers.DateTimeField()
+  user = serializers.CharField()
