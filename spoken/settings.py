@@ -99,7 +99,6 @@ INSTALLED_APPS = [
     'workshop',
     'django_filters',
     'impersonate',
-    'corsheaders',
     'ckeditor',
     'cron',
     'ilwmoodle',
