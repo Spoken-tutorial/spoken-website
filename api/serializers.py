@@ -6,10 +6,18 @@ from django.conf import settings
 from creation.views import get_video_info
 
 class TutorialDetailSerializer(serializers.ModelSerializer):
-    tutorial_detail = serializers.CharField(read_only=True)
+    outline = serializers.SerializerMethodField()
 
     class Meta(object):
         model = TutorialDetail
+        fields = ('id', 'tutorial', 'outline')
+    
+    def get_outline(self, instance):
+        lang = Language.objects.filter(id=self.context.get('lang'))
+        if TutorialResource.objects.filter(tutorial_detail=instance, language=lang).exists():
+            return TutorialResource.objects.filter(tutorial_detail=instance, language=lang)[0].outline
+        else:
+            return None
 
 
 class VideoSerializer(serializers.ModelSerializer):

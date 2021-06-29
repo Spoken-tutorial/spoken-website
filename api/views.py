@@ -6,7 +6,7 @@ from creation.models import TutorialResource,\
             TutorialDetail, FossSuperCategory, Language,\
              FossCategory, TutorialCommonContent, TutorialDuration
 from api.serializers import VideoSerializer, CategorySerializer, FossSerializer, LanguageSerializer, RelianceJioSerializer,\
-        RelianceJioVideoSerializer, RelianceJioCategorySerializer, RelianceJioLanguageSerializer
+        RelianceJioVideoSerializer, RelianceJioCategorySerializer, RelianceJioLanguageSerializer, TutorialDetailSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, Q
 import json
@@ -22,7 +22,8 @@ from django.core.cache import cache
 from creation.templatetags.creationdata import instruction_sheet, installation_sheet, get_prerequisite
 from rest_framework import status
 from forums.models import Question
-
+from rest_framework.decorators import api_view
+from creation.models import ContributorRole, DomainReviewerRole, QualityReviewerRole
 @csrf_exempt
 def video_list(request):
     """
@@ -271,3 +272,35 @@ class TutorialResourceAPI(APIView):
             except TutorialResource.DoesNotExist:
                 return Response(context, status=status.HTTP_400_BAD_REQUEST)
         return Response(context, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_all_foss_langauges(request):
+    foss = FossSerializer(FossCategory.objects.all(), many=True).data
+    language = LanguageSerializer(Language.objects.all(), many=True).data
+    context={'spokentutorials':{'foss':foss, 'language':language}}
+    return Response(context, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_all_tutorials(request, fid, lid):
+    tutorials = TutorialDetailSerializer(
+        TutorialDetail.objects.filter(foss = fid).order_by('order'), 
+        context={"lang": lid},
+        many=True
+        ).data
+    context={'spokentutorials':{'tutorials':tutorials}}
+    return Response(context, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_foss_roles(request, fid, lid, username):
+    roles = []
+    if ContributorRole.objects.filter(foss_category__id=fid, language__id=lid, user__username=username).exists():
+        roles.append('Contributor')
+    if DomainReviewerRole.objects.filter(foss_category__id=fid, language__id=lid, user__username=username).exists():
+        roles.append('Domain-Reviewer')
+    if QualityReviewerRole.objects.filter(foss_category__id=fid, language__id=lid, user__username=username).exists():
+        roles.append('Quality-Reviewer')
+    context={'spokentutorials':{'roles':roles}}
+    return Response(context, status=status.HTTP_200_OK)
+
