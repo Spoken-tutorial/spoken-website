@@ -129,7 +129,11 @@ def filter_student_grades(key=None):
     try:
       fossmdl=FossMdlCourses.objects.filter(foss__in=foss)
       #get moodle user grade for a specific foss quiz id having certain grade
-      user_grade=MdlQuizGrades.objects.using('moodle').values_list('userid', 'quiz', 'grade').filter(quiz__in=[f.mdlquiz_id for f in fossmdl], grade__gte=int(grade))
+      if from_date and to_date:
+        user_grade=MdlQuizGrades.objects.using('moodle').values_list('userid', 'quiz', 'grade').filter(quiz__in=[f.mdlquiz_id for f in fossmdl], grade__gte=int(grade), timemodified__range=[datetime.strptime(from_date,"%Y-%m-%d").timestamp(), datetime.strptime(to_date,"%Y-%m-%d").timestamp()])
+      elif from_date:
+        user_grade=MdlQuizGrades.objects.using('moodle').values_list('userid', 'quiz', 'grade').filter(quiz__in=[f.mdlquiz_id for f in fossmdl], grade__gte=int(grade), timemodified__gte=datetime.strptime(from_date,"%Y-%m-%d").timestamp())
+
       #convert moodle user and grades as key value pairs
       dictgrade = {i[0]:{i[1]:[i[2],False]} for i in user_grade}
       #get all test attendance for moodle user ids and for a specific moodle quiz ids
@@ -142,10 +146,6 @@ def filter_student_grades(key=None):
                                 test__academic__institution_type__in=institution_type if institution_type else InstituteType.objects.all(), 
                                 test__academic__status__in=[activation_status] if activation_status else [1,3]
                               )
-      if from_date and to_date:
-        test_attendance = test_attendance.filter(test__tdate__range=[from_date, to_date])
-      elif from_date:
-        test_attendance = test_attendance.filter(test__tdate__gte=from_date)
         
       filter_ta=[]
       for i in range(test_attendance.count()):
