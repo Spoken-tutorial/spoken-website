@@ -26,6 +26,7 @@ class FossSuperCategoryAdmin(admin.ModelAdmin):
 
 
 class FossCategoryAdmin(admin.ModelAdmin):
+    form = FossCategoryForm
     exclude = ('user',)
     list_display = ('foss', 'id', 'status', 'created', 'updated', 'user')
     filter_horizontal = ['category']
