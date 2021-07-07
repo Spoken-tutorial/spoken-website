@@ -218,8 +218,10 @@
       message = CKEDITOR.instances['task_message'].getData()
       data = JSON.stringify({ 'data': data });
       $.post('/cron/upload_task/',{'subject': subject,'job': job, 'message': message, 'data': data},
-      function(success_url) {
-        window.location = success_url
+      function(data) {
+        if (data['status'] == true){
+          window.location = data['success_url']
+        }  
         }
       );
       }

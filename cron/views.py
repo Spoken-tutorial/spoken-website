@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import csv
 import uuid
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import datetime as dt
 from config import WORKER_STATUS,WORKER_TIME
 
@@ -95,18 +95,22 @@ def update_task(request):
     return redirect('cron:mail_list_create')
 
 @csrf_exempt
-@user_passes_test(lambda u: u.is_superuser or u.groups.filter(name='HR').exists())
 def upload_task(request):
-    if request.method == 'POST':
-        subject=request.POST['subject']
-        message=request.POST['message']
-        job=request.POST['job']
-        data = json.loads(request.POST.get('data'))
-        file_name = 'emails/'+str(uuid.uuid4())+'.csv'
-        with open('media/'+file_name,'w') as f:
-            write = csv.writer(f)
-            write.writerows(data['data'])
-            cron=AsyncCronMail.objects.create(subject=subject, message=message, uploaded_by=request.user, status=False, ers_job_id=job)
-            cron.csvfile.name = file_name
-            cron.save()
-            return HttpResponse(request.build_absolute_uri('/cron/mail_list_create'))
+    if request.user.is_superuser or request.user.groups.filter(name='HR').exists():
+        if request.method == 'POST':
+            subject=request.POST['subject']
+            message=request.POST['message']
+            job=request.POST['job']
+            data = json.loads(request.POST.get('data'))
+            file_name = 'emails/'+str(uuid.uuid4())+'.csv'
+            try:
+                with open('media/'+file_name,'w') as f:
+                    write = csv.writer(f)
+                    write.writerows(data['data'])
+                    cron=AsyncCronMail.objects.create(subject=subject, message=message, uploaded_by=request.user, status=False, ers_job_id=job)
+                    cron.csvfile.name = file_name
+                    cron.save()
+                    return JsonResponse({'status':True,'success_url':request.build_absolute_uri('/cron/mail_list_create')})
+            except:
+                return JsonResponse({'status':False,'success_url':None})
+    return JsonResponse({'status':False,'success_url':None})
