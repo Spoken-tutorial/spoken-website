@@ -51,9 +51,6 @@ from donate.models import *
 import csv
 
 
-
-today = date.today()
-
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
 	model = TrainingEvents
@@ -242,6 +239,7 @@ class EventUpdateView(UpdateView):
 
 #used to display evnets to mngrs under dashboard link
 def listevents(request, role, status):
+	today=date.today()
 	context = {}
 	user = request.user
 	if not (user.is_authenticated() and (is_resource_person(user) or is_administrator(user))):
@@ -329,7 +327,7 @@ def listevents(request, role, status):
 	context['role'] = role
 	context['status'] = status
 	context['header'] = header
-	context['today'] = today
+	context['today'] = date.today()
 	context['ordering'] = get_field_index(raw_get_data)
 	context['pcount'] = pcount
 	context['mcount'] = mcount
