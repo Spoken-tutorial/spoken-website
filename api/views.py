@@ -304,3 +304,13 @@ def get_foss_roles(request, fid, lid, username):
     context={'spokentutorials':{'roles':roles}}
     return Response(context, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+def get_tutorial_detail(request, fid, lid, tid):
+    tutorial = TutorialDetail.objects.get(pk = tid)
+    tdata = TutorialDetailSerializer(
+        tutorial, 
+        context={"lang": lid},
+        ).data
+    lang = Language.objects.get(pk=lid)
+    context = {'spokentutorials':{'foss':tutorial.foss.foss,'language':lang.name ,'tutorial':tdata}}
+    return Response(context, status=status.HTTP_200_OK)
