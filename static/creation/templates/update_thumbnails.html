@@ -1,0 +1,72 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Upload Thumbnails{% endblock %}
+{% block heading %}
+    Upload Thumbnails
+{% endblock %}
+{% block content %}
+    <form role="form" method="post" enctype="multipart/form-data" action="">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_foss">FOSS Category </label>
+            {% render_field form.foss class+="form-control foss" tabindex="1" %}
+            {{ form.foss.errors }}
+        </div>
+        <div class="form-group">
+            <label for="id_tutorial">Tutorial 
+                <span class='ajax-refresh ajax-refresh-tutorial'>
+                    <i class="fa fa-2 fa-refresh fa-spin"></i>
+                </span>
+            </label>
+            {% render_field form.tutorial class+="form-control tutorial" tabindex="2" %}
+            {{ form.tutorial.errors }}
+        </div>
+        <div class="form-group">
+                <label for="id_thumb_mins">Video Thumbnail time</label>
+                <div class="input-group">
+                    {% render_field form.thumb_mins class+="form-control" %}
+                    {{ form.thumb_mins.errors }}
+                    <span class="input-group-addon">:</span>
+                    {% render_field form.thumb_secs class+="form-control" %}
+                    {{ form.thumb_secs.errors }}
+                </div>
+        </div>
+        <input type="submit" class="btn btn-primary" value="Save"  tabindex="5" />
+    </form>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script type="text/javascript">
+        $(document).ready(
+            function() {
+                $('.foss').on("change", 
+                    function() {
+                        var foss = $(this).val();
+                        $('.tutorial').html('<option value="" selected="selected">-- Select tutorial --</option>');
+                        $('.tutorial').attr("disabled", "disabled");
+                        if(foss != '') {
+                            $.ajax({
+                                url: "/creation/ajax-get-tutorials/",
+                                type: "POST",
+                                data: {
+                                    foss: foss,
+                                },
+                                beforeSend: function() {
+                                    $('.ajax-refresh-tutorial').show();
+                                },
+                                success: function(data) {
+                                    if(data){
+                                        $('.tutorial').html(data);
+                                        $('.tutorial').removeAttr('disabled');
+                                    }
+                                    $('.ajax-refresh-tutorial').hide();
+                                }
+                            });
+                        }
+                    }
+                );
+
+            }
+        );
+    </script>
+{% endblock %}
