@@ -3249,7 +3249,6 @@ def update_thumbnail(request):
             try:
                 foss_id = request.POST.get('foss')
                 foss = FossCategory.objects.get(pk = foss_id)
-                tr_rec.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
 
                 tutorial_detail_id = request.POST.get('tutorial')
                 tutorial = TutorialDetail.objects.get(pk = tutorial_detail_id)
@@ -3259,8 +3258,8 @@ def update_thumbnail(request):
                 tr_res.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
                 tr_res.save()
 
-                create_thumbnail(tr_rec, 'Big', tr_res.video_thumbnail_time, '700:500')
-                create_thumbnail(tr_rec, 'Small', tr_res.video_thumbnail_time, '170:127')
+                create_thumbnail(tr_res, 'Big', tr_res.video_thumbnail_time, '700:500')
+                create_thumbnail(tr_res, 'Small', tr_res.video_thumbnail_time, '170:127')
 
 
                 messages.success(request, 'create_thumbnail updated successfully!')
