@@ -100,4 +100,4 @@ cron/nohup.out
 .vscode/
 cron/spoken_search/index
 static/spoken/images/*
-cron/*
+

@@ -67,7 +67,9 @@
                   <th>#</th>
                   <th>Subject</th>
                   <th>Message </th>
+                  <th>Job Id </th>
                   <th>Sender</th>
+                  <th>Uploaded On</th>
                   <th>Uploaded by</th>
                   <th>Started at</th>
                   <th>Completed at</th>
@@ -82,12 +84,14 @@
               <td>{{ forloop.counter }}</td>
               <td><a class="btn btn-link"  data-toggle="modal" data-target="#taskModal" data-taskid="{{t.pk}}" data-subject="{{t.subject}}" data-message="{{t.message}}" data-status="{{t.status}}"> {{t.subject|truncatewords:4}}</a></td>
               <td>{{t.message|safe|striptags|truncatewords:20}}</td>
+              <td>{{t.ers_job_id}}</td>
               <td>{{t.sender}}</td>
+              <td>{{t.uploaded_at}}</td>
               <td>{{t.uploaded_by}}</td>
               <td>{{t.started_at}}</td>
               <td>{{t.completed_at}}</td>
               <td>{%if t.status %}<p style="color:green;">Completed</p>{% elif t.started_at %}<p style="color:orangered;">Running</p>{% else %} <p style="color:blue;">New Task</p> {% endif %}</td>
-              <td>{% if t.report %}{%if t.log_file %}<a href="{{t.log_file.url}}">Download</a>{% endif %}<br/>{{t.report}}{% else %} None {% endif %}</td>
+              <td>{% if t.report %}{% if user.is_superuser %}{%if t.log_file %}<a href="{{t.log_file.url}}">Download</a>{% endif %}<br/>{% endif %}{{t.report}}{% else %} None {% endif %}</td>
               <td>{% if t.status or  t.started_at %}Submitted{% else %}<form action="{% url 'cron:run_cron_mail'%}" method='post'>{% csrf_token %}<input type="hidden" name='cron_id' value={{t.id}} /><input class="btn btn-success" name="submit" type="submit" value="Run" /></form>{% endif %}</td>
             </tr>
           {% endfor %}

@@ -12,6 +12,12 @@ class AsyncCronMail(models.Model):
     started_at = models.DateTimeField(null=True)
     completed_at = models.DateTimeField(null=True)
     message = models.TextField()
-    sender = models.EmailField()
+    sender = models.EmailField(default='no-reply@spoken-tutorial.org')
     log_file =  models.FileField(null=True, upload_to='emails/')
+    job_id = models.TextField(null=True)
+    ers_job_id = models.TextField(null=True)
+
+    def __str__(self):
+        return self.subject
+    
 

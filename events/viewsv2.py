@@ -60,12 +60,15 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 from events.views import get_page
 from io import BytesIO
 from django.db.models import Q
-
+from cron import TOPPER_QUEUE, REDIS_CLIENT
 import uuid 
-
+from django.core.cache import caches
+from rq.job import Job
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
 from events.helpers import get_prev_semester_duration, get_updated_form
+from cron.tasks import async_filter_student_grades, filter_student_grades
+from spoken.config import TOPPER_WORKER_STATUS
 
 class JSONResponseMixin(object):
   """
@@ -3374,12 +3377,13 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
   success_url = '/software-training/student-grade-filter/' 
 
   def test_func(self):
-        return self.request.user.is_superuser
+        return self.request.user.is_superuser or self.request.user.groups.filter(name='HR').exists()
   
   def form_valid(self, form):
     """
     If the form is valid, redirect to the supplied URL.
     """
+    result=[]
     if form.is_valid:
       foss = [x for x in form.cleaned_data['foss']]
       state = [s for s in form.cleaned_data['state']]
@@ -3389,46 +3393,27 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
       institution_type = [t for t in form.cleaned_data['institution_type']]
       from_date = form.cleaned_data['from_date']
       to_date = form.cleaned_data['to_date']
-      result=self.filter_student_grades(foss, state, city, grade, institution_type, activation_status, from_date, to_date)
+      foss_ids=[f.pk for f in foss]
+      foss_ids.sort()
+      state_ids=[s.pk for s in state]
+      state_ids.sort()
+      city_ids=[c.pk for c in city]
+      city_ids.sort()
+      institution_type_ids=[t.pk for t in institution_type]
+      institution_type_ids.sort()
+      key=';'.join([str(f) for f in foss_ids])+':'+';'.join([str(s) for s in state_ids])+':'+';'.join([str(c) for c in city_ids])+':'+str(grade)+':'+';'.join([str(t) for t in institution_type_ids])+':'+str(activation_status)+':'+str(from_date).replace(" ", "")+':'+str(to_date).replace(" ", "")
+      result=caches['file_cache'].get(key)
+      if not result:
+        if TOPPER_WORKER_STATUS:
+          try:
+            Job.fetch(key, connection=REDIS_CLIENT)
+            messages.success(self.request, "We are wokring on filtering the results for you. Please refresh after some time.")
+          except:
+            async_filter_student_grades(key)
+            messages.success(self.request, "We are wokring on filtering the results for you. Please refresh after some time.")
+        else:
+          result=filter_student_grades(key)
     return self.render_to_response(self.get_context_data(form=form, result=result))
-
-
-  def filter_student_grades(self, foss=None, state=None, city=None, grade=None, institution_type=None, activation_status=None, from_date=None, to_date=None):
-    if grade:
-      #get the moodle id for the foss
-      try:
-        fossmdl=FossMdlCourses.objects.filter(foss__in=foss)
-        #get moodle user grade for a specific foss quiz id having certain grade
-        user_grade=MdlQuizGrades.objects.using('moodle').values_list('userid', 'quiz', 'grade').filter(quiz__in=[f.mdlquiz_id for f in fossmdl], grade__gte=int(grade))
-        #convert moodle user and grades as key value pairs
-        dictgrade = {i[0]:{i[1]:[i[2],False]} for i in user_grade}
-        #get all test attendance for moodle user ids and for a specific moodle quiz ids
-        test_attendance=TestAttendance.objects.filter(
-                                  mdluser_id__in=list(dictgrade.keys()), 
-                                  mdlquiz_id__in=[f.mdlquiz_id for f in fossmdl], 
-                                  test__academic__state__in=state if state else State.objects.all(),
-                                  test__academic__city__in=city if city else City.objects.all(), 
-                                  status__gte=3, 
-                                  test__academic__institution_type__in=institution_type if institution_type else InstituteType.objects.all(), 
-                                  test__academic__status__in=[activation_status] if activation_status else [1,3]
-                                )
-        if from_date and to_date:
-          test_attendance = test_attendance.filter(test__tdate__range=[from_date, to_date])
-        elif from_date:
-          test_attendance = test_attendance.filter(test__tdate__gte=from_date)
-          
-        filter_ta=[]
-        for i in range(test_attendance.count()):
-          if not dictgrade[test_attendance[i].mdluser_id][test_attendance[i].mdlquiz_id][1]:
-            dictgrade[test_attendance[i].mdluser_id][test_attendance[i].mdlquiz_id][1] = True
-            filter_ta.append(test_attendance[i])
-            
-        #return the result as dict
-        return {'mdl_user_grade': dictgrade, 'test_attendance': filter_ta, "count":len(filter_ta)}
-      except FossMdlCourses.DoesNotExist:
-        return None
-    return None
-
 
 
 class AcademicKeyCreateView(CreateView):
