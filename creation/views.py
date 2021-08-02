@@ -3236,6 +3236,43 @@ def update_common_component(request):
     }
     context.update(csrf(request))
     return render(request, 'creation/templates/update_common_comp.html', context)
+
+
+@login_required
+def update_thumbnail(request):
+    if not is_administrator(request.user):
+        raise PermissionDenied()
+    form = UpdateThumbnailForm()
+    if request.method == 'POST':
+        form = UpdateThumbnailForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                foss_id = request.POST.get('foss')
+                foss = FossCategory.objects.get(pk = foss_id)
+
+                tutorial_detail_id = request.POST.get('tutorial')
+                tutorial = TutorialDetail.objects.get(pk = tutorial_detail_id)
+                
+
+                tr_res = TutorialResource.objects.get(tutorial_detail = tutorial_detail_id, language_id = 22)
+                tr_res.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
+                tr_res.save()
+
+                create_thumbnail(tr_res, 'Big', tr_res.video_thumbnail_time, '700:500')
+                create_thumbnail(tr_res, 'Small', tr_res.video_thumbnail_time, '170:127')
+
+
+                messages.success(request, 'create_thumbnail updated successfully!')
+                form = UpdateThumbnailForm()
+            except Exception as e:
+                print(e)
+    context = {
+        'form': form,
+    }
+    context.update(csrf(request))
+    return render(request, 'creation/templates/update_thumbnails.html', context)
+
+
 # -------------- Bidding Module -----------------
 
 @csrf_exempt

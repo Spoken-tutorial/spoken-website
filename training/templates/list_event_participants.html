@@ -125,7 +125,7 @@
 {% elif eventid|is_tr_completed %}
 	<a  class="btn btn-info" type="Submit" onclick="document.forms['form-id'].submit();">Submit Attendance</a>
 	{% if eventid|event_has_attendance %}
-	<a href="{% url 'training:close_event' eventid %}" class="btn btn-info">Close Event and Genearte Certificates</a>{% endif %}
+	<a href="{% url 'training:close_event' eventid %}" class="btn btn-info">Close Event and Generate Certificates</a>{% endif %}
 
 {% endif %}
 

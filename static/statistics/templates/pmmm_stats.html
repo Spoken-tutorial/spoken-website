@@ -110,11 +110,11 @@
                         <td>{{ participants.participants__sum }}</td>
                     </tr>
                     <tr>
-                        <th>Total female participants</th>
+                        <th>Total participants (women)</th>
                         <td>{{ femalecount }}</td>
                     </tr>
                     <tr>
-                        <th>Total male participants</th>
+                        <th>Total participants (men)</th>
                         <td>{{ malecount }}</td>
                     </tr>
                 </table>
@@ -187,10 +187,10 @@
     </script>
 {% endblock %}
 {% block uncompressjsblock %}
-    <script src="{% static 'spoken/js/google-jsapi.js' %}"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback(drawChart);
+      google.charts.load('current', {packages: ['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
           ['Year', 'Participants'],
