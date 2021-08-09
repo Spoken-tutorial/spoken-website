@@ -32,6 +32,7 @@ from cms.views import create_profile, send_registration_confirmation
 from cms.models import Profile
 from certificate.views import _clean_certificate_certificate
 from django.http import HttpResponse
+from django.template import RequestContext
 import os, sys
 from string import Template
 import subprocess
@@ -1114,11 +1115,14 @@ def ilwtestkey_verification(serial):
     try:
         certificate = EventTestStatus.objects.get(cert_code=serial)
         name = certificate.participant.name
-        foss = certificate.foss.foss
+        foss = certificate.fossid.foss
         detail = {}
         detail['Participant_Name'] = name
         detail['Foss'] = foss
-        detail['Test_Date'] = tdate
+        detail['Event Details'] = certificate.event
+        detail['Event Date'] = str(certificate.event.event_start_date)+" to "+str(certificate.event.event_end_date)
+        detail['Event Host College'] = certificate.event.host_college
+        # detail['Test_Date'] = tdate
 
         context['certificate'] = certificate
         context['detail'] = detail

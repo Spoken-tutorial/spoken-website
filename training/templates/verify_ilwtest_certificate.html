@@ -35,7 +35,7 @@
             {% endfor %}
         </tbody>
     </table>
-  <div align="center"><a href="{% url 'events:verify_ilwtest_certificate' %}" ><u> Verify serial number</u></a></div>
+  <div align="center"><a href="{% url 'training:verify_ilwtest_certificate' %}" ><u> Verify serial number</u></a></div>
 </div>
 {% else %}
     <div class="modal fade" id="invalidModal" tabindex="-1" role="dialog" aria-labelledby="invalidModalLabel" aria-hidden="true">
@@ -53,7 +53,7 @@
     </div>
     <p align="center"><b> Enter the serial number from your test certificate </p>
     <hr>
-    <form action="{% url 'events:verify_ilwtest_certificate' %}" method="post">
+    <form action="{% url 'training:verify_ilwtest_certificate' %}" method="post">
         {{ detail }}
         {% csrf_token %}
         <div class="input-group" style="width:340px;text-align:center;margin:0 auto;">
