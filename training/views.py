@@ -1107,3 +1107,32 @@ class EventTestCertificateView(ILWTestCertificate, View):
     else:
       messages.error(self.request, "Permission Denied!")
     return HttpResponseRedirect("/")
+
+
+def ilwtestkey_verification(serial):
+    context = {}
+    try:
+        certificate = EventTestStatus.objects.get(cert_code=serial)
+        name = certificate.participant.name
+        foss = certificate.foss.foss
+        detail = {}
+        detail['Participant_Name'] = name
+        detail['Foss'] = foss
+        detail['Test_Date'] = tdate
+
+        context['certificate'] = certificate
+        context['detail'] = detail
+        context['serial_no'] = True
+    except EventTestStatus.DoesNotExist:
+        context["invalidserial"] = 1
+    return context
+
+@csrf_exempt
+def verify_ilwtest_certificate(request):
+    context = {}
+    ci = RequestContext(request)
+    if request.method == 'POST':
+        serial_no = request.POST.get('serial_no').strip()
+        context = ilwtestkey_verification(serial_no)
+        return render(request, 'verify_ilwtest_certificate.html', context)
+    return render(request, 'verify_ilwtest_certificate.html', {})
