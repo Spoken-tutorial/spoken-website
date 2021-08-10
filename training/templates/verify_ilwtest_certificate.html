@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load announcements %}
+
+{% block header%}
+    <h1> Test Certificate Verification </h1>
+{% endblock %}
+{% block announcement %}
+    <div id="slideshow">
+            {% get_notifications as notifications %}
+            {% if notifications %}
+                {% for notification in notifications %}
+                    <div class="announcement alert" style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
+                        <div class="inner">
+                            <div class="text-container">
+                                {{ notification.body|safe }}
+                                <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+    </div>
+{% endblock %}
+{% block content %}
+{% if serial_no %}
+<div>
+    <table class="table table-bordered" align="center" style="width:50%"> 
+        <caption>Participation Details</caption>    
+        <tbody>
+            {% for key, value in detail.items %}
+            <tr>
+                <td>{{ key }}</td>
+                <td>{{ value }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+  <div align="center"><a href="{% url 'training:verify_ilwtest_certificate' %}" ><u> Verify serial number</u></a></div>
+</div>
+{% else %}
+    <div class="modal fade" id="invalidModal" tabindex="-1" role="dialog" aria-labelledby="invalidModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+              <h4 class="modal-title" id="invalidModalLabel">Invalid Serial Number</h4>
+            </div>
+            <div class="modal-body">
+              Sorry ! The serial number you entered seems to be invalid. Please try again !
+            </div>
+          </div>
+        </div>
+    </div>
+    <p align="center"><b> Enter the serial number from your test certificate </p>
+    <hr>
+    <form action="{% url 'training:verify_ilwtest_certificate' %}" method="post">
+        {{ detail }}
+        {% csrf_token %}
+        <div class="input-group" style="width:340px;text-align:center;margin:0 auto;">
+            <input class="form-control input-lg" placeholder="Enter the serial number" type="text" name=serial_no>
+              <span class="input-group-btn"><button class="btn btn-lg btn-primary" type="submit">Verify</button></span>
+        </div>
+{% endif %}
+    </form>
+    <hr>
+    <center><h4>Problem in verfying details ? write to us at <a href="mailto:contact@spoken-tutorial.org">contact[at]spoken-tutorial[dot]org</a></h4>
+{% endblock %}
+
+{% block compressjsblock %}
+<script type="text/javascript">
+  invalid_serial = {{ invalidserial }}
+  $( document ).ready(function() {
+      if(invalid_serial == 1)
+      {
+          $("#invalidModal").modal(); 
+      }
+  });
+</script>
+{% endblock %}
+{% block jsblock %}
+    <script>
+        /* Slideshow */
+        var stop = 1
+        $('#slideshow').hover(function(){
+            stop = 0
+        }, function(){
+            stop = 1
+        });
+        if($(".announcement").length > 1){
+            $("#slideshow > div:gt(0)").hide();
+            setInterval(function() {
+              if(stop){
+                  $('#slideshow > div:first')
+                    .fadeOut(0)
+                    .next()
+                    .fadeIn(0)
+                    .end()
+                    .appendTo('#slideshow');
+                 }
+            },  5000);
+        }
+        $('.close').click(function(){
+            $(".navbar-fixed-top").css({'top' : '0px', 'position' : 'fixed'});
+            $("#header-wrapper").css({'height' : '0px'});
+        });
+    </script>
+{% endblock %}
+
+
