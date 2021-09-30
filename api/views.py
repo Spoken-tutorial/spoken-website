@@ -199,7 +199,8 @@ class RelianceJioAPI(APIView):
         if jio_data:
             return Response(jio_data)
         else:
-            foss = FOSS_API_LIST
+            #foss = FOSS_API_LIST
+            foss = FossCategory.objects.filter(available_for_jio=True).values_list('id', flat=True)
             lists=[]
             category_list=[]
             lang_en='English'
