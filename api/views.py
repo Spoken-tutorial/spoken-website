@@ -147,7 +147,7 @@ def get_schoolfosslist(request):
     List all fosses for school website.
     """
     if request.method == 'GET':
-        fosses = FossCategory.objects.filter(status=1ss)
+        fosses = FossCategory.objects.filter(status=1)
         serializer = FossSerializer(fosses, many=True)
         return JsonResponse(serializer.data, safe=False)
 
