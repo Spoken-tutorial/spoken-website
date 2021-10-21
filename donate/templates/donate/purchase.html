@@ -31,9 +31,9 @@
 {% endblock %}
 {% block content %}
 
-<p style="color: Red; font-size: 40px; text-align: center;">Currently we are not accepting any T-shirt order.  <br>Please check later.</p>
-
-<!-- <div class="row">
+<!-- <p style="color: Red; font-size: 40px; text-align: center;">Currently we are not accepting any T-shirt order.  <br>Please check later.</p>
+ -->
+<div class="row">
   <div class="col-sm-10 col-sm-offset-1 col-md-6 col-md-offset-3 col-lg-6 col-lg-offset-1">
   <form id="donation_form" action="{% url 'donate:pay_now' 'Goodie' %}" method="post">
           {% csrf_token %}
@@ -74,7 +74,7 @@
         </div>
           </div>
           <div class="col-xs-12 col-sm-4">
-            <button type="submit" class="btn btn-success ">
+            <button type="button" class="btn btn-success " onclick="alert('Payment process in progress')">
               Pay
             </button>
             </div>
@@ -82,12 +82,12 @@
         
       </form>
       </div>
-</div> -->
+</div>
   
     
 {%endblock%}
 {% block jsblock %}
-<!-- <script type="text/javascript">
+<script type="text/javascript">
  $( document ).ready(function() {
 
   $('#id_currency').change(function(){
@@ -103,5 +103,5 @@
 
   });
 
- </script> -->
+ </script>
 {% endblock %}
