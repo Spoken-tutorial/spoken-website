@@ -130,7 +130,8 @@ def training(request):
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     
-    participants = collection.qs.aggregate(Sum('participants')) 
+    participants = collection.qs.aggregate(Sum('participants'))
+    
 
     if lang == 'English':
         participants = participants['participants__sum']+294593
@@ -190,6 +191,9 @@ def training(request):
         for year,count in list(year_data_all.items()):
             chart_data += "['" + str(year) + "', " + str(count) + "],"
     
+    no_of_colleges=collection.qs.filter().values('training_planner__academic_id').distinct().count()   
+    print(" ********************** no of colleges: ", no_of_colleges)
+
     context = {}
     context['form'] = collection.form
     context['chart_data'] = chart_data
@@ -206,6 +210,7 @@ def training(request):
     context['status']=status
     context['femalecount'] = femalecount
     context['malecount'] = malecount
+    context['no_of_colleges'] = no_of_colleges
 
     context['language'] = Language.objects.values('id','name')
     return render(request, 'statistics/templates/training.html', context)
@@ -259,6 +264,11 @@ def fdp_training(request):
     chart_data = ''
     for data in chart_query_set:
         chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
+    
+
+    no_of_colleges=collection.qs.filter().values('training_planner__academic_id').distinct().count()   
+    print(" ********************** no of colleges: ", no_of_colleges)
+
     context = {}
     context['form'] = collection.form
     context['chart_data'] = chart_data
@@ -271,6 +281,7 @@ def fdp_training(request):
     context['model'] = 'Workshop/Training'
     context['femalecount'] = femalecount
     context['malecount'] = malecount
+    context['no_of_colleges'] = no_of_colleges
     return render(request, 'statistics/templates/pmmm_stats.html', context)
 
 
@@ -338,6 +349,10 @@ def online_test(request):
     chart_data = ''
     for data in chart_query_set:
         chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
+    
+    no_of_colleges=collection.qs.filter().values('academic_id').distinct().count()   
+    print(" ********************** no of colleges: ", no_of_colleges)
+
     context = {}
     context['form'] = collection.form
     context['chart_data'] = chart_data
@@ -348,6 +363,7 @@ def online_test(request):
     context['ordering'] = ordering
     context['participant_count'] = participant_count
     context['model'] = 'Online-Test'
+    context['no_of_colleges'] = no_of_colleges
     return render(request, 'statistics/templates/online_test.html', context)
 
 
