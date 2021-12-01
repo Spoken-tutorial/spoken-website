@@ -542,6 +542,8 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     # whenever publish date filter is applied there is a table join, resulting a duplicate entry for tutorials 
     # because single tutorial might have multiple pushish objects
     qs = tutorials_filter.qs.distinct()
+    no_of_foss = qs.filter().values('tutorial_detail__foss_id').distinct().count()
+    print('************ no of foss: ',no_of_foss)
 
     context = {}
 
@@ -562,6 +564,7 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     context['tutorial_num'] = tutorials.paginator.count
     context['header'] = header
     context['ordering'] = ordering
+    context['no_of_foss'] = no_of_foss
 
     return render(request, template, context)
 
