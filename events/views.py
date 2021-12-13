@@ -2366,7 +2366,7 @@ def test_participant_ceritificate(request, wid, participant_id):
 def test_participant_ceritificate_all(request, testid):
     certificate_pass = ''
     w = Test.objects.get(id = testid)
-    if not w.organiser.user == request.user:
+    if not w.organiser.user == request.user and not w.invigilator.user == request.user:
         raise PermissionDenied()
     testattendances = TestAttendance.objects.filter(test_id = testid)
 
