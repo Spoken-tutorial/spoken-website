@@ -70,6 +70,7 @@ urlpatterns = [
     url(r'^update-keywords/$',  update_keywords, name="update_keywords"),
     url(r'^update-manual/(\w+)/$',  update_sheet, name="update_sheet"),
     url(r'^update-assignment/$',  update_assignment, name="update_assignment"),
+    url(r'^update-thumbnail/$',  update_thumbnail, name="update_thumbnail"),
     url(r'^update-codefiles/$',  update_codefiles, name="update_codefiles"),
     url(r'^role/requests/([a-zA-Z-]+)/$',  creation_list_role_requests, name="creation_list_role_requests"),
     url(r'^role/lang_requests/([a-zA-Z-]+)/$',  creation_lang_list_role_requests, name="creation_lang_list_role_requests"),

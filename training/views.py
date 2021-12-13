@@ -32,6 +32,7 @@ from cms.views import create_profile, send_registration_confirmation
 from cms.models import Profile
 from certificate.views import _clean_certificate_certificate
 from django.http import HttpResponse
+from django.template import RequestContext
 import os, sys
 from string import Template
 import subprocess
@@ -50,9 +51,6 @@ from donate.models import *
 
 import csv
 
-
-
-today = date.today()
 
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
@@ -242,6 +240,7 @@ class EventUpdateView(UpdateView):
 
 #used to display evnets to mngrs under dashboard link
 def listevents(request, role, status):
+	today=date.today()
 	context = {}
 	user = request.user
 	if not (user.is_authenticated() and (is_resource_person(user) or is_administrator(user))):
@@ -329,7 +328,7 @@ def listevents(request, role, status):
 	context['role'] = role
 	context['status'] = status
 	context['header'] = header
-	context['today'] = today
+	context['today'] = date.today()
 	context['ordering'] = get_field_index(raw_get_data)
 	context['pcount'] = pcount
 	context['mcount'] = mcount
@@ -1109,3 +1108,35 @@ class EventTestCertificateView(ILWTestCertificate, View):
     else:
       messages.error(self.request, "Permission Denied!")
     return HttpResponseRedirect("/")
+
+
+def ilwtestkey_verification(serial):
+    context = {}
+    try:
+        certificate = EventTestStatus.objects.get(cert_code=serial)
+        name = certificate.participant.name
+        foss = certificate.fossid.foss
+        detail = {}
+        detail['Participant_Name'] = name
+        detail['Foss'] = foss
+        detail['Event Details'] = certificate.event
+        detail['Event Date'] = str(certificate.event.event_start_date)+" to "+str(certificate.event.event_end_date)
+        detail['Event Host College'] = certificate.event.host_college
+        # detail['Test_Date'] = tdate
+
+        context['certificate'] = certificate
+        context['detail'] = detail
+        context['serial_no'] = True
+    except EventTestStatus.DoesNotExist:
+        context["invalidserial"] = 1
+    return context
+
+@csrf_exempt
+def verify_ilwtest_certificate(request):
+    context = {}
+    ci = RequestContext(request)
+    if request.method == 'POST':
+        serial_no = request.POST.get('serial_no').strip()
+        context = ilwtestkey_verification(serial_no)
+        return render(request, 'verify_ilwtest_certificate.html', context)
+    return render(request, 'verify_ilwtest_certificate.html', {})

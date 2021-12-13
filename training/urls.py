@@ -79,4 +79,5 @@ urlpatterns = [
       EventTestCertificateView.as_view(), \
         name="generate_test_certificate"
         ),
+    url(r'^verify-ilwtest-certificate/$', verify_ilwtest_certificate, name='verify_ilwtest_certificate'),
     ]

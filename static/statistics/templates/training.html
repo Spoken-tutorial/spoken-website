@@ -134,6 +134,10 @@
                         <td>{{ collection.paginator.count }}</td>
                     </tr>
                     <tr>
+                        <th>Total number of Institutes</th>
+                        <td>{{ no_of_colleges }}</td>
+                    </tr>
+                    <tr>
                         <th>Participants Count</th>
                         <td>{{ participants }}</td>
                     </tr>
@@ -241,10 +245,10 @@
     </script>
 {% endblock %}
 {% block uncompressjsblock %}
-    <script src="{% static 'spoken/js/google-jsapi.js' %}"></script>
-    <script type="text/javascript">
-      google.load("visualization", "1", {packages:["corechart"]});
-      google.setOnLoadCallback(drawChart);
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+      google.charts.load('current', {packages: ['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
           ['Year', 'Participants'],
