@@ -4892,7 +4892,7 @@ def honorarium(request,hono_id):
             ending = 'for the creation of the following spoken tutorials.'
         else:
             ending = 'for translating and dubbing the following spoken tutorials.'
-    total = '&&'+'Total Time&'+str(timedelta(seconds=secs))+'&&'+str(amount)+r'\\'
+    total = '&&'+'Total&'+str(timedelta(seconds=secs))+'&&'+str(amount)+r'\\'
     download_file_name = ''
     template = 'honorarium'
     certificate_path = os.path.dirname(os.path.realpath(__file__))+"/hr-receipts/"
