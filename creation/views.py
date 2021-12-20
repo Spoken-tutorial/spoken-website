@@ -45,6 +45,7 @@ from django.utils import timezone
 from datetime import datetime,timedelta
 from creation.filters import CreationStatisticsFilter, ContributorRatingFilter, ReviewerFilter
 from django.db.models import Count, Min, Q, Sum, F
+from django.contrib.auth.models import User
 import itertools
 from django.utils.html import format_html
 from django.core.urlresolvers import reverse
@@ -3320,16 +3321,20 @@ def initiate_payment(request):
         message = "Rs."+ str(honorarium.amount)+" is initiated for "+str(len(honorarium.tutorials.all()))+" tutorials"
         # Admin Desk Notification
         try:
-            QualityReviewerNotification.objects.create(user__email = admin_email1, title = honorarium.code, message = message, tutorial_resource = tr_rec)
-            QualityReviewerNotification.objects.create(user__email = admin_email2, title = honorarium.code, message = message, tutorial_resource = tr_rec) 
+            a1 = User.objects.get(email=admin_email1)
+            a2 = User.objects.get(email=admin_email2)
+            QualityReviewerNotification.objects.create(user = a1, title = honorarium.code, message = message, tutorial_resource = tr_pay.tutorial_resource)
+            QualityReviewerNotification.objects.create(user = a2, title = honorarium.code, message = message, tutorial_resource = tr_pay.tutorial_resource) 
         except :
             messages.warning(request, "Incorrect Admin email address")
         # Payment Managers' Notofication
         try:
-            QualityReviewerNotification.objects.create(user__email = payment_manager1, title = honorarium.code, message = message, tutorial_resource = tr_rec)
-            QualityReviewerNotification.objects.create(user__email = payment_manager2, title = honorarium.code, message = message, tutorial_resource = tr_rec) 
+            p1 = User.objects.get(email=payment_manager1)
+            p2 = User.objects.get(email=payment_manager2)
+            QualityReviewerNotification.objects.create(user= p1, title = honorarium.code, message = message, tutorial_resource = tr_pay.tutorial_resource)
+            QualityReviewerNotification.objects.create(user= p2, title = honorarium.code, message = message, tutorial_resource = tr_pay.tutorial_resource) 
         except :
-            message.warning(request, "Incorrect Payment Manager email address")
+            messages.warning(request, "Incorrect Payment Manager email address")
 
         
         #generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials, total_time)
