@@ -4848,8 +4848,9 @@ def honorarium(request,hono_id):
     address = tpi[0]['user__profile__address']
     pincode = tpi[0]['user__profile__pincode']
     phone = tpi[0]['user__profile__phone']
-    if str(pincode) not in address:
-        address = tpi[0]['user__profile__address']+' Pincode -'+str(tpi[0]['user__profile__pincode'])
+    if pincode:
+        if str(pincode) not in address:
+            address = tpi[0]['user__profile__address']+' Pincode -'+str(tpi[0]['user__profile__pincode'])
     manager_name = ''
     # Set the user to the main payment manager
     try:
@@ -4877,7 +4878,8 @@ def honorarium(request,hono_id):
 
         code = b_details.ifsc
     except BankDetail.DoesNotExist:
-        print("Details not found")
+        messages.warning(request, 'Please update Bank Details')
+    
     amount = 0.0
     secs = 0
     ft = ''
@@ -4894,9 +4896,9 @@ def honorarium(request,hono_id):
         secs += instance['seconds']
         ending = ''
         if instance['tutorial_resource__language__name'] == 'English' :
-            ending = 'for the creation of the following spoken tutorials.'
+            ending = 'for the creation of the following Spoken Tutorial.'
         else:
-            ending = 'for translating and dubbing the following spoken tutorials.'
+            ending = 'for translating and dubbing the following Spoken Tutorial.'
     total = '&&'+'Total&'+str(timedelta(seconds=secs))+'&&'+str(amount)+r'\\'
     download_file_name = ''
     template = 'honorarium'
