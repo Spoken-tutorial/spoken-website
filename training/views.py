@@ -456,7 +456,7 @@ class ParticipantCreateView(CreateView):
 			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
 			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
 			user.save()
-			create_profile(user, row[8].strip())
+			create_profile(user, '')
 			send_registration_confirmation(user)
 			return user
 
