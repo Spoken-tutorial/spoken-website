@@ -843,3 +843,12 @@ def expression_of_intrest_new(request):
 
 # def nmeict_intro(request):
 #     return render(request, 'spoken/templates/nmeict_intro.html')
+
+@csrf_exempt
+def saveVideoData(request):
+    print("saveVideoData")
+    d = request.POST
+    print(d)
+    print(d.keys())
+    
+    return HttpResponse("Added")
