@@ -4897,8 +4897,13 @@ def honorarium(request,hono_id):
         ending = ''
         if instance['tutorial_resource__language__name'] == 'English' :
             ending = 'for the creation of the following Spoken Tutorial.'
+        elif rate == hono_rate[1]:
+            ending = 'for translating the following Spoken Tutorial.'
+        elif rate == hono_rate[2]:
+            ending = 'for dubbing the following Spoken Tutorial.'
         else:
             ending = 'for translating and dubbing the following Spoken Tutorial.'
+
     total = '&&'+'Total&'+str(timedelta(seconds=secs))+'&&'+str(amount)+r'\\'
     download_file_name = ''
     template = 'honorarium'
