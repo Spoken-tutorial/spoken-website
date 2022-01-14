@@ -847,8 +847,10 @@ def expression_of_intrest_new(request):
 @csrf_exempt
 def saveVideoData(request):
     print("saveVideoData")
+    file = open('logs.txt','a+')
     d = request.POST
-    print(d)
     print(d.keys())
-    
+    file.write(str(d))
+    file.close()
+    print("\n\nAdded\n\n")
     return HttpResponse("Added")

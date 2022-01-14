@@ -593,7 +593,11 @@
 
     <script>
 
-var log_data = []
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+    
+
+        var log_data = []
         
         function logData(e){
             let data = {
@@ -604,7 +608,7 @@ var log_data = []
             log_data.push(data)
         }
         let video = document.getElementById("st_video_html5_api")
-        alert("video")
+        alert(video.src)
         video.addEventListener('pause',logData)
 
         function myfun(e){
@@ -613,8 +617,9 @@ var log_data = []
             console.log(JSON.stringify({video_log: log_data}));
             $.ajax({
             method: "POST",
-            url: "/saveVideoData",
-            data: { video_log: log_data }
+            url: "/saveVideoData/",
+            data: { video_log: log_data },
+            csrfmiddlewaretoken : '{{ csrf_token }}',
             })
             .done(function( msg ) {
                 alert( "Data Saved: " + msg );
@@ -625,6 +630,11 @@ var log_data = []
             e.preventDefault();
             myfun(e);
         };
+
+
+});
+
+
 
 
     var player,
