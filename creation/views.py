@@ -3312,6 +3312,7 @@ def initiate_payment(request):
             tr_pay.save()
         total_time=timedelta(seconds=total_time)
         honorarium.amount = amount
+        honorarium.initiated_by = request.user
         honorarium.save()
         # generating honorarium receipt
         contributor = str(user.first_name+" "+user.last_name)
@@ -4839,7 +4840,7 @@ def honorarium(request,hono_id):
         'seconds','user_id__username','user_id__email','user_id__first_name',
         'user_id__last_name','user__profile__address','created',
         'amount','seconds','user_type','user__profile__pincode',
-        'user__profile__phone'
+        'user__profile__phone', 'payment_honorarium__initiated_by__email'
         ).order_by('tutorial_resource__tutorial_detail__foss__foss')
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username'] + '_honorarium'
@@ -4854,7 +4855,7 @@ def honorarium(request,hono_id):
     manager_name = ''
     # Set the user to the main payment manager
     try:
-        manager = User.objects.get(email=payment_manager1)
+        manager = User.objects.get(email=tpi[0]['payment_honorarium__initiated_by__email'])
         manager_name = manager.first_name+" "+manager.last_name
     except :
         print("Incorrect Payment Manager email address")

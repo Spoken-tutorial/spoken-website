@@ -260,7 +260,7 @@ class TutorialResource(models.Model):
 class PaymentHonorarium(models.Model):
     amount = models.DecimalField(default=0, max_digits=7, decimal_places=2)
     code = models.CharField(max_length=20, editable=False)
-    doc = models.FileField(null=True, blank=True)
+    initiated_by = models.ForeignKey(User, related_name="initiator",default=7)
     status = models.PositiveSmallIntegerField(default=1, choices=HONORARIUM_STATUS)
     updated = models.DateTimeField(auto_now=True)
 
