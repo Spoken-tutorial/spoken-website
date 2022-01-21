@@ -595,21 +595,49 @@
 
 
         document.addEventListener('DOMContentLoaded', (event) => {
-    
-
-        var log_data = []
         
         function logData(e){
+            if(e.target.id == "st_video_html5_api")
+            {
             let data = {
-                url : e.target.currentSrc,
+                tag : e.target.currentSrc,
                 time_paused : e.target.currentTime
             }
             console.log(data)
             log_data.push(data)
         }
+        }
         let video = document.getElementById("st_video_html5_api")
         alert(video.src)
         video.addEventListener('pause',logData)
+        
+        var arrayWithElements = new Array();
+
+function clickListener(e) 
+{    
+    var clickedElement=(window.event)
+                        ? window.event.srcElement
+                        : e.target,
+        tags=document.getElementsByTagName(clickedElement.tagName);
+
+    for(var i=0;i<tags.length;++i)
+    {
+      if(tags[i]==clickedElement)
+      {
+        let video = document.getElementById("st_video_html5_api")
+        var href = clickedElement.parentElement.getAttribute("href")
+        alert(href);
+        if(href){
+        log_data.push({tag:href,
+            time_paused:video.currentTime}); 
+    }
+ 
+      }    
+    }
+}
+var log_data = []
+document.onclick = clickListener;
+
 
         function myfun(e){
             console.log(e);
@@ -629,6 +657,7 @@
         window.onbeforeunload = function(e){
             e.preventDefault();
             myfun(e);
+            log_data = [];
         };
 
 

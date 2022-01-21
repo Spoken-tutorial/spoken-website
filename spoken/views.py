@@ -31,6 +31,7 @@ from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
 from .search import search_for_results
 
+import pymongo
 
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
@@ -846,11 +847,21 @@ def expression_of_intrest_new(request):
 
 @csrf_exempt
 def saveVideoData(request):
-    print("saveVideoData")
-    file = open('logs.txt','a+')
-    d = request.POST
-    print(d.keys())
-    file.write(str(d))
-    file.close()
-    print("\n\nAdded\n\n")
-    return HttpResponse("Added")
+    if request.user.is_authenticated():
+        d = request.POST
+        print('POST :',d)
+        myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+        mydb = myclient["users"]
+        name = request.user.username
+        if not name:
+            name = request.user.email
+        mycol = mydb[str(request.user.username)]
+        if d:
+            data = dict(d.lists())
+            data['email'] = request.user.email
+            data['date'] = dt.datetime.now().date().strftime('%d-%m-%y')            
+            x = mycol.insert_one(data)
+            print("\n\nAdded\n\n")
+        return HttpResponse("Added")
+    else:
+        return HttpResponse("Not Added")
