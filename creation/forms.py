@@ -1198,6 +1198,7 @@ class LanguageManagerForm(forms.ModelForm):
 
 class DetailsForm(forms.ModelForm):
     bankaddress = forms.CharField( widget=forms.Textarea )
+    vendoraddress = forms.CharField( widget=forms.Textarea )
 
     def __init__(self, *args, **kwargs):
         super(DetailsForm, self).__init__(*args, **kwargs)

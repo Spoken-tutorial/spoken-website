@@ -4792,9 +4792,12 @@ def honorarium_agreement(request,hono_id):
     file_name = tpi[0]['user_id__username']+'_agreement'
     hono_date = tpi[0]['created'].strftime("%b %d %Y ")
     email = tpi[0]['user_id__email']
-    address = tpi[0]['user__profile__address']
-    if str(tpi[0]['user__profile__pincode']) not in address:
-        address = tpi[0]['user__profile__address']+' Pincode -'+str(tpi[0]['user__profile__pincode'])
+    address = ''
+    try:
+        b_details = BankDetail.objects.get(user__email = email)
+        address = b_details.vendoraddress
+    except:
+        messages.warning(request, 'Please update Bank Details')
     phone = tpi[0]['user__profile__phone']
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
     ft = ''
@@ -4849,9 +4852,6 @@ def honorarium(request,hono_id):
     address = tpi[0]['user__profile__address']
     pincode = tpi[0]['user__profile__pincode']
     phone = tpi[0]['user__profile__phone']
-    if pincode:
-        if str(pincode) not in address:
-            address = tpi[0]['user__profile__address']+' Pincode -'+str(tpi[0]['user__profile__pincode'])
     manager_name = ''
     # Set the user to the main payment manager
     try:
@@ -4867,6 +4867,8 @@ def honorarium(request,hono_id):
     code = ''
     b_address = ''
     pancard = ''
+    vendor = ''
+    v_address = ''
 
     try:
         b_details = BankDetail.objects.get(user__email = tpi[0]['user_id__email'])
@@ -4876,7 +4878,8 @@ def honorarium(request,hono_id):
         b_branch = b_details.branch
         b_address = b_details.bankaddress
         pancard = b_details.pancard
-
+        vendor = b_details.vendor
+        v_address = b_details.vendoraddress
         code = b_details.ifsc
     except BankDetail.DoesNotExist:
         messages.warning(request, 'Please update Bank Details')
@@ -4930,6 +4933,8 @@ def honorarium(request,hono_id):
         b_code = code,
         b_branch = b_branch,
         b_address = b_address,
+        vendor = vendor,
+        v_address = v_address,
         pancard = pancard,
         total = total
         )
@@ -4951,10 +4956,14 @@ def honorarium_receipt(request,hono_id):
     response = HttpResponse(content_type='application/pdf')
     file_name = tpi[0]['user_id__username']+ '_receipt'
     name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
+    hono_date = tpi[0]['created'].strftime("%d %B %Y")
     email = tpi[0]['user_id__email']
-    address = tpi[0]['user__profile__address']
-    if str(tpi[0]['user__profile__pincode']) not in address:
-        address = tpi[0]['user__profile__address']+' Pincode -'+str(tpi[0]['user__profile__pincode'])
+    address = ''
+    try:
+        b_details = BankDetail.objects.get(user__email = email)
+        address = b_details.vendoraddress
+    except:
+        messages.warning(request, 'Please update Bank Detailsss')
     phone = tpi[0]['user__profile__phone']
     amount = 0.0
     secs = 0
@@ -4986,8 +4995,9 @@ def honorarium_receipt(request,hono_id):
         amount = amount,
         money_as_text = money_as_text(amount),
         name = name,
+        date = hono_date,
         rows = ft,
-        email = email,
+        email = email.replace('_',"\_"),
         phone = phone,
         address = address
         )
@@ -5030,9 +5040,10 @@ def add_details(request):
         this_user = User.objects.get(id = request.POST.get('user'))
         details = BankDetail.objects.filter(user=this_user).values(
                     'account_name','account_number','ifsc','bank','branch','pincode',
-                    'pancard','bankaddress')
+                    'pancard','bankaddress','vendor','vendoraddress')
         if details:
             my_dict = details[0]
+        print('-'*10,my_dict)
         return HttpResponse(json.dumps(my_dict), content_type = 'application/json')
     context.update(csrf(request))
     return render(request, 'creation/templates/add_details.html', context)

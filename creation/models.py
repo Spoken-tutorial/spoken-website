@@ -325,6 +325,8 @@ class BankDetail(models.Model):
     pincode = models.CharField(max_length=10,default=0)#India - 6, World -10
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    vendor = models.CharField(max_length=11,default=0)
+    vendoraddress = models.CharField(max_length=255, default=None)
 
 
 class ArchivedVideo(models.Model):
