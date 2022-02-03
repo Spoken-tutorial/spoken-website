@@ -597,19 +597,38 @@
         document.addEventListener('DOMContentLoaded', (event) => {
         
         function logData(e){
+            videotime = String(e.target.currentTime);
+            if (e.type == 'play') {
+                play = Math.round(e.target.currentTime);
+                if (play == pause) {
+                    act_pp = e.type;
+                }
+                else{
+                    act_pp = 'seek';
+                    videotime = String(play)+'-'+String(pause);
+                }
+            }
+            if (e.type == 'pause') {
+                pause = Math.round(e.target.currentTime);
+                act_pp = e.type;
+            }
             if(e.target.id == "st_video_html5_api")
             {
             let data = {
                 timestamp   : new Date().toLocaleTimeString(),
-                action      : e.type,
+                action      : act_pp,
                 url         : e.target.currentSrc,
-                videotime : e.target.currentTime
+                videotime   : videotime
             }
             console.log(data)
             log_data.push(data)
         }
         }
         let video = document.getElementById("st_video_html5_api")
+        let pause = 0
+        let play = 0
+        let act_pp =''
+        let videotime = ''
         video.addEventListener('play',logData)
         video.addEventListener('pause',logData)
         
