@@ -600,15 +600,17 @@
             if(e.target.id == "st_video_html5_api")
             {
             let data = {
-                tag : e.target.currentSrc,
-                time_paused : e.target.currentTime
+                timestamp   : new Date().toLocaleTimeString(),
+                action      : e.type,
+                url         : e.target.currentSrc,
+                videotime : e.target.currentTime
             }
             console.log(data)
             log_data.push(data)
         }
         }
         let video = document.getElementById("st_video_html5_api")
-        alert(video.src)
+        video.addEventListener('play',logData)
         video.addEventListener('pause',logData)
         
         var arrayWithElements = new Array();
@@ -626,10 +628,33 @@ function clickListener(e)
       {
         let video = document.getElementById("st_video_html5_api")
         var href = clickedElement.parentElement.getAttribute("href")
-        alert(href);
-        if(href){
-        log_data.push({tag:href,
-            time_paused:video.currentTime}); 
+        var href1 = clickedElement.getAttribute('href')
+        var act = String(clickedElement.innerText).trim()
+        const list = ['Assignment','Script','Timed Script','Slides','Code files']
+        if (href1 == '#tutorials') {
+            act = 'TutorialList';
+            href =  href1;
+        }
+        if (href){
+        if(href.match('watch'))
+        {
+            act = 'Change';
+        }    
+        }
+        if (href1){
+        if(href1.match('watch'))
+        {
+            act = 'Change';
+            href = href1;
+        }    
+        }
+        if (href) {
+        log_data.push({
+                timestamp   : new Date().toLocaleTimeString(),
+                action      : act,
+                url         : href,
+                videotime   : video.currentTime,
+        }); 
     }
  
       }    
@@ -650,7 +675,7 @@ document.onclick = clickListener;
             csrfmiddlewaretoken : '{{ csrf_token }}',
             })
             .done(function( msg ) {
-                alert( "Data Saved: " + msg );
+                console.log( "Data Saved: " + msg );
             });
             
         }
@@ -789,7 +814,7 @@ document.onclick = clickListener;
  
   		
 				function setForum(cur_time)
-				{       alert("HHHEEELLLOOSS");
+				{
 					 
 						var time_split = cur_time.split(".")
 						var minute = parseFloat(time_split[0]);
