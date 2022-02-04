@@ -601,16 +601,16 @@
             if (e.type == 'play') {
                 play = Math.round(e.target.currentTime);
                 if (play == pause) {
-                    act_pp = e.type;
+                    act_pp = 'Play';
                 }
                 else{
-                    act_pp = 'seek';
-                    videotime = String(play)+'-'+String(pause);
+                    act_pp = 'Seek';
+                    videotime = String(pause)+'-'+String(play);
                 }
             }
             if (e.type == 'pause') {
                 pause = Math.round(e.target.currentTime);
-                act_pp = e.type;
+                act_pp = 'Pause';
             }
             if(e.target.id == "st_video_html5_api")
             {
