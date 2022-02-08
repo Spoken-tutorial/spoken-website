@@ -26,6 +26,7 @@ from creation.subtitles import *
 from creation.views import get_video_info
 from events.views import get_page
 from forums.models import Question
+from config import FOSS_FOR_ANALYTICS, MONGO_PORT
 
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
@@ -298,6 +299,9 @@ def watch_tutorial(request, foss, tutorial, lang):
     video_path = settings.MEDIA_ROOT + "videos/" + \
         str(tr_rec.tutorial_detail.foss_id) + "/" + str(tr_rec.tutorial_detail_id) + "/" + tr_rec.video
     video_info = get_video_info(video_path)
+    analytics = 0
+    if int(td_rec.foss.id) in FOSS_FOR_ANALYTICS:
+        analytics = 1
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
@@ -306,7 +310,8 @@ def watch_tutorial(request, foss, tutorial, lang):
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
-        'script_base': settings.SCRIPT_URL
+        'script_base': settings.SCRIPT_URL,
+        'perform_analysis':analytics,
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
@@ -848,7 +853,7 @@ def expression_of_intrest_new(request):
 
 @csrf_exempt
 def saveVideoData(request):
-    myclient = pymongo.MongoClient("mongodb://localhost:27017/")
+    myclient = pymongo.MongoClient("mongodb://localhost:"+str(MONGO_PORT)+'/')
     mydb = myclient["users"]
     if request.user.is_authenticated():
         d = request.POST

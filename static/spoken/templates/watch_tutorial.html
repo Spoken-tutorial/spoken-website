@@ -620,19 +620,10 @@
                 url         : e.target.currentSrc,
                 videotime   : videotime
             }
-            console.log(data)
             log_data.push(data)
         }
         }
-        let video = document.getElementById("st_video_html5_api")
-        let pause = 0
-        let play = 0
-        let act_pp =''
-        let videotime = ''
-        video.addEventListener('play',logData)
-        video.addEventListener('pause',logData)
         
-        var arrayWithElements = new Array();
 
 function clickListener(e) 
 {    
@@ -696,13 +687,19 @@ function clickListener(e)
     }
 }
 var log_data = []
-document.onclick = clickListener;
-
+let pause = 0
+let play = 0
+if ({{ perform_analysis }} ){
+        let video = document.getElementById("st_video_html5_api")
+        let act_pp =''
+        let videotime = ''
+        video.addEventListener('play',logData)
+        video.addEventListener('pause',logData)
+        var arrayWithElements = new Array();
+        document.onclick = clickListener;
+}
 
         function myfun(e){
-            console.log(e);
-            console.log(`log_data - ${log_data}`)
-            console.log(JSON.stringify({video_log: log_data}));
             $.ajax({
             method: "POST",
             url: "/saveVideoData/",
@@ -715,9 +712,10 @@ document.onclick = clickListener;
             
         }
         window.onbeforeunload = function(e){
-            e.preventDefault();
-            myfun(e);
-            log_data = [];
+            if ({{ perform_analysis }} ){
+                e.preventDefault();
+                myfun(e);
+        }
         };
 
 
