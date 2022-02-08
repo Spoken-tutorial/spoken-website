@@ -649,15 +649,6 @@ function clickListener(e)
         var href = clickedElement.parentElement.getAttribute("href")
         var href1 = clickedElement.getAttribute('href')
         var act = String(clickedElement.innerText).trim()
-        alert(href+'::'+href1+"::"+act);
-        if (href1 == '#tutorials') {
-            act = 'TutorialList';
-            href =  href1;
-        }
-        if (href1 == '#forums') {
-            act = 'ForumsQuestionList';
-            href =  href1;
-        }
         if (href){
         if(href.match('watch'))
         {
@@ -670,7 +661,15 @@ function clickListener(e)
             act = 'Change';
             href = href1;
         }
-        if(href1.match('forums'))
+        if (href1 == '#tutorials') {
+            act = 'TutorialList';
+            href =  href1;
+        }
+        if (href1 == '#forums') {
+            act = 'ForumsQuestionList';
+            href =  href1;
+        }
+        else if(href1.match('forums'))
         {
             act = 'ForumsQuestion';
             href = href1;
