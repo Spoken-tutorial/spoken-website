@@ -21,6 +21,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.core.serializers import serialize
+from django.core.files.storage import FileSystemStorage
 
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
@@ -3431,6 +3432,13 @@ def detail_payment_honorarium(request, hr_id):
                 messages.success(request,"Payment Honorarium (#"+hr.code+") confirmed as recieved.")
                 next_url = request.GET.get("next",reverse('creation:payment_honorarium_detail', args=[hr_id]))
                 return HttpResponseRedirect(next_url)
+            elif request.FILES['myfile']:
+                myfile = request.FILES['myfile']
+                fs = FileSystemStorage(
+                    location=settings.MEDIA_ROOT + '../../Users_signed_docs/'+str(request.user))
+                filename = fs.save(myfile.name, myfile)
+                uploaded_file_url = fs.url(filename)
+                messages.success(request, 'File uploaded successfully')
         context = {
             'pay_hr': hr,
         }
