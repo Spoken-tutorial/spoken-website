@@ -649,9 +649,13 @@ function clickListener(e)
         var href = clickedElement.parentElement.getAttribute("href")
         var href1 = clickedElement.getAttribute('href')
         var act = String(clickedElement.innerText).trim()
-        const list = ['Assignment','Script','Timed Script','Slides','Code files']
+        alert(href+'::'+href1+"::"+act);
         if (href1 == '#tutorials') {
             act = 'TutorialList';
+            href =  href1;
+        }
+        if (href1 == '#forums') {
+            act = 'ForumsQuestionList';
             href =  href1;
         }
         if (href){
@@ -665,7 +669,20 @@ function clickListener(e)
         {
             act = 'Change';
             href = href1;
-        }    
+        }
+        if(href1.match('forums'))
+        {
+            act = 'ForumsQuestion';
+            href = href1;
+        }     
+        }
+        if (act.match('Slides')){
+            act = 'Slides';
+            href = 'Slides';
+        }
+        if (act.match('files') || act.match('Codefiles')){
+            act = 'Codefiles';
+            href = 'Codefiles';
         }
         if (href) {
         log_data.push({
