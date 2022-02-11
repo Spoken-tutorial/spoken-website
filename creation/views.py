@@ -3423,25 +3423,29 @@ def detail_payment_honorarium(request, hr_id):
     except PaymentHonorarium.DoesNotExist:
         # invalid pay_hr id in url
         raise Http404
-
+    context = {}
     if hr.tutorials.all()[0].user == request.user:
+        loc = 'creation/hr-receipts/Users_signed_docs/'+str(request.user)+'/'+str(hr.code)
+        context['base_url'] = loc
         if request.method == "POST":
             if "confirm" in request.POST:
                 hr.status = 4
-                hr.save()
+                #hr.save()
                 messages.success(request,"Payment Honorarium (#"+hr.code+") confirmed as recieved.")
                 next_url = request.GET.get("next",reverse('creation:payment_honorarium_detail', args=[hr_id]))
                 return HttpResponseRedirect(next_url)
-            elif request.FILES['myfile']:
+            else:
+                # try:
+                request.FILES['myfile']
                 myfile = request.FILES['myfile']
-                fs = FileSystemStorage(
-                    location=settings.MEDIA_ROOT + '../../Users_signed_docs/'+str(request.user))
+                fs = FileSystemStorage(location=loc)
                 filename = fs.save(myfile.name, myfile)
                 uploaded_file_url = fs.url(filename)
+                context['filename'] = filename
                 messages.success(request, 'File uploaded successfully')
-        context = {
-            'pay_hr': hr,
-        }
+                # except:
+                #     messages.error(request, "Please upload a file")
+        context['pay_hr'] = hr
         return render(request,'creation/templates/detail_payment_honorarium.html',context)
     else:
         # user not associated with pay_hr
