@@ -26,7 +26,7 @@ from creation.subtitles import *
 from creation.views import get_video_info
 from events.views import get_page
 from forums.models import Question
-from config import FOSS_FOR_ANALYTICS, MONGO_PORT
+from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS
 
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
@@ -853,8 +853,10 @@ def expression_of_intrest_new(request):
 
 @csrf_exempt
 def saveVideoData(request):
-    myclient = pymongo.MongoClient("mongodb://localhost:"+str(MONGO_PORT)+'/')
-    mydb = myclient["users"]
+    myclient =  pymongo.MongoClient(
+        "mongodb://"+MONGO_USER+':'+MONGO_PASS+'@localhost:'+MONGO_PORT+\
+        '/?authSource=admin')
+    mydb = myclient["userslogs"]
     if request.user.is_authenticated():
         d = request.POST
         name = request.user.username
