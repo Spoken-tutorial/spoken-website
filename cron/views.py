@@ -46,7 +46,7 @@ class AsyncCronMailListCreateView(UserPassesTestMixin, CreateView):
 
 
     def test_func(self):
-        return self.request.user.is_superuser or self.request.user.groups.filter(name='HR').exists()
+        return self.request.user.is_superuser or self.request.user.groups.filter(name='HR-Manager').exists()
 
 @user_passes_test(lambda u: u.is_superuser or u.groups.filter(name='HR').exists())
 def run_cron_mail(request):
