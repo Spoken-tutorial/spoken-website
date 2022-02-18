@@ -3377,7 +3377,7 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
   success_url = '/software-training/student-grade-filter/' 
 
   def test_func(self):
-        return self.request.user.is_superuser or self.request.user.groups.filter(name='HR').exists()
+        return self.request.user.is_superuser or self.request.user.groups.filter(name='HR-Manager').exists()
   
   def form_valid(self, form):
     """
