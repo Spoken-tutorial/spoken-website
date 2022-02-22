@@ -149,9 +149,9 @@ def filter_student_grades(key=None):
         
       filter_ta=[]
       for i in range(test_attendance.count()):
-        temp = dictgrade.get(test_attendance[i].mdluser_id).get(test_attendance[i].mdlquiz_id)
-        if temp:
-          if not temp[1]:
+        key_quiz = dictgrade.get(test_attendance[i].mdluser_id).get(test_attendance[i].mdlquiz_id)
+        if key_quiz:
+          if not key_quiz[1]:
             dictgrade[test_attendance[i].mdluser_id][test_attendance[i].mdlquiz_id][1] = True
             filter_ta.append(test_attendance[i])
           
