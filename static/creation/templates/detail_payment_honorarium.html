@@ -45,6 +45,9 @@
             <a class="btn btn-xs btn-link" href="{% url 'creation:honorarium_agreement' pay_hr.id %}" class="btn btn-primary btn-sm" title="Receipt">Agreement</a>
         </td>
         </table>
+        <div class="text-left" style="color:red;">
+			Please upload your signed Receipt and Agreement here
+        </div>
         <div class="text-left">
 			<form method="POST" enctype="multipart/form-data">
 			    {% csrf_token %}
@@ -52,9 +55,14 @@
 			    <button type="submit">Upload</button>
 			  </form>
         </div>
+        {%for file in files%}
         <div class="text-left">
-			<button class="bi bi-x">{{filename}}</button> 	
+			<label class="btn-lg">{{file}}
+			<button type="button" class="close custom_cross"
+			aria-hidden="true" id = "{{file}}">×</button>
+			</label>
         </div>
+        {%endfor%}
         <div class="text-right">
         {% if pay_hr.status == 3 %}
         
@@ -67,4 +75,32 @@
 	    {% endif %}
 	    </div>
 	    <div style="margin-top:20px"></div>
+{% endblock %}
+
+{% block compressinlinejsblock %}
+    <script type="text/javascript">
+		var btns = document.getElementsByClassName('custom_cross')
+        for (let i = 0; i < btns.length; i++) {
+            btns[i].addEventListener('click', myFunction);
+        }
+        function myFunction(e) {
+            alert(String(this.id));
+            $.ajax({
+                type : "POST",
+                url:"/creation/payment/honorarium/detail/"+String({{pay_hr.id}})+'/',
+                dataType : "json",
+                data: {
+                  'hono_id' : this.id,
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                success: function(data)
+                {
+                    window.location.href = window.location.href;
+                }
+              });
+
+
+
+        }
+    </script>
 {% endblock %}

@@ -3425,26 +3425,29 @@ def detail_payment_honorarium(request, hr_id):
         raise Http404
     context = {}
     if hr.tutorials.all()[0].user == request.user:
-        loc = 'creation/hr-receipts/Users_signed_docs/'+str(request.user)+'/'+str(hr.code)
+        loc = 'creation/hr-receipts/Users_signed_docs/'+str(request.user)+'/'
         context['base_url'] = loc
         if request.method == "POST":
             if "confirm" in request.POST:
                 hr.status = 4
-                #hr.save()
+                hr.save()
                 messages.success(request,"Payment Honorarium (#"+hr.code+") confirmed as recieved.")
                 next_url = request.GET.get("next",reverse('creation:payment_honorarium_detail', args=[hr_id]))
                 return HttpResponseRedirect(next_url)
+            elif "hono_id" in request.POST:
+                print("\n\nOkay\n\n",os.remove(loc+request.POST['hono_id']))
+                return HttpResponse(json.dumps('deleted'), content_type='application/json')
             else:
-                # try:
-                request.FILES['myfile']
                 myfile = request.FILES['myfile']
                 fs = FileSystemStorage(location=loc)
-                filename = fs.save(myfile.name, myfile)
+                filename = fs.save(str(hr.code)+'-'+myfile.name, myfile)
                 uploaded_file_url = fs.url(filename)
-                context['filename'] = filename
                 messages.success(request, 'File uploaded successfully')
-                # except:
-                #     messages.error(request, "Please upload a file")
+        files = []
+        for x in os.listdir(loc):
+            if str(hr.code) in x:
+                files.append(x)
+        context['files'] = files
         context['pay_hr'] = hr
         return render(request,'creation/templates/detail_payment_honorarium.html',context)
     else:
