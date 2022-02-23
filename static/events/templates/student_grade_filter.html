@@ -12,6 +12,9 @@
 {% block heading %} <i class="fa fa-list-ul"></i> {{ model }} Student Grade Query Filter {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
+{% if user|is_administrator%}
+{{user}}
+{% endif %}
     <div class= 'filters row' >
         <form action="" method="post" class='form-horizontal'>
           {% csrf_token %}
@@ -110,7 +113,9 @@
                   <th>#</th>
                   <th>Firstname</th>
                   <th>Lastname</th>
-                  <th>Email</th>
+                  {% if user|is_administrator%}
+                    <th>Email</th>
+                  {% endif %}
                   <th>Grade</th>
                   <th>Date</th>
                   <th>Institution</th>
@@ -127,7 +132,11 @@
               <td>{{ forloop.counter }}
               <td>{% if ta.student.user.first_name %}{{ ta.student.user.first_name }}{%else%}{{ta.mdluser_id|get_grade_mdluser_first_name}}{%endif%}</td>
               <td>{% if ta.student.user.last_name %}{{ ta.student.user.last_name }}{%else%}{{ta.mdluser_id|get_grade_mdluser_last_name}}{%endif%}</td>
-              <td>{% if ta.student.user.email %}{{ ta.student.user.email }}{%else%}{{ta.mdluser_id|get_grade_mdluser_email}}{%endif%}</td>
+              
+              {% if user|is_administrator%}
+                <td>{% if ta.student.user.email %}{{ ta.student.user.email }}{%else%}{{ta.mdluser_id|get_grade_mdluser_email}}{%endif%}</td>
+              {% endif %}
+
               <td>{{ result.mdl_user_grade|get_grade_mdluser:ta}} </td>
               <td>{{ta.created}}</td>
               <td>{{ ta.test.academic.institution_name }}</td>
@@ -190,14 +199,32 @@
 <script type="text/javascript"  src="{% static 'DataTables/js/pdfmake.js' %}"></script>
 <script type="text/javascript"  src="{% static 'DataTables/js/vfs_fonts.js' %}"></script>
 <script type="text/javascript" >
+
       $(document).ready( function () {
-          $('#id_student_grade_table').DataTable( {
-                    dom: 'Bfrtip',
-                    buttons: [
-                      'csv',
-                    ]
-                } );
-      } );
+        $('#id_student_grade_table').DataTable( {
+        dom: 'Bfrtip',
+        buttons: [
+        'csv',
+        ]
+        } );
+        var is_superuser = '{{user.is_superuser}}'
+        console.log(is_superuser)
+        if(is_superuser!='True'){
+          console.log('not a superuser')
+          //remove btn
+          let btn_div = document.getElementsByClassName('dt-buttons')
+          console.log(btn_div)
+          if(btn_div.length!=0){
+            let elem = btn_div[0];
+            console.log("if -- "+elem)
+            elem.remove();
+          }
+        }
+
+        } );
+
+
+
 
       function send_mass_mail(event) {
         event.preventDefault()
