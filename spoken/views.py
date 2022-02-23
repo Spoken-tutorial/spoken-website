@@ -26,8 +26,8 @@ from creation.subtitles import *
 from creation.views import get_video_info
 from events.views import get_page
 from forums.models import Question
-from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS, MONGO_HOST
-
+from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
+ MONGO_HOST, MONGO_DB
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
 from .search import search_for_results
@@ -855,7 +855,7 @@ def expression_of_intrest_new(request):
 def saveVideoData(request):
     myclient =  pymongo.MongoClient(
         "mongodb://"+MONGO_USER+':'+MONGO_PASS+'@'+MONGO_HOST+':'+MONGO_PORT+\
-        '/?authSource=admin')
+        '/?authSource='+MONGO_DB)
     mydb = myclient["userslogs"]
     if request.user.is_authenticated():
         d = request.POST
