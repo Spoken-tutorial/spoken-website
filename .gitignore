@@ -103,5 +103,5 @@ static/spoken/images/*
 cron/*
 creation/hr-receipts/hono_agreement_template
 creation/hr-receipts/honorarium
-creation/hr-receipts/receipt
+creation/hr-receipts/
 *.DS_Store
