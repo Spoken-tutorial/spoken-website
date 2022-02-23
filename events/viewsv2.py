@@ -3377,7 +3377,7 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
   success_url = '/software-training/student-grade-filter/' 
 
   def test_func(self):
-        return self.request.user.is_superuser or self.request.user.groups.filter(name='HR').exists()
+        return self.request.user.is_superuser or self.request.user.groups.filter(name='HR-Manager').exists()
   
   def form_valid(self, form):
     """
@@ -3407,10 +3407,10 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
         if TOPPER_WORKER_STATUS:
           try:
             Job.fetch(key, connection=REDIS_CLIENT)
-            messages.success(self.request, "We are wokring on filtering the results for you. Please refresh after some time.")
+            messages.success(self.request, "We are working on filtering the results for you. Please refresh after some time.")
           except:
             async_filter_student_grades(key)
-            messages.success(self.request, "We are wokring on filtering the results for you. Please refresh after some time.")
+            messages.success(self.request, "We are working on filtering the results for you. Please refresh after some time.")
         else:
           result=filter_student_grades(key)
     return self.render_to_response(self.get_context_data(form=form, result=result))
