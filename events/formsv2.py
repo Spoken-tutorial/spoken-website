@@ -626,7 +626,7 @@ class DateInput(forms.DateInput):
     input_type = 'date'
 
 class StudentGradeFilterForm(forms.Form):
-  foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.all())
+  foss = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(test__status__gt=3).distinct())
   state = forms.ModelMultipleChoiceField(queryset=State.objects.all(), required=False)
   city = forms.ModelMultipleChoiceField(queryset=City.objects.all().order_by('name'), required=False)
   grade = forms.IntegerField(min_value=0, max_value=100)
