@@ -12,9 +12,6 @@
 {% block heading %} <i class="fa fa-list-ul"></i> {{ model }} Student Grade Query Filter {% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
-{% if user|is_administrator%}
-{{user}}
-{% endif %}
     <div class= 'filters row' >
         <form action="" method="post" class='form-horizontal'>
           {% csrf_token %}
