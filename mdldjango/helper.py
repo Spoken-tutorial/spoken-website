@@ -4,7 +4,7 @@ import hashlib
 
 # Third Party Stuff
 from django.core.mail import EmailMultiAlternatives
-from .models import MdlUser
+from .models import MdlUser, MdlQuizGrades
 
 # Spoken Tutorial Stuff
 from events.models import *
@@ -87,3 +87,8 @@ Admin Spoken Tutorials
       except:
         return MdlUser.objects.filter(email = email).first()
     return mdluser
+
+
+def get_moodle_grade(mdluserid, mdlquizid):
+    mdlusergrade = MdlQuizGrades.objects.get(userid=mdluserid, quiz=mdlquizid)
+    return mdlusergrade

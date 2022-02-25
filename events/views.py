@@ -46,7 +46,7 @@ from .forms import *
 from django.utils import formats
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from mdldjango.get_or_create_participant import get_or_create_participant, check_csvfile, update_participants_count, clone_participant
-from mdldjango.helper import get_moodle_user
+from mdldjango.helper import get_moodle_user, get_moodle_grade
 from django.template.defaultfilters import slugify
 
 #pdf generate
@@ -3129,12 +3129,17 @@ def key_verification(serial):
             name = certificate.mdluser_firstname+" "+certificate.mdluser_lastname
         else:    
             name = certificate.student.user.first_name+ " "+certificate.student.user.last_name
+        
+
+        grade = get_moodle_grade(certificate.mdluser_id, certificate.mdlquiz_id)
+        print(grade.grade)
         foss = certificate.test.foss.foss
         tdate = certificate.test.tdate
         detail = {}
         detail['Participant_Name'] = name
         detail['Foss'] = foss
         detail['Test_Date'] = tdate
+        detail['grade'] = grade.grade
 
         context['certificate'] = certificate
         context['detail'] = detail
