@@ -34,7 +34,7 @@ from .search import search_for_results
 
 import pymongo
 from uuid import getnode as get_mac
-
+import socket
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
     if user.groups.filter(name='Resource Person').count() == 1:
@@ -869,13 +869,14 @@ def saveVideoData(request):
             data['date'] = dt.datetime.now().date().strftime('%d-%m-%y')            
             x = mycol.insert_one(data)
         return HttpResponse("User Logs Added")
-    else:
-        name = get_mac()
-        mycol = mydb[str(name)]
-        d = request.POST
-        if d:
-            data = dict(d.lists())
-            data['id'] = name
-            data['date'] = dt.datetime.now().date().strftime('%d-%m-%y')            
-            x = mycol.insert_one(data)
-        return HttpResponse("Unregistered User Logs Added")
+    # else:
+    #     name = request.POST['addr']
+    #     mycol = mydb[str(name)]
+    #     d = request.POST
+    #     if d:
+    #         data = dict(d.lists())
+    #         data['id'] = name
+    #         data['date'] = dt.datetime.now().date().strftime('%d-%m-%y')
+    #         x = mycol.insert_one(data)
+    #     return HttpResponse("Unregistered User Logs Added")
+    return HttpResponse("User not registered. No Logs Added")
