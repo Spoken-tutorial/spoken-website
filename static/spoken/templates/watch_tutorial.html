@@ -593,6 +593,135 @@
 
     <script>
 
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+        
+        function logData(e){
+            videotime = String(e.target.currentTime);
+            if (e.type == 'play') {
+                play = Math.round(e.target.currentTime);
+                if (play == pause) {
+                    act_pp = 'Play';
+                }
+                else{
+                    act_pp = 'Seek';
+                    videotime = String(pause)+'-'+String(play);
+                }
+            }
+            if (e.type == 'pause') {
+                pause = Math.round(e.target.currentTime);
+                act_pp = 'Pause';
+            }
+            if(e.target.id == "st_video_html5_api")
+            {
+            let data = {
+                timestamp   : new Date().toLocaleTimeString(),
+                action      : act_pp,
+                url         : e.target.currentSrc,
+                videotime   : videotime
+            }
+            log_data.push(data)
+        }
+        }
+        
+
+function clickListener(e) 
+{    
+    var clickedElement= e.target,
+        tags=document.getElementsByTagName(clickedElement.tagName);
+
+    for(var i=0;i<tags.length;++i)
+    {
+      if(tags[i]==clickedElement)
+      {
+        let video = document.getElementById("st_video_html5_api")
+        var href = clickedElement.parentElement.getAttribute("href")
+        var href1 = clickedElement.getAttribute('href')
+        var act = String(clickedElement.innerText).trim()
+        if (href){
+        if(href.match('watch'))
+        {
+            act = 'Change';
+        }    
+        }
+        if (href1){
+        if(href1.match('watch'))
+        {
+            act = 'Change';
+            href = href1;
+        }
+        if (href1 == '#tutorials') {
+            act = 'TutorialList';
+            href =  href1;
+        }
+        if (href1 == '#forums') {
+            act = 'ForumsQuestionList';
+            href =  href1;
+        }
+        else if(href1.match('forums'))
+        {
+            act = 'ForumsQuestion';
+            href = href1;
+        }     
+        }
+        if (act.match('Slides')){
+            act = 'Slides';
+            href = 'Slides';
+        }
+        if (act.match('files') || act.match('Codefiles')){
+            act = 'Codefiles';
+            href = 'Codefiles';
+        }
+        if (href) {
+        log_data.push({
+                timestamp   : new Date().toLocaleTimeString(),
+                action      : act,
+                url         : href,
+                videotime   : video.currentTime,
+        }); 
+    }
+ 
+      }    
+    }
+}
+var log_data = []
+let pause = 0
+let play = 0
+if ({{ perform_analysis }} ){
+        let video = document.getElementById("st_video_html5_api")
+        let act_pp =''
+        let videotime = ''
+        video.addEventListener('play',logData)
+        video.addEventListener('pause',logData)
+        var arrayWithElements = new Array();
+        document.onclick = clickListener;
+}
+
+        function myfun(e){
+            $.ajax({
+            method: "POST",
+            url: "/saveVideoData/",
+            data: { video_log: log_data },
+            csrfmiddlewaretoken : '{{ csrf_token }}',
+            })
+            .done(function( msg ) {
+                console.log( "Data Saved: " + msg );
+            });
+            
+        }
+        window.onbeforeunload = function(e){
+            if ({{ perform_analysis }} ){
+                e.preventDefault();
+                myfun(e);
+        }
+        };
+
+
+});
+
+
+
+
     var player,
     tag = document.createElement('script'),
     firstScriptTag = document.getElementsByTagName('script')[0];
