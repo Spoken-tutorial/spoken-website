@@ -10,6 +10,7 @@ from django import template
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.core.files.storage import FileSystemStorage
 
 # Spoken Tutorial Stuff
 from creation.models import *
@@ -254,6 +255,14 @@ def get_mp4_video(tr):
         return 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
     return False
 
+def get_user_uploads(username):
+    loc = 'creation/hr-receipts/Users_signed_docs/'
+    fs = FileSystemStorage(location=loc)
+    if fs.exists(name=username):
+        print(fs.listdir(path=username))
+        return fs.listdir(path=username)
+    else:
+        return None
 
 register.inclusion_tag('spoken/templates/tutorial_search_form.html')(tutorialsearch)
 #register.filter('tutorialsearch', tutorialsearch)
@@ -291,3 +300,4 @@ register.filter('get_contenteditor', is_contenteditor)
 register.filter('format_component_title', format_component_title)
 register.filter('get_mp4_video', get_mp4_video)
 register.filter('get_language_manager',is_language_manager)
+register.filter('get_user_uploads', get_user_uploads)

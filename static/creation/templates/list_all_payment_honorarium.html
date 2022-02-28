@@ -88,7 +88,15 @@
 				{{ honorarium.tutorials.all.0.user.first_name }} {{ honorarium.tutorials.all.0.user.last_name }}
 			</td>
 			<td>₹ {{ honorarium.amount }}</td>
-			<td>{{ honorarium.updated }}</td>
+			<!-- <td>{{ honorarium.updated }}</td> -->
+			<td>
+				{% for file in honorarium.tutorials.all.0.user.username|get_user_uploads %}
+                                 {% if file %}
+            					<a href="{{file.0}}">{{file.0}}</a>
+                                 {% endif %}
+                             {% endfor %}
+			</td>
+			
 			<td class="text-center">Download<a class="btn btn-xs btn-link" href="{% url 'creation:honorarium' honorarium.id %}" class="btn btn-primary btn-sm" title="Honorarium" target="blank">Honorarium</a>
             <a class="btn btn-xs btn-link" href="{% url 'creation:honorarium_receipt' honorarium.id %}" class="btn btn-primary btn-sm" title="Receipt" target="blank">Receipt</a>
             <a class="btn btn-xs btn-link" href="{% url 'creation:honorarium_agreement' honorarium.id %}" class="btn btn-primary btn-sm" title="Receipt" target="blank">Agreement</a></td>
