@@ -114,6 +114,7 @@ urlpatterns = [
     url(r'hono_receipt/(?P<hono_id>\d+)/',honorarium_receipt,name='honorarium_receipt'),
     url(r'add_details/',add_details,name='add_details'),
     url(r'save_details/',save_details,name='save_details'),
+    url(r'file_checker/(?P<username>[\w]+)/(?P<file_name>[-\w]+)',file_checker,name='file_checker'),
 
 
 

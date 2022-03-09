@@ -14,6 +14,7 @@ from django.core.files.storage import FileSystemStorage
 
 # Spoken Tutorial Stuff
 from creation.models import *
+from creation.helpers import DOCS
 from creation.views import (
     is_administrator,
     is_contenteditor,
@@ -255,12 +256,17 @@ def get_mp4_video(tr):
         return 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
     return False
 
-def get_user_uploads(username):
-    loc = 'creation/hr-receipts/Users_signed_docs/'
-    fs = FileSystemStorage(location=loc)
+def get_user_uploads(username, hr_code):
+    fs = FileSystemStorage(location=settings.MEDIA_ROOT+ DOCS)
+    file_list = []
+    context = {}
     if fs.exists(name=username):
-        print(fs.listdir(path=username))
-        return fs.listdir(path=username)
+        list_of_file = fs.listdir(path=username)
+        for files in list_of_file:
+            for file in files:
+                if hr_code in file:
+                    file_list.append([file,fs.path(name=username)+'/'+file])
+        return file_list
     else:
         return None
 

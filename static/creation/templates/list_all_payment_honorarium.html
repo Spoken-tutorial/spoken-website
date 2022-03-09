@@ -88,13 +88,20 @@
 				{{ honorarium.tutorials.all.0.user.first_name }} {{ honorarium.tutorials.all.0.user.last_name }}
 			</td>
 			<td>₹ {{ honorarium.amount }}</td>
-			<!-- <td>{{ honorarium.updated }}</td> -->
 			<td>
-				{% for file in honorarium.tutorials.all.0.user.username|get_user_uploads %}
-                                 {% if file %}
-            					<a href="{{file.0}}">{{file.0}}</a>
-                                 {% endif %}
-                             {% endfor %}
+			{% with honorarium.tutorials.all.0.user.username|get_user_uploads:honorarium.code as files %}
+			<ul>
+            	{%for f in files%}
+            	<form action="" method="POST">
+					<li>
+						<a href="{% url 'creation:file_checker' honorarium.tutorials.all.0.user.username f.0 %}" id='{{f.0}}'>{{f.0}}</a><br>
+						<button type="button" class="btn btn-success" onclick="file_accept_reject('{{honorarium.tutorials.all.0.user.username}}', '{{f.0}}','accept')">Accept</button>
+						<button type="button" class="btn btn-danger" onclick="file_accept_reject('{{honorarium.tutorials.all.0.user.username}}', '{{f.0}}','reject')">Reject</button>
+					</li>
+				</form>
+				{% endfor %}
+			</ul>
+			{% endwith %}
 			</td>
 			
 			<td class="text-center">Download<a class="btn btn-xs btn-link" href="{% url 'creation:honorarium' honorarium.id %}" class="btn btn-primary btn-sm" title="Honorarium" target="blank">Honorarium</a>
@@ -149,5 +156,26 @@
             formatDate:'Y/m/d',
             maxDate:'+1987/06/14',
         });
+
+        function file_accept_reject(u_name,file,action){
+        	alert(file+action);
+        	$.ajax({
+         type:"POST",
+         url:"/creation/file_checker/"+u_name+'/'+file,
+         data: {
+                'action'	: action,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+         success: function(){
+            if(action == 'accept') {
+              alert(file+" accepted");
+            }
+            if(action == 'reject') {
+              alert(file+" rejected");
+            }
+             window.location.reload();
+         }
+    });
+        	}
     </script>
 {% endblock %}

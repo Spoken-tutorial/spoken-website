@@ -40,6 +40,7 @@ from cms.sortable import *
 from creation.forms import *
 from creation.models import *
 from creation.subtitles import *
+from creation.helpers import DOCS
 
 from . import services
 from django.utils import timezone
@@ -3425,7 +3426,8 @@ def detail_payment_honorarium(request, hr_id):
         raise Http404
     context = {}
     if hr.tutorials.all()[0].user == request.user:
-        loc = 'creation/hr-receipts/Users_signed_docs/'+str(request.user)+'/'
+        loc = settings.MEDIA_ROOT+ DOCS+str(request.user.username)+'/'
+        print('loc',loc)
         context['base_url'] = loc
         if request.method == "POST":
             if "confirm" in request.POST:
@@ -5083,3 +5085,26 @@ def save_details(request):
             b_details.save()
             messages.success(request, "Details updated !")
     return HttpResponseRedirect('/creation/add_details')
+
+@csrf_protect
+def file_checker(request, username, file_name):
+    filename = file_name+'.pdf'
+    fs = FileSystemStorage(location=settings.MEDIA_ROOT+DOCS+username)
+    if request.method == 'POST':
+        if fs.exists(fs.path(name='')+'/'+filename):
+            if request.POST['action'] == 'reject':
+                os.rename(fs.path(name='')+'/'+filename,
+                    fs.path(name='')+'/'+file_name+'_rejected.pdf')
+                return HttpResponse('deleted')
+            if request.POST['action'] == 'accept':
+                os.rename(fs.path(name='')+'/'+filename,
+                    fs.path(name='')+'/'+file_name+'_accepted.pdf')
+                return HttpResponse('accepted')
+    else:
+        with fs.open(filename) as pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; \
+                    filename=%s' % (file_name+'.pdf')
+            response.write(pdf)
+            return response
+    return Http404
