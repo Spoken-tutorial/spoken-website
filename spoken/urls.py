@@ -109,7 +109,7 @@ urlpatterns = [
     # url(r'^list_videos/$',  list_videos', name='list_videos'),
     url(r'^show_video/$',  show_video, name='show_video'),
     url(r'^search/node/([0-9a-zA-Z-+%\(\)]+)/$',  search_node, name='search_node'),
-
+    url(r'^saveVideoData/$',  saveVideoData, name='saveVideoData'),
     # Masquerade user
     # url(r'^masquerade/', include('masquerade.urls', namespace='masquerade')),
     url(r'^masquerade/', include('impersonate.urls', namespace='impersonate')),
