@@ -3414,6 +3414,12 @@ def list_payment_honorarium(request):
     }
     return render(request, "creation/templates/list_all_payment_honorarium.html",context)
 
+def pdf_extn_check(file_to_save):
+    if file_to_save.name.endswith('.pdf'):
+        return True
+    else:
+        return False
+
 @login_required
 def detail_payment_honorarium(request, hr_id):
     """
@@ -3440,14 +3446,20 @@ def detail_payment_honorarium(request, hr_id):
                 return HttpResponse(json.dumps('deleted'), content_type='application/json')
             elif 'agreement' in request.FILES:
                 myfile = request.FILES['agreement']
-                fs = FileSystemStorage(location=loc)
-                filename = fs.save(str(hr.code)+'-'+'agreement.pdf', myfile)
-                messages.success(request, 'Agreement uploaded successfully')
+                if pdf_extn_check(myfile):
+                    fs = FileSystemStorage(location=loc)
+                    filename = fs.save(str(hr.code)+'-'+'agreement.pdf', myfile)
+                    messages.success(request, 'Agreement uploaded successfully')
+                else:
+                    messages.error(request, 'Please upload the agreement in pdf format')
             elif 'receipt' in request.FILES:
                 myfile = request.FILES['receipt']
-                fs = FileSystemStorage(location=loc)
-                filename = fs.save(str(hr.code)+'-'+'receipt.pdf', myfile)
-                messages.success(request, 'Receipt uploaded successfully')
+                if pdf_extn_check(myfile):
+                    fs = FileSystemStorage(location=loc)
+                    filename = fs.save(str(hr.code)+'-'+'receipt.pdf', myfile)
+                    messages.success(request, 'Receipt uploaded successfully')
+                else:
+                    messages.error(request, 'Please upload the receipt in pdf format')
         files = {}
         for x in os.listdir(loc):
             if str(hr.code) in x:
