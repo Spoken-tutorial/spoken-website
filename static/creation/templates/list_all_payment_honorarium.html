@@ -158,7 +158,6 @@
         });
 
         function file_accept_reject(u_name,file,action){
-        	alert(file+action);
         	$.ajax({
          type:"POST",
          url:"/creation/file_checker/"+u_name+'/'+file,
@@ -167,12 +166,6 @@
                 csrfmiddlewaretoken: '{{ csrf_token }}',
                 },
          success: function(){
-            if(action == 'accept') {
-              alert(file+" accepted");
-            }
-            if(action == 'reject') {
-              alert(file+" rejected");
-            }
              window.location.reload();
          }
     });
