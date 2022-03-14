@@ -3427,7 +3427,6 @@ def detail_payment_honorarium(request, hr_id):
     context = {}
     if hr.tutorials.all()[0].user == request.user:
         loc = settings.MEDIA_ROOT+ DOCS+str(request.user.username)+'/'
-        print('loc',loc)
         context['base_url'] = loc
         if request.method == "POST":
             if "confirm" in request.POST:
@@ -3437,18 +3436,25 @@ def detail_payment_honorarium(request, hr_id):
                 next_url = request.GET.get("next",reverse('creation:payment_honorarium_detail', args=[hr_id]))
                 return HttpResponseRedirect(next_url)
             elif "hono_id" in request.POST:
-                print("\n\nOkay\n\n",os.remove(loc+request.POST['hono_id']))
+                os.remove(loc+request.POST['hono_id'])
                 return HttpResponse(json.dumps('deleted'), content_type='application/json')
-            else:
-                myfile = request.FILES['myfile']
+            elif 'agreement' in request.FILES:
+                myfile = request.FILES['agreement']
                 fs = FileSystemStorage(location=loc)
-                filename = fs.save(str(hr.code)+'-'+myfile.name, myfile)
-                uploaded_file_url = fs.url(filename)
-                messages.success(request, 'File uploaded successfully')
-        files = []
+                filename = fs.save(str(hr.code)+'-'+'agreement.pdf', myfile)
+                messages.success(request, 'Agreement uploaded successfully')
+            elif 'receipt' in request.FILES:
+                myfile = request.FILES['receipt']
+                fs = FileSystemStorage(location=loc)
+                filename = fs.save(str(hr.code)+'-'+'receipt.pdf', myfile)
+                messages.success(request, 'Receipt uploaded successfully')
+        files = {}
         for x in os.listdir(loc):
             if str(hr.code) in x:
-                files.append(x)
+                if 'agreement' in x:
+                    files['agreement'] = x
+                if 'receipt' in x:
+                    files['receipt'] = x
         context['files'] = files
         context['pay_hr'] = hr
         return render(request,'creation/templates/detail_payment_honorarium.html',context)
@@ -5091,14 +5097,18 @@ def file_checker(request, username, file_name):
     filename = file_name+'.pdf'
     fs = FileSystemStorage(location=settings.MEDIA_ROOT+DOCS+username)
     if request.method == 'POST':
+        hono_id = int(file_name[11:16])
+        hono_obj = PaymentHonorarium.objects.get(id=hono_id)
         if fs.exists(fs.path(name='')+'/'+filename):
             if request.POST['action'] == 'reject':
                 os.rename(fs.path(name='')+'/'+filename,
-                    fs.path(name='')+'/'+file_name+'_rejected.pdf')
+                fs.path(name='')+'/'+file_name+'_rejected.pdf')
+                hono_obj.status = 3
+                hono_obj.save()
                 return HttpResponse('deleted')
             if request.POST['action'] == 'accept':
                 os.rename(fs.path(name='')+'/'+filename,
-                    fs.path(name='')+'/'+file_name+'_accepted.pdf')
+                fs.path(name='')+'/'+file_name+'_accepted.pdf')
                 return HttpResponse('accepted')
     else:
         with fs.open(filename) as pdf:
