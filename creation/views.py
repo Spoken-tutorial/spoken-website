@@ -3461,12 +3461,16 @@ def detail_payment_honorarium(request, hr_id):
                 else:
                     messages.error(request, 'Please upload the receipt in pdf format')
         files = {}
-        for x in os.listdir(loc):
-            if str(hr.code) in x:
-                if 'agreement' in x:
-                    files['agreement'] = x
-                if 'receipt' in x:
-                    files['receipt'] = x
+        try:
+            for x in os.listdir(loc):
+                if str(hr.code) in x:
+                    if 'agreement' in x:
+                        files['agreement'] = x
+                    if 'receipt' in x:
+                        files['receipt'] = x    
+        except:
+            os.mkdir(loc) 
+        
         context['files'] = files
         context['pay_hr'] = hr
         return render(request,'creation/templates/detail_payment_honorarium.html',context)
