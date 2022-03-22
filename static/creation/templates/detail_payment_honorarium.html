@@ -47,10 +47,17 @@
         </table>
     </div>
     <div class="text-left" style="color:red;" id="alerter">
+        {% if pay_hr.status < 5%}
 			Please upload your signed Agreement and Receipt here in 'PDF' format
+        {% elif pay_hr.status == 5 %}
+            Please upload your signed Receipt here in 'PDF' format
+        {% elif pay_hr.status == 6 %}
+            Please upload your signed Agreement here in 'PDF' format
+        {% endif %}
     </div>
 
         <div class="row text-left">
+            {% if pay_hr.status < 5 %}
             <div class="col-sm-2">Agreement :</div>
             <div class="col-sm-6">
                 <label class="btn-lg">
@@ -70,9 +77,11 @@
                 <button type="submit" id="agr_upload">Upload</button>
                 </div>
 			  </form>
+              {% endif %}
               </div>
 
         <div class="row text-left">
+            {% if pay_hr.status < 6 %}
             <div class="col-sm-2">Receipt :</div>
             <div class="col-sm-6">
                 <label class="btn-lg">
@@ -94,6 +103,7 @@
                 <button type="submit" id="rec_upload">Upload</button>
                 </div>
               </form>
+              {% endif %}
               </div>
         <div class="text-right">
         {% if pay_hr.status == 3 %}

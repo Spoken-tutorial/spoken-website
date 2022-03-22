@@ -95,8 +95,12 @@
             	<form action="" method="POST">
 					<li>
 						<a href="{% url 'creation:file_checker' honorarium.tutorials.all.0.user.username f.0 %}" id='{{f.0}}'>{{f.0}}</a><br>
+						{% if honorarium.status != 11 %}
+						{% if 'agreement' in f.0 and honorarium.status != 5  or 'receipt' in f.0 and honorarium.status != 6 %}
 						<button type="button" class="btn btn-success" onclick="file_accept_reject('{{honorarium.tutorials.all.0.user.username}}', '{{f.0}}','accept')">Accept</button>
 						<button type="button" class="btn btn-danger" onclick="file_accept_reject('{{honorarium.tutorials.all.0.user.username}}', '{{f.0}}','reject')">Reject</button>
+						{% endif %}
+						{% endif %}
 					</li>
 				</form>
 				{% endfor %}
@@ -118,11 +122,17 @@
 						<input type="submit" name="change_status" class="btn btn-primary btn-xs" value="Mark as Completed">
 					{% elif honorarium.status == 3 %}
 						<span class="text-success">Waiting for Confirmation</span>
-					{% else %}
+					{% elif honorarium.status == 4 %}
 						<span class="text-success">
 							Confirmed
 							&nbsp;<span class="fa fa-1 fa-check-circle"></span>&nbsp;
 						</span>
+					{% elif honorarium.status == 5 %}
+						<span class="text-success">Agreement Accepted</span>
+					{% elif honorarium.status == 6 %}
+						<span class="text-success">Receipt Accepted</span>
+					{% elif honorarium.status == 11 %}
+						<span class="text-success">All files accepted and Hono Closed</span>
 					{% endif%}
 				</form>
 			</td>

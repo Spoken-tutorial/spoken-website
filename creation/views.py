@@ -4887,7 +4887,7 @@ def honorarium_receipt(request,hono_id):
         b_details = BankDetail.objects.get(user__email = email)
         address = b_details.vendoraddress
     except:
-        messages.warning(request, 'Please update Bank Detailsss')
+        messages.warning(request, 'Please update Bank Details!!!')
     phone = tpi[0]['user__profile__phone']
     amount = 0.0
     secs = 0
@@ -5004,12 +5004,21 @@ def file_checker(request, username, file_name):
             if request.POST['action'] == 'reject':
                 os.rename(fs.path(name='')+'/'+filename,
                 fs.path(name='')+'/'+file_name+'_rejected.pdf')
-                hono_obj.status = 3
-                hono_obj.save()
                 return HttpResponse('deleted')
             if request.POST['action'] == 'accept':
                 os.rename(fs.path(name='')+'/'+filename,
                 fs.path(name='')+'/'+file_name+'_accepted.pdf')
+                if 'agreement' in file_name:
+                    if hono_obj.status == 6:
+                        hono_obj.status = 11
+                    else:
+                        hono_obj.status = 5
+                if 'receipt' in file_name:
+                    if hono_obj.status == 5:
+                        hono_obj.status = 11
+                    else:
+                        hono_obj.status = 6
+                hono_obj.save()
                 return HttpResponse('accepted')
     else:
         with fs.open(filename) as pdf:

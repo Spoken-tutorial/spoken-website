@@ -33,6 +33,9 @@ HONORARIUM_STATUS = (
     (2, 'Forwarded'),
     (3, 'Completed'),
     (4, 'Confirmed'),
+    (5, 'Agreement Accepted'),
+    (6, 'Receipt Accepted'),
+    (11, 'All accepted and closed'),
 )
 
 import datetime
