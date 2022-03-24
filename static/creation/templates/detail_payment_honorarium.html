@@ -50,14 +50,15 @@
         {% if pay_hr.status < 5%}
 			Please upload your signed Agreement and Receipt here in 'PDF' format
         {% elif pay_hr.status == 5 %}
-            Please upload your signed Receipt here in 'PDF' format
+            Please upload your signed Receipt here in 'PDF' format. Click on the cross to remove the file and upload your signed Receipt file.
         {% elif pay_hr.status == 6 %}
-            Please upload your signed Agreement here in 'PDF' format
+            Please upload your signed Agreement here in 'PDF' format. Click on the cross to remove the file and upload your signed Agreement file.
+
         {% endif %}
     </div>
 
         <div class="row text-left">
-            {% if pay_hr.status < 5 %}
+            {% if pay_hr.status != 5 %}
             <div class="col-sm-2">Agreement :</div>
             <div class="col-sm-6">
                 <label class="btn-lg">
@@ -81,7 +82,7 @@
               </div>
 
         <div class="row text-left">
-            {% if pay_hr.status < 6 %}
+            {% if pay_hr.status != 6 %}
             <div class="col-sm-2">Receipt :</div>
             <div class="col-sm-6">
                 <label class="btn-lg">
@@ -140,7 +141,6 @@
         });
         }
         function myFunction(file) {
-            alert(file);
             $.ajax({
                 type : "POST",
                 url:"/creation/payment/honorarium/detail/"+String({{pay_hr.id}})+'/',
