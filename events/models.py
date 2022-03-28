@@ -424,6 +424,7 @@ class TestAttendance(models.Model):
   password = models.CharField(max_length = 100, null=True)
   count = models.PositiveSmallIntegerField(default=0)
   status = models.PositiveSmallIntegerField(default=0)
+  mdlgrade = models.DecimalField(max_digits=12, decimal_places=5, default=0.00)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
   class Meta(object):
