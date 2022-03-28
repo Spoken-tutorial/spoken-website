@@ -6,6 +6,8 @@ import time
 import collections
 from django.utils import timezone
 from decimal import Decimal
+from string import Template
+from config import admin_email1,admin_email2,payment_manager1,payment_manager2
 try:
     from urllib.parse import quote, unquote_plus
     from urllib.request import urlopen
@@ -18,26 +20,34 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
+from django.core.serializers import serialize
+from django.core.files.storage import FileSystemStorage
 
 from django.core.exceptions import PermissionDenied
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.http import HttpResponse, HttpResponseRedirect
-from django.template.context_processors import csrf
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.views.decorators.csrf import csrf_exempt,csrf_protect
+from django.template.context_processors import csrf
 from django.shortcuts import render,redirect
+from django.db.models import Count, F, Q
+from django.views.generic.list import ListView
+from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 
 # Spoken Tutorial Stuff
 from cms.sortable import *
 from creation.forms import *
 from creation.models import *
 from creation.subtitles import *
+from creation.helpers import DOCS
 
 from . import services
 from django.utils import timezone
 from datetime import datetime,timedelta
 from creation.filters import CreationStatisticsFilter, ContributorRatingFilter, ReviewerFilter
 from django.db.models import Count, Min, Q, Sum, F
+from django.contrib.auth.models import User
 import itertools
 from django.utils.html import format_html
 from django.core.urlresolvers import reverse
@@ -198,6 +208,9 @@ def add_contributor_notification(tr_rec, comp_title, message):
 
     for con in con_roles:
         ContributorNotification.objects.create(user = con.user, title = comp_title, message = message, tutorial_resource = tr_rec)
+
+def add_payment_notification(user, tr_rec, comp_title, message):
+    ContributorNotification.objects.create(user = user, title = comp_title, message = message, tutorial_resource = tr_rec)
 
 ROLES_DICT = {
         'contributor': 0,
@@ -1360,7 +1373,8 @@ def tutorials_contributed(request):
                 11: SortableHeader('Additional material', False, '', 'col-center'),
                 12: SortableHeader('Prerequisite', False, '', 'col-center'),
                 13: SortableHeader('Keywords', False, '', 'col-center'),
-                14: SortableHeader('Status', False)
+                14: SortableHeader('Status', False),
+                15: SortableHeader('Payment Status', False, '','col-center'),
             }
             tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
@@ -1407,7 +1421,7 @@ def tutorials_pending(request):
                 11: SortableHeader('Additional material', False, '', 'col-center'),
                 12: SortableHeader('Prerequisite', False, '', 'col-center'),
                 13: SortableHeader('Keywords', False, '', 'col-center'),
-                14: SortableHeader('Status', False)
+                14: SortableHeader('Status', False),
             }
             tmp_recs = get_sorted_list(request, tmp_recs, header, raw_get_data)
             ordering = get_field_index(raw_get_data)
@@ -2392,6 +2406,7 @@ def public_review_tutorial(request, trid):
 
 @login_required
 def publish_tutorial(request, trid):
+    tr_rec = TutorialResource.objects.get(id = trid)
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
@@ -2412,12 +2427,14 @@ def publish_tutorial(request, trid):
         tr_rec.publish_at = timezone.now()
         tr_rec.save()
         PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
+        create_payment_instance(request, tr_rec) # create instance of tutorial payment
         # add tutorials available here
         refresh_tutorials(request, tr_rec)
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
     else:
         messages.error(request, 'The selected tutorial cannot be marked as Public review')
+
     return HttpResponseRedirect('/creation/quality-review/tutorial/publish/index/')
 
 
@@ -3142,6 +3159,383 @@ def update_assignment(request):
 
 
 @login_required
+def list_all_published_tutorials(request):
+    form = PublishedTutorialFilterForm(request.GET)
+    # status = 1 for published and script_user__groups = 5 for external contributors
+    tr_pub = TutorialResource.objects.filter( Q(script_user__groups__in = [5,])|
+                Q(video_user__groups__in = [5,]), status = 1).distinct()
+    if form.is_valid():
+        start_date = form.cleaned_data['start_date']
+        end_date = form.cleaned_data['end_date']
+        contributor = form.cleaned_data['contributor']
+        foss = form.cleaned_data['foss']
+        language = form.cleaned_data['language']
+        if start_date:
+            tr_pub = tr_pub.filter(publish_at__gte = start_date)
+        if end_date:
+            tr_pub = tr_pub.filter(publish_at__lte = end_date)
+        if contributor:
+            tr_pub = tr_pub.filter(script_user = contributor)
+        if foss:
+            tr_pub = tr_pub.filter(tutorial_detail__foss_id = foss)
+        if language:
+            tr_pub = tr_pub.filter(language = language)
+    #generating summary out of filtered tutorials
+    payment_summary = tr_pub.values('script_user', 'script_user__first_name', 'script_user__last_name').annotate(published_tuorial = Count('script_user'))
+    tr_pub_count = tr_pub.count() # counting number of tutorial published
+    payment_summary_count = payment_summary.count() # number of contributors
+
+    tr_pub = tr_pub.order_by('-publish_at') # ordering latest first
+    #pagination
+    page = request.GET.get('page')
+    tr_pub = get_page(tr_pub, page, 10)
+    context = {
+        'published_tutorials': tr_pub,
+        'media_url': settings.MEDIA_URL,
+        'count_of_published_tutorials': tr_pub_count,
+        'count_of_contributors': payment_summary_count,
+        'form': form,
+        'collection': tr_pub, # for pagination
+        'payment_summary': payment_summary,
+    }
+    return render(request, 'creation/templates/list_all_published_tutorials.html', context)
+
+#Views for ajax response to payment view
+def load_languages(request):
+    """
+    Dynamicly loads language list for all published tutorial filterset
+    """
+    foss_id = request.GET.get('foss')
+    user_id = request.GET.get('contributor')
+    existing_language = request.GET.get('language')
+    if foss_id == "":
+        language_list = Language.objects.distinct().values_list('id','name')
+    elif user_id == "":
+        language_list = TutorialResource.objects.filter(tutorial_detail__foss_id = foss_id).values_list('language','language__name').distinct()
+    else:
+        language_list = TutorialResource.objects.filter(tutorial_detail__foss_id = foss_id, script_user = user_id).values_list('language','language__name').distinct()
+    return render(request,'creation/templates/language_dropdown_list_options.html',{'language_list':language_list, 'existing_language': existing_language})
+
+def load_fosses(request):
+    """
+    Dynamicly loads foss list for all published tutorial filterset
+    """
+    user_id = request.GET.get('contributor')
+    existing_foss = request.GET.get('foss')
+    if user_id == "":
+        foss_list = FossCategory.objects.distinct().values_list('id','foss')
+    else:
+        foss_id_list = TutorialResource.objects.filter(script_user = user_id).values_list('tutorial_detail__foss_id').distinct()
+        foss_list = FossCategory.objects.filter(id__in = foss_id_list).values_list('id','foss')
+    return render(request, 'creation/templates/foss_dropdown_list_options.html',{'foss_list': foss_list, 'existing_foss': existing_foss})
+
+@login_required
+def list_all_due_tutorials(request):
+    """
+    Display all publshed tutorials for whom payment is due and can initiate payment process for selected tutorials
+    """
+    if not (is_administrator(request.user) or is_qualityreviewer(request.user)):
+        #is_language_manager(request.user)
+        raise PermissionDenied()
+    if request.method == "POST":
+        initiate_payment(request)
+        # to aviod form resubmit
+        return HttpResponseRedirect(reverse('creation:payment_due_tutorials'))
+    tr_due = TutorialPayment.objects.filter(status = 1).order_by('user')
+    # pagination
+    page = request.GET.get('page')
+    tr_due = get_page(tr_due, page, 100)
+    context = {
+        'due_tutorials': tr_due,
+        'collection': tr_due, # for pagination
+    }
+    return render(request, 'creation/templates/list_all_due_tutorials.html', context)
+
+
+def create_payment_instance(request, tr_res):
+    '''
+    When an object got published it creates instance for payment.
+    Input -> TutorialResourceObject
+    Do -> Create TutorialPayment objects
+    '''
+    # getting video time
+    tr_video_path = settings.MEDIA_ROOT + "videos/" + str(tr_res.tutorial_detail.foss_id) + "/" + str(tr_res.tutorial_detail_id) + "/" + tr_res.video
+    tr_video_info = get_video_info(tr_video_path)
+    tr_video_duration = tr_video_info.get('total',0)
+    try:
+        if tr_res.script_user == tr_res.video_user:
+            if is_external_contributor(tr_res.script_user):
+                tp = TutorialPayment.objects.create(
+                    user = tr_res.script_user,
+                    tutorial_resource = tr_res,
+                    user_type = 3,
+                    seconds = tr_video_duration,
+                    # payment_honorarium = None,
+                )
+                tp.save()
+        else:
+            if is_external_contributor(tr_res.script_user):
+                tp = TutorialPayment.objects.create(
+                    user = tr_res.script_user,
+                    tutorial_resource = tr_res,
+                    user_type = 1,
+                    seconds = tr_video_duration,
+                    # payment_honorarium = None,
+                )
+                tp.save()
+            if is_external_contributor(tr_res.video_user):
+                tp = TutorialPayment.objects.create(
+                    user = tr_res.video_user,
+                    tutorial_resource = tr_res,
+                    user_type = 2,
+                    seconds = tr_video_duration,
+                    # payment_honorarium = None,
+                )
+                tp.save()
+    except IntegrityError as e:
+        messages.error(request, " Tutorial already in payment process.")
+
+def initiate_payment(request):
+    user_id = request.POST.get('user')
+    tr_pay_ids = request.POST.getlist('selected_tutorialpayments')
+    user = User.objects.get(id = user_id)
+    total_time =0
+    if len(tr_pay_ids) > 0:
+        honorarium = PaymentHonorarium.objects.create(status = 1)
+        amount = 0
+        tutorials = [] # arr of arr['tut_title','tut_time']
+        for tr_pay_id in tr_pay_ids:
+            tr_pay = TutorialPayment.objects.get(id = tr_pay_id)
+            tutorials.append([tr_pay.tutorial_resource.tutorial_detail.tutorial, tr_pay.get_duration()])
+            tr_pay.status = 2 # from 1 --> 2 i.e due --> initiated
+            tr_pay.payment_honorarium = honorarium
+            amount += tr_pay.amount
+            total_time += tr_pay.seconds
+            tr_pay.save()
+        total_time=timedelta(seconds=total_time)
+        honorarium.amount = amount
+        honorarium.initiated_by = request.user
+        honorarium.save()
+        # generating honorarium receipt
+        contributor = str(user.first_name+" "+user.last_name)
+        foss = tr_pay.tutorial_resource.tutorial_detail.foss.foss
+        manager = request.user.first_name+" "+request.user.last_name # currrent logged in user - manager
+        email = user.email
+        message = "Rs."+ str(honorarium.amount)+" is initiated for "+str(len(honorarium.tutorials.all()))+" tutorials"
+        # Admin Desk Notification
+        try:
+            a1 = User.objects.get(email=admin_email1)
+            a2 = User.objects.get(email=admin_email2)
+            QualityReviewerNotification.objects.create(user = a1, title = honorarium.code, message = message, tutorial_resource = tr_pay.tutorial_resource)
+            QualityReviewerNotification.objects.create(user = a2, title = honorarium.code, message = message, tutorial_resource = tr_pay.tutorial_resource) 
+        except :
+            messages.warning(request, "Incorrect Admin email address")
+        # Payment Managers' Notofication
+        try:
+            p1 = User.objects.get(email=payment_manager1)
+            p2 = User.objects.get(email=payment_manager2)
+            QualityReviewerNotification.objects.create(user= p1, title = honorarium.code, message = message, tutorial_resource = tr_pay.tutorial_resource)
+            QualityReviewerNotification.objects.create(user= p2, title = honorarium.code, message = message, tutorial_resource = tr_pay.tutorial_resource) 
+        except :
+            messages.warning(request, "Incorrect Payment Manager email address")
+
+        
+        #generate_honorarium_receipt(honorarium.code, contributor, foss, honorarium.amount, manager, tutorials, total_time)
+        #generate_contributor_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
+        #generate_agreement_receipt(honorarium.code, contributor, foss, honorarium.amount, email, tutorials)
+        messages.success(request,"Payment Honorarium (#"+str(honorarium.code)+") worth Rs. \
+            "+str(amount)+" for contributor "+user.first_name+" "+user.last_name+" initiated for \
+            "+str(len(tr_pay_ids))+" tutorials")
+
+@login_required
+def list_payment_honorarium(request):
+    '''
+    to display list of all payment honorariums and update their status
+    '''
+    #if not is_qualityreviewer(request.user):
+    if not (is_administrator(request.user) or is_qualityreviewer(request.user)):
+        raise PermissionDenied()
+    # updating honorarium status
+    if request.method == "POST":
+        if "change_status" in request.POST:
+            try:
+                msg_end = ''
+                honorarium_id = request.POST.get('id',0)
+                honorarium = PaymentHonorarium.objects.get(id = honorarium_id)
+                hr_st = honorarium.status
+                if hr_st == 1:
+                    honorarium.status = 2
+                    msg_end = 'marked as forwarded.'
+                elif hr_st == 2:
+                    honorarium.status = 3
+                    msg_end = 'marked as completed'
+                    add_payment_notification(
+                        honorarium.tutorials.all()[0].user,
+                        honorarium.tutorials.all()[0].tutorial_resource,
+                        "Tutorials Payment Credited", # title
+                        "Honorarium (#"+honorarium.code+") worth Rs. "\
+                        +str(honorarium.amount)+" for "+str(len(honorarium.tutorials.all())) \
+                        +" tutorials credited. Kindly confirm in tutorials contributed section."
+                    )
+                messages.success(request,'Payment Honorarium (#'+str(honorarium.code)+') worth Rs. '+str(honorarium.amount)+' '+msg_end)
+                honorarium.save()
+            except Exception as e:
+                messages.warning(request, "Something went wrong. Couldn't complete your request")
+            # to avoid form resubmission
+            return HttpResponseRedirect(reverse('creation:payment_honorarium_list'))
+
+    honorariums = PaymentHonorarium.objects.order_by('status','-updated')
+    # filtering honorarium result
+    form = PaymentHonorariumFilterForm(request.GET)
+    if request.method == "GET":
+        if form.is_valid():
+            contributor = form.cleaned_data['contributor']
+            status = form.cleaned_data['status']
+            s_date = form.cleaned_data['start_date']
+            e_date = form.cleaned_data['end_date']
+            if contributor:
+                tr_pay = TutorialPayment.objects.filter(status = 2, user = contributor)
+                pay_honorarium_ids = tr_pay.values_list('payment_honorarium', flat = True).distinct()
+                honorariums = honorariums.filter(id__in = pay_honorarium_ids)
+            if status:
+                honorariums = honorariums.filter(status = status)
+            if s_date:
+                honorariums = honorariums.filter(updated__gte = s_date)
+            if e_date:
+                honorariums = honorariums.filter(updated__lte = e_date)
+
+    #pagination
+    page = request.GET.get('page')
+    honorariums = get_page(honorariums, page, 20)
+    context = {
+        'honorariums': honorariums,
+        'collection': honorariums, # for pagination
+        'form':form
+    }
+    return render(request, "creation/templates/list_all_payment_honorarium.html",context)
+
+def pdf_extn_check(file_to_save):
+    if file_to_save.name.endswith('.pdf'):
+        return True
+    else:
+        return False
+
+@login_required
+def detail_payment_honorarium(request, hr_id):
+    """
+    Contributor can view and confirm his honorarium details
+    """
+    try:
+        hr = PaymentHonorarium.objects.get(id=hr_id,)
+    except PaymentHonorarium.DoesNotExist:
+        # invalid pay_hr id in url
+        raise Http404
+    context = {}
+    if hr.tutorials.all()[0].user == request.user:
+        loc = settings.MEDIA_ROOT+ DOCS+str(request.user.username)+'/'
+        context['base_url'] = loc
+        if request.method == "POST":
+            if "confirm" in request.POST:
+                hr.status = 4
+                hr.save()
+                messages.success(request,"Payment Honorarium (#"+hr.code+") confirmed as recieved.")
+                next_url = request.GET.get("next",reverse('creation:payment_honorarium_detail', args=[hr_id]))
+                return HttpResponseRedirect(next_url)
+            elif "hono_id" in request.POST:
+                os.remove(loc+request.POST['hono_id'])
+                return HttpResponse(json.dumps('deleted'), content_type='application/json')
+            elif 'agreement' in request.FILES:
+                myfile = request.FILES['agreement']
+                if pdf_extn_check(myfile):
+                    fs = FileSystemStorage(location=loc)
+                    filename = fs.save(str(hr.code)+'-'+'agreement.pdf', myfile)
+                    messages.success(request, 'Agreement uploaded successfully')
+                else:
+                    messages.error(request, 'Please upload the agreement in pdf format')
+            elif 'receipt' in request.FILES:
+                myfile = request.FILES['receipt']
+                if pdf_extn_check(myfile):
+                    fs = FileSystemStorage(location=loc)
+                    filename = fs.save(str(hr.code)+'-'+'receipt.pdf', myfile)
+                    messages.success(request, 'Receipt uploaded successfully')
+                else:
+                    messages.error(request, 'Please upload the receipt in pdf format')
+        files = {}
+        try:
+            for x in os.listdir(loc):
+                if str(hr.code) in x:
+                    if 'agreement' in x:
+                        files['agreement'] = x
+                    if 'receipt' in x:
+                        files['receipt'] = x    
+        except:
+            os.mkdir(loc) 
+        
+        context['files'] = files
+        context['pay_hr'] = hr
+        return render(request,'creation/templates/detail_payment_honorarium.html',context)
+    else:
+        # user not associated with pay_hr
+        raise PermissionDenied()
+
+
+def money_as_text(amount):
+    """
+    Display numerical money in text format
+    12345 --> tweleve thousand three hundred forty five only
+    """
+    try:
+        rupee, paise = list(map(int, str(amount).split('.')))
+    except:
+        rupee = amount
+        paise = 0
+    ans = ""
+    small_arr = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
+    'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Forteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Ninteen']
+    large_arr = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety']
+
+    """ Calculating for Rupee """
+    if rupee > 100000 or rupee < 1:
+        return "Invalid Amount"
+    if rupee // 1000:
+        value = rupee // 1000
+        if value < 20:
+            ans += small_arr[value]
+        if value >= 20 and value < 100:
+            large_val = value // 10
+            small_val = value % 10
+            ans += large_arr[large_val] + " " + small_arr[small_val]
+        ans += " Thousand "
+        rupee %= 1000
+
+    if rupee // 100:
+        value = rupee // 100
+        ans += small_arr[value] + " Hundred "
+        rupee %= 100
+
+    if rupee > 19:
+        value = rupee // 10
+        ans += large_arr[value] + " "
+        rupee %= 10
+
+    if rupee < 20:
+        ans += small_arr[rupee] + " "
+
+    """ calculating for paise"""
+    if paise != 0:
+        ans += "And "
+        if paise > 19:
+            value = paise // 10
+            ans += large_arr[value] + " "
+            paise %= 10
+
+        if paise < 20:
+            ans += small_arr[paise] + " "
+        ans += "Paise "
+
+    ans += "Only"
+    return ans
+
 def update_codefiles(request):
     if not is_administrator(request.user):
         raise PermissionDenied()
@@ -4309,3 +4703,328 @@ def grant_role(request):
             contrib_roles.update(status = 0, updated = timezone.now())
             data = "Role Deleted"
     return HttpResponse(json.dumps(data),content_type='application/json')
+
+
+def honorarium_agreement(request,hono_id):
+    tpi = TutorialPayment.objects.filter(payment_honorarium_id=hono_id
+        ).values('tutorial_resource__tutorial_detail__foss__foss',
+        'tutorial_resource__tutorial_detail__tutorial',
+        'seconds','user_id__username','user_id__email','user_id__first_name',
+        'user_id__last_name','created','user__profile__address','user__profile__phone',
+        'user__profile__pincode').order_by('tutorial_resource__tutorial_detail__foss__foss')
+    response = HttpResponse(content_type='application/pdf')
+    file_name = tpi[0]['user_id__username']+'_agreement'
+    hono_date = tpi[0]['created'].strftime("%b %d %Y ")
+    email = tpi[0]['user_id__email']
+    address = ''
+    try:
+        b_details = BankDetail.objects.get(user__email = email)
+        address = b_details.vendoraddress
+    except:
+        messages.warning(request, 'Please update Bank Details')
+    phone = tpi[0]['user__profile__phone']
+    name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
+    ft = ''
+    for instance in tpi:
+        ft += str(instance['tutorial_resource__tutorial_detail__foss__foss']) + \
+        '&' +  str(instance['tutorial_resource__tutorial_detail__tutorial']) + '('\
+        + str(timedelta(seconds=instance['seconds'])) + ')'+r'\\'
+
+    download_file_name = ''
+    template = 'hono_agreement_template'
+    certificate_path = os.path.dirname(os.path.realpath(__file__))+"/hr-receipts/"
+    template_file = open('{0}{1}'.format
+                         (certificate_path, template), 'r')
+    content = Template(template_file.read())
+    template_file.close()
+    content_tex = content.safe_substitute(
+        image_dir = certificate_path+"images/",
+        date = hono_date,
+        name = name,
+        tut1 = ft,
+        email = email,
+        phone = phone,
+        address = address
+        )
+    response = make_latex(certificate_path, file_name, content_tex)
+    if response:
+        return response
+    else:
+        messages.error(request, 'latex or data error')
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+hono_rate = {
+    1 : '1300',
+    2 : '700',
+    3 : '2000'
+}
+
+def honorarium(request,hono_id):
+    tpi = TutorialPayment.objects.filter(payment_honorarium_id=hono_id
+        ).values('tutorial_resource__tutorial_detail__foss__foss',
+        'tutorial_resource__tutorial_detail__tutorial',
+        'tutorial_resource__language__name',
+        'seconds','user_id__username','user_id__email','user_id__first_name',
+        'user_id__last_name','user__profile__address','created',
+        'amount','seconds','user_type','user__profile__pincode',
+        'user__profile__phone', 'payment_honorarium__initiated_by__email'
+        ).order_by('tutorial_resource__tutorial_detail__foss__foss')
+    response = HttpResponse(content_type='application/pdf')
+    file_name = tpi[0]['user_id__username'] + '_honorarium'
+    hono_date = tpi[0]['created'].strftime("%d %B %Y")
+    name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
+    address = tpi[0]['user__profile__address']
+    pincode = tpi[0]['user__profile__pincode']
+    phone = tpi[0]['user__profile__phone']
+    manager_name = ''
+    # Set the user to the main payment manager
+    try:
+        manager = User.objects.get(email=tpi[0]['payment_honorarium__initiated_by__email'])
+        manager_name = manager.first_name+" "+manager.last_name
+    except :
+        print("Incorrect Payment Manager email address")
+    #Bank Details
+    a_name = ''
+    a_no = ''
+    b_name = ''
+    b_branch = ''
+    code = ''
+    b_address = ''
+    pancard = ''
+    vendor = ''
+    v_address = ''
+
+    try:
+        b_details = BankDetail.objects.get(user__email = tpi[0]['user_id__email'])
+        a_name = b_details.account_name
+        a_no = b_details.account_number
+        b_name = b_details.bank
+        b_branch = b_details.branch
+        b_address = b_details.bankaddress
+        pancard = b_details.pancard
+        vendor = b_details.vendor
+        v_address = b_details.vendoraddress
+        code = b_details.ifsc
+    except BankDetail.DoesNotExist:
+        messages.warning(request, 'Please update Bank Details')
+    
+    amount = 0.0
+    secs = 0
+    ft = ''
+    i = 0
+    for instance in tpi:
+        i +=1
+        rate = hono_rate[instance['user_type']]
+        ft += str(i) + '&' + str(instance['tutorial_resource__tutorial_detail__foss__foss']) +\
+        '&' + str(instance['tutorial_resource__tutorial_detail__tutorial'])+'('+\
+        str(instance['tutorial_resource__language__name'])+')'+\
+        '&' + str(timedelta(seconds=instance['seconds']))+'&'+str(rate)+\
+        '&'+str(instance['amount'])+r'\\'
+        amount += float(instance['amount'])
+        secs += instance['seconds']
+        ending = ''
+        if instance['tutorial_resource__language__name'] == 'English' :
+            ending = 'for the creation of the following Spoken Tutorial.'
+        elif rate == hono_rate[1]:
+            ending = 'for translating the following Spoken Tutorial.'
+        elif rate == hono_rate[2]:
+            ending = 'for dubbing the following Spoken Tutorial.'
+        else:
+            ending = 'for translating and dubbing the following Spoken Tutorial.'
+
+    total = '&&'+'Total&'+str(timedelta(seconds=secs))+'&&'+str(amount)+r'\\'
+    download_file_name = ''
+    template = 'honorarium'
+    certificate_path = os.path.dirname(os.path.realpath(__file__))+"/hr-receipts/"
+    template_file = open('{0}{1}'.format
+                         (certificate_path, template), 'r')
+    content = Template(template_file.read())
+    template_file.close()
+    content_tex = content.safe_substitute(
+        amount = amount,
+        money_as_text = money_as_text(amount),
+        line_ending = ending, 
+        date = hono_date,
+        name = name,
+        rows = ft,
+        address = address,
+        pincode = pincode,
+        phone = phone,
+        manager = manager_name,
+        acc_name = a_name,
+        acc_no = a_no,
+        b_name = b_name,
+        b_code = code,
+        b_branch = b_branch,
+        b_address = b_address,
+        vendor = vendor,
+        v_address = v_address,
+        pancard = pancard,
+        total = total
+        )
+    response = make_latex(certificate_path, file_name, content_tex)
+    if response:
+        return response
+    else:
+        messages.error(request, 'latex or data error')
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+def honorarium_receipt(request,hono_id):
+    tpi = TutorialPayment.objects.filter(payment_honorarium_id=hono_id
+        ).values('tutorial_resource__tutorial_detail__foss__foss',
+        'tutorial_resource__tutorial_detail__tutorial',
+        'seconds','user_id__username','user_id__email','user_id__first_name',
+        'user_id__last_name','created','amount','seconds','user__profile__address',
+        'user__profile__phone','user__profile__pincode'
+        ).order_by('tutorial_resource__tutorial_detail__foss__foss')
+    response = HttpResponse(content_type='application/pdf')
+    file_name = tpi[0]['user_id__username']+ '_receipt'
+    name = tpi[0]['user_id__first_name'] +' ' +tpi[0]['user_id__last_name']
+    hono_date = tpi[0]['created'].strftime("%d %B %Y")
+    email = tpi[0]['user_id__email']
+    address = ''
+    try:
+        b_details = BankDetail.objects.get(user__email = email)
+        address = b_details.vendoraddress
+    except:
+        messages.warning(request, 'Please update Bank Details!!!')
+    phone = tpi[0]['user__profile__phone']
+    amount = 0.0
+    secs = 0
+    ft = ''
+    i = 0
+    cur_foss = tpi[0]['tutorial_resource__tutorial_detail__foss__foss']
+    ft = str(tpi[0]['tutorial_resource__tutorial_detail__foss__foss']) +':'+'&'+r'\\'
+    for instance in tpi:
+        i +=1
+        if instance['tutorial_resource__tutorial_detail__foss__foss'] == cur_foss:
+            ft += '-'+str(instance['tutorial_resource__tutorial_detail__tutorial'])
+            ft += '&' + str(timedelta(seconds=instance['seconds']))+r'\\'
+        else:
+            cur_foss = instance['tutorial_resource__tutorial_detail__foss__foss']
+            ft += str(cur_foss) +':'+'&'+r'\\'
+            ft += '-'+str(instance['tutorial_resource__tutorial_detail__tutorial'])
+            ft += '&' + str(timedelta(seconds=instance['seconds']))+r'\\'
+        amount += float(instance['amount'])
+        secs += instance['seconds']
+    total = '&&'+'Total Time&'+str(timedelta(seconds=secs))+r'\\'
+    download_file_name = ''
+    template = 'receipt'
+    certificate_path = os.path.dirname(os.path.realpath(__file__))+"/hr-receipts/"
+    template_file = open('{0}{1}'.format
+                         (certificate_path, template), 'r')
+    content = Template(template_file.read())
+    template_file.close()
+    content_tex = content.safe_substitute(
+        amount = amount,
+        money_as_text = money_as_text(amount),
+        name = name,
+        date = hono_date,
+        rows = ft,
+        email = email.replace('_',"\_"),
+        phone = phone,
+        address = address
+        )
+    response = make_latex(certificate_path, file_name, content_tex)
+    if response:
+        return response
+    else:
+        messages.error(request, 'latex or data error')
+        return HttpResponseRedirect(request.META['HTTP_REFERER'])
+
+
+def make_latex(certificate_path, file_name, content_tex):
+    download_file_name = "ST_" + file_name + '.pdf'
+    response = HttpResponse(content_type='application/pdf')
+    create_tex = open('{0}{1}.tex'.format
+                      (certificate_path, file_name), 'w')
+    create_tex.write(content_tex)
+    create_tex.close()
+    command = 'user_receipt'
+    process = subprocess.Popen('make -C {0} {1} file_name={2}'.format(certificate_path, command, file_name),
+        stderr=subprocess.PIPE, shell=True)
+    err = process.communicate(timeout=10)[1]
+    if process.returncode == 0:
+        pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
+        response['Content-Disposition'] = 'attachment; \
+                    filename=%s' % (download_file_name)
+        response.write(pdf.read())
+        clean_process = subprocess.Popen('make -C {0} clean file_name={1}'.format(
+           certificate_path, file_name), shell=True)
+        return response
+    else:
+        return False
+@csrf_exempt
+def add_details(request):
+    form = DetailsForm()
+    context = {}
+    context['form']= form
+    if request.method == 'POST':
+        my_dict = dict()
+        this_user = User.objects.get(id = request.POST.get('user'))
+        details = BankDetail.objects.filter(user=this_user).values(
+                    'account_name','account_number','ifsc','bank','branch','pincode',
+                    'pancard','bankaddress','vendor','vendoraddress')
+        if details:
+            my_dict = details[0]
+        print('-'*10,my_dict)
+        return HttpResponse(json.dumps(my_dict), content_type = 'application/json')
+    context.update(csrf(request))
+    return render(request, 'creation/templates/add_details.html', context)
+
+@csrf_exempt
+def save_details(request):
+    if request.method == 'POST':
+        form = DetailsForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Details saved successfully")
+        else:
+            b_details = BankDetail.objects.get(user= request.POST.get('user'))
+            b_details.account_number = request.POST.get('account_number')
+            b_details.account_name = request.POST.get('account_name')
+            b_details.ifsc = request.POST.get('ifsc')
+            b_details.bank = request.POST.get('bank')
+            b_details.branch = request.POST.get('branch')
+            b_details.pincode = request.POST.get('pincode')
+            b_details.pancard = request.POST.get('pancard')
+            b_details.bankaddress = request.POST.get('bankaddress')
+            b_details.save()
+            messages.success(request, "Details updated !")
+    return HttpResponseRedirect('/creation/add_details')
+
+@csrf_protect
+def file_checker(request, username, file_name):
+    filename = file_name+'.pdf'
+    fs = FileSystemStorage(location=settings.MEDIA_ROOT+DOCS+username)
+    if request.method == 'POST':
+        hono_id = int(file_name[11:16])
+        hono_obj = PaymentHonorarium.objects.get(id=hono_id)
+        if fs.exists(fs.path(name='')+'/'+filename):
+            if request.POST['action'] == 'reject':
+                os.rename(fs.path(name='')+'/'+filename,
+                fs.path(name='')+'/'+file_name+'_rejected.pdf')
+                return HttpResponse('deleted')
+            if request.POST['action'] == 'accept':
+                os.rename(fs.path(name='')+'/'+filename,
+                fs.path(name='')+'/'+file_name+'_accepted.pdf')
+                if 'agreement' in file_name:
+                    if hono_obj.status == 6:
+                        hono_obj.status = 11
+                    else:
+                        hono_obj.status = 5
+                if 'receipt' in file_name:
+                    if hono_obj.status == 5:
+                        hono_obj.status = 11
+                    else:
+                        hono_obj.status = 6
+                hono_obj.save()
+                return HttpResponse('accepted')
+    else:
+        with fs.open(filename) as pdf:
+            response = HttpResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; \
+                    filename=%s' % (file_name+'.pdf')
+            response.write(pdf)
+            return response
+    return Http404

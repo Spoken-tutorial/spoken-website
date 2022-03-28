@@ -7,6 +7,8 @@ from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
 
+import datetime
+
 # Spoken Tutorial Stuff
 from creation.models import *
 
@@ -983,6 +985,111 @@ class UpdateAssignmentForm(forms.Form):
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
 
+
+class PublishedTutorialFilterForm(forms.Form):
+    contributor = forms.ChoiceField(
+        choices = ['','--- Select Contributor ---'],
+        required = False,
+        # widget = forms.Select(attrs={'class': 'form-control'})
+    )
+    foss = forms.ChoiceField(
+        choices = ['','--- Select FOSS ---'],
+        required = False,
+    )
+    language = forms.ChoiceField(
+        choices = ['','--- Select Language ---'],
+        required = False,
+    )
+    start_date = forms.DateField(
+        required=False,
+        widget = forms.DateInput(attrs={'placeholder': 'yyyy-mm-dd'}),
+    )
+    end_date = forms.DateField(
+        required=False,
+        widget = forms.DateInput(attrs={'placeholder': 'yyyy-mm-dd'}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(PublishedTutorialFilterForm, self).__init__(*args, **kwargs)
+        #populating contributor select choices
+        contributor_list = list(TutorialResource.objects.filter(script_user__groups__in = [5,]).order_by('script_user__first_name').distinct()
+            .values_list('script_user', 'script_user__first_name', 'script_user__last_name')
+        )
+        c_list = []
+        for contributor in contributor_list:
+            if contributor[1] == '':
+                c_list.append((contributor[0], contributor[0]))
+            else:
+                c_list.append((contributor[0], contributor[1]+" "+contributor[2]))
+        contributor_list = c_list
+        contributor_list.insert(0, ('', '--- Select Contributor ---'))
+        self.fields['contributor'].choices = contributor_list
+
+        #populating FOSS select choices
+        foss_list = list(FossCategory.objects.distinct().
+            values_list('id','foss')
+        )
+        foss_list.insert(0, ('', '--- Select FOSS ---'))
+        self.fields['foss'].choices = foss_list
+
+        #Populating Language select choices
+        language_list = list(Language.objects.distinct().
+            values_list('id','name')
+        )
+        language_list.insert(0, ('', '--- Select Language ---'))
+        self.fields['language'].choices = language_list
+
+    def clean(self):
+        super(PublishedTutorialFilterForm, self).clean()
+        s_date = self.cleaned_data.get('start_date')
+        e_date = self.cleaned_data.get('end_date')
+        if s_date and e_date and s_date > e_date:
+            raise forms.ValidationError('End date must be later')
+
+class PaymentHonorariumFilterForm(forms.Form):
+    contributor = forms.ChoiceField(
+        choices = ['','--- Select Contributor ---'],
+        required = False,
+        # widget = forms.Select(attrs={'class': 'form-control'})
+    )
+    status = forms.ChoiceField(
+        choices = (
+            ['','--- Select Status ---'],
+            [1, 'In Process'],
+            [2, 'Forwarded'],
+            [3, 'Completed'],
+            [4, 'Confirmed'],
+        ),
+        required = False,
+        # widget = forms.Select(attrs={'class': 'form-control'})
+    )
+    start_date = forms.DateField(
+        required=False,
+        widget = forms.DateInput(attrs={'placeholder': 'yyyy-mm-dd'}),
+    )
+    end_date = forms.DateField(
+        required=False,
+        widget = forms.DateInput(attrs={'placeholder': 'yyyy-mm-dd'}),
+    )    
+
+    def __init__(self, *args, **kwargs):
+        super(PaymentHonorariumFilterForm, self).__init__(*args, **kwargs)
+        #populating contributor select choices
+        contributor_list = list(TutorialPayment.objects.filter(status = 2).distinct()
+            .values_list('user', 'user__first_name', 'user__last_name')
+        )
+        contributor_list = [(contributor[0], contributor[1]+" "+contributor[2]) for contributor in contributor_list]        
+        contributor_list.insert(0, ('', '--- Select Contributor ---'))
+        self.fields['contributor'].choices = contributor_list
+
+    def clean(self):
+        super(PaymentHonorariumFilterForm, self).clean()
+        s_date = self.cleaned_data.get('start_date')
+        e_date = self.cleaned_data.get('end_date')
+        if s_date and e_date and s_date > e_date:
+            self.add_error('end_date', "End date must be later than start date.")
+
+
 class UpdateCodefilesForm(forms.Form):
     foss = forms.ChoiceField(
         choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) |
@@ -1021,6 +1128,7 @@ class UpdateCodefilesForm(forms.Form):
                 self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
+
 
 class UpdateCommonCompForm(forms.Form):
     foss = forms.ChoiceField(
@@ -1088,6 +1196,34 @@ class LanguageManagerForm(forms.ModelForm):
         exclude = ['created', 'updated']
 
 
+class DetailsForm(forms.ModelForm):
+    bankaddress = forms.CharField( widget=forms.Textarea )
+    vendoraddress = forms.CharField( widget=forms.Textarea )
+
+    def __init__(self, *args, **kwargs):
+        super(DetailsForm, self).__init__(*args, **kwargs)
+        ext_contribs = self.fields['user'].queryset.values('id',
+            'first_name','last_name','username').order_by('first_name','last_name','username')
+        c_list = []
+        for contributor in ext_contribs:
+            if contributor['first_name'] == '' and contributor['last_name'] == '':
+                c_list.append((contributor['id'],contributor['username']))
+            else:
+                c_list.append((contributor
+                    ['id'],contributor['first_name']+' '+contributor['last_name']
+                    +' ('+contributor['username']+')'))
+
+
+        contributor_list = c_list
+        contributor_list.insert(0, ('', '--- Select Contributor ---'))
+        self.fields['user'].choices = contributor_list
+        #   self.fields['user'].queryset = name
+
+    class Meta():
+        model = BankDetail
+        exclude = ['created', 'updated']
+
+
 class UpdateThumbnailForm(forms.Form):
     foss = forms.ChoiceField(
         choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) |
@@ -1136,4 +1272,3 @@ class UpdateThumbnailForm(forms.Form):
                 self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
-

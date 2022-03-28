@@ -87,7 +87,7 @@ urlpatterns = [
     url(r'^update_tutorials/$',  update_tutorials, name="update_tutorials"),
     url(r'^grant_role/$',  grant_role, name="grant_role"),
 
-    # Common to Domain & Admin reviewer parts
+    # Common to Domain & Admin reviewer parts    
     url(r'^accept-all/(\w+)/(\d+)/$',  accept_all, name="accept_all"),
     url(r'^delete-notification/(\w+)/(\d+)/$',  delete_creation_notification, name="delete_creation_notification"),
     url(r'^clear-notifications/(\w+)/$',  clear_creation_notification, name="clear_creation_notification"),
@@ -100,6 +100,23 @@ urlpatterns = [
     url(r'^report-missing-component/(\d+)/$',  report_missing_component, name="report_missing_component"),
     url(r'^report-missing-component/reply/(\d+)/$',  report_missing_component_reply, name="report_missing_component_reply"),
     url(r'^report-missing-component/list/$',  report_missing_component_list, name="report_missing_component_list"),
+    
+
+    # Additional Views Created for Payment Module
+    url(r'payment/tutorials/$',  list_all_published_tutorials, name="list_all_published_tutorials"),
+    url(r'payment/ajax/languages/$',  load_languages, name="load_languages"),
+    url(r'payment/ajax/fosses/$',  load_fosses, name="load_fosses"),
+    url(r'payment/due/$',  list_all_due_tutorials, name="payment_due_tutorials"),
+    url(r'payment/honorarium/$',  list_payment_honorarium, name="payment_honorarium_list"),
+    url(r'payment/honorarium/detail/(\d+)/$',  detail_payment_honorarium, name="payment_honorarium_detail"),
+    url(r'hono_agreement/(?P<hono_id>\d+)/',honorarium_agreement,name='honorarium_agreement'),
+    url(r'honorarium/(?P<hono_id>\d+)/',honorarium,name='honorarium'),
+    url(r'hono_receipt/(?P<hono_id>\d+)/',honorarium_receipt,name='honorarium_receipt'),
+    url(r'add_details/',add_details,name='add_details'),
+    url(r'save_details/',save_details,name='save_details'),
+    url(r'file_checker/(?P<username>[\w]+)/(?P<file_name>[-\w]+)',file_checker,name='file_checker'),
+
+
 
     #Bidding Module
     url(r'^rate_contributors/$',rate_contributors,name = "rate_contributors"),
@@ -124,4 +141,3 @@ urlpatterns = [
     #creation sitemaps
     url(r'^sitemap\.xml/$', sitemap, {'sitemaps' : tutorial_sitemaps } , name='tutorial_sitemap'),
 ]
-
