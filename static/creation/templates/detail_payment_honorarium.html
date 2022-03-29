@@ -1,0 +1,164 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %}Confirm Payment Honorarium{% endblock %}
+{% block uncompresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Confirm Payment Honorarium{% endblock %}
+{% block content %}
+	<div class="text-center">
+		<h4>Payment Honorarium : <b>#{{ pay_hr.code }}</b></h4>
+	</div>
+    <div id="flip-scroll" class="table-responsive">
+        <table class="paleblue table table-condensed table-bordered table-hovers">
+        	<thead>
+        		<tr>
+	        		<th>S.No.</th>
+	        		<th>Tutorial Title</th>
+	                <th>Duration</th>
+	                <th>Amount</th>
+	            </tr>
+            </thead>
+            <tbody>
+            	{% for tr_pay in pay_hr.tutorials.all %}
+            	<tr>
+            		<td>{{ forloop.counter }}</td>
+            		<td>{{ tr_pay.tutorial_resource.tutorial_detail.tutorial }}</td>
+            		<td>{{ tr_pay.get_duration }}</td>
+            		<td>₹ {{ tr_pay.amount }}</td>
+            	</tr>
+            	{% endfor %}
+            </tbody>
+            <tfoot>
+            	<tr class="active">
+            		<td colspan="3" class="text-right">Total Amount</td>
+            		<th>₹ {{ pay_hr.amount }}</th>
+            	</tr>
+            </tfoot>
+        </table>
+        <table>
+            <td class="text-center">Download<a class="btn btn-xs btn-link" href="{% url 'creation:honorarium' pay_hr.id %}" class="btn btn-primary btn-sm" title="Honorarium">Honorarium</a>
+            <a class="btn btn-xs btn-link" href="{% url 'creation:honorarium_receipt' pay_hr.id %}" class="btn btn-primary btn-sm" title="Receipt" >Receipt</a>
+            <a class="btn btn-xs btn-link" href="{% url 'creation:honorarium_agreement' pay_hr.id %}" class="btn btn-primary btn-sm" title="Receipt">Agreement</a>
+        </td>
+        </table>
+    </div>
+    <div class="text-left" style="color:red;" id="alerter">
+        {% if pay_hr.status < 5%}
+			Please upload your signed Agreement and Receipt here in 'PDF' format
+        {% elif pay_hr.status == 5 %}
+            Please upload your signed Receipt here in 'PDF' format. Click on the cross to remove the file and upload your signed Receipt file.
+        {% elif pay_hr.status == 6 %}
+            Please upload your signed Agreement here in 'PDF' format. Click on the cross to remove the file and upload your signed Agreement file.
+
+        {% endif %}
+    </div>
+
+        <div class="row text-left">
+            {% if pay_hr.status != 5 %}
+            <div class="col-sm-2">Agreement :</div>
+            <div class="col-sm-6">
+                <label class="btn-lg">
+                    {%if files.agreement %}
+                    <a href="{% url 'creation:file_checker' pay_hr.tutorials.all.0.user.username files.agreement %}" id="agreement_file">{{files.agreement}}</a>
+                    <button type="button" class="close" id="custom_cross_agr"
+            aria-hidden="true">×</button>
+            {% endif %}
+            </label>
+        </div>
+			<form method="POST" enctype="multipart/form-data">
+			    {% csrf_token %}
+			    <div class="col-sm-2">
+                <input type="file" id = "agreement_btn" name='agreement'>
+                </div>
+                <div class="col-sm-2">
+                <button type="submit" id="agr_upload">Upload</button>
+                </div>
+			  </form>
+              {% endif %}
+              </div>
+
+        <div class="row text-left">
+            {% if pay_hr.status != 6 %}
+            <div class="col-sm-2">Receipt :</div>
+            <div class="col-sm-6">
+                <label class="btn-lg">
+                    {%if files.receipt %}
+                    <a href="{% url 'creation:file_checker' pay_hr.tutorials.all.0.user.username files.receipt %}" id="receipt_file">{{files.receipt}}</a>
+
+                    <button type="button" class="close" id="custom_cross_rec"
+            aria-hidden="true" >×</button>
+            {% endif %}
+            </label>
+        </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="col-sm-2">
+                <input type="file" id = "receipt_btn" name='receipt'>
+                </div>
+                <div class="col-sm-2">
+                <button type="submit" id="rec_upload">Upload</button>
+                </div>
+              </form>
+              {% endif %}
+              </div>
+        <div class="text-right">
+        {% if pay_hr.status == 3 %}
+        
+	    	<form method="POST" class="form-horizontal">
+	    		{% csrf_token %}
+                <input type="submit" class="btn btn-primary " name="confirm" value="Confirm" title="Honorarium Recieved" id="hono_confirm" disabled />
+	    	</form>
+	    {% else %}
+	    	<h4>Status : <b>{{ pay_hr.get_status_display }}</b></h4>
+	    {% endif %}
+	    </div>
+	    <div style="margin-top:20px"></div>
+{% endblock %}
+
+{% block compressinlinejsblock %}
+    <script type="text/javascript">
+		var agr_btn = document.getElementById('custom_cross_agr');
+        var agr_file = document.getElementById('agreement_file');
+        if (agr_file && agr_btn) {
+            document.getElementById("agreement_btn").disabled = true;
+            document.getElementById("agr_upload").disabled = true;
+            agr_btn.addEventListener('click', function(){
+            myFunction(document.getElementById('agreement_file').text);
+        });
+        }
+        var rec_btn = document.getElementById('custom_cross_rec')
+        var rec_file = document.getElementById('receipt_file');
+        if (rec_btn && rec_file) {
+            document.getElementById("receipt_btn").disabled = true;
+            document.getElementById("rec_upload").disabled = true;
+            rec_btn.addEventListener('click', function(){
+            myFunction(document.getElementById('receipt_file').text);
+        });
+        }
+        function myFunction(file) {
+            $.ajax({
+                type : "POST",
+                url:"/creation/payment/honorarium/detail/"+String({{pay_hr.id}})+'/',
+                dataType : "json",
+                data: {
+                  'hono_id' : file,
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                success: function(data)
+                {
+                    window.location.href = window.location.href;
+                }
+              });
+        }
+
+        if (agr_file && rec_file) {
+            document.getElementById('alerter').style.display = "none";
+            document.getElementById('hono_confirm').disabled = false;
+        }
+    </script>
+{% endblock %}

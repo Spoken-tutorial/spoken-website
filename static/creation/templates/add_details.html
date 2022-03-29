@@ -1,0 +1,165 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Add Details{% endblock %}
+{% block compressinlinecssblock %}
+{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> External Contributor Details{% endblock %}
+{% block content %}
+   <form role="form" method="post" action="{% url 'creation:save_details' %}" class="form-horizontal"  name="bankDetailForm">
+                    <div class="form-group">
+                        <label for="id_user" class="col-sm-3 control-label">User: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.user class+="form-control ext-contrib" tabindex="2" %}
+                            {{ form.user.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_vendor" class="col-sm-3 control-label">Vendor Id: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.vendor class+="form-control vendor" tabindex="2" %}
+                            {{ form.vendor.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_vendoraddress" class="col-sm-3 control-label">Vendor Address: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.vendoraddress class+="form-control vendoraddress" tabindex="2" %}
+                            {{ form.vendoraddress.errors }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_account_name" class="col-sm-3 control-label">Account Name: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.account_name class+="form-control account_name" tabindex="2" %}
+                            {{ form.account_name.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_account_number" class="col-sm-3 control-label">Account number: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.account_number class+="form-control account_number" tabindex="2" %}
+                            {{ form.account_number.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_ifsc" class="col-sm-3 control-label">IFSC: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.ifsc class+="form-control ifsc" tabindex="2" %}
+                            {{ form.ifsc.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_bank" class="col-sm-3 control-label">Bank Name: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.bank class+="form-control bank" tabindex="2" %}
+                            {{ form.bank.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_branch" class="col-sm-3 control-label">Branch Name: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.branch class+="form-control branch" tabindex="2" %}
+                            {{ form.branch.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_pancard" class="col-sm-3 control-label">Pancard: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.pancard class+="form-control pancard" tabindex="2" %}
+                            {{ form.pancard.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_bankaddress" class="col-sm-3 control-label">Bank Address: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.bankaddress class+="form-control bankaddress" tabindex="2" %}
+                            {{ form.bankaddress.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_pincode" class="col-sm-3 control-label">Pincode: </label>
+                        <div class="col-sm-9">
+                            {% render_field form.pincode class+="form-control pincode" tabindex="2" %}
+                            {{ form.pincode.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-9 col-md-9 col-sm-9 col-lg-offset-3 col-md-offset-3 col-sm-offset-3">
+                            <input type="submit" class="btn btn-primary" value="Save"  tabindex="4" onclick="return validateform()" />
+                        </div>
+                    </div>
+    </form>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script type="text/javascript">
+        $(document).ready(
+            function() {
+                $('.ext-contrib').on("change", 
+                    function() {
+                        var sel_user = $('#id_user').find(":selected").val();
+                            $.ajax({
+                                url: "/creation/add_details/",
+                                type: "POST",
+                                data: {
+                                    user: sel_user
+                                },
+                                success: function(data) {
+                                    // loading tutorial names
+                                    if(data){
+                                        $('#id_user_name').val(data.name);
+                                        $('#id_account_name:text').val(data.account_name);
+                                        $('#id_account_number:text').val(data.account_number);
+                                        $('#id_ifsc:text').val(data.ifsc);
+                                        $('#id_bank:text').val(data.bank);
+                                        $('#id_branch:text').val(data.branch);
+                                        $('#id_pincode:text').val(data.pincode);
+                                        $('#id_pancard:text').val(data.pancard);
+                                        $('#id_bankaddress').val(data.bankaddress);
+                                        $('#id_vendor').val(data.vendor);
+                                        $('#id_vendoraddress').val(data.vendoraddress);
+                                    }
+                                }
+                            });
+                    }
+                );
+            }
+        );
+        function validateform(){
+            var errors = "";
+            // check for account number
+            var account_num =document.bankDetailForm.account_number.value; 
+            let is_valid_account_num = /^\d+$/.test(account_num);
+            if (!is_valid_account_num) {
+                errors = errors + "Error in account number. " ;
+            }
+            // check for ifsc
+            var ifsc =document.bankDetailForm.ifsc.value;  
+            var ifsc_regex = new RegExp("^[A-Z]{4}0[A-Z0-9]{6}$");
+            let is_valid_ifsc = ifsc_regex.test(ifsc);
+            if (!is_valid_ifsc) {
+                errors = errors + "Error in IFSC. " ;
+            }
+            // check for pancard
+            var pan =document.bankDetailForm.pancard.value;  
+            var pan_regex = new RegExp("[A-Z]{5}[0-9]{4}[A-Z]{1}");
+            let is_valid_pan = pan_regex.test(pan);
+            if (!is_valid_pan) {
+                errors = errors + "Error in PAN. " ;
+            }
+            // check for pincode
+            var pin =document.bankDetailForm.pincode.value; 
+            let is_valid_pin = /^\d+$/.test(pin);
+            if (!is_valid_pin) {
+                errors = errors + "Error in Pincode. " ;
+            }
+            if (!errors.length == 0) {
+                alert(errors);
+                return false;
+            }
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,184 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} Payment Honorariums {% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/flip-scroll.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %}<i class="fa fa-list-ul"></i> Payment Honorariums {% endblock %}
+{% block content %}
+	<style>
+		.tr_detail{
+			display: None; /* Hide tutorial details initially */
+		}
+	</style>
+	<ul class="breadcrumb">
+		<li><a href="{% url 'creation:list_all_published_tutorials' %}">Published Tutorials</a></li>
+        <li><a href="{% url 'creation:payment_due_tutorials' %}">Payment Due</a></li>
+        <li class="active">Payment In Process</li>
+    </ul>
+	<div class="row">
+        <form class="form-horizontal">
+            <div class="col-md-6">
+            	<div class="form-group">
+                    <label for="id_contributor" class="col-sm-4 control-label">Contributor</label>
+                    <div class="col-sm-8">
+                        {% render_field form.contributor class+="form-control" tabindex="1" %}
+                        {{ form.contributor.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_contributor" class="col-md-4 control-label">Payment Status</label>
+                    <div class="col-md-8">
+                        {% render_field form.status class+="form-control " tabindex="1" %}
+                        {{ form.status.errors }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+            	<div class="form-group">
+                    <label for="id_start_date" class="col-sm-4 control-label">Start Date</label>
+                    <div class="col-sm-8">
+                        {% render_field form.start_date class+="form-control date" tabindex="1" %}
+                        {{ form.start_date.errors }}
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label for="id_end_date" class="col-sm-4 control-label">End Date</label>
+                    <div class="col-sm-8">
+                        {% render_field form.end_date class+="form-control date" tabindex="1" %}
+                        <div class="text-danger">{{ form.end_date.errors }}</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 text-center" style="margin-bottom:10px;">
+            	<input type="submit" value="Filter" class="btn btn-success">
+                <a href="?"  class="btn btn-danger">Clear</a>
+            </div>
+        </form>
+    </div>
+	<table class="paleblue table table-condensed table-bordered table-hover table-striped ">
+		<tr>
+			<th>Code</th>
+			<th>Contributor</th>
+			<th>Total Amount</th>
+			<th>Last Updated</th>
+			<th>Honorarium</th>
+			<th>Options</th>
+		</tr>
+	{% for honorarium in honorariums %}
+		<tr>
+			<td>
+				<a class="toggle_tr_detail">#{{ honorarium.code }}</a>
+				<div class="tr_detail">
+					<ul class="">
+						{% for tut in honorarium.tutorials.all %}
+						<li>{{ tut.tutorial_resource.tutorial_detail.tutorial | truncatechars:20 }}
+						 - {{ tut.get_duration }}
+						 - ₹{{ tut.amount }}</li>
+						{% endfor %}
+					</ul>
+				</div>
+			</td>
+			<td>
+				{{ honorarium.tutorials.all.0.user.first_name }} {{ honorarium.tutorials.all.0.user.last_name }}
+			</td>
+			<td>₹ {{ honorarium.amount }}</td>
+			<td>
+			{% with honorarium.tutorials.all.0.user.username|get_user_uploads:honorarium.code as files %}
+			<ul>
+            	{%for f in files%}
+            	<form action="" method="POST">
+					<li>
+						<a href="{% url 'creation:file_checker' honorarium.tutorials.all.0.user.username f.0 %}" id='{{f.0}}'>{{f.0}}</a><br>
+						{% if honorarium.status != 11 %}
+						{% if 'agreement' in f.0 and honorarium.status != 5  or 'receipt' in f.0 and honorarium.status != 6 %}
+						<button type="button" class="btn btn-success" onclick="file_accept_reject('{{honorarium.tutorials.all.0.user.username}}', '{{f.0}}','accept')">Accept</button>
+						<button type="button" class="btn btn-danger" onclick="file_accept_reject('{{honorarium.tutorials.all.0.user.username}}', '{{f.0}}','reject')">Reject</button>
+						{% endif %}
+						{% endif %}
+					</li>
+				</form>
+				{% endfor %}
+			</ul>
+			{% endwith %}
+			</td>
+			
+			<td class="text-center">Download<a class="btn btn-xs btn-link" href="{% url 'creation:honorarium' honorarium.id %}" class="btn btn-primary btn-sm" title="Honorarium" target="blank">Honorarium</a>
+            <a class="btn btn-xs btn-link" href="{% url 'creation:honorarium_receipt' honorarium.id %}" class="btn btn-primary btn-sm" title="Receipt" target="blank">Receipt</a>
+            <a class="btn btn-xs btn-link" href="{% url 'creation:honorarium_agreement' honorarium.id %}" class="btn btn-primary btn-sm" title="Receipt" target="blank">Agreement</a></td>
+			<td class="text-center">
+				<form method="POST">
+					{% csrf_token %}
+					<input type="hidden" name="id" value="{{ honorarium.id}}">
+
+					{% if honorarium.status == 1 %}
+						<input type="submit" name="change_status" class="btn btn-info btn-xs" value="Mark as Forwarded">
+					{% elif honorarium.status == 2 %}
+						<input type="submit" name="change_status" class="btn btn-primary btn-xs" value="Mark as Completed">
+					{% elif honorarium.status == 3 %}
+						<span class="text-success">Waiting for Confirmation</span>
+					{% elif honorarium.status == 4 %}
+						<span class="text-success">
+							Confirmed
+							&nbsp;<span class="fa fa-1 fa-check-circle"></span>&nbsp;
+						</span>
+					{% elif honorarium.status == 5 %}
+						<span class="text-success">Agreement Accepted</span>
+					{% elif honorarium.status == 6 %}
+						<span class="text-success">Receipt Accepted</span>
+					{% elif honorarium.status == 11 %}
+						<span class="text-success">All files accepted and Hono Closed</span>
+					{% endif%}
+				</form>
+			</td>
+	{% empty %}
+		<tr class="text-center">
+			<td colspan="6">No honorarium generated so far.</td>
+		</tr>	
+	{% endfor %}
+	</table>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+    <script>
+
+        $(document).ready(function(){
+        	$('.tr_detail').hide();
+        	$('.toggle_tr_detail').click(function(){
+        		$(this).next().toggle();
+        	})
+        });
+    </script>
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/events.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.fancybox.pack.js' %}"></script>
+    <script type="text/javascript">        
+        $('.date').datetimepicker({
+            lang:'en',
+            timepicker:false,
+            format:'Y-m-d',
+            formatDate:'Y/m/d',
+            maxDate:'+1987/06/14',
+        });
+
+        function file_accept_reject(u_name,file,action){
+        	$.ajax({
+         type:"POST",
+         url:"/creation/file_checker/"+u_name+'/'+file,
+         data: {
+                'action'	: action,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+         success: function(){
+             window.location.reload();
+         }
+    });
+        	}
+    </script>
+{% endblock %}

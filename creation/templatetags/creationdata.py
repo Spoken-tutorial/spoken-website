@@ -10,9 +10,11 @@ from django import template
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.core.files.storage import FileSystemStorage
 
 # Spoken Tutorial Stuff
 from creation.models import *
+from creation.helpers import DOCS
 from creation.views import (
     is_administrator,
     is_contenteditor,
@@ -63,6 +65,18 @@ def get_review_status_class(key):
 def get_review_status_symbol(key):
 	status_list = ['fa fa-1 fa-minus-circle review-pending-upload', 'fa fa-1 fa-check-circle review-admin-review', 'fa fa-1 fa-check-circle review-domain-review', 'fa fa-1 fa-check-circle review-quality-review', 'fa fa-1 fa-check-circle review-accepted', 'fa fa-1 fa-times-circle review-pending-upload', 'fa fa-1 fa-ban review-accepted']
 	return status_list[key];
+
+def get_payment_status_list(key):
+    status_list = ['Canceled','Due','Initiated','Completed','Confirmed']
+    return status_list[key];
+
+def get_payment_status_color(key):
+    status_list = ['danger','warning', 'muted', 'primary', 'success']
+    return status_list[key]
+
+def get_payment_status_symbol(key):
+    status_list = ['fa fa-1 fa-times-circle','fa fa-1 fa-minus-circle', 'fa fa-1 fa-check-circle', 'fa fa-1 fa-check-circle', 'fa fa-1 fa-check-circle', ]
+    return status_list[key]
 
 def get_username(key):
 	user = User.objects.get(pk = key)
@@ -242,6 +256,19 @@ def get_mp4_video(tr):
         return 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
     return False
 
+def get_user_uploads(username, hr_code):
+    fs = FileSystemStorage(location=settings.MEDIA_ROOT+ DOCS)
+    file_list = []
+    context = {}
+    if fs.exists(name=username):
+        list_of_file = fs.listdir(path=username)
+        for files in list_of_file:
+            for file in files:
+                if hr_code in file:
+                    file_list.append([file,fs.path(name=username)+'/'+file])
+        return file_list
+    else:
+        return None
 
 register.inclusion_tag('spoken/templates/tutorial_search_form.html')(tutorialsearch)
 #register.filter('tutorialsearch', tutorialsearch)
@@ -267,6 +294,10 @@ register.filter('get_last_video_upload_time', get_last_video_upload_time)
 register.filter('get_review_status_list', get_review_status_list)
 register.filter('get_review_status_symbol', get_review_status_symbol)
 register.filter('get_review_status_class', get_review_status_class)
+
+register.filter('get_payment_status_list', get_payment_status_list)
+register.filter('get_payment_status_symbol', get_payment_status_symbol)
+register.filter('get_payment_status_color', get_payment_status_color)
 register.filter('get_username', get_username)
 register.filter('instruction_sheet', instruction_sheet)
 register.filter('installation_sheet', installation_sheet)
@@ -275,3 +306,4 @@ register.filter('get_contenteditor', is_contenteditor)
 register.filter('format_component_title', format_component_title)
 register.filter('get_mp4_video', get_mp4_video)
 register.filter('get_language_manager',is_language_manager)
+register.filter('get_user_uploads', get_user_uploads)
