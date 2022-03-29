@@ -4741,10 +4741,10 @@ def honorarium_agreement(request,hono_id):
         image_dir = certificate_path+"images/",
         date = hono_date,
         name = name,
-        tut1 = ft,
-        email = email,
+        tut1 = ft.replace('_',"\_"),
+        email = email.replace('_',"\_"),
         phone = phone,
-        address = address
+        address = address.replace('_',"\_")
         )
     response = make_latex(certificate_path, file_name, content_tex)
     if response:
@@ -4847,18 +4847,18 @@ def honorarium(request,hono_id):
         date = hono_date,
         name = name,
         rows = ft,
-        address = address,
+        address = address.replace('_',"\_"),
         pincode = pincode,
         phone = phone,
         manager = manager_name,
         acc_name = a_name,
         acc_no = a_no,
         b_name = b_name,
-        b_code = code,
-        b_branch = b_branch,
-        b_address = b_address,
-        vendor = vendor,
-        v_address = v_address,
+        b_code = code.replace('_',"\_"),
+        b_branch = b_branch.replace('_',"\_"),
+        b_address = b_address.replace('_',"\_"),
+        vendor = vendor.replace('_',"\_"),
+        v_address = v_address.replace('_',"\_"),
         pancard = pancard,
         total = total
         )
@@ -4920,10 +4920,10 @@ def honorarium_receipt(request,hono_id):
         money_as_text = money_as_text(amount),
         name = name,
         date = hono_date,
-        rows = ft,
+        rows = ft.replace('_',"\_"),
         email = email.replace('_',"\_"),
         phone = phone,
-        address = address
+        address = address.replace('_',"\_")
         )
     response = make_latex(certificate_path, file_name, content_tex)
     if response:
