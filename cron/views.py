@@ -31,7 +31,13 @@ class AsyncCronMailListCreateView(UserPassesTestMixin, CreateView):
         if 'view' not in kwargs:
             kwargs['view'] = self
         if 'task' not in kwargs:
-            kwargs['task'] = AsyncCronMail.objects.all().order_by('-uploaded_at') 
+            kwargs['task'] = AsyncCronMail.objects.all().order_by('-uploaded_at')
+        #display worker time
+        time = dt.time(*WORKER_TIME)
+        worker_time = time.strftime('%H:%M:%S %p')
+        kwargs['worker_time'] = worker_time
+        worker_status = WORKER_STATUS
+        kwargs['worker_status'] = worker_status
         return kwargs
 
     def form_valid(self, form):

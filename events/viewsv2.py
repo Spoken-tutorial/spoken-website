@@ -8,6 +8,7 @@ from datetime import date
 from datetime import timedelta
 import re
 from django.conf import settings
+from rq import Queue
 
 from config import TARGET, CHANNEL_ID, CHANNEL_KEY
 # Create your views here.
@@ -60,15 +61,17 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 from events.views import get_page
 from io import BytesIO
 from django.db.models import Q
-from cron import TOPPER_QUEUE, REDIS_CLIENT
+from cron import TOPPER_QUEUE, REDIS_CLIENT, DEFAULT_QUEUE
 import uuid 
 from django.core.cache import caches
 from rq.job import Job
+from rq import Worker
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
 from events.helpers import get_prev_semester_duration, get_updated_form
 from cron.tasks import async_filter_student_grades, filter_student_grades
 from spoken.config import TOPPER_WORKER_STATUS
+from django.db import connection
 
 class JSONResponseMixin(object):
   """
@@ -3376,6 +3379,97 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
   form_class = StudentGradeFilterForm
   success_url = '/software-training/student-grade-filter/' 
 
+  #get current job(Job) & pending jobs(List of Jobs)
+  def get_redis_data(self):
+    redis_data = {}
+    try:
+      workers = Worker.all(queue=TOPPER_QUEUE)
+      if workers:
+        worker = workers[0]
+        worker_status = worker.get_state()
+        current_job = worker.get_current_job()
+        redis_data['current_job'] = current_job
+        redis_data['worker_status']=worker_status
+      pending_jobs = TOPPER_QUEUE.get_jobs()
+      redis_data['pending_jobs']=pending_jobs
+    except:
+      print("error in getting worker ")
+    return redis_data
+
+  def get_topper_cache_keys(self):
+    cache_keys = ()
+    with connection.cursor() as cursor:
+      cursor.execute("SELECT *  FROM topper_cache_table")
+      cache_keys=cursor.fetchall()
+    keys = [item[0][3:] for item in cache_keys]
+    
+    return keys
+
+  def get_dict_val(self):
+    fosses = FossCategory.objects.values('id','foss')
+    dict_id_foss = {}
+    for item in fosses:
+      dict_id_foss[item['id']] = item['foss']
+
+    states = State.objects.values('id','name')
+    dict_id_state = {}
+    for item in states:
+      dict_id_state[item['id']] = item['name']
+
+    cities = City.objects.values('id','name')
+    dict_id_city = {}
+    for item in cities:
+      dict_id_city[item['id']] = item['name']
+
+    institutes = InstituteType.objects.values('id','name')
+    dict_id_insti = {}
+    for item in institutes:
+      dict_id_insti[item['id']] = item['name']
+    return dict_id_foss, dict_id_state, dict_id_city, dict_id_insti
+
+  def get_formatted_query(self,keys):
+    dict_id_foss, dict_id_state, dict_id_city, dict_id_insti = self.get_dict_val()
+    formatted_queries = [] # list of dictionaries, id = filter field & value = selected value
+    foss_str,state_str,city_str,institutes_str='','','',''
+    for key in keys:
+      d = {}
+      if isinstance(key,str):
+        fields = key.split(':')
+      elif isinstance(key,Job):
+        fields = key.id.split(':')
+        d['enqueued_at'] = key.enqueued_at
+      else :
+        return formatted_queries
+      foss_ids, state, city, grade, insti, active_status, from_date, to_date = fields
+      if foss_ids : foss_str = ','.join(dict_id_foss.get(int(id)) for id in foss_ids.split(';'))
+      if state : state_str = ','.join(dict_id_state.get(int(id)) for id in state.split(';'))
+      if city : city_str = ','.join(dict_id_city.get(int(id)) for id in city.split(';'))
+      if insti : institutes_str = ','.join(dict_id_insti.get(int(id)) for id in insti.split(';'))
+      
+      d['foss'] = foss_str
+      d['grade'] = grade
+      d['state'] = state_str
+      d['city'] = city_str
+      d['insti'] = institutes_str
+      d['from_date'] = from_date
+      d['to_date'] = to_date
+      formatted_queries.append(d)
+    return formatted_queries
+
+  def get_query_data(self):
+    redis_data=self.get_redis_data()
+    topper_cache_keys=self.get_topper_cache_keys()
+    completed = self.get_formatted_query(topper_cache_keys)
+    pending = self.get_formatted_query(redis_data.get('pending_jobs'))
+    current = self.get_formatted_query([redis_data.get('current_job')])
+
+    return redis_data,topper_cache_keys,completed,pending,current
+
+  def get(self, request, *args, **kwargs):
+    redis_data,topper_cache_keys,completed,pending,current=self.get_query_data()
+    form = StudentGradeFilterForm()
+    return self.render_to_response(self.get_context_data(form=form,redis_data=redis_data,topper_cache_keys=topper_cache_keys,completed=completed,pending=pending,current=current))
+
   def test_func(self):
         return self.request.user.is_superuser or self.request.user.groups.filter(name='HR-Manager').exists()
   
@@ -3413,7 +3507,9 @@ class StudentGradeFilter(UserPassesTestMixin, FormView):
             messages.success(self.request, "We are working on filtering the results for you. Please refresh after some time.")
         else:
           result=filter_student_grades(key)
-    return self.render_to_response(self.get_context_data(form=form, result=result))
+
+    redis_data,topper_cache_keys,completed,pending,current=self.get_query_data()
+    return self.render_to_response(self.get_context_data(form=form, result=result,redis_data=redis_data,topper_cache_keys=topper_cache_keys,completed=completed,pending=pending,current=current))
 
 
 class AcademicKeyCreateView(CreateView):
@@ -3449,5 +3545,3 @@ class AcademicKeyCreateView(CreateView):
 
       messages.success(self.request, "Payment Details for academic is added successfully.")
       return HttpResponseRedirect(self.success_url)
-
-
