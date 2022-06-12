@@ -102,4 +102,4 @@ cron/spoken_search/index
 static/spoken/images/*
 cron/*
 creation/hr-receipts/
-
+*.DS_Store
