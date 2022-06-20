@@ -57,7 +57,7 @@ def bulk_email(taskid, *args, **kwargs):
                 job.save_meta()
                 if len(row) < 1:
                     continue
-                if i%1000 == 0:
+                if i%10 == 0:
                         print('Total ran: ',i)
                         time.sleep(5)
                 email = EmailMultiAlternatives(
