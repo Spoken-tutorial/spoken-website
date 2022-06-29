@@ -1,4 +1,3 @@
-from django.template import context
 from .models import AsyncCronMail
 from django.views.generic import CreateView, FormView
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -132,15 +131,16 @@ def run_cron_worker(request):
     # subprocess.run(["ls"])
     subprocess.run([cron_cmd])
     print('Cron worker started successfully.....')
-    return JsonResponse({'status':False,'success_url':None})
+    return JsonResponse({'status':True})
 
 @csrf_exempt
 @user_passes_test(lambda u: u.is_superuser or u.groups.filter(name='HR').exists())
 def read_cron_logs(request):
-    print("******************* read_cron_logs")
+    print("reading cron_logs ....")
+    base_dir =  getattr(settings, 'BASE_DIR', os.getcwd())
     cron_folder = getattr(settings, 'CRON_LOG_FOLDER', 'cron')
     cron_log_file = getattr(settings, 'CRON_LOG_FILE', 'cron_worker.logs')
-    fille_path = os.path.join(os.getcwd(),cron_folder,cron_log_file)
+    fille_path = os.path.join(base_dir,cron_folder,cron_log_file)
     f = open(fille_path, "r")
     msg = f.read()
     context = {'msg' : msg}
