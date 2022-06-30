@@ -8,6 +8,11 @@
 {% block compresscssblock %}
     <link rel="stylesheet" type="text/css" href="{% static 'DataTables/css/jquery.dataTables.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'DataTables/css/buttons.dataTables.css' %}">
+    <style>
+      #tb_completed, #tb_pending{
+        width: 100%!important;
+      }
+    </style>
 {% endblock %}
 {% block heading %} <i class="fa fa-list-ul"></i> {{ model }} Student Grade Query Filter {% endblock %}
 {% block search %}{% endblock %}
@@ -95,6 +100,126 @@
             </div>
         </form>
         <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#taskModal">Create Mass Mail</button>
+    </div>
+    <div>
+      <button type="button" class="btn btn-default" aria-label="Left Align" id="toggle_status" style="margin-bottom: 6px;;">
+        <span>View / Hide Query Status</span>
+      </button>
+      <div style="padding: 6px; border: 1px solid rgba(0,0,0,0.2);" id="status_view">
+        <p><b>Query Status</b></p>
+        <ul class="nav nav-tabs">
+          <li class="active"><a data-toggle="tab" href="#home">In Progress</a></li>
+          <li><a data-toggle="tab" href="#pending">Pending</a></li>
+          <li><a data-toggle="tab" href="#completed">Completed</a></li>
+        </ul>
+  
+        <div class="tab-content">
+          <div id="home" class="tab-pane fade in active">
+            {% if redis_data.worker_status and not redis_data.worker_status == '?' %}
+            <p><b>Worker status :</b> {{redis_data.worker_status}}
+            {% if redis_data.worker_status == 'idle' %}
+              <p>
+                All queries are completed. (TOPPER_QUEUE is empty)
+              </p>
+            {% endif %}
+  
+            </p>
+            <p><b>Current query requested at :</b> {{redis_data.current_job.enqueued_at}}</p>
+            <table class="table table-bordered table-hover" id="tb_current">
+              <thead>
+                <tr>
+                  <td><b>Foss</b></td>
+                  <td><b>Grade</b></td>
+                  <td><b>State</b></td>
+                  <td><b>City</b></td>
+                  <td><b>Institute Type</b></td>
+                  <td><b>From Date</b></td>
+                  <td><b>To Date</b></td>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in current %}
+                <tr>
+                  <td>{{item.foss}}</td>
+                  <td>{{item.grade}}</td>
+                  <td>{{item.state}}</td>
+                  <td>{{item.city}}</td>
+                  <td>{{item.insti}}</td>
+                  <td>{{item.from_date}}</td>
+                  <td>{{item.to_date}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% else %}
+            <p>Note : Cron worker is not running. Please ask system admin to run cmd - 'python manage.py cron_worker'</p>
+            {% endif %}
+  
+          </div>
+          <div id="pending" class="tab-pane fade">
+            {% if redis_data.worker_status and not redis_data.worker_status == '?' %}
+            <table class="table table-bordered table-hover" id="tb_pending">
+              <thead>
+                <tr>
+                  <td><b>Foss</b></td>
+                  <td><b>Grade</b></td>
+                  <td><b>State</b></td>
+                  <td><b>City</b></td>
+                  <td><b>Institute Type</b></td>
+                  <td><b>From Date</b></td>
+                  <td><b>To Date</b></td>
+                  <td><b>Enqueued at</b></td>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in pending %}
+                <tr>
+                  <td>{{item.foss}}</td>
+                  <td>{{item.grade}}</td>
+                  <td>{{item.state}}</td>
+                  <td>{{item.city}}</td>
+                  <td>{{item.insti}}</td>
+                  <td>{{item.from_date}}</td>
+                  <td>{{item.to_date}}</td>
+                  <td>{{item.enqueued_at}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% else %}
+            <p>Note : Cron worker is not running. Please ask sys admin to run cmd - 'python manage.py cron_worker'</p>
+            {% endif %}
+  
+          </div>
+          <div id="completed" class="tab-pane fade">
+            <table class="table table-bordered table-hover" id="tb_completed">
+              <thead>
+                <tr>
+                  <td><b>Foss</b></td>
+                  <td><b>Grade</b></td>
+                  <td><b>State</b></td>
+                  <td><b>City</b></td>
+                  <td><b>Institute Type</b></td>
+                  <td><b>From Date</b></td>
+                  <td><b>To Date</b></td>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in completed %}
+                <tr>
+                  <td>{{item.foss}}</td>
+                  <td>{{item.grade}}</td>
+                  <td>{{item.state}}</td>
+                  <td>{{item.city}}</td>
+                  <td>{{item.insti}}</td>
+                  <td>{{item.from_date}}</td>
+                  <td>{{item.to_date}}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
     </div>
     <!-- big chart -->
     <div id="inline" style="height: 100%; width: 100%;">
@@ -198,6 +323,8 @@
 <script type="text/javascript" >
 
       $(document).ready( function () {
+        $('#tb_completed').DataTable();
+          $('#tb_pending').DataTable();
         $('#id_student_grade_table').DataTable( {
         dom: 'Bfrtip',
         buttons: [
@@ -222,7 +349,9 @@
 
 
 
-
+        $("#toggle_status").click(function(){
+        $("#status_view").toggle();
+      });
       function send_mass_mail(event) {
         event.preventDefault()
         table = $('#id_student_grade_table').DataTable()
