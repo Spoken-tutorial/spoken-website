@@ -6,7 +6,7 @@ import collections
 
 def get_data_for_brochure_display():
     # my code starts here
-    categories = FossSuperCategory.objects.order_by('name')
+    categories = FossSuperCategory.objects.filter(part_of_recsys=False).order_by('name')
     data_dict = collections.OrderedDict()
 
     for category in categories:

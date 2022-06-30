@@ -61,6 +61,9 @@ class FossSuperCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    specialisation = models.CharField(max_length=255, default='Programming Language')
+    # Some of the Fosses are part of Recommendation System
+    part_of_recsys = models.BooleanField(max_length=2, default=False)
 
     class Meta(object):
         verbose_name = 'FOSS Category'
