@@ -15,7 +15,10 @@ import uuid
 from django.http import HttpResponse, JsonResponse
 import datetime as dt
 from config import WORKER_STATUS,WORKER_TIME
-
+import subprocess
+from django.conf import settings
+from django.shortcuts import render
+import os
 class AsyncCronMailListCreateView(UserPassesTestMixin, CreateView):
     template_name = 'cron/cron_mail_list_create.html'
     model = AsyncCronMail
@@ -120,3 +123,25 @@ def upload_task(request):
             except:
                 return JsonResponse({'status':False,'success_url':None})
     return JsonResponse({'status':False,'success_url':None})
+
+@csrf_exempt
+def run_cron_worker(request):
+    print('Running cron command.....')
+    cron_cmd = getattr(settings, 'RUN_CRON_WORKER', '/bin/sudo /usr/bin/systemctl restart cron_mailer.service')
+    # subprocess.run(["ls"])
+    subprocess.run([cron_cmd])
+    print('Cron worker started successfully.....')
+    return JsonResponse({'status':True})
+
+@csrf_exempt
+@user_passes_test(lambda u: u.is_superuser or u.groups.filter(name='HR').exists())
+def read_cron_logs(request):
+    print("reading cron_logs ....")
+    base_dir =  getattr(settings, 'BASE_DIR', os.getcwd())
+    cron_folder = getattr(settings, 'CRON_LOG_FOLDER', 'cron')
+    cron_log_file = getattr(settings, 'CRON_LOG_FILE', 'cron_worker.logs')
+    fille_path = os.path.join(base_dir,cron_folder,cron_log_file)
+    f = open(fille_path, "r")
+    msg = f.read()
+    context = {'msg' : msg}
+    return render(request,'cron/cron_logs.html', context)
