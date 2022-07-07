@@ -102,6 +102,9 @@
         <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#taskModal">Create Mass Mail</button>
     </div>
     <div>
+      <button type="button" class="btn btn-default" aria-label="Left Align" id="btn_cron_worker" style="margin-bottom: 6px;;">
+        <span>Start Cron Worker</span>
+      </button>
       <button type="button" class="btn btn-default" aria-label="Left Align" id="toggle_status" style="margin-bottom: 6px;;">
         <span>View / Hide Query Status</span>
       </button>
@@ -347,7 +350,15 @@
 
         } );
 
+        $("#btn_cron_worker").click(function(){
+          alert('Restart Cron Worker ?');
+          fetch('/cron/run_cron_worker/').then(response => {
+            alert('Cron worker restarted');
+            }).catch(error => {
+              alert('Failed to restart cron worker');
+            });
 
+        });
 
         $("#toggle_status").click(function(){
         $("#status_view").toggle();
