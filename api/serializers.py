@@ -105,12 +105,19 @@ class RelianceJioLanguageSerializer(serializers.Serializer):
 class RelianceJioCategorySerializer(serializers.Serializer):
     category = serializers.SerializerMethodField()
     lists = serializers.SerializerMethodField()
-
+    supercategory = serializers.SerializerMethodField()
+    hitcount = serializers.SerializerMethodField()
     def get_category(self, obj):
         return self.context.get('category')
     
     def get_lists(self, obj):
         return self.context.get('lists')
+
+    def get_supercategory(self, obj):
+        return self.context.get('supercategory')
+
+    def get_hitcount(self,obj):
+        return self.context.get('hitcount')
 
 class RelianceJioSerializer(serializers.Serializer):
     spokentutorials = serializers.SerializerMethodField()

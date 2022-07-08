@@ -16,5 +16,7 @@ urlpatterns = [
     url(r'^script/foss_lang/$', get_all_foss_langauges, name='script_foss_lang'),
     url(r'^script/tutorials/(?P<fid>[0-9]+)/(?P<lid>[0-9]+)/$', get_all_tutorials, name='script_foss_lang'),
     url(r'^script/roles/(?P<fid>[0-9]+)/(?P<lid>[0-9]+)/(?P<username>[\w\-]+)/$', get_foss_roles, name='script_foss_roles'),
-    url(r'^script/tutorial_detail/(?P<fid>[0-9]+)/(?P<lid>[0-9]+)/(?P<tid>[0-9]+)/$', get_tutorial_detail, name='script_tutorial_detail')
+    url(r'^script/tutorial_detail/(?P<fid>[0-9]+)/(?P<lid>[0-9]+)/(?P<tid>[0-9]+)/$', get_tutorial_detail, name='script_tutorial_detail'),
+    url(r'^get_users_progress/$', get_users_progress, name='get_users_progress'),
+    url(r'^get_top_tuts_foss/$', get_top_tuts_foss, name='get_top_tuts_foss'),
 ]

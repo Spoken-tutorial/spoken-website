@@ -10,20 +10,29 @@ from api.serializers import VideoSerializer, CategorySerializer, FossSerializer,
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, Q
 import json
+import re
 from django.conf import settings
+from django.db.models import Avg, Count, Min, Sum, Max
 from creation.views import get_video_info
 import math
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
-from spoken.config import FOSS_API_LIST
+from spoken.config import FOSS_API_LIST, SUPERCATEGORY_COL_NAME
 from django.core.cache import cache
 from creation.templatetags.creationdata import instruction_sheet, installation_sheet, get_prerequisite
 from rest_framework import status
 from forums.models import Question
 from rest_framework.decorators import api_view
+from collections import OrderedDict
 from creation.models import ContributorRole, DomainReviewerRole, QualityReviewerRole
+import pymongo
+from django.contrib.auth.models import User
+from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
+ MONGO_HOST, MONGO_DB
+from .additional_learning import *
+
 @csrf_exempt
 def video_list(request):
     """
@@ -206,16 +215,26 @@ class RelianceJioAPI(APIView):
             lang_en='English'
             languages = Language.objects.all().exclude(name=lang_en)
             for f in foss:
+                tr_sum_en = 0
+                tr_sum_l = 0
                 f = FossCategory.objects.get(pk=f)
                 tr_en = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language__name=lang_en)
+                tr_sum_en = tr_en.aggregate(total_count=Sum('hit_count'))['total_count']
                 lists.append(self.get_foss_serialized(request, tr_en, lang_en))
                 for l in languages:
                     tr = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language=l)
                     if tr.count() == tr_en.count():
+                        tr_sum_l += tr.aggregate(total_count=Sum('hit_count'))['total_count']
                         lists.append(self.get_foss_serialized(request, tr, l.name))
                     else:
                         continue
-                category_serializer = RelianceJioCategorySerializer(tr_en, context={'category':f.foss, 'lists': lists})
+                # use 'specialisation' instead of 'name' when this data is set from admin
+                category_serializer = RelianceJioCategorySerializer(tr_en,
+                    context={
+                    'category':f.foss, 'supercategory':f.category.values(
+                        SUPERCATEGORY_COL_NAME)[0][SUPERCATEGORY_COL_NAME],
+                    'lists': lists,
+                    'hitcount' : tr_sum_en + tr_sum_l})
                 lists = []
                 category_list.append(category_serializer.data)
             serializer = RelianceJioSerializer(tr_en, context={'spokentutorials' : category_list})
@@ -259,6 +278,8 @@ class TutorialResourceAPI(APIView):
                 context['timed_script'] = "https://script.spoken-tutorial.org/index.php/" + tr.timed_script if tr.timed_script else None
                 context['srt_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/" + tr.tutorial_detail.tutorial.replace(' ', '-') + "-" + tr.language.name + ".srt")
                 context['additional_resource'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.additional_material) if tr.common_content.additional_material_status == 4 else None
+                # alm - additional learning material
+                context['additional_learning'] = alm(tr)
                 questions = Question.objects.filter(category=tr.tutorial_detail.foss.foss.replace(' ', '-'), tutorial=tr.tutorial_detail.tutorial.replace(' ', '-')).order_by('-date_created')
                 questions_filtered = []
                 for q in questions:
@@ -315,3 +336,61 @@ def get_tutorial_detail(request, fid, lid, tid):
     lang = Language.objects.get(pk=lid)
     context = {'spokentutorials':{'foss':tutorial.foss.foss,'language':lang.name ,'tutorial':tdata}}
     return Response(context, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_users_progress(request):
+    context = {}
+    myclient =  pymongo.MongoClient(
+        "mongodb://"+MONGO_USER+':'+MONGO_PASS+'@'+MONGO_HOST+':'+MONGO_PORT+\
+        '/?authSource='+MONGO_DB)
+    mydb = myclient[MONGO_DB]
+    userlogs = mydb.list_collections()
+    for collection in userlogs:
+        x = mydb[collection['name']].find({})
+        try:
+            user = User.objects.get(
+                Q(username=collection['name'])|Q(email=collection['name']))
+            temp = set()
+            for data in x:
+                fossid = None
+                tutid = None
+                lang = ''
+                time = 0.0
+                for key,value in data.items():
+                    if 'url' in key:
+                        if 'http' in value[0] and 'video' in value[0]:
+                            fossid, tutid, lang = value[0].split('videos/')[1].split('/')
+                            lang = lang.split('.ogv')[0].split('-')[-1]
+                    if 'videotime' in key and '.' in value[0] :
+                        time = float(value[0])
+                if tutid:
+                    obj = TutorialResource.objects.filter(tutorial_detail_id = int(tutid))[0]
+                    td = TutorialDetail.objects.filter(foss=obj.tutorial_detail.foss)
+                    video_path = settings.MEDIA_ROOT+'videos/'+str(obj.tutorial_detail.foss.pk)+'/'+\
+                    str(obj.tutorial_detail.pk)+'/'+obj.video
+                    video_info = get_video_info(video_path)
+                    temp.add((obj.tutorial_detail.foss.foss,obj.tutorial_detail.tutorial,
+                        lang, time,video_info['duration'],td.count(),user.email))
+            if temp:
+                context[collection['name']] = list(temp)
+        except:
+            print('Invalid User',collection['name'])
+    return JsonResponse(context, safe=False)
+
+
+@api_view(['GET'])
+def get_top_tuts_foss(request):
+    context = {}
+    foss = FossCategory.objects.filter(available_for_jio=1)
+    top_foss = []
+    for foss in foss:
+        top_foss.append([foss.foss,TutorialResource.objects.filter(
+            tutorial_detail__foss__foss=foss).aggregate(
+            total_hit=Sum('hit_count'))['total_hit']])
+    top_foss.sort(key = lambda x : x[1],reverse= True)
+    context['top_foss'] = list(top_foss)
+    top_tutorials =  TutorialResource.objects.filter(
+        hit_count__gt = 1000).order_by('-hit_count').values_list(
+        'tutorial_detail__foss__foss','tutorial_detail__tutorial','hit_count')
+    context['top_tutorials'] = list(top_tutorials)
+    return JsonResponse(json.dumps(context),safe=False)
