@@ -793,7 +793,7 @@ class TrainingPlanner(models.Model):
     if self.training_requests().filter(
       department_id=department_id,
       batch_id=batch_id
-    ).count() > 11:
+    ).count() > 4:
       return True
     return False
 

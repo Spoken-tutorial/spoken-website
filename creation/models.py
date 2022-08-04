@@ -87,7 +87,8 @@ class FossCategory(models.Model):
     updated = models.DateTimeField(auto_now=True)
     show_on_homepage = models.PositiveSmallIntegerField(default=0, help_text ='0:Series, 1:Display on home page, 2:Archived')
     available_for_nasscom = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for nasscom' )
-    available_for_jio = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for jio and spoken-tutorial.in' )
+    available_for_jio = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for jio, csc and spoken-tutorial.in' )
+    csc_dca_programme = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for csc-dca programme' )
 
     class Meta(object):
         verbose_name = 'FOSS'
