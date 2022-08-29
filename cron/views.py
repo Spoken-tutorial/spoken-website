@@ -128,8 +128,14 @@ def upload_task(request):
 def run_cron_worker(request):
     print('Running cron command.....')
     cron_cmd = getattr(settings, 'RUN_CRON_WORKER', '/bin/sudo /usr/bin/systemctl restart cron_mailer.service')
-    # subprocess.run(["ls"])
-    subprocess.run([cron_cmd])
+    print(f"cron_cmd ".ljust(20,'*')+f"{cron_cmd}")
+    try:
+        print(f"starting subprocess ....".ljust(20,'*'))
+        subprocess.run(cron_cmd,shell=True)
+    except Exception as e:
+        print(f"Exception raised while running subprocess ....".ljust(20,'*'))
+        print(f"Exception :: {e}")
+        return JsonResponse({'status':False})
     print('Cron worker started successfully.....')
     return JsonResponse({'status':True})
 
