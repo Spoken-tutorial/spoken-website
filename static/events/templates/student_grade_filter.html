@@ -353,9 +353,20 @@
         $("#btn_cron_worker").click(function(){
           alert('Restart Cron Worker ?');
           fetch('/cron/run_cron_worker/').then(response => {
-            alert('Cron worker restarted');
+            console.log(response.text);
+            
+            return response.json()
+            }).then(data => {
+              console.log(data);
+              if(data['status']==true){
+                alert('1Cron worker restarted');
+              }else{
+                alert('Failed to restart cron worker');
+              }
             }).catch(error => {
-              alert('Failed to restart cron worker');
+              alert('Failed to restart cron worker.');
+              console.log(error)
+
             });
 
         });
