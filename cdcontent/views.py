@@ -83,7 +83,6 @@ def get_all_foss_details(selectedfoss):
         for value in values[0]:
             language = Language.objects.get(pk=value)
             all_foss_details[foss_rec.id]['langs'][language.id] = language.name
-
     return all_foss_details
 
 
@@ -259,7 +258,6 @@ def internal_computation(request, user_type):
 
         if level:
             t_resource_qs = t_resource_qs.filter(tutorial_detail__level_id=level)
-
         for value in values[0]:
             language = Language.objects.get(pk=value)
             add_sheets(archive, foss_rec, language)
@@ -544,19 +542,34 @@ def get_user_type(request):
         try:
             AcademicKey.objects.get(academic_id=request.user.organiser.academic_id, expiry_date__gte=date.today())
             return classification['registered_paid']
-        except :
+        except AcademicKey.DoesNotExist:
             user_type = classification['registered_not_paid']
+        except AcademicKey.MultipleObjectsReturned:
+            return classification['registered_paid']
+        except:
+            user_type = classification['registered_not_paid']
+
+
 
         try:
             AcademicKey.objects.get(academic_id=request.user.invigilator.academic_id, expiry_date__gte=date.today())
             return classification['registered_paid']
-        except :
+        except AcademicKey.DoesNotExist:
             user_type = classification['registered_not_paid']
+        except AcademicKey.MultipleObjectsReturned:
+            return classification['registered_paid']
+        except:
+            user_type = classification['registered_not_paid']
+        
 
         try:
             AcademicKey.objects.get(academic_id=request.user.student.academic_id, expiry_date__gte=date.today())
             return classification['registered_paid']
-        except :
+        except AcademicKey.DoesNotExist:
+            user_type = classification['registered_not_paid']
+        except AcademicKey.MultipleObjectsReturned:
+            return classification['registered_paid']
+        except:
             user_type = classification['registered_not_paid']
         return user_type
     else:
