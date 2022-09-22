@@ -2380,6 +2380,7 @@ def test_participant_ceritificate_all(request, testid):
     for ta in testattendances: 
         try:
             mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = ta.mdluser_id)
+            mdluser = MdlUser.objects.get(id=ta.mdluser_id)
         except:
             continue
         if ta.status < 1 or round(mdlgrade.grade, 1) < 40:
@@ -2998,7 +2999,7 @@ def test(request):
         print((academic.institution_name, " => ", academic.institution_type))
         academic.institution_type = InstituteType.objects.get(name='Engineering')
         academic.save()
-    return HttpResponsei("Done!")
+    return HttpResponse("Done!")
 
 @csrf_exempt
 def ajax_check_foss(request):
