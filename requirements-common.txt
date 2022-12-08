@@ -6,7 +6,7 @@ simplejson==3.6.5
 beautifulsoup4==4.6.3
 cachetools==2.1.0
 captcha==0.2.4
-certifi==2018.8.24
+certifi==2022.12.7
 chardet==3.0.4
 Django==1.11
 django-appconf==1.0.2
