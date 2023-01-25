@@ -99,6 +99,9 @@ class ILWFossMdlCourses(models.Model):
 	mdlcourse_id = models.PositiveIntegerField()
 	mdlquiz_id = models.PositiveIntegerField()
 	testfoss = models.ForeignKey(FossCategory, on_delete=models.PROTECT, related_name='testfoss', null=True)
+	class Meta(object):
+        ordering = ('foss', )
+
 
 	def __str__(self):
 		return self.foss.foss
