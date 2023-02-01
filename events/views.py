@@ -2265,6 +2265,7 @@ def test_participant_ceritificate(request, wid, participant_id):
             mdluser = MdlUser.objects.get(id = participant_id)
             ta = TestAttendance.objects.get(test_id = w.id, mdluser_id = participant_id)
             mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = participant_id)
+            print(w.foss.credits,"#########################&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
             if ta.status < 1 or round(mdlgrade.grade, 1) < 40 or not w.invigilator:
                 raise PermissionDenied()
 
@@ -2306,6 +2307,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     # Draw image on Canvas and save PDF in buffer
     imgPath = settings.MEDIA_ROOT +"sign.jpg"
     imgDoc.drawImage(imgPath, 600, 95, 150, 76)    ## at (399,760) with size 160x160
+    credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
     #paragraphe
     if ta.test.training.department.id == 169:
@@ -2313,20 +2315,21 @@ def test_participant_ceritificate(request, wid, participant_id):
     elif ta.test.academic.institution_type_id == 18:
         text = "This is to certify that <b><u>"+mdluser.firstname +" "+mdluser.lastname+"</u></b>  has successfully completed <b>"+w.foss.foss+"</b> test organized at "+w.academic.institution_name+" by <u>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</u> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <u>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</u> at "+w.academic.institution_name+" invigilated this examination.<br/>This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, Ministry of Education, Govt., of India."
     else:
-        text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay.</p>"
+        text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay.</p><br /><br />"+credits
 
     centered = ParagraphStyle(name = 'centered',
         fontSize = 15,
         leading = 24,
-        alignment = 0,
+        alignment = 1,
         spaceAfter = 20)
 
     p = Paragraph(text, centered)
     p.wrap(700, 200)
-    p.drawOn(imgDoc, 3 * cm, 7 * cm)
+    p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
+
 
     #paragraphe
-    text = "Certificate for Completion of <br/>"+w.foss.foss+" Training"
+    text = "Certificate for the Completion of <br/>"+w.foss.foss+" Training"
 
     centered = ParagraphStyle(name = 'centered',
         fontSize = 25,
@@ -2335,8 +2338,8 @@ def test_participant_ceritificate(request, wid, participant_id):
         spaceAfter = 15)
 
     p = Paragraph(text, centered)
-    p.wrap(400,30)
-    p.drawOn(imgDoc, 6.2 * cm, 15.5 * cm)
+    p.wrap(500,20)
+    p.drawOn(imgDoc, 6.2 * cm, 17 * cm)
 
 
     imgDoc.save()
@@ -2415,23 +2418,39 @@ def test_participant_ceritificate_all(request, testid):
         imgPath = settings.MEDIA_ROOT +"sign.jpg"
         imgDoc.drawImage(imgPath, 600, 95, 150, 76)    ## at (399,760) with size 160x160
 
+        credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
+
         #paragraphe
         if ta.test.training.department.id == 169:
             text = " This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b>  has successfully completed <b>"+w.foss.foss+"</b> test on <b>"+str(w.tdate)+"</b> organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay."
         elif ta.test.academic.institution_type_id == 18:
             text = "This is to certify that <b><u>"+mdluser.firstname +" "+mdluser.lastname+"</u></b>  has successfully completed <b>"+w.foss.foss+"</b> test organized at "+w.academic.institution_name+" by <u>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</u> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <u>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</u> at "+w.academic.institution_name+" invigilated this examination.<br/>This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, Ministry of Education, Govt., of India."
         else:
-            text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay.</p>"
+            text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay.</p><br /><br />"+credits
 
         centered = ParagraphStyle(name = 'centered',
             fontSize = 15,
             leading = 24,
-            alignment = 0,
+            alignment = 1,
             spaceAfter = 20)
 
         p = Paragraph(text, centered)
         p.wrap(700, 200)
-        p.drawOn(imgDoc, 3 * cm, 7 * cm)
+        p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
+
+
+
+        credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
+        centered = ParagraphStyle(name = 'centered',
+            fontSize = 15,
+            leading = 24,
+            alignment = 1,
+            spaceAfter = 20)
+
+        p = Paragraph(credits, centered)
+        p.wrap(700, 200)
+        p.drawOn(imgDoc, 2 * cm, 6 * cm)
+
 
         #paragraphe
         text = "Certificate for Completion of <br/>"+w.foss.foss+" Training"
@@ -2443,8 +2462,9 @@ def test_participant_ceritificate_all(request, testid):
             spaceAfter = 15)
 
         p = Paragraph(text, centered)
-        p.wrap(400,30)
-        p.drawOn(imgDoc, 6.2 * cm, 15.5 * cm)
+        p.wrap(500,20)
+        p.drawOn(imgDoc, 6.2 * cm, 17 * cm)
+
 
 
         imgDoc.save()
