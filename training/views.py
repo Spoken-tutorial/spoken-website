@@ -1052,10 +1052,12 @@ class ILWTestCertificate(object):
     imgPath = settings.MEDIA_ROOT +"sign.jpg"
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
+    credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
+
     #paragraphe
     text = "This is to certify that <b>"+participantname +"</b> successfully passed a \
     <b>"+teststatus.fossid.foss+"</b> test, remotely conducted by the Spoken Tutorial project, IIT Bombay, under an honour invigilation system.\
-    <br /> Self learning through Spoken Tutorials and passing an online test completes the training programme."
+    <br /> Self learning through Spoken Tutorials and passing an online test completes the training programme.<br />"+credits
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -1064,7 +1066,8 @@ class ILWTestCertificate(object):
       spaceAfter = 20
     )
 
-    p = Paragraph(text, centered)
+    p = Paragraph(text, centered)						
+
     p.wrap(650, 200)
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
