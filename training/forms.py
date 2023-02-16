@@ -8,7 +8,11 @@ from training.models import *
 from .validators import validate_csv_file
 
 class CreateTrainingEventForm(forms.ModelForm):
-    foss = forms.ModelChoiceField(empty_label='---------', queryset=FossCategory.objects.filter(show_on_homepage=1))
+    courses = FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id'))
+
+
+    foss = forms.ModelChoiceField(empty_label='---------', queryset=courses)
+
     event_coordinator_email = forms.CharField(required = False)
     event_coordinator_contact_no = forms.CharField(required = False)
     class Meta(object):
