@@ -89,7 +89,8 @@ class FossCategory(models.Model):
     available_for_nasscom = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for nasscom' )
     available_for_jio = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for jio, csc and spoken-tutorial.in' )
     csc_dca_programme = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for csc-dca programme' )
-    credits = models.PositiveSmallIntegerField(default=0) 
+    credits = models.PositiveSmallIntegerField(default=0)
+    is_fossee = models.BooleanField(verbose_name="Added by FOSSEE", default=False)
     class Meta(object):
         verbose_name = 'FOSS'
         verbose_name_plural = 'FOSSes'
