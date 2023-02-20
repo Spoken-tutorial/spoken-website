@@ -219,16 +219,19 @@ class RelianceJioAPI(APIView):
                 tr_sum_l = 0
                 f = FossCategory.objects.get(pk=f)
                 tr_en = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language__name=lang_en)
-                tr_sum_en = tr_en.aggregate(total_count=Sum('hit_count'))['total_count']
+                if tr_en:
+                    tr_sum_en = tr_en.aggregate(total_count=Sum('hit_count'))['total_count']
                 lists.append(self.get_foss_serialized(request, tr_en, lang_en))
                 for l in languages:
                     tr = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language=l)
                     if tr.count() == tr_en.count():
-                        tr_sum_l += tr.aggregate(total_count=Sum('hit_count'))['total_count']
+                        if tr:
+                            tr_sum_l += tr.aggregate(total_count=Sum('hit_count'))['total_count']
                         lists.append(self.get_foss_serialized(request, tr, l.name))
                     else:
                         continue
                 # use 'specialisation' instead of 'name' when this data is set from admin
+                
                 category_serializer = RelianceJioCategorySerializer(tr_en,
                     context={
                     'category':f.foss, 'supercategory':f.category.values(
