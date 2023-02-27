@@ -880,3 +880,7 @@ def saveVideoData(request):
     #         x = mycol.insert_one(data)
     #     return HttpResponse("Unregistered User Logs Added")
     return HttpResponse("User not registered. No Logs Added")
+
+def bookfair(request):
+    context = {}
+    return render(request, 'spoken/templates/nep_bookfair.html',context)
