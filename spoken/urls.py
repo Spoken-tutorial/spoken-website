@@ -135,5 +135,7 @@ urlpatterns = [
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
     
-
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    #nep book fiar
+    url(r'wbf-book-fair-2023', bookfair,name="bookfair"),
+    
+] + static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
