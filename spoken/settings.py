@@ -329,7 +329,7 @@ CHANNEL_KEY = CHANNEL_KEY
 RECAPTCHA_USE_SSL = True
 ACADEMIC_DURATION = 5
 SPOKEN_HASH_SALT = 'change this value'
-
+PASS_GRADE = PASS_GRADE
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
