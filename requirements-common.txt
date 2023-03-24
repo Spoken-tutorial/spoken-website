@@ -19,7 +19,7 @@ django-masquerade==1.3
 django-picklefield==1.1.0
 django-report-builder==6.2.2
 django-widget-tweaks==1.4.3
-djangorestframework==3.8.2
+djangorestframework==3.11.2
 et-xmlfile==1.0.1
 google-api-python-client==1.7.4
 google-auth==1.5.1
