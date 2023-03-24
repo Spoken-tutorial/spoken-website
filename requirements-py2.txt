@@ -16,4 +16,4 @@ pyflakes==1.6.0
 PyJWT==1.6.4
 requests==2.19.1
 singledispatch==3.4.0.3
-urllib3==1.23
+urllib3==1.26.5
