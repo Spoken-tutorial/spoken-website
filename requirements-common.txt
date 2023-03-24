@@ -43,7 +43,7 @@ python-dateutil==2.7.3
 pytz==2018.5
 rcssmin==1.0.6
 reportlab==3.5.9
-requests==2.19.1
+requests==2.28.2
 rjsmin==1.0.12
 rsa==4.7
 six==1.11.0
