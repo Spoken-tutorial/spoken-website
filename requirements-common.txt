@@ -42,7 +42,7 @@ PyPDF2==1.27.5
 python-dateutil==2.7.3
 pytz==2018.5
 rcssmin==1.0.6
-reportlab==3.5.9
+reportlab==3.5.55
 requests==2.19.1
 rjsmin==1.0.12
 rsa==4.7
