@@ -1,7 +1,7 @@
 backports-abc==0.5
 BeautifulSoup==3.2.1
 beautifulsoup4==4.3.2
-certifi==2018.4.16
+certifi==2022.12.7
 configparser==3.5.0
 enum34==1.1.6
 flake8==3.5.0
@@ -16,4 +16,4 @@ pyflakes==1.6.0
 PyJWT==1.6.4
 requests==2.19.1
 singledispatch==3.4.0.3
-urllib3==1.23
+urllib3==1.26.5

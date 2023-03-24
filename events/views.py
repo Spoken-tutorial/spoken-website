@@ -286,7 +286,7 @@ def add_participant(request, cid, category ):
                 wa.firstname = mdluser.firstname
                 wa.lastname = mdluser.lastname
                 wa.email = mdluser.email
-                wa.gender = mdluser.gender
+                # wa.gender = mdluser.gender
                 wa.status = 0
                 wa.save()
                 messages.success(request, "User has added in the attendance list")

@@ -26,8 +26,6 @@ def get_moodle_user(academic_id, firstname, lastname, gender, email):
             mdluser.firstname = firstname
         if not mdluser.lastname == lastname:
             mdluser.lastname = lastname
-        if not mdluser.gender == gender:
-            mdluser.gender = gender
         if not mdluser.username == email:
             mdluser.username = email
         """password = encript_password(firstname)
@@ -46,7 +44,6 @@ def get_moodle_user(academic_id, firstname, lastname, gender, email):
         mdluser.email = email
         mdluser.confirmed = 1
         mdluser.mnethostid = 1
-        mdluser.gender = gender
         mdluser.save()
         mdluser = MdlUser.objects.filter(email = email, firstname= firstname, username=username, password=password).first()
 
