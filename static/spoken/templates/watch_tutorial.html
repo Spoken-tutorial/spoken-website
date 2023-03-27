@@ -3,6 +3,7 @@
 {% load static %}
 {% load creationdata %}
 {% load announcements %}
+{% load cmsdata %}
 {% block main_meta %}
     <meta name="title" content="{{ tr_rec.tutorial_detail.tutorial }} - {{ tr_rec.language.name }}">
     <meta name="description" content="{{ tr_rec.tutorial_detail.foss.description }}">
@@ -278,8 +279,9 @@
 {% block content %}
     {% if tr_rec.video_status %}
     <row>
+        {% if not is_valid_user_for_tut %} <div class="bg-danger" style="padding:12px;margin-bottom:12px;">Please enroll to gain access to the full video and its resources.</div>{% endif %}
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
-            <div class="video-container col-lg-8 col-md-8 col-sm-8">
+            <div class="video-container col-lg-8 col-md-8 col-sm-8 {% if not is_valid_user_for_tut %}invalid_user{% endif %}" >
                         <video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
                             <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
 			    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/ogg" />
@@ -371,6 +373,7 @@
 <script type="text/javascript">
     jQuery(document).ready(function ($) {
        $("#tabs").tab();
+       
     });
 </script> 
 </div> <!-- container -->
@@ -409,8 +412,6 @@
                 </ol>
                 <hr class="hline" />
                 <pre class="custom-jumbotron"><h3><b>Outline:</b></h3><p>{{ tr_rec.outline }}</p></pre>
-            
-
             </div>
         </div>
         <div class="col-lg-4 col-md-4 col-sm-4 no-padding right-bar">
@@ -430,6 +431,7 @@
                     </div>
                     <p class="video-show-more no-record">Show video info</p>
                 </div>
+                
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <p class="panel-body-heading"><i class="fa fa-youtube-play fa-1"></i> Pre-requisite</p>
@@ -451,14 +453,14 @@
                 <div class="list-group">
                     {% if tr_rec.common_content.assignment_status and tr_rec.common_content.assignment_status != 6 %}
                         <div  class="list-group-item-container">
-                            <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.assignment }}" target="_blank" class="list-group-item">
+                            <a {% if is_valid_user_for_tut %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.assignment }}"{% else %}href="#"{% endif %} target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-file-text"></i>&nbsp; Assignment</h4>
                             </a>
                         </div>
                     {% endif %}
                     {% if tr_rec.common_content.code_status and tr_rec.common_content.code_status != 6 %}
                         <div  class="list-group-item-container">
-                            <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.code }}" target="_blank" class="list-group-item">
+                            <a {% if is_valid_user_for_tut %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.code }}"{% else %}href="#"{% endif %} target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-archive"></i> Code files</h4>
                                 {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.code %}
                                     {% with code_files=path|get_zip_content %}
@@ -477,7 +479,7 @@
                     {% endif %}
                     {% if tr_rec.script_status %}
                         <div class="list-group-item-container">
-                            <a href="{{ script_base|add:tr_rec.script }}" target="_blank" class="list-group-item">
+                            <a {% if is_valid_user_for_tut %}href="{{ script_base|add:tr_rec.script }}"{% else %}href="#"{% endif %} target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> Script</h4>
                             </a>
                         </div>
@@ -485,7 +487,7 @@
                             {% with timed_script=tr_rec.script|get_timed_script:tr_rec.timed_script %}
                                 {% if timed_script %}
                                     <div class="list-group-item-container">
-                                        <a href="{{ timed_script }}" target="_blank" class="list-group-item">
+                                        <a {% if is_valid_user_for_tut %}href="{{ timed_script }}"{% else %}href="#"{% endif %} target="_blank" class="list-group-item">
                                             <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> Timed Script</h4>
                                         </a>
                                     </div>
@@ -495,7 +497,7 @@
                     {% endif %}
                     {% if tr_rec.common_content.slide_status and tr_rec.common_content.slide_status != 6 %}
                         <div class="list-group-item-container">
-                            <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}" target="_blank" class="list-group-item">
+                            <a  {% if is_valid_user_for_tut %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}"{% else %}href="#"{% endif %} target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-archive"></i> Slides</h4>
                                 {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.slide %}
                                     {% with slide_files=path|get_zip_content %}
@@ -514,12 +516,13 @@
                     {% endif %}
                     {% if tr_rec.common_content.additional_material_status and tr_rec.common_content.additional_material_status != 6 %}
                         <div  class="list-group-item-container">
-                            <a href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.additional_material }}" target="_blank" class="list-group-item">
+                            <a {% if is_valid_user_for_tut %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.additional_material }}"{% else %}href="#"{% endif%} target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-file-text"></i>&nbsp; Additional reading material</h4>
                             </a>
                         </div>
                     {% endif %}
                 </div>
+                
             </div>
         </div>
     </row>
@@ -555,7 +558,25 @@
 {% block compressinlinejsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
+            
+            //const vid_element = document.querySelector('.valid_user');
+            const videoElement = document.querySelector('div.invalid_user video');
 
+            if(videoElement){
+                console.log("Invalid Video");
+                console.log(videoElement);
+                videoElement.addEventListener('timeupdate', () => {
+                    // Check if the video has played for more than 10 seconds
+                    if (videoElement.currentTime > 15) {
+                        // Pause the video
+                        videoElement.currentTime = 0;
+                        videoElement.pause();
+                    }
+                    });
+            }else{
+                // Add an event listener for the 'timeupdate' event
+                console.log("Valid Video");
+            }
             currentVideo = $('.playlist-item.active');
             nextVideo = currentVideo.next('li');
             prevVideo = currentVideo.prev('li');
@@ -589,6 +610,25 @@
                 $(this).text( $(this).text() == 'Show video info' ? "Hide video info" : "Show video info");
             });
         });
+
+        // Get a reference to the video element
+        {% comment %} const video = document.getElementById('st_video');
+        const video1 = document.getElementById('st_video_html5_api');
+        
+        video1.addEventListener('timeupdate', function() {
+            console.log('2');
+          if (video1.currentTime >= 5) {
+            setTimeout(function() {
+                
+                console.log('Video 2 has been playing for 5 seconds');
+                video1.currentTime = 0; // Set the starting time to 15 seconds
+            }, 0);
+          }
+        }); {% endcomment %}
+        
+        
+  
+
     </script>
 
     <script>
@@ -782,13 +822,6 @@ if ({{ perform_analysis }} ){
            
         });
 
-
-    //var title = $('#text').html("Post your Question on the Forum");
-       // $("#text").click(function(e){
-     // e.preventDefault();
-         // alert(logDuration());
-            //title.html('new title'+logDuration());
-       // });
         }
 
       function trigger(cur_time, duration){

@@ -282,8 +282,36 @@ def archived_tutorial_search(request):
     context['current_foss'] = foss_get
     return render(request, 'spoken/templates/archived_tutorial_search.html', context)
 
+def is_valid_user(user,foss,lang):
+    allowed_internal_roles = [1,4,5,6,7,8,9,10,15,20] #IDs of auth_group  
+    # 1: Resource Person, 4:Contributor, 5:External-Contributor, 6: Video-Reviewer, 7:Domain-Reviewer, 8: Quality-Reviewer
+    # 9: Administrator, 10:Event Manager, 15:Content-Editor, 20:Forums-Admin
+    foss = FossCategory.objects.get(foss=foss)
+    if foss.is_fossee:
+        return True
+    if isinstance(user,User):
+        groups = user.groups.all().values_list('id',flat=True)
+        allowed_grps = set(allowed_internal_roles).intersection(set(groups))
+        if allowed_grps:
+            return True
+        try:
+            ut = UserType.objects.get(user=user)
+            subs = ut.subscription
+            ilw = ut.ilw
+            foss = str(FossCategory.objects.get(foss=foss).id)
+            lang = Language.objects.get(name=lang).id
+            if subs:
+                if datetime.date.today() <= subs:
+                    return True
+            if ilw:
+                if foss in ilw and lang in ilw.get(foss, []):
+                    return True
+        except UserType.DoesNotExist:
+            return False
+    return False
 
 def watch_tutorial(request, foss, tutorial, lang):
+    is_valid_user_for_tut = is_valid_user(request.user,foss,lang)
     try:
         foss = unquote_plus(foss)
         tutorial = unquote_plus(tutorial)
@@ -312,6 +340,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
         'script_base': settings.SCRIPT_URL,
         'perform_analysis':analytics,
+        'is_valid_user_for_tut':is_valid_user_for_tut,
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
