@@ -1,3 +1,4 @@
+from django.db.models import Q
 from events.models import AcademicKey
 from training.models import *
 from cms.models import Profile
@@ -8,20 +9,19 @@ register = template.Library()
 today = date.today()
 
 def is_user_paid(user_obj):
-    try:
-        idcase = AcademicKey.objects.filter(academic_id=user_obj.organiser.academic_id).order_by('-expiry_date').first()
-        user_paid = True if (idcase.expiry_date >= date.today()) else False
-        return user_paid
-    except:
-        user_paid = False
-    try:
-        idcase = AcademicKey.objects.filter(academic_id=user_obj.invigilator.academic_id).order_by('-expiry_date').first()
-        user_paid = True if (idcase.expiry_date >= date.today()) else False
-        return user_paid
-    except:
-        user_paid = False
-    return user_paid
-
+    academic_id = None
+    organiser = Organiser.objects.filter(user=user_obj).first()
+    if organiser:
+      academic_id = user_obj.organiser.academic_id
+    else:
+      invigilator = Invigilator.objects.filter(user=user_obj).first()
+      if invigilator:
+        academic_id = user_obj.invigilator.academic_id
+      else:
+        return False
+    if academic_id:
+      return AcademicKey.objects.filter(Q(academic_id=academic_id) & Q(expiry_date__gte=date.today())).exists()
+    return False
 
 def is_reg_valid(reg_end_date):
 
