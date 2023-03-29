@@ -563,11 +563,9 @@
             const videoElement = document.querySelector('div.invalid_user video');
 
             if(videoElement){
-                console.log("Invalid Video");
-                console.log(videoElement);
                 videoElement.addEventListener('timeupdate', () => {
                     // Check if the video has played for more than 10 seconds
-                    if (videoElement.currentTime > 15) {
+                    if (videoElement.currentTime > {{video_play_time}}) {
                         // Pause the video
                         videoElement.currentTime = 0;
                         videoElement.pause();
@@ -610,24 +608,6 @@
                 $(this).text( $(this).text() == 'Show video info' ? "Hide video info" : "Show video info");
             });
         });
-
-        // Get a reference to the video element
-        {% comment %} const video = document.getElementById('st_video');
-        const video1 = document.getElementById('st_video_html5_api');
-        
-        video1.addEventListener('timeupdate', function() {
-            console.log('2');
-          if (video1.currentTime >= 5) {
-            setTimeout(function() {
-                
-                console.log('Video 2 has been playing for 5 seconds');
-                video1.currentTime = 0; // Set the starting time to 15 seconds
-            }, 0);
-          }
-        }); {% endcomment %}
-        
-        
-  
 
     </script>
 

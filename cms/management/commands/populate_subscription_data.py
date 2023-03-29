@@ -1,9 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.db.models import Max
-from events.models import AcademicPaymentStatus, AcademicCenter, Organiser, AcademicKey, StudentBatch, StudentMaster, Student, Invigilator
+from events.models import Organiser, AcademicKey, StudentBatch, StudentMaster, Student, Invigilator
 from cms.models import UserType
-from collections import defaultdict
-from training.models import Participant
+
 def update_subscription(users,expiry_date):
     for user in users:
         try:
@@ -15,7 +14,7 @@ def update_subscription(users,expiry_date):
             try:
                 ut = UserType.objects.create(user_id=user,subscription=expiry_date)
             except Exception as e:
-                print(f"{'User':>11} : {user:>10} \033[91m\u2718\033[0m fail")
+                print(f"failed for user: {user:>10}\n{e}")
         
 def get_users_from_acad(academic_id):
     organisers = [x for x in Organiser.objects.filter(academic_id=academic_id).values_list('user',flat=True)]
@@ -23,6 +22,7 @@ def get_users_from_acad(academic_id):
     student_batch = StudentBatch.objects.filter(academic_id=academic_id)
     student_ids = [x for x in StudentMaster.objects.filter(batch__in=student_batch).values_list('student_id',flat=True)]
     students = [x for x in Student.objects.filter(id__in=student_ids).values_list('user',flat=True)]
+    # return users who are organisers, invigilators or students of the given academic center
     users_from_acad = organisers + invigilators + students
     return users_from_acad 
     
@@ -37,8 +37,8 @@ class Command(BaseCommand):
             users = get_users_from_acad(key['academic_id'])
             try:
                 update_subscription(users,expiry_date)
-                self.stdout.write(f"academic_id : {key['academic_id']:>10} \033[92m\u2714\033[0m pass")
+                self.stdout.write(f"academic_id passed: {key['academic_id']:>10}")
             except Exception as e:
-                self.stdout.write(f"academic_id : {key['academic_id']:>10} \033[91m\u2718\033[0m fail")
+                self.stdout.write(f"academic_id failed: {key['academic_id']:>10} \n{e}")
                 
         self.stdout.write('Ending populate_subscription_data.')

@@ -283,7 +283,7 @@ def archived_tutorial_search(request):
     return render(request, 'spoken/templates/archived_tutorial_search.html', context)
 
 def is_valid_user(user,foss,lang):
-    allowed_internal_roles = [1,4,5,6,7,8,9,10,15,20] #IDs of auth_group  
+    allowed_internal_roles = getattr(settings, 'ALLOWED_INTERNAL_ROLES', [1,4,5,6,7,8,9,10,15,20]) #IDs of auth_group 
     # 1: Resource Person, 4:Contributor, 5:External-Contributor, 6: Video-Reviewer, 7:Domain-Reviewer, 8: Quality-Reviewer
     # 9: Administrator, 10:Event Manager, 15:Content-Editor, 20:Forums-Admin
     foss = FossCategory.objects.get(foss=foss)
@@ -341,6 +341,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'script_base': settings.SCRIPT_URL,
         'perform_analysis':analytics,
         'is_valid_user_for_tut':is_valid_user_for_tut,
+        'video_play_time':getattr(settings, 'VIDEO_TIME', 15)
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 

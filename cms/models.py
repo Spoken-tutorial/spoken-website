@@ -1,9 +1,9 @@
 # Standard Library
-
 from builtins import str
 from builtins import object
 import os
 from datetime import datetime
+import jsonfield
 
 # Third Party Stuff
 from django.contrib.auth.models import User
@@ -12,7 +12,6 @@ from django.utils.encoding import python_2_unicode_compatible
 
 # Spoken Tutorial Stuff
 from events.models import City, District, Location, State
-import jsonfield
 
 def profile_picture(instance, filename):
     ext = os.path.splitext(filename)[1]
