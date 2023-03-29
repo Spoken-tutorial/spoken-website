@@ -379,3 +379,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ],
 }
+
+EVENT_CD_CONTENT=EVENT_CD_CONTENT
+ALLOWED_INTERNAL_ROLES=ALLOWED_INTERNAL_ROLES #IDs of auth_group who are allowed to view tutorial video pages without payment
+VIDEO_TIME=VIDEO_TIME

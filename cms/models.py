@@ -1,9 +1,9 @@
 # Standard Library
-
 from builtins import str
 from builtins import object
 import os
 from datetime import datetime
+import jsonfield
 
 # Third Party Stuff
 from django.contrib.auth.models import User
@@ -12,7 +12,6 @@ from django.utils.encoding import python_2_unicode_compatible
 
 # Spoken Tutorial Stuff
 from events.models import City, District, Location, State
-
 
 def profile_picture(instance, filename):
     ext = os.path.splitext(filename)[1]
@@ -143,3 +142,12 @@ class News(models.Model):
 #    
     class Meta(object):
         verbose_name = "New"
+
+class UserType(models.Model):
+    STATUS_CHOICES = ((0,'Inactive'),(1,'Active'))
+    user = models.ForeignKey(User, on_delete=models.CASCADE,unique=True)
+    subscription = models.DateField(null=True,blank=True)
+    ilw = jsonfield.JSONField(null=True)
+    status = models.CharField(choices=STATUS_CHOICES,max_length=25,default=1)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
