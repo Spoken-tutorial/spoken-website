@@ -279,7 +279,7 @@
 {% block content %}
     {% if tr_rec.video_status %}
     <row>
-        {% if not is_valid_user_for_tut %} <div class="bg-danger" style="padding:12px;margin-bottom:12px;">Please enroll to gain access to the full video and its resources.</div>{% endif %}
+        {% if not is_valid_user_for_tut %} <div class="bg-danger" style="padding:12px;margin-bottom:12px;font-weight:bold">Please enroll to gain access to the full video and its resources.</div>{% endif %}
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
             <div class="video-container col-lg-8 col-md-8 col-sm-8 {% if not is_valid_user_for_tut %}invalid_user{% endif %}" >
                         <video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
