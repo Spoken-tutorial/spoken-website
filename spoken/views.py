@@ -311,7 +311,6 @@ def is_valid_user(user,foss,lang):
     return False
 
 def watch_tutorial(request, foss, tutorial, lang):
-    is_valid_user_for_tut = is_valid_user(request.user,foss,lang)
     try:
         foss = unquote_plus(foss)
         is_valid_user_for_tut = is_valid_user(request.user,foss,lang)
