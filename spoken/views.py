@@ -311,9 +311,9 @@ def is_valid_user(user,foss,lang):
     return False
 
 def watch_tutorial(request, foss, tutorial, lang):
-    is_valid_user_for_tut = is_valid_user(request.user,foss,lang)
     try:
         foss = unquote_plus(foss)
+        is_valid_user_for_tut = is_valid_user(request.user,foss,lang)
         tutorial = unquote_plus(tutorial)
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
