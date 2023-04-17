@@ -2310,9 +2310,9 @@ def test_participant_ceritificate(request, wid, participant_id):
     credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
     #paragraphe
-    if ta.test.training.department.id == 169:
-        text = " This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b>  has successfully completed <b>"+w.foss.foss+"</b> test on <b>"+str(w.tdate)+"</b> organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at I<b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay."
-    elif ta.test.academic.institution_type_id == 18:
+    if ta.test.training.department.id == 169: #fdp
+        text = " This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test on <b>"+str(w.tdate)+"</b> organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at I<b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay."
+    elif ta.test.academic.institution_type_id == 18: #csc
         text = "This is to certify that <b><u>"+mdluser.firstname +" "+mdluser.lastname+"</u></b>  has successfully completed <b>"+w.foss.foss+"</b> test organized at "+w.academic.institution_name+" by <u>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</u> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <u>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</u> at "+w.academic.institution_name+" invigilated this examination.<br/>This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, Ministry of Education, Govt., of India."
     else:
         text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay.</p><br /><br />"+credits
@@ -2421,12 +2421,26 @@ def test_participant_ceritificate_all(request, testid):
         credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
         #paragraphe
-        if ta.test.training.department.id == 169:
-            text = " This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b>  has successfully completed <b>"+w.foss.foss+"</b> test on <b>"+str(w.tdate)+"</b> organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> at <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay."
-        elif ta.test.academic.institution_type_id == 18:
-            text = "This is to certify that <b><u>"+mdluser.firstname +" "+mdluser.lastname+"</u></b>  has successfully completed <b>"+w.foss.foss+"</b> test organized at "+w.academic.institution_name+" by <u>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</u> with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <u>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</u> at "+w.academic.institution_name+" invigilated this examination.<br/>This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, Ministry of Education, Govt., of India."
-        else:
-            text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by the Spoken Tutorial Project, IIT Bombay.</p><br /><br />"+credits
+        common_text = "This is to certify that <b>{mdl_fullname}</b> \
+        has successfully completed <b>{foss}</b> test {date} \
+        organized at <b>{institute}</b> by <b>{org_fullname}</b> \
+        with course material provided by the Spoken Tutorial Project, IIT Bombay. Passing an online exam, \
+        conducted remotely from IIT Bombay, is a pre-requisite for completing this {test}<br/><br/> \
+        <b>{invi_fullname}</b> at <b>{institute}</b> invigilated this examination. \
+        This training is offered by the Spoken Tutorial Project, IIT Bombay{end}<br/><br/>"
+        
+        is_fdp = ta.test.training.department.id == 169
+        is_csc = ta.test.academic.institution_type_id == 18
+
+        text = common_text.format(mdl_fullname=f"{mdluser.firstname} {mdluser.lastname}",
+                           foss=w.foss.foss,
+                           date=f"on <b>{w.tdate}</b>" if is_fdp else "",
+                           institute=w.academic.institution_name,
+                           org_fullname=f"{w.organiser.user.first_name} {w.organiser.user.last_name}",
+                           test='Faculty Development Programme.' if is_fdp else 'training.',
+                           invi_fullname=f"{w.invigilator.user.first_name} {w.invigilator.user.last_name}",
+                           end=', funded by National Mission on Education through ICT, Ministry of Education, Govt., of India.' if is_csc else '.',
+                           )
 
         centered = ParagraphStyle(name = 'centered',
             fontSize = 15,
