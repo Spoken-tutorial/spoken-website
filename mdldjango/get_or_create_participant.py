@@ -38,7 +38,6 @@ def encript_password(password):
 def create_account(w, firstname, lastname, gender, email, category):
     password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
     password_encript = encript_password(password_string)
-
     password = password_encript
     username = email
     mdluser = None
@@ -47,7 +46,6 @@ def create_account(w, firstname, lastname, gender, email, category):
         mdluser.institution = w.academic_id
         mdluser.firstname = firstname
         mdluser.lastname = lastname
-        mdluser.gender = gender
         mdluser.save()
     except Exception as e:
         mdluser = MdlUser()
@@ -60,10 +58,8 @@ def create_account(w, firstname, lastname, gender, email, category):
         mdluser.email = email
         mdluser.confirmed = 1
         mdluser.mnethostid = 1
-        mdluser.gender = gender
         mdluser.save()
         mdluser = MdlUser.objects.filter(email=email, firstname=firstname, username=username, password=password).first()
-
         # send password to email
         subject = "Spoken Tutorial Online Test password"
         to = [mdluser.email]
