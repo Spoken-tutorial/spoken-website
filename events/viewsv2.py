@@ -2521,7 +2521,6 @@ class UpdateStudentName(UpdateView):
       mdluser.username = email
       mdluser.firstname = form.cleaned_data['first_name']
       mdluser.lastname = form.cleaned_data['last_name']
-      mdluser.gender = form.cleaned_data['gender']
       mdluser.save()
        #save testattendance table
       test_attendance = TestAttendance.objects.filter(student_id = self.user.student.id)
