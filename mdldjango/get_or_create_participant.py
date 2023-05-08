@@ -124,7 +124,7 @@ def get_or_create_participant(w, firstname, lastname, gender, email, category):
         ta.training_id = w.id
         ta.firstname = mdluser.firstname
         ta.lastname = mdluser.lastname
-        ta.gender = mdluser.gender
+        ta.gender = gender
         ta.email = mdluser.email
         ta.save()
         return True

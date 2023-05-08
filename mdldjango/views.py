@@ -241,7 +241,6 @@ def mdl_register(request):
                 mdluser = MdlUser()
                 mdluser.auth = 'manual'
                 mdluser.institution = form.cleaned_data['college']
-                mdluser.gender = form.cleaned_data['gender']
                 mdluser.firstname = form.cleaned_data['firstname'].upper()
                 mdluser.lastname = form.cleaned_data['lastname'].upper()
                 mdluser.email = form.cleaned_data['email'].lower()
