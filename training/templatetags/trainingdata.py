@@ -20,9 +20,9 @@ def is_user_paid(user_obj):
       if invigilator:
         academic_id = user_obj.invigilator.academic_id
       else:
-        student = Student.objects.filter(user=user_obj).exists()
-        if student:
-          student = Student.objects.filter(user=user_obj)[0]
+        student = Student.objects.filter(user=user_obj)
+        if student.exists():
+          student = student.first()
           try:
             academic_id = StudentMaster.objects.get(student=student).batch.academic.id
           except StudentMaster.DoesNotExist:
