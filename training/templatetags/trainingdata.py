@@ -20,7 +20,13 @@ def is_user_paid(user_obj):
       if invigilator:
         academic_id = user_obj.invigilator.academic_id
       else:
-        return False
+        student = Student.objects.filter(user=user_obj)
+        if student.exists():
+          student = student.first()
+          try:
+            academic_id = StudentMaster.objects.get(student=student).batch.academic.id
+          except StudentMaster.DoesNotExist:
+            return False
     if academic_id:
       return AcademicKey.objects.filter(Q(academic_id=academic_id) & Q(expiry_date__gte=date.today())).exists()
     return False
