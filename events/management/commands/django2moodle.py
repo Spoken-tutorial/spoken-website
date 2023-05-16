@@ -120,7 +120,6 @@ class Command(BaseCommand):
             mdluser.username = user.email
             mdluser.password = self.encrypt_password(password)
             mdluser.institution = academy
-            mdluser.gender = user.student.gender
             mdluser.email = user.email
             mdluser.confirmed = 1
             mdluser.mnethostid = 1
