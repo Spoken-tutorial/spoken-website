@@ -23,13 +23,13 @@ REGISTRATION_TYPE_CHOICES =(
 
 def is_user_paid(user_obj, academic_id):
     try:
-        idcase = AcademicKey.objects.get(academic_id=academic_id)
+        idcase = AcademicKey.objects.filter(academic_id=academic_id).order_by('-expiry_date').first()
         user_paid = [True, user_obj.organiser.academic] if (idcase.expiry_date >= date.today()) else [False]
         return user_paid
     except:
         user_paid = [False]
     try:
-        idcase = AcademicKey.objects.get(academic_id=academic_id)
+        idcase = AcademicKey.objects.filter(academic_id=academic_id).order_by('-expiry_date').first()
         user_paid = [True, user_obj.invigilator.academic] if (idcase.expiry_date >= date.today()) else [False]
         return user_paid
     except:
@@ -59,12 +59,11 @@ def handle_uploaded_file(request):
 
 def is_college_paid(college_id):
     try:
-        idcase = AcademicKey.objects.get(academic_id=college_id)
+        idcase = AcademicKey.objects.filter(academic_id=college_id).order_by('-expiry_date').first()
         college_paid = True if (idcase.expiry_date >= date.today()) else False
         return college_paid
-    except:
+    except Exception as e:
         college_paid = False
-    
     return college_paid
 
 def create_certificate(eventid,pname):

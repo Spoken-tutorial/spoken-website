@@ -596,7 +596,7 @@ def check_user_details(request, filesize):
 # return '1' if organizer belongs to paid college with valid expiry date, else '0'
 def is_organizer_paid(request):
     try:
-        idcase = AcademicKey.objects.get(academic_id=request.user.organiser.academic_id, expiry_date__gte=date.today())
+        idcase = AcademicKey.objects.filter(academic_id=request.user.organiser.academic_id, expiry_date__gte=date.today()).order_by('-expiry_date').first()
         organizer_paid = '1' if (idcase.expiry_date >= date.today()) else '0'
     except:
         organizer_paid = '0'
