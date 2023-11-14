@@ -74,6 +74,9 @@ def is_tr_completed(eventid):
 @register.filter
 def is_reg_approved_ongoing(eventid):
     event = TrainingEvents.objects.get(id=eventid)
+    print('event.event_end_date', event.event_end_date)
+    print('type event.event_end_date', type(event.event_end_date))
+    print('today', today)
     if event.training_status == 1 and event.event_end_date >= today:
         return True
     return False
