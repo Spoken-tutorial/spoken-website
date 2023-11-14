@@ -77,6 +77,7 @@ def is_reg_approved_ongoing(eventid):
     print('event.event_end_date', event.event_end_date)
     print('type event.event_end_date', type(event.event_end_date))
     print('today', today)
+    print('type today', type(today))
     if event.training_status == 1 and event.event_end_date >= today:
         return True
     return False
