@@ -6,8 +6,6 @@ from django import template
 from datetime import datetime,date
 register = template.Library()
 
-today = date.today()
-
 def is_user_paid(user_obj):
     if not user_obj.is_authenticated():
       return False
@@ -67,14 +65,14 @@ def is_event_closed(eventid):
 @register.filter
 def is_tr_completed(eventid):
     event = TrainingEvents.objects.get(id=eventid)
-    if event.training_status == 1 and event.event_end_date < today:
+    if event.training_status == 1 and event.event_end_date < date.today():
         return True
     return False
 
 @register.filter
 def is_reg_approved_ongoing(eventid):
     event = TrainingEvents.objects.get(id=eventid)
-    if event.training_status == 1 and event.event_end_date >= today:
+    if event.training_status == 1 and event.event_end_date >= date.today():
         return True
     return False
 
@@ -88,7 +86,7 @@ def is_tr_ongoing(eventid):
 @register.filter
 def is_tr_expired(eventid):
     event = TrainingEvents.objects.get(id=eventid)
-    if event.training_status == 0 and event.event_end_date < today:
+    if event.training_status == 0 and event.event_end_date < date.today():
         return True
     return False
 
