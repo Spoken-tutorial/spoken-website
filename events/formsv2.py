@@ -65,17 +65,7 @@ class TrainingRequestForm(forms.ModelForm):
   def clean(self):
     if self.cleaned_data:
       #48hrs, batch id fetched
-      batch_id_list = []
-      sm_batch_all = StudentMaster.objects.all()
-      for i in sm_batch_all:
-        if dt.datetime.today().isoformat() < (i.created + dt.timedelta(days=2)).isoformat():
-          batch_id_list.append(i.batch_id)
-      batch_id_set = set(batch_id_list)
-      uniq_batch_id = []
-      for j in batch_id_set:
-        uniq_batch_id.append(j)
       tp = TrainingPlanner.objects.get(pk=self.cleaned_data['training_planner'])
-
       # Date restriction
       if self.cleaned_data and 'sem_start_date' in self.cleaned_data and self.cleaned_data['sem_start_date']:
         start_date, end_date =tp.get_current_semester_date_duration_new()
