@@ -42,6 +42,7 @@
         {% compress css %}{% block compresscssblock %}{% endblock %}{% endcompress %}
         {% compress css %}{% block compressinlinecssblock %}{% endblock %}{% endcompress %}
         {% block cssblock %}{% endblock %}
+        <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
     </head>
     <body>
         {% block announcement %}{% endblock %}
@@ -400,7 +401,7 @@
         <!-- Bootstrap core JavaScript
         ================================================== -->
         <!-- Placed at the end of the document so the pages load faster -->
-        <script src="{% static 'spoken/js/jquery-1.11.0.min.js' %}"></script>
+        
         <script src="{% static 'spoken/js/bootstrap.min.js' %}"></script>
     {% block uncompressjsblock %}{% endblock %}
     {% compress js %}
