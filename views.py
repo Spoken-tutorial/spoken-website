@@ -88,11 +88,11 @@ def add_side_by_side_tutorials(archive, languages):
     available_langs = set()
 
     for language in languages:
-        filepath = '{}videos/32/714/Side-by-Side-Method-{}.ogv'.format(settings.MEDIA_ROOT, language)
+        filepath = '{}videos/32/714/Side-by-Side-Method-{}.webm'.format(settings.MEDIA_ROOT, language)
 
         if os.path.isfile(filepath):
             available_langs.add(language)
-            archive.write(filepath, 'spoken/videos/Side-by-Side-Method-{}.ogv'.format(language))
+            archive.write(filepath, 'spoken/videos/Side-by-Side-Method-{}.webm'.format(language))
 
     return available_langs
 
@@ -449,7 +449,7 @@ def ajax_show_added_foss(request):
 
     # calculate size for side-by-side tutorials
     for language in languages:
-        filepath = '{}videos/32/714/Side-by-Side-Method-{}.ogv'.format(settings.MEDIA_ROOT, language)
+        filepath = '{}videos/32/714/Side-by-Side-Method-{}.webm'.format(settings.MEDIA_ROOT, language)
 
         if os.path.isfile(filepath):
             fsize += os.path.getsize(filepath)
