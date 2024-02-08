@@ -102,12 +102,12 @@ def add_side_by_side_tutorials(archive, languages):
 def add_forum_video(archive):
     filepath = '{}videos/32/1450/Spoken-Tutorial-Forums-English.webm'.format(settings.MEDIA_ROOT)
     if os.path.isfile(filepath):
-            archive.write(filepath, 'spoken/videos/Spoken-Tutorial-Forums-English.webm')
+        archive.write(filepath, 'spoken/videos/Spoken-Tutorial-Forums-English.webm')
 
 def add_suplementary_video(archive):
     filepath = '{}videos/32/1537/Spoken-Tutorial-Supplementary-Material-English.webm'.format(settings.MEDIA_ROOT)
     if os.path.isfile(filepath):
-            archive.write(filepath, 'spoken/videos/Spoken-Tutorial-Supplementary-Material-English.webm')
+        archive.write(filepath, 'spoken/videos/Spoken-Tutorial-Supplementary-Material-English.webm')
 
 
 def get_static_files():

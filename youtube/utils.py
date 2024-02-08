@@ -7,11 +7,11 @@ import subprocess
 def convert_tmp_video(src_path, dst_path):
     stdout = None
     stderr = None
-    """mffmpeg -i input-file.webm -strict experimental -pix_fmt yuv420p -r 15 -f mp4 tmp.mp4"""
-    print(("/usr/bin/mffmpeg -i", src_path, "-strict experimental -pix_fmt yuv420p -r 15 -f mp4", dst_path))
+    """ffmpeg -i input-file.webm -strict experimental -pix_fmt yuv420p -r 15 -f mp4 tmp.mp4"""
+    print(("/usr/bin/ffmpeg -i", src_path, "-strict experimental -pix_fmt yuv420p -r 15 -f mp4", dst_path))
     process = subprocess.Popen(
         [
-            '/usr/bin/mffmpeg',
+            '/usr/bin/ffmpeg',
             '-i', src_path,
             '-strict', 'experimental',
             '-pix_fmt', 'yuv420p',
