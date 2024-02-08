@@ -166,21 +166,21 @@
                             </select>
                                 <br />
                             <video id="st_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                                <source src="./Side-by-Side-Method-English.ogv" type="video/ogg" />
+                                <source src="./Side-by-Side-Method-English.webm" type="video/webm" />
                             </video>
 
                             <br /><hr>
                             <h3>Spoken Tutorial Forums:</h3>
                             <hr>
                             <video id="forum_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                                <source src="./Spoken-Tutorial-Forums-English.ogv" type="video/ogg" />
+                                <source src="./Spoken-Tutorial-Forums-English.webm" type="video/webm" />
                             </video>
 
                             <br /><hr>
                             <h3>Spoken Tutorial Supplementary Material:</h3>
                             <hr>
                             <video id="forum_video" class="video-js vjs-default-skin" controls preload="auto" width="auto" height="auto" data-setup="{}">
-                                <source src="./Spoken-Tutorial-Supplementary-Material-English.ogv" type="video/ogg" />
+                                <source src="./Spoken-Tutorial-Supplementary-Material-English.webm" type="video/webm" />
                             </video>
 
                         </div>
@@ -261,7 +261,7 @@
                 $('.languages').on("change", function(){
                     language = ($(this).val()).trim();
         		    mp = videojs('st_video');
-                    mp.src({ type: "video/ogg", src: './Side-by-Side-Method-'+language+'.ogv' });
+                    mp.src({ type: "video/webm", src: './Side-by-Side-Method-'+language+'.webm' });
                     mp.play();
         	 	    mp.volume(0.2);
 
