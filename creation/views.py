@@ -160,7 +160,7 @@ def get_video_info(path):
         info_m['height'] = int(info_m['height'].split()[0])
         info_m['size'] = get_filesize(path)
     except Exception as e:
-        print("Exception for video metadata: ",e)
+        print("Exception for video metadata: ", e)
         info_m['codec'] = ''
         info_m['profile'] = ''
         info_m['hours'] = 0
