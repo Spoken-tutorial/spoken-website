@@ -342,7 +342,7 @@ $('#pwd').on('focusout',function(){
                 'email': email,
                 'password': password,
                 csrfmiddlewaretoken: '{{ csrf_token }}',
-            },
+                },
             success: function(data) {
               if (data['msg']=='') {
                 $("#logged_success").show();
@@ -356,7 +356,9 @@ $('#pwd').on('focusout',function(){
                 },
     error: function(data){
       alert("Pulling up your data ... Hold on !!!");
-                  location.reload();
+                  // location.reload();
+                  console.log("error data for ilw: ");
+                  console.log(data);
                 },
     });
                 var r = data['organizer_paid'];
