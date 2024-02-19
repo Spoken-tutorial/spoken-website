@@ -363,7 +363,7 @@ def get_users_progress(request):
                     if 'url' in key:
                         if 'http' in value[0] and 'video' in value[0]:
                             fossid, tutid, lang = value[0].split('videos/')[1].split('/')
-                            lang = lang.split('.ogv')[0].split('-')[-1]
+                            lang = lang.split('.webm')[0].split('-')[-1]
                     if 'videotime' in key and '.' in value[0] :
                         time = float(value[0])
                 if tutid:

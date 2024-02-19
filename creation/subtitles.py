@@ -112,7 +112,7 @@ def generate_subtitle(srt_url, srt_file_path):
                     else:
                         time_error = 1
                 #print col.text
-        duration_info = get_duration_info(rreplace(srt_file_path, 'srt', 'ogv', 1))
+        duration_info = get_duration_info(rreplace(srt_file_path, 'srt', 'webm', 1))
         if srt_data:
             if previous_script_data:
                 srt_data += str(counter) + '\n'

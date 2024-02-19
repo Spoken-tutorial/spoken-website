@@ -91,23 +91,23 @@ def add_side_by_side_tutorials(archive, languages):
     available_langs = set()
 
     for language in languages:
-        filepath = '{}videos/32/714/Side-by-Side-Method-{}.ogv'.format(settings.MEDIA_ROOT, language)
+        filepath = '{}videos/32/714/Side-by-Side-Method-{}.webm'.format(settings.MEDIA_ROOT, language)
 
         if os.path.isfile(filepath):
             available_langs.add(language)
-            archive.write(filepath, 'spoken/videos/Side-by-Side-Method-{}.ogv'.format(language))
+            archive.write(filepath, 'spoken/videos/Side-by-Side-Method-{}.webm'.format(language))
 
     return available_langs
 
 def add_forum_video(archive):
-    filepath = '{}videos/32/1450/Spoken-Tutorial-Forums-English.ogv'.format(settings.MEDIA_ROOT)
+    filepath = '{}videos/32/1450/Spoken-Tutorial-Forums-English.webm'.format(settings.MEDIA_ROOT)
     if os.path.isfile(filepath):
-            archive.write(filepath, 'spoken/videos/Spoken-Tutorial-Forums-English.ogv')
+        archive.write(filepath, 'spoken/videos/Spoken-Tutorial-Forums-English.webm')
 
 def add_suplementary_video(archive):
-    filepath = '{}videos/32/1537/Spoken-Tutorial-Supplementary-Material-English.ogv'.format(settings.MEDIA_ROOT)
+    filepath = '{}videos/32/1537/Spoken-Tutorial-Supplementary-Material-English.webm'.format(settings.MEDIA_ROOT)
     if os.path.isfile(filepath):
-            archive.write(filepath, 'spoken/videos/Spoken-Tutorial-Supplementary-Material-English.ogv')
+        archive.write(filepath, 'spoken/videos/Spoken-Tutorial-Supplementary-Material-English.webm')
 
 
 def get_static_files():
@@ -501,18 +501,18 @@ def ajax_show_added_foss(request):
 
     # calculate size for side-by-side tutorials
     for language in languages:
-        filepath = '{}videos/32/714/Side-by-Side-Method-{}.ogv'.format(settings.MEDIA_ROOT, language)
+        filepath = '{}videos/32/714/Side-by-Side-Method-{}.webm'.format(settings.MEDIA_ROOT, language)
 
         if os.path.isfile(filepath):
             fsize += os.path.getsize(filepath)
 
     # calculate size for forum video
-    filepath = '{}videos/32/1450/Spoken-Tutorial-Forums-English.ogv'.format(settings.MEDIA_ROOT)
+    filepath = '{}videos/32/1450/Spoken-Tutorial-Forums-English.webm'.format(settings.MEDIA_ROOT)
     if os.path.isfile(filepath):
             fsize += os.path.getsize(filepath)
 
     # calculate size for suplementary video
-    filepath = '{}videos/32/1537/Spoken-Tutorial-Supplementary-Material-English.ogv'.format(settings.MEDIA_ROOT)
+    filepath = '{}videos/32/1537/Spoken-Tutorial-Supplementary-Material-English.webm'.format(settings.MEDIA_ROOT)
     if os.path.isfile(filepath):
             fsize += os.path.getsize(filepath)
             
