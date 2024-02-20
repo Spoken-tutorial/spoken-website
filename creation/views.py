@@ -139,7 +139,7 @@ def get_video_info(path):
         print("stderr : ", stderr)
         print("process : ", process)
         duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout.decode('utf-8'), re.DOTALL).groupdict()
-        info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), ", stdout.decode('utf-8'), re.DOTALL).groupdict()
+        info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?)\([^)]*\), (?P<width>.*?)x(?P<height>.*?), ", stdout.decode('utf-8'), re.DOTALL).groupdict()
 
         hours = Decimal(duration_m['hours'])
         minutes = Decimal(duration_m['minutes'])
