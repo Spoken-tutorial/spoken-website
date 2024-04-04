@@ -43,6 +43,9 @@ class TrainingEvents(models.Model):
 
 	def __str__(self):
 		return self.event_name
+	
+	class Meta:
+		verbose_name_plural = "Training Events"
 
 
 class Participant(models.Model):

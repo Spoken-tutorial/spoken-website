@@ -44,9 +44,9 @@ def validate_csv_file(csv_file):
                     ASCIIUsernameValidator()(col[2].strip())
                     if col[2].strip().split("@")[-1].lower() != "yopmail.com":
                         if not validate_email(col[2].strip(), verify=True):
-                            error.update(dict(lname="Email: "+ col[2] +" has errors."))
+                            error.update(dict(lname = "Email: " + col[2] + " has errors."))
                 except:
-                    error.update(dict(lname="Email: "+ col[2] +" has errors."))
+                    error.update(dict(lname = "Email: " + col[2] + " has errors."))
                 try:
                     ASCIIValidator()(col[3].strip())
                 except:
