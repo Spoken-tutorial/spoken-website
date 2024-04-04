@@ -88,13 +88,13 @@ class TrainingEventsListView(ListView):
 				self.show_myevents = True
 
 		if self.status == 'completed':
-			self.events = TrainingEvents.objects.filter(event_end_date__lt=today)
+			self.events = TrainingEvents.objects.filter(event_end_date__lt=today).order_by('registartion_end_date', 'registartion_start_date')
 		if self.status == 'ongoing':
-			self.events = TrainingEvents.objects.filter(event_end_date__gte=today)
+			self.events = TrainingEvents.objects.filter(event_end_date__gte=today).order_by('registartion_end_date', 'registartion_start_date')
 		if self.status == 'myevents':
 			participant = Participant.objects.filter(
 				Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
-				user_id=self.request.user.id)
+				user_id=self.request.user.id).order_by('registartion_end_date', 'registartion_start_date')
 			self.events = participant
 
 		self.raw_get_data = self.request.GET.get('o', None)
