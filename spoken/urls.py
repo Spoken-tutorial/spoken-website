@@ -16,7 +16,7 @@ app_name = 'spoken'
 admin.autodiscover()
 
 urlpatterns = [
-    url(r'^robots\.txt$', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    url(r'^robots\.txt', robots_txt, name='robots-txt'),
     #url(r'^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='text/xml')),
     url(r'^sitemap\.html$', sitemap, name='sitemap'),
     # Examples:
