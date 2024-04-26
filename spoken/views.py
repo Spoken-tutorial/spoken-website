@@ -813,6 +813,12 @@ def sitemap(request):
     return render(request, 'sitemap.html', {})
 
 
+def robots_txt(request):
+    with open('robots.txt', 'r') as f:
+        content = f.read()
+    return HttpResponse(content, content_type="text/plain")
+
+
 def add_user(request):
     username = None
     password = None

@@ -78,6 +78,7 @@ def get_state_info(request, code):
         print(e)
         return HttpResponse('<h4 style="margin: 30px;">Permission Denied!</h4>')
 
+
 def training(request):
     """ Organiser index page """
     collectionSet = TrainingRequest.objects.filter(
@@ -153,6 +154,7 @@ def training(request):
     if status != 0:
         if not femalecount or not malecount:
             gender_counts = TrainingAttend.objects.filter(training__in=collection.qs).values('student__gender').annotate(gender_count=Count('student__gender'))
+
             for item in gender_counts:
                 if item['student__gender'] == 'Female':
                     femalecount = item['gender_count']
