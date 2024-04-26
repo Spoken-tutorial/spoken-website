@@ -78,7 +78,6 @@ def get_state_info(request, code):
         print(e)
         return HttpResponse('<h4 style="margin: 30px;">Permission Denied!</h4>')
 
-import time
 def training(request):
     """ Organiser index page """
     collectionSet = TrainingRequest.objects.filter(
