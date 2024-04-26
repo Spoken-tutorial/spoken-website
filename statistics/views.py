@@ -78,7 +78,7 @@ def get_state_info(request, code):
         print(e)
         return HttpResponse('<h4 style="margin: 30px;">Permission Denied!</h4>')
 
-
+import time
 def training(request):
     """ Organiser index page """
     collectionSet = TrainingRequest.objects.filter(
@@ -153,10 +153,18 @@ def training(request):
     malecount = cache.get(male_key)
     if status != 0:
         if not femalecount or not malecount:
-            female_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Female').values_list('id'))
-            femalecount= len([i[0] for i in female_list])
-            male_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Male').values_list('id'))
-            malecount= len([i[0] for i in male_list])
+            training_ids = [col.id for col in collection.qs]
+            # start_time = time.time()
+            femalecount = TrainingAttend.objects.filter(training_id__in=training_ids, student__gender='Female').count()
+            malecount = TrainingAttend.objects.filter(training_id__in=training_ids, student__gender='Male').count()
+            # femalecount = Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Female').count()
+            # femalecount = TrainingAttend.objects.filter(training_id__in=[col.id for col in collection.qs], student__gender='Female').count()
+            # female_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Female').values_list('id'))
+            # femalecount= len([i[0] for i in female_list])
+            # print(f"\033[92m Time : {time.time()-start_time} \033[0m")
+            # print(f"\033[92m count is : {femalecount} \033[0m")
+            # male_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Male').values_list('id'))
+            # malecount= len([i[0] for i in male_list])
             try:
                 cache.set(female_key, femalecount)
                 cache.set(male_key, malecount)
