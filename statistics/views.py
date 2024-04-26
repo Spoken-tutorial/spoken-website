@@ -153,8 +153,7 @@ def training(request):
     malecount = cache.get(male_key)
     if status != 0:
         if not femalecount or not malecount:
-            training_ids = [col.id for col in collection.qs]
-            gender_counts = TrainingAttend.objects.filter(training_id__in=training_ids).values('student__gender').annotate(gender_count=Count('student__gender'))
+            gender_counts = TrainingAttend.objects.filter(training__in=collection.qs).values('student__gender').annotate(gender_count=Count('student__gender'))
             for item in gender_counts:
                 if item['student__gender'] == 'Female':
                     femalecount = item['gender_count']
