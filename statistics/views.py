@@ -253,14 +253,14 @@ def fdp_training(request):
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     participants = collection.qs.aggregate(Sum('participants'))
-    
-    femalecount =0
-    female_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Female').values_list('id'))
-    femalecount= len([i[0] for i in female_list])
-
-    malecount =0
-    male_list=list(Student.objects.filter(trainingattend__training_id__in=[col.id for col in collection.qs], gender='Male').values_list('id'))
-    malecount= len([i[0] for i in male_list])
+    gender_counts = TrainingAttend.objects.filter(training__in=collection.qs).values('student__gender').annotate(gender_count=Count('student__gender'))
+    femalecount = 0
+    malecount = 0
+    for item in gender_counts:
+        if item['student__gender'] == 'Female':
+            femalecount = item['gender_count']
+        if item['student__gender'] == 'Male':
+            malecount = item['gender_count']
     
     chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM sem_start_date)"}).values('year').order_by(
         '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
@@ -649,22 +649,17 @@ def ilw_stats(request):
     if status == REG_COMPLETED:
         participants = Participant.objects.filter(event_id__in=collection.qs, reg_approval_status=1)
         pcount = participants.count()
-        female_list=list(participants.filter(gender__in=('f','F','female','Female','FEMALE')).values_list('id'))
-        male_list=list(participants.filter(gender__in=('m','M','male','Male','MALE')).values_list('id'))
+        femalecount = participants.filter(gender__in=('f','F','female','Female','FEMALE')).count()
+        malecount = participants.filter(gender__in=('m','M','male','Male','MALE')).count()
+        
     
     elif status == CLOSED_TRAINING:
         participants = EventAttendance.objects.filter(event_id__in=collection.qs)
         pcount=participants.count()
-        female_list = list(participants.filter(participant__gender__in=('f','F','female','Female','FEMALE')).values_list('id'))
-        male_list=list(participants.filter(participant__gender__in=('m','M','male','Male','MALE')).values_list('id'))
+        femalecount = participants.filter(participant__gender__in=('f','F','female','Female','FEMALE')).count()
+        male_list = participants.filter(participant__gender__in=('m','M','male','Male','MALE')).count()
 
-    
-    
-    femalecount= len([i[0] for i in female_list])   
-    
-    malecount= len([i[0] for i in male_list])
-    
-    
+        
     context['form'] = collection.form
     page = request.GET.get('page')
     collection = get_page(collection.qs, page)
