@@ -657,9 +657,9 @@ def ilw_stats(request):
         participants = EventAttendance.objects.filter(event_id__in=collection.qs)
         pcount=participants.count()
         femalecount = participants.filter(participant__gender__in=('f','F','female','Female','FEMALE')).count()
-        male_list = participants.filter(participant__gender__in=('m','M','male','Male','MALE')).count()
+        malecount = participants.filter(participant__gender__in=('m','M','male','Male','MALE')).count()
 
-        
+    
     context['form'] = collection.form
     page = request.GET.get('page')
     collection = get_page(collection.qs, page)
