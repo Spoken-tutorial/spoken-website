@@ -92,7 +92,7 @@ class TrainingEventsListView(ListView):
 			self.events = TrainingEvents.objects.filter(event_end_date__lt=today).order_by('-event_end_date')
 		if self.status == 'ongoing':
 			print(f"\033[92m ongoing \033[0m")
-			self.events = TrainingEvents.objects.filter(event_end_date__gte=today).order_by('registartion_end_date')
+			self.events = TrainingEvents.objects.filter(event_end_date__gte=today)
 		if self.status == 'myevents':
 			print(f"\033[93m myevents \033[0m")
 			participant = Participant.objects.filter(
@@ -1067,7 +1067,8 @@ class ILWTestCertificate(object):
       alignment = 0,
       spaceAfter = 20
     )
-    imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+    imgDoc.setFillColorRGB(0, 0, 0)
+    imgDoc.drawCentredString(150, 115, self.custom_strftime('%B {S} %Y', training_end))
     p = Paragraph(text, centered)						
 
     p.wrap(650, 200)
