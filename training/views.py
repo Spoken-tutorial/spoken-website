@@ -88,7 +88,7 @@ class TrainingEventsListView(ListView):
 				self.show_myevents = True
 
 		if self.status == 'completed':
-			self.events = TrainingEvents.objects.filter(event_end_date__lt=today)
+			self.events = TrainingEvents.objects.filter(event_end_date__lt=today).order_by('-event_end_date')
 		if self.status == 'ongoing':
 			self.events = TrainingEvents.objects.filter(event_end_date__gte=today)
 		if self.status == 'myevents':
@@ -736,10 +736,8 @@ class EventTrainingCertificateView(FDPTrainingCertificate, View):
 
   def post(self, request, *args, **kwargs):
     eventid = self.request.POST.get("eventid")
-    print(eventid)
     event = TrainingEvents.objects.get(id=eventid)
-    participantname = self.request.user.first_name+" "+self.request.user.last_name    
-
+    participantname = self.request.user.first_name+" "+self.request.user.last_name
     if event:
       return self.create_fdptraining_certificate(event, participantname)
     else:
@@ -1065,7 +1063,8 @@ class ILWTestCertificate(object):
       alignment = 0,
       spaceAfter = 20
     )
-
+    imgDoc.setFillColorRGB(0, 0, 0)
+    imgDoc.drawCentredString(150, 115, self.custom_strftime('%B {S} %Y', training_end))
     p = Paragraph(text, centered)						
 
     p.wrap(650, 200)
