@@ -88,13 +88,10 @@ class TrainingEventsListView(ListView):
 				self.show_myevents = True
 
 		if self.status == 'completed':
-			print(f"\033[91m completed \033[0m")
 			self.events = TrainingEvents.objects.filter(event_end_date__lt=today).order_by('-event_end_date')
 		if self.status == 'ongoing':
-			print(f"\033[92m ongoing \033[0m")
 			self.events = TrainingEvents.objects.filter(event_end_date__gte=today)
 		if self.status == 'myevents':
-			print(f"\033[93m myevents \033[0m")
 			participant = Participant.objects.filter(
 				Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
 				user_id=self.request.user.id)
@@ -739,7 +736,6 @@ class EventTrainingCertificateView(FDPTrainingCertificate, View):
 
   def post(self, request, *args, **kwargs):
     eventid = self.request.POST.get("eventid")
-    print(eventid)
     event = TrainingEvents.objects.get(id=eventid)
     participantname = self.request.user.first_name+" "+self.request.user.last_name
     if event:
