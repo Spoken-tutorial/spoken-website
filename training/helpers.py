@@ -7,6 +7,7 @@ from django.http import HttpResponse
 import os
 from string import Template
 import subprocess
+from django.db.models import Count
 
 EVENT_TYPE_CHOICES =(
 	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
@@ -209,22 +210,24 @@ def get_transaction_details(request, purpose):
 
     return allpaydetails
 
-def get_all_events_detail(queryset, event_type=None):
+def get_all_events_detail(queryset, status, event_type=None):   
+    if event_type:
+        queryset = queryset.filter(event_type=event_type)
+
     pcount = 0
     mcount = 0
     fcount = 0
-    if event_type:
-        queryset = queryset.filter(event_type=event_type)
-    for event in queryset:
-        if event.training_status <= 1 :
-            #completed state
-            pcount += Participant.objects.filter(event=event,  reg_approval_status=1).count()
-            mcount += Participant.objects.filter(event=event, gender__in=['M','m','Male','male'], reg_approval_status=1).count()
-            fcount += Participant.objects.filter(event=event, gender__in=['F', 'f','Female','female'], reg_approval_status=1).count()
-        elif event.training_status == 2:
-            #closed
-            pcount += EventAttendance.objects.filter(event=event).count()
-            mcount += EventAttendance.objects.filter(event=event, participant__gender__in =['M','m','Male','male']).count()
-            fcount += EventAttendance.objects.filter(event=event, participant__gender__in =['F', 'f','Female','female']).count()
-    
+    event_ids = queryset.values_list('id', flat=True)
+    if status in ['ongoing', 'completed', 'expired']:
+        participants = Participant.objects.filter(event_id__in=event_ids,  reg_approval_status=1).values('gender').annotate(count=Count('id'))
+    elif status == 'closed':
+        participants = EventAttendance.objects.filter(event_id__in=event_ids).values('participant__gender').annotate(count=Count('id'))
+        
+    for item in participants:
+        key = 'participant__gender' if 'participant__gender' in item else 'gender'
+        pcount += item['count']
+        if item[key] in ['M','m','Male','male']:
+            mcount += item['count']
+        elif item[key] in ['F', 'f','Female','female']:
+            fcount += item['count']
     return pcount, mcount, fcount

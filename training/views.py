@@ -307,7 +307,7 @@ def listevents(request, role, status):
 		11: SortableHeader('Action', False)
 		}
 		event_type = request.GET.get('event_type', None)
-		pcount, mcount, fcount = get_all_events_detail(queryset, event_type) if event_type else get_all_events_detail(queryset)
+		pcount, mcount, fcount = get_all_events_detail(queryset, status, event_type)
 		raw_get_data = request.GET.get('o', None)
 		queryset = get_sorted_list(
 			request,
