@@ -225,9 +225,9 @@ def get_all_events_detail(queryset, status, event_type=None):
         
     for item in participants:
         key = 'participant__gender' if 'participant__gender' in item else 'gender'
+        pcount += item['count']
         if item[key] in ['M','m','Male','male']:
             mcount += item['count']
         elif item[key] in ['F', 'f','Female','female']:
             fcount += item['count']
-    pcount = mcount + fcount
     return pcount, mcount, fcount
