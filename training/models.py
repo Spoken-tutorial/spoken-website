@@ -12,13 +12,26 @@ import json
 
 EVENT_TYPE_CHOICES =(
 	('', '-----'), ('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
-), ('SSDP', 'School Students  Development Program')
+), ('SSDP', 'School Students  Development Program'), ('PDP', 'Professional Development Program'), ('CDP', 'Community Development Program'),
 	)
 
 
 REGISTRATION_TYPE_CHOICES =(
     ('', '-----'),  (1, 'Subscribed College'),(2, 'Manual Registration')
     )
+
+class Company(models.Model):
+	name = models.CharField(max_length=250)
+	added_by = models.ForeignKey(User, on_delete=models.PROTECT)
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name_plural = "Companies"
+		ordering = ['name']
+
+	def __str__(self):
+		return self.name
 
 class TrainingEvents(models.Model):	
 
@@ -39,6 +52,8 @@ class TrainingEvents(models.Model):
 	training_status = models.PositiveSmallIntegerField(default=0)
 	entry_date = models.DateTimeField(auto_now_add = True)
 	entry_user = models.ForeignKey(User, on_delete=models.PROTECT)
+	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
+	city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True)
 
 
 	def __str__(self):
