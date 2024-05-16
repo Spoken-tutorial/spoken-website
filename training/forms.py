@@ -33,6 +33,18 @@ class RegisterUser(forms.ModelForm):
         required = False,
         error_messages = {'required': 'component type is required.'},
     )
+    # company = forms.ModelChoiceField(
+    #         widget = forms.Select(attrs = {'class' : 'ac-state'}),
+    #         queryset = Company.objects.order_by('name'),
+    #         empty_label = "--- Select Company ---", 
+    #         help_text = ""
+    #         )
+    # city = forms.ModelChoiceField(
+    #         widget = forms.Select(attrs = {'class' : 'ac-city'}),
+    #         queryset = City.objects.order_by('name'),
+    #         empty_label = "--- Select City ---", 
+    #         help_text = ""
+    #         )
     foss_language = forms.ModelChoiceField(
         queryset = Language.objects.order_by('name'),
         required = False,
@@ -41,7 +53,7 @@ class RegisterUser(forms.ModelForm):
     phone = forms.RegexField(regex=r'^\+?1?\d{8,15}$', error_messages = {'required': 'Enter valid phone number.'},)
     class Meta(object):
         model = Participant
-        fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language']
+        fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language', 'company', 'city']
 
     def __init__(self, *args, **kwargs):
         super(RegisterUser, self).__init__(*args, **kwargs)

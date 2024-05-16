@@ -58,9 +58,13 @@
 {% block jsblock %}
 <script type="text/javascript">
     function loading()
-    {        
-        window.document.test.submit();
-        return;
+    {   
+      // alert('auto submitting form');
+        // window.document.test.submit();
+        alert('Payment success!');
+        // window.location.href = 'http://127.0.0.1:8000/training/reg_success/paid/';
+        
+        // return;
     }
 </script>
 {% endblock %}

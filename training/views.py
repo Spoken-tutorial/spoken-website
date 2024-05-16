@@ -11,6 +11,7 @@ from django.core.serializers import serialize
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.db import IntegrityError
 # Python imports
 from datetime import datetime,date
 import csv
@@ -60,7 +61,10 @@ class TrainingEventCreateView(CreateView):
 
 	@method_decorator(group_required("Resource Person"))
 	def get(self, request, *args, **kwargs):
-		return render(self.request, self.template_name, {'form': self.form_class()})
+		context = {'form': self.form_class()}
+		context['pdp_fee']=settings.PDP_FEE
+		context['cdp_fee']=settings.CDP_FEE
+		return render(self.request, self.template_name, context)
 
 	def form_valid(self, form, **kwargs):
 		self.object = form.save(commit=False)
@@ -90,7 +94,7 @@ class TrainingEventsListView(ListView):
 		if self.status == 'completed':
 			self.events = TrainingEvents.objects.filter(event_end_date__lt=today).order_by('-event_end_date')
 		if self.status == 'ongoing':
-			self.events = TrainingEvents.objects.filter(event_end_date__gte=today)
+			self.events = TrainingEvents.objects.filter(event_end_date__gte=today).order_by('registartion_end_date')
 		if self.status == 'myevents':
 			participant = Participant.objects.filter(
 				Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
@@ -170,16 +174,40 @@ def reg_success(request, user_type):
 		email = request.POST.get('email')
 		phone = request.POST.get('phone')
 		event_obj = request.POST.get('event')
+		city = request.POST.get('city')
+		company = request.POST.get('company')
+		new_company = request.POST.get('new_company')
 		event = TrainingEvents.objects.get(id=event_obj)
+		
 		form = RegisterUser(request.POST)
+
+		event_type = request.POST.get('event_type', '')
+		print(f"\033[92m event_type : {event_type} \033[0m")
+		print(f"\033[93m {request.POST} \033[0m")
 		if form.is_valid():
 			form_data = form.save(commit=False)
 			form_data.user = request.user
 			form_data.event = event
-			try:
-				form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
-			except:
-				form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
+			if not event_type in ['PDP', 'CDP']:
+				try:
+					form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
+				except:
+					form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
+			else:
+				city_obj = City.objects.get(id=city)	
+				form_data.city = city_obj
+				print(f"\033[94m city : {city_obj} \033[0m")
+				form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))	
+				if company:
+					comp_obj = Company.objects.get(id=company)	
+					print(f"\033[94m company : {comp_obj} \033[0m")
+					form_data.company = comp_obj
+				else:
+					try:
+						company=Company.objects.create(name=new_company, added_by=request.user)
+						form_data.company = company
+					except IntegrityError:
+						pass
 			user_data = is_user_paid(request.user, form_data.college.id)
 			if user_data[0]:
 				form_data.registartion_type = 1 #Subscribed College
@@ -194,19 +222,23 @@ def reg_success(request, user_type):
 				messages.success(request, "You have already registered for this event.")
 				return redirect('training:list_events', status='myevents')
 			else :
-
+				print(f"\033[92m Saving form \033[0m")
+				print(f"{form_data}")
 				form_data.save()
 			event_name = event.event_name
 			userprofile = Profile.objects.get(user=request.user)
 			userprofile.phone = phone
 			userprofile.save()
 			if user_type == 'paid':
+				# if user is already a paid user -> render reg_success.html showing registration success 
 				context = {'participant_obj':form_data}
 				return render(request, template_name, context)
 			else:
+				# if user has made payment from ILW interface -> return Participant form
 				return form_data
 		else:
-			messages.warning(request, 'Invalid form payment request.')
+			print(f"\033[91m {form.errors} \033[0m")
+			messages.warning(request, 'Invalid form payment request 1.')
 			return redirect('training:list_events', status='ongoing' )
 
 
