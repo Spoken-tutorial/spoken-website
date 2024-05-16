@@ -336,7 +336,7 @@ class ViewEventFilter(django_filters.FilterSet):
   event_start_date = django_filters.DateFromToRangeFilter()
   event_end_date = django_filters.DateFromToRangeFilter()
   event_type = django_filters.ChoiceFilter(choices=[('FDP', 'Paid FDP'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
-), ('SSDP', 'School Students  Development Program')])
+), ('SSDP', 'School Students  Development Program'), ('PDP', 'Professional Development Program'), ('CDP', 'Community Development Program'),])
 
 
   def __init__(self, *args, **kwargs):

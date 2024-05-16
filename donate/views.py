@@ -108,32 +108,39 @@ def pay_now(request, purpose):
             data = get_final_data(request, obj, purpose)
         else:
             messages.errors(request,'Invalid Form')
+    print(f"\033[93m pay_now \033[0m")
     return render(request, 'payment_status.html', data)
 
 @csrf_exempt
 def form_valid(request, form, purpose):
     """
-    If the form is valid, save the associated model.
+    This method saves the Payee & CdFossLanguages records.
+    Payee record is used to store payment information.
+    CdFossLanguages record stores mapping of user and foss which the user is eligible to download.
     """
+    print(f"\033[92m Form is valid \033[0m")
+    # Save Payee record
     form_data = form.save(commit=False)
-    form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
+    # form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
+    form_data.reqId = "abc"
     form_data.user = request.user
     form_data.status = 0
     form_data.expiry = calculate_expiry()
     form_data.purpose = purpose
     form_data.save()
     payee_obj = form_data
+    print(f"\033[97m Form data is saved \033[0m")
+    # Save CdFossLanguages record
+    # foss_ids = form.cleaned_data.get('foss_id')
+    # languages = form.cleaned_data.get('language_id')
+    # level_ids = form.cleaned_data.get('level_id')
+    fosses = form.cleaned_data.get('foss_id').split(',')
+    foss_languages = form.cleaned_data.get('language_id').split(',|')
+    levels = form.cleaned_data.get('level_id').split(',')
 
-    foss_ids = form.cleaned_data.get('foss_id')
-    languages = form.cleaned_data.get('language_id')
-    level_ids = form.cleaned_data.get('level_id')
-    fosses = foss_ids.split(',')
-    foss_languages = languages.split(',|')
-    levels = level_ids.split(',')
-
-    payee_id = payee_obj.pk
+    # payee_id = payee_obj.pk
     foss_level = 0
-
+    
     for i in range(len(fosses)):
         foss_category = FossCategory.objects.get(pk=int(fosses[i]))
         if int(levels[i]):
@@ -150,7 +157,7 @@ def form_valid(request, form, purpose):
             if language not in ('','None'):
                 foss_language = Language.objects.get(pk=int(language))
                 cd_foss_langs = CdFossLanguages()
-                cd_foss_langs.payment = Payee.objects.get(pk=payee_id)
+                cd_foss_langs.payment = Payee.objects.get(pk=payee_obj.pk)
                 cd_foss_langs.foss = foss_category
                 cd_foss_langs.lang = foss_language
                 if foss_level:
@@ -165,24 +172,31 @@ def form_invalid(request, form):
     If the form is invalid, re-render the context data with the
     data-filled form and errors.
     """
+    
     messages.warning(request, 'Invalid form payment request.')
     return redirect('cdcontent:cdcontenthome')
 
 
 @csrf_exempt
 def controller(request, purpose):
+    print(f"\033[92m 1 Inside controller of initiate_payment  \033[0m")
+    print(f"\033[92m purpose : {purpose} \033[0m")
     form = PayeeForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
+            # form_valid function creates Payee & CdFossLanguages records.
+            # & returns Payee record
             payee_obj_new = form_valid(request, form, purpose)
+            print(f"\033[95m FORM IS VALID  \033[0m")
         else:
             form_invalid(request, form)
-    if purpose != 'cdcontent':
-        participant_form = reg_success(request, 'general')
+    
+    if purpose != 'cdcontent': # purpose = event_id in case of ILW
+        participant_form = reg_success(request, 'general') 
         participant_form.payment_status = payee_obj_new
         try :
             participant_form.save()
-        except :
+        except Exception as e:
             return redirect('training:list_events', status='myevents')
     data = get_final_data(request, payee_obj_new, purpose)
     return render(request, 'payment_status.html', data)
@@ -202,6 +216,7 @@ def encrypted_data(request, obj, purpose):
     request_id = obj.reqId
     STdata =  request_id + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
+    print(f"\033[92m Encrypted Data : {s} \033[0m")
     return s
 
 
@@ -317,6 +332,17 @@ def validate(request):
         context["validate"] = "fail"
     return HttpResponse(json.dumps(context), content_type='application/json')
 
+# import requests
+# def temp(request):
+#     template_name = 'reg_success.html'
+#     name = request.POST.get('name')
+#     email = request.POST.get('email')
+#     phone = request.POST.get('phone')
+#     event_obj = request.POST.get('event')
+#     context = {
+#         name = ''
+#     }
+#     return render(request, template_name, context)
 
 def receipt(request):
     response = HttpResponse(content_type='application/pdf')

@@ -75,6 +75,8 @@ class Participant(models.Model):
 	foss_language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True )
 	payment_status = models.ForeignKey(Payee, on_delete=models.PROTECT, null=True)
 	reg_approval_status = models.PositiveSmallIntegerField(default=0)
+	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
+	city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True)
 	
 	class Meta(object):
 		unique_together = ('event', 'user', 'payment_status')
