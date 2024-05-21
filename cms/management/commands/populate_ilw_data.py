@@ -12,11 +12,13 @@ def set_user_type_ilw(user_lst,foss={}):
     for user in user_lst:
         try:
             ut=UserType.objects.get(user_id=user)
+            if ut.ilw != foss:
+                ut.ilw = foss
+                ut.save()
         except UserType.DoesNotExist:
-            ut=UserType.objects.create(user_id=user)
-        if ut.ilw != foss:
-            ut.ilw = foss
-            ut.save()
+            ut=UserType.objects.create(user_id=user, ilw=foss)
+        except Exception as e:
+            print(f"Exception in set_user_type_ilw : {e}")
 
 def get_fosses(payee):
     foss_lang = CdFossLanguages.objects.filter(payment=payee)
@@ -36,9 +38,12 @@ def get_ilw_users(payee):
             participants = [x for x in Participant.objects.filter(event=event).values_list('user_id',flat=True)]
             event_users = [x.id for x in User.objects.filter(Q(email=event.event_coordinator_email) | Q(id=event.entry_user_id))] #Event coordinator & Training Manager
             #return users who are participants /coordinator / Training Manager of the ILW event 
-            return participants+event_users
+            unique_users = list(set(participants+event_users))
+            return unique_users
+        except TrainingEvents.DoesNotExist:
+            print(f"\033[93m TrainingEvent not found: {purpose} \n \033[0m")
         except Exception as e:
-            print(f"event failed: {purpose:>15} \n{e}")
+            print(f"\033[93m get_ilw_users exception: {purpose} \n{e} \033[0m")
     
 
 class Command(BaseCommand):
@@ -51,5 +56,6 @@ class Command(BaseCommand):
         for payee in payee_list:
             d = get_fosses(payee)
             users = get_ilw_users(payee)
-            set_user_type_ilw(users,d)
+            if users:
+                set_user_type_ilw(users,d)
         self.stdout.write('Ending populate_ilw_data command...')
