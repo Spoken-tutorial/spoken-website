@@ -33,10 +33,18 @@ def get_users_from_acad(academic_id):
 class Command(BaseCommand):
     help = 'Populate cms_usertype table from events_academickey. It populates data for organisers, invigilators and students for paid academic centers with check on expiry date'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--month', type=int, help='Filter Academic Key objects by month of expiry_date'
+        )
+    
     def handle(self, *args, **options):
         self.stdout.write('Starting subscription management command...')
         today = timezone.now().date()
         acad_keys = AcademicKey.objects.filter(expiry_date__gte=today).values('academic_id').annotate(latest_expiry_date=Max('expiry_date'))
+        month = options.get('month')
+        if month:
+            acad_keys = acad_keys.filter(expiry_date__month=month)
         for key in acad_keys:
             expiry_date = key['latest_expiry_date']
             users = get_users_from_acad(key['academic_id'])
