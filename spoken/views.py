@@ -314,6 +314,8 @@ def watch_tutorial(request, foss, tutorial, lang):
     try:
         foss = unquote_plus(foss)
         is_valid_user_for_tut = is_valid_user(request.user,foss,lang)
+        print(f"\033[92m is_valid_user_for_tut : {is_valid_user_for_tut} \033[0m")
+        print(f"\033[92m request.user : {request.user} \033[0m")
         # is_valid_user_for_tut = True #Temporary making videos available to all
         tutorial = unquote_plus(tutorial)
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
