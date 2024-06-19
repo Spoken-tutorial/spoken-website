@@ -1,0 +1,99 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}New Company{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> New Company
+{% endblock %}
+{% block content %}
+    <div class="row well">
+        <div class='col-sm-8'>
+            <form action="{{ action }}" method="post" class='form-horizontal'>{% csrf_token %}
+                {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                    {% if form.non_field_errors %}
+                    <ul>
+                      {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {{ form.errors }}
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_state">State</label>
+                        <div class="col-sm-9">
+                            {% render_field form.state class+="form-control  state" tabindex="1" data-placeholder="Choose state" %}
+                            {{ form.state.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_district">District <span class='ajax-refresh ajax-refresh-district'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+                        <div class="col-sm-9">
+                            {% render_field form.district class+="form-control  district" tabindex="1" data-placeholder="Choose district" %}
+                            {{ form.district.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_company_type">Institute Type</label>
+                        <div class="col-sm-9">
+                            {% render_field form.company_type class+="form-control  company_type" tabindex="1" data-placeholder="Choose Type" %}
+                            {{ form.company_type.errors }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_name">Institution Name</label>
+                        <div class="col-sm-9">
+                            {% render_field form.name class+="form-control name" tabindex="1" data-placeholder="Enter company name" %}
+                            {{ form.name.errors }}
+                        </div>
+                    </div>
+                    
+                    <!--
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_institution_type">Govt / Govt-Aided/Private</label>
+                        <div class="col-sm-9">
+                            {% render_field form.institute_category class+="form-control  institute_category" tabindex="1" data-placeholder="Choose Institute Category" %}
+                            {{ form.institute_category.errors }}
+                        </div>
+                    </div>
+                -->
+                    
+                    <!-- <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_location">Location <span class='ajax-refresh ajax-refresh-location'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+                        <div class="col-sm-9">
+                            {% render_field form.location class+="form-control  location" tabindex="1" data-placeholder="Choose location" %}
+                            {{ form.location.errors }}
+                        </div>
+                    </div> -->
+                   
+                    <div class="form-group">
+                       <div class="col-sm-offset-3 col-sm-9">
+                            <div class="btn-group">
+                                <input class="btn btn-primary" type="submit" value="Submit" />
+                                
+                            </div>
+                            <div class="col-md-offset-3 col-md-8 col-sm-offset-3 col-sm-9">
+                                <a href="/training/companies/" class="btn btn-secondary w-100">Back to companies list</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endwith %}
+            </form>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/events.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script>
+        $("#id_state").change(function(){
+            ajaxStrateFillDatas('district', 'city', 'university');
+        });
+        $('.district').change(function(){
+            ajaxDistrictFillDatas('location', '', $(this).val());
+        });
+    </script>
+{% endblock %}
+

@@ -190,7 +190,7 @@ def controller(request, purpose):
         participant_form.payment_status = payee_obj_new
         try :
             participant_form.save()
-        except Exception as e:
+        except :
             return redirect('training:list_events', status='myevents')
     data = get_final_data(request, payee_obj_new, purpose)
     return render(request, 'payment_status.html', data)
@@ -323,18 +323,6 @@ def validate(request):
     else:
         context["validate"] = "fail"
     return HttpResponse(json.dumps(context), content_type='application/json')
-
-# import requests
-# def temp(request):
-#     template_name = 'reg_success.html'
-#     name = request.POST.get('name')
-#     email = request.POST.get('email')
-#     phone = request.POST.get('phone')
-#     event_obj = request.POST.get('event')
-#     context = {
-#         name = ''
-#     }
-#     return render(request, template_name, context)
 
 def receipt(request):
     response = HttpResponse(content_type='application/pdf')

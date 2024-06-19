@@ -223,8 +223,6 @@ def reg_success(request, user_type):
 				messages.success(request, "You have already registered for this event.")
 				return redirect('training:list_events', status='myevents')
 			else :
-				print(f"\033[92m Saving form \033[0m")
-				print(f"{form_data}")
 				form_data.save()
 			event_name = event.event_name
 			userprofile = Profile.objects.get(user=request.user)
@@ -238,7 +236,6 @@ def reg_success(request, user_type):
 				# if user has made payment from ILW interface -> return Participant form
 				return form_data
 		else:
-			print(f"\033[91m {form.errors} \033[0m")
 			messages.warning(request, 'Invalid form payment request 1.')
 			return redirect('training:list_events', status='ongoing' )
 

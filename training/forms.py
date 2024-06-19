@@ -33,18 +33,6 @@ class RegisterUser(forms.ModelForm):
         required = False,
         error_messages = {'required': 'component type is required.'},
     )
-    # company = forms.ModelChoiceField(
-    #         widget = forms.Select(attrs = {'class' : 'ac-state'}),
-    #         queryset = Company.objects.order_by('name'),
-    #         empty_label = "--- Select Company ---", 
-    #         help_text = ""
-    #         )
-    # city = forms.ModelChoiceField(
-    #         widget = forms.Select(attrs = {'class' : 'ac-city'}),
-    #         queryset = City.objects.order_by('name'),
-    #         empty_label = "--- Select City ---", 
-    #         help_text = ""
-    #         )
     foss_language = forms.ModelChoiceField(
         queryset = Language.objects.order_by('name'),
         required = False,
