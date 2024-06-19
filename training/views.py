@@ -11,6 +11,7 @@ from django.core.serializers import serialize
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.db import IntegrityError
 # Python imports
 from datetime import datetime,date
 import csv
@@ -25,7 +26,7 @@ from .templatetags.trainingdata import registartion_successful, get_event_detail
 from creation.models import TutorialResource, Language, FossCategory
 from events.decorators import group_required
 from events.models import *
-from events.views import is_resource_person, is_administrator, get_page, id_generator
+from events.views import is_resource_person, is_administrator, get_page, id_generator, is_event_manager
 from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
@@ -33,6 +34,7 @@ from cms.models import Profile
 from certificate.views import _clean_certificate_certificate
 from django.http import HttpResponse
 from django.template import RequestContext
+from .filters import CompanyFilter
 import os, sys
 from string import Template
 import subprocess
@@ -60,7 +62,10 @@ class TrainingEventCreateView(CreateView):
 
 	@method_decorator(group_required("Resource Person"))
 	def get(self, request, *args, **kwargs):
-		return render(self.request, self.template_name, {'form': self.form_class()})
+		context = {'form': self.form_class()}
+		context['pdp_fee']=settings.PDP_FEE
+		context['cdp_fee']=settings.CDP_FEE
+		return render(self.request, self.template_name, context)
 
 	def form_valid(self, form, **kwargs):
 		self.object = form.save(commit=False)
@@ -90,7 +95,7 @@ class TrainingEventsListView(ListView):
 		if self.status == 'completed':
 			self.events = TrainingEvents.objects.filter(event_end_date__lt=today).order_by('-event_end_date')
 		if self.status == 'ongoing':
-			self.events = TrainingEvents.objects.filter(event_end_date__gte=today)
+			self.events = TrainingEvents.objects.filter(event_end_date__gte=today).order_by('registartion_end_date')
 		if self.status == 'myevents':
 			participant = Participant.objects.filter(
 				Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
@@ -170,16 +175,40 @@ def reg_success(request, user_type):
 		email = request.POST.get('email')
 		phone = request.POST.get('phone')
 		event_obj = request.POST.get('event')
+		city = request.POST.get('city')
+		company = request.POST.get('company')
+		new_company = request.POST.get('new_company')
 		event = TrainingEvents.objects.get(id=event_obj)
+		
 		form = RegisterUser(request.POST)
+
+		event_type = request.POST.get('event_type', '')
+		print(f"\033[92m event_type : {event_type} \033[0m")
+		print(f"\033[93m {request.POST} \033[0m")
 		if form.is_valid():
 			form_data = form.save(commit=False)
 			form_data.user = request.user
 			form_data.event = event
-			try:
-				form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
-			except:
-				form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
+			if not event_type in ['PDP', 'CDP']:
+				try:
+					form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
+				except:
+					form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
+			else:
+				city_obj = City.objects.get(id=city)	
+				form_data.city = city_obj
+				print(f"\033[94m city : {city_obj} \033[0m")
+				form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))	
+				if company:
+					comp_obj = Company.objects.get(id=company)	
+					print(f"\033[94m company : {comp_obj} \033[0m")
+					form_data.company = comp_obj
+				else:
+					try:
+						company=Company.objects.create(name=new_company, added_by=request.user)
+						form_data.company = company
+					except IntegrityError:
+						pass
 			user_data = is_user_paid(request.user, form_data.college.id)
 			if user_data[0]:
 				form_data.registartion_type = 1 #Subscribed College
@@ -194,19 +223,20 @@ def reg_success(request, user_type):
 				messages.success(request, "You have already registered for this event.")
 				return redirect('training:list_events', status='myevents')
 			else :
-
 				form_data.save()
 			event_name = event.event_name
 			userprofile = Profile.objects.get(user=request.user)
 			userprofile.phone = phone
 			userprofile.save()
 			if user_type == 'paid':
+				# if user is already a paid user -> render reg_success.html showing registration success 
 				context = {'participant_obj':form_data}
 				return render(request, template_name, context)
 			else:
+				# if user has made payment from ILW interface -> return Participant form
 				return form_data
 		else:
-			messages.warning(request, 'Invalid form payment request.')
+			messages.warning(request, 'Invalid form payment request 1.')
 			return redirect('training:list_events', status='ongoing' )
 
 
@@ -1140,3 +1170,82 @@ def verify_ilwtest_certificate(request):
         context = ilwtestkey_verification(serial_no)
         return render(request, 'verify_ilwtest_certificate.html', context)
     return render(request, 'verify_ilwtest_certificate.html', {})
+
+@login_required
+def add_company(request):
+	"""create new company"""
+	user = request.user
+	if not (is_event_manager(user) or is_resource_person(user)):
+		raise PermissionDenied()
+	
+	if request.method == 'POST':
+		form = CompanyForm(request.POST)
+		if form.is_valid():
+			form_data = form.save(commit=False)
+			form_data.added_by = user
+			form_data.save()
+			messages.success(request, form_data.name+" has been updated")
+			return HttpResponseRedirect("/training/companies/new/")
+	else:
+		context = {}
+		#pass form
+		context['form'] = CompanyForm()
+		return render(request, 'company_form.html', context)
+	
+@login_required
+def list_companies(request):
+	user = request.user
+	if not (is_event_manager(user) or is_resource_person(user)):
+		raise PermissionDenied()
+	
+	context = {}
+	header = {
+		1: SortableHeader('#', False),
+		2: SortableHeader('Name', True),
+		3: SortableHeader('Type', True),
+		4: SortableHeader('State', True),
+		5: SortableHeader('District', True),
+		6: SortableHeader('Added By', True),
+		7: SortableHeader('Action', False),
+	}
+
+	collectionSet = Company.objects.select_related('added_by').all()
+	raw_get_data = request.GET.get('o', None)
+	collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+	ordering = get_field_index(raw_get_data)
+	collection = CompanyFilter(request.GET, queryset=collection)
+	context['form'] = collection.form
+	page = request.GET.get('page')
+	collection = get_page(collection.qs, page)
+	
+	context['collection'] = collection
+	context['header'] = header
+	context['ordering'] = ordering
+
+	return render(request, 'companies.html', context)
+
+@login_required
+def edit_company(request, rid = None):
+	user = request.user
+	if not (is_event_manager(user) or is_resource_person(user)):
+		raise PermissionDenied()
+
+	if request.method == 'POST':
+		company = Company.objects.get(id=rid)
+		form = CompanyForm(request.POST, instance=company)
+		if form.is_valid():
+			form.save()
+			messages.success(request, "Company details has been updated")
+			return HttpResponseRedirect("/training/edit_company/"+str(rid)+"/")
+		context = { 'form': form }
+		return HttpResponseRedirect("/training/companies/new/")
+	else:
+		try:
+			company = Company.objects.get(id=rid)
+			context = {}
+			context['form'] = CompanyForm(instance=company)
+			context['edit'] = rid
+			return render(request, 'company_form.html', context)
+		except:
+			raise PermissionDenied()
+

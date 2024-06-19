@@ -1,0 +1,84 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+
+{% block title %}Listing Companies{% endblock %}
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Listing Company Details <a href="{% url 'events:events_dashboard' %}" class=' dashboard pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+
+<div class= 'filters row' >
+	<form action="" method="get" class='form-horizontal'>
+		<div class="col-lg-4 col-md-4 col-sm-4">
+			<div class="form-group">
+				<label for="id_state" class="col-sm-4 control-label">State</label>
+				<div class="col-sm-8">
+					{% render_field form.state class+="form-control state" tabindex="1" %}
+					{{ form.state.errors }}
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="id_resource_center" class="col-sm-4 control-label">Name</label>
+				<div class="col-sm-8">
+					{% render_field form.name class+="form-control name" tabindex="1" %}
+					{{ form.name.errors }}
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-4 col-md-4 col-sm-4">
+			<div class="form-group">
+				<label for="id_state" class="col-sm-4 control-label">Institution Type</label>
+				<div class="col-sm-8">
+					{% render_field form.company_type class+="form-control company_type" tabindex="1" %}
+					{{ form.company_type.errors }}
+				</div>
+			</div>
+			<div class="form-group">
+			  <div class="col-sm-offset-4 col-sm-8">
+				 <input class="btn btn-success" type="submit" value="Filter" />
+				 <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+			  </div>
+		   </div>
+		</div>
+		<div class="col-lg-4 col-md-4 col-sm-4">
+		</div>
+	</form>
+</div>
+   
+    <div class='add-new'>
+	    <a class="btn btn-primary" href="{% url 'training:add_company' %}" >Add New</a>
+	</div>
+    {% if form.non_field_errors %}
+                    <ul>
+                      {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    </ul>
+                    {% endif %}
+                    {{ form.errors }}
+	<div class='table-responsive'>
+		{% if collection %}
+		    
+			<table class="paleblue table table-bordered table-hover table-striped">
+				{% get_sortable_header header ordering request.GET %}
+				{% for record in collection %}
+					<tr class="{% cycle 'odd' 'even' %}">
+                        <td>{{ forloop.counter }}
+						<td>{{ record.name }}</td>
+						<td>{{ record.company_type }}</td>
+						<td>{{ record.state }}</td>
+						<td>{{ record.district }}</td>
+						<td>{{ record.user.email }}</td>
+						<td>{{ record.created }}</td>
+                       
+						<td><a href="{% url 'training:edit_company' record.id %}" target="_blank">Edit</a> </td>
+					</tr>
+				{% endfor %}
+			</table>
+		{% else %}
+		    <p class="no-record"> No record found!</p>
+		{% endif %}
+	</div>
+{% endblock %}

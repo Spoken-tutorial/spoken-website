@@ -41,7 +41,7 @@ class RegisterUser(forms.ModelForm):
     phone = forms.RegexField(regex=r'^\+?1?\d{8,15}$', error_messages = {'required': 'Enter valid phone number.'},)
     class Meta(object):
         model = Participant
-        fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language']
+        fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language', 'company', 'city']
 
     def __init__(self, *args, **kwargs):
         super(RegisterUser, self).__init__(*args, **kwargs)
@@ -124,5 +124,9 @@ class TrainingManagerPaymentForm(forms.Form):
                     self.fields['events'].widget.attrs = {}
 
 
+class CompanyForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        exclude = ['added_by', 'created', 'updated']
 
 
