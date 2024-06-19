@@ -136,5 +136,9 @@ class TrainingManagerPaymentForm(forms.Form):
                     self.fields['events'].widget.attrs = {}
 
 
+class CompanyForm(forms.ModelForm):
+    class Meta:
+        model = Company
+        exclude = ['added_by', 'created', 'updated']
 
 

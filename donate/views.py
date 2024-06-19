@@ -108,7 +108,6 @@ def pay_now(request, purpose):
             data = get_final_data(request, obj, purpose)
         else:
             messages.errors(request,'Invalid Form')
-    print(f"\033[93m pay_now \033[0m")
     return render(request, 'payment_status.html', data)
 
 @csrf_exempt
@@ -118,18 +117,16 @@ def form_valid(request, form, purpose):
     Payee record is used to store payment information.
     CdFossLanguages record stores mapping of user and foss which the user is eligible to download.
     """
-    print(f"\033[92m Form is valid \033[0m")
     # Save Payee record
     form_data = form.save(commit=False)
-    # form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
-    form_data.reqId = "abc"
+    form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
+    
     form_data.user = request.user
     form_data.status = 0
     form_data.expiry = calculate_expiry()
     form_data.purpose = purpose
     form_data.save()
     payee_obj = form_data
-    print(f"\033[97m Form data is saved \033[0m")
     # Save CdFossLanguages record
     # foss_ids = form.cleaned_data.get('foss_id')
     # languages = form.cleaned_data.get('language_id')
@@ -179,15 +176,12 @@ def form_invalid(request, form):
 
 @csrf_exempt
 def controller(request, purpose):
-    print(f"\033[92m 1 Inside controller of initiate_payment  \033[0m")
-    print(f"\033[92m purpose : {purpose} \033[0m")
     form = PayeeForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
             # form_valid function creates Payee & CdFossLanguages records.
             # & returns Payee record
             payee_obj_new = form_valid(request, form, purpose)
-            print(f"\033[95m FORM IS VALID  \033[0m")
         else:
             form_invalid(request, form)
     
@@ -216,7 +210,6 @@ def encrypted_data(request, obj, purpose):
     request_id = obj.reqId
     STdata =  request_id + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
-    print(f"\033[92m Encrypted Data : {s} \033[0m")
     return s
 
 
@@ -321,7 +314,6 @@ def validate(request):
     email = request.POST.get("email")
     user = User.objects.get(email=email)
     profile = Profile.objects.get(user=user)
-    print(profile.confirmation_code, " - ", user_pass)
     if profile.confirmation_code == user_pass:
         user.is_active = True
         user.save()

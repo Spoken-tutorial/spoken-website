@@ -26,7 +26,7 @@ from .templatetags.trainingdata import registartion_successful, get_event_detail
 from creation.models import TutorialResource, Language, FossCategory
 from events.decorators import group_required
 from events.models import *
-from events.views import is_resource_person, is_administrator, get_page, id_generator
+from events.views import is_resource_person, is_administrator, get_page, id_generator, is_event_manager
 from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation
@@ -34,6 +34,7 @@ from cms.models import Profile
 from certificate.views import _clean_certificate_certificate
 from django.http import HttpResponse
 from django.template import RequestContext
+from .filters import CompanyFilter
 import os, sys
 from string import Template
 import subprocess
@@ -1172,3 +1173,82 @@ def verify_ilwtest_certificate(request):
         context = ilwtestkey_verification(serial_no)
         return render(request, 'verify_ilwtest_certificate.html', context)
     return render(request, 'verify_ilwtest_certificate.html', {})
+
+@login_required
+def add_company(request):
+	"""create new company"""
+	user = request.user
+	if not (is_event_manager(user) or is_resource_person(user)):
+		raise PermissionDenied()
+	
+	if request.method == 'POST':
+		form = CompanyForm(request.POST)
+		if form.is_valid():
+			form_data = form.save(commit=False)
+			form_data.added_by = user
+			form_data.save()
+			messages.success(request, form_data.name+" has been updated")
+			return HttpResponseRedirect("/training/companies/new/")
+	else:
+		context = {}
+		#pass form
+		context['form'] = CompanyForm()
+		return render(request, 'company_form.html', context)
+	
+@login_required
+def list_companies(request):
+	user = request.user
+	if not (is_event_manager(user) or is_resource_person(user)):
+		raise PermissionDenied()
+	
+	context = {}
+	header = {
+		1: SortableHeader('#', False),
+		2: SortableHeader('Name', True),
+		3: SortableHeader('Type', True),
+		4: SortableHeader('State', True),
+		5: SortableHeader('District', True),
+		6: SortableHeader('Added By', True),
+		7: SortableHeader('Action', False),
+	}
+
+	collectionSet = Company.objects.select_related('added_by').all()
+	raw_get_data = request.GET.get('o', None)
+	collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+	ordering = get_field_index(raw_get_data)
+	collection = CompanyFilter(request.GET, queryset=collection)
+	context['form'] = collection.form
+	page = request.GET.get('page')
+	collection = get_page(collection.qs, page)
+	
+	context['collection'] = collection
+	context['header'] = header
+	context['ordering'] = ordering
+
+	return render(request, 'companies.html', context)
+
+@login_required
+def edit_company(request, rid = None):
+	user = request.user
+	if not (is_event_manager(user) or is_resource_person(user)):
+		raise PermissionDenied()
+
+	if request.method == 'POST':
+		company = Company.objects.get(id=rid)
+		form = CompanyForm(request.POST, instance=company)
+		if form.is_valid():
+			form.save()
+			messages.success(request, "Company details has been updated")
+			return HttpResponseRedirect("/training/edit_company/"+str(rid)+"/")
+		context = { 'form': form }
+		return HttpResponseRedirect("/training/companies/new/")
+	else:
+		try:
+			company = Company.objects.get(id=rid)
+			context = {}
+			context['form'] = CompanyForm(instance=company)
+			context['edit'] = rid
+			return render(request, 'company_form.html', context)
+		except:
+			raise PermissionDenied()
+

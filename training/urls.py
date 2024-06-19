@@ -80,4 +80,7 @@ urlpatterns = [
         name="generate_test_certificate"
         ),
     url(r'^verify-ilwtest-certificate/$', verify_ilwtest_certificate, name='verify_ilwtest_certificate'),
+    url(r'^companies/new/$', add_company, name='add_company'),
+    url(r'^companies/$', list_companies, name='list_companies'),
+    url(r'^edit_company/(\d+)/$', edit_company, name='edit_company'),
     ]

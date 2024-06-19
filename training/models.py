@@ -20,9 +20,18 @@ REGISTRATION_TYPE_CHOICES =(
     ('', '-----'),  (1, 'Subscribed College'),(2, 'Manual Registration')
     )
 
+class CompanyType(models.Model):
+	name = models.CharField(max_length=250)
+
+	def __str__(self):
+		return self.name
+
 class Company(models.Model):
 	name = models.CharField(max_length=250)
 	added_by = models.ForeignKey(User, on_delete=models.PROTECT)
+	company_type = models.ForeignKey(CompanyType, on_delete=models.PROTECT, null=True, blank=True)
+	state = models.ForeignKey(State, on_delete=models.PROTECT)
+	district = models.ForeignKey(District, on_delete=models.PROTECT)
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
 
