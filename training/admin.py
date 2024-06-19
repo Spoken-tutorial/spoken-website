@@ -11,5 +11,5 @@ class CompanyTypeAdmin(admin.ModelAdmin):
 
 admin.site.register(ILWFossMdlCourses)
 admin.site.register(Company, CompanyAdmin)
-admin.site.register(CompanyType, CompanyAdmin)
+admin.site.register(CompanyType, CompanyTypeAdmin)
 
