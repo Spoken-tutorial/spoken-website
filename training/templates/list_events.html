@@ -162,7 +162,9 @@
       <div class="content">
           <h6>{{event.event.event_name}}</h6>
           <p>
-              <b>Host College :</b> <span>{{event.event.host_college}}{{event.event.state.name}}</span><br>
+            {% if event.event_type != 'PDP' and  event.event_type != 'CDP' %}
+              <b>Host College :</b> <span>{{event.event.host_college}}, {{event.event.state.name}}</span><br>
+            {% endif %}
               <b>Event Coordinator Name :</b> <span>{{event.event.event_coordinator_name}}</span><br>
               <b>FOSS :</b> <span >{{event.event.foss}}</span>
                         <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{event.get_foss_langs}}' style="display: none;">
@@ -218,7 +220,10 @@
     <div class="content">
       <h6>{{event.event_name}}</h6>
       <p>
-        <b>Host College :</b> <span>{{event.host_college}}{{event.state.name}}</span><br>
+        {% if event.event_type != 'PDP' and  event.event_type != 'CDP' %}
+          <b>Host College :</b> <span>{{event.host_college}}, {{event.state.name}}</span><br>
+        {% endif %}
+        
         <b>Event Coordinator Name :</b> <span>{{event.event_coordinator_name}}</span><br>
         <b>FOSS :</b> <span >{{event.foss}}</span>
       </p>

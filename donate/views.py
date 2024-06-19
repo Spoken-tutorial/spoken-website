@@ -128,14 +128,10 @@ def form_valid(request, form, purpose):
     form_data.save()
     payee_obj = form_data
     # Save CdFossLanguages record
-    # foss_ids = form.cleaned_data.get('foss_id')
-    # languages = form.cleaned_data.get('language_id')
-    # level_ids = form.cleaned_data.get('level_id')
     fosses = form.cleaned_data.get('foss_id').split(',')
     foss_languages = form.cleaned_data.get('language_id').split(',|')
     levels = form.cleaned_data.get('level_id').split(',')
 
-    # payee_id = payee_obj.pk
     foss_level = 0
     
     for i in range(len(fosses)):

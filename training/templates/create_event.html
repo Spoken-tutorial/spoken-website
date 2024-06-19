@@ -187,11 +187,11 @@
 		const host_college = $('#id_host_college');
 		const event_fee = $('#id_event_fee')
 		if(event_type === "PDP"){
-			event_fee.val(1000);
+			event_fee.val("{{ pdp_fee }}");
 			host_college.val(621); 
 
 		}else if(event_type === "CDP"){
-			event_fee.val(500);
+			event_fee.val("{{ cdp_fee }}");
 			host_college.val(621); 
 		}	
 	});
