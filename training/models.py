@@ -60,6 +60,7 @@ class Participant(models.Model):
 	foss_language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True )
 	payment_status = models.ForeignKey(Payee, on_delete=models.PROTECT, null=True)
 	reg_approval_status = models.PositiveSmallIntegerField(default=0)
+	source = models.CharField(max_length=25, null=True, default=None)
 	
 	class Meta(object):
 		unique_together = ('event', 'user', 'payment_status')
@@ -119,3 +120,4 @@ class EventTestStatus(models.Model):
 	cert_code= models.CharField(max_length = 100, null=True)
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
+

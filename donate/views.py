@@ -121,6 +121,9 @@ def form_valid(request, form, purpose):
     form_data.status = 0
     form_data.expiry = calculate_expiry()
     form_data.purpose = purpose
+    source = request.POST.get('source')
+    if source == 'deet':
+        form_data.source = 'deet'
     form_data.save()
     payee_obj = form_data
 
@@ -185,6 +188,12 @@ def controller(request, purpose):
         except :
             return redirect('training:list_events', status='myevents')
     data = get_final_data(request, payee_obj_new, purpose)
+    if payee_obj_new.source == 'deet':
+        callbackurl = request.POST.get('callbackurl')
+        json = {'id': f'p{payee_obj_new.id}', 'name': payee_obj_new.name,
+                 'email':payee_obj_new.email, 'paid college': False,
+                 'amount': payee_obj_new.amount, 'status': 0}
+        requests.post(callbackurl, json)
     return render(request, 'payment_status.html', data)
 
 
