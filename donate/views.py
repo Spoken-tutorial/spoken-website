@@ -113,10 +113,14 @@ def pay_now(request, purpose):
 @csrf_exempt
 def form_valid(request, form, purpose):
     """
-    If the form is valid, save the associated model.
+    This method saves the Payee & CdFossLanguages records.
+    Payee record is used to store payment information.
+    CdFossLanguages record stores mapping of user and foss which the user is eligible to download.
     """
+    # Save Payee record
     form_data = form.save(commit=False)
     form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
+    
     form_data.user = request.user
     form_data.status = 0
     form_data.expiry = calculate_expiry()
@@ -126,17 +130,13 @@ def form_valid(request, form, purpose):
         form_data.source = 'deet'
     form_data.save()
     payee_obj = form_data
+    # Save CdFossLanguages record
+    fosses = form.cleaned_data.get('foss_id').split(',')
+    foss_languages = form.cleaned_data.get('language_id').split(',|')
+    levels = form.cleaned_data.get('level_id').split(',')
 
-    foss_ids = form.cleaned_data.get('foss_id')
-    languages = form.cleaned_data.get('language_id')
-    level_ids = form.cleaned_data.get('level_id')
-    fosses = foss_ids.split(',')
-    foss_languages = languages.split(',|')
-    levels = level_ids.split(',')
-
-    payee_id = payee_obj.pk
     foss_level = 0
-
+    
     for i in range(len(fosses)):
         foss_category = FossCategory.objects.get(pk=int(fosses[i]))
         if int(levels[i]):
@@ -153,7 +153,7 @@ def form_valid(request, form, purpose):
             if language not in ('','None'):
                 foss_language = Language.objects.get(pk=int(language))
                 cd_foss_langs = CdFossLanguages()
-                cd_foss_langs.payment = Payee.objects.get(pk=payee_id)
+                cd_foss_langs.payment = Payee.objects.get(pk=payee_obj.pk)
                 cd_foss_langs.foss = foss_category
                 cd_foss_langs.lang = foss_language
                 if foss_level:
@@ -168,6 +168,7 @@ def form_invalid(request, form):
     If the form is invalid, re-render the context data with the
     data-filled form and errors.
     """
+    
     messages.warning(request, 'Invalid form payment request.')
     return redirect('cdcontent:cdcontenthome')
 
@@ -177,11 +178,14 @@ def controller(request, purpose):
     form = PayeeForm(request.POST)
     if request.method == 'POST':
         if form.is_valid():
+            # form_valid function creates Payee & CdFossLanguages records.
+            # & returns Payee record
             payee_obj_new = form_valid(request, form, purpose)
         else:
             form_invalid(request, form)
-    if purpose != 'cdcontent':
-        participant_form = reg_success(request, 'general')
+    
+    if purpose != 'cdcontent': # purpose = event_id in case of ILW
+        participant_form = reg_success(request, 'general') 
         participant_form.payment_status = payee_obj_new
         try :
             participant_form.save()
@@ -315,7 +319,6 @@ def validate(request):
     email = request.POST.get("email")
     user = User.objects.get(email=email)
     profile = Profile.objects.get(user=user)
-    print(profile.confirmation_code, " - ", user_pass)
     if profile.confirmation_code == user_pass:
         user.is_active = True
         user.save()
@@ -325,7 +328,6 @@ def validate(request):
     else:
         context["validate"] = "fail"
     return HttpResponse(json.dumps(context), content_type='application/json')
-
 
 def receipt(request):
     response = HttpResponse(content_type='application/pdf')
