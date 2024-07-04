@@ -43,28 +43,26 @@ def readUrl(url):
 def getNewBrowser():
     # create browser instance
     b = mechanize.Browser()
-
     # create a cookiejar for cookies
     jar = http.cookiejar.LWPCookieJar()
     b.set_cookiejar(jar)
-
     # prevent mechanize from simulating a 403 disallow
-    b.set_handle_robots(False)
-
-    # handle some other stuff
-    b.set_handle_equiv(True)
-    #b.set_handle_gzip(True)
-    b.set_handle_redirect(True)
-    b.set_handle_referer(True)
-
-    # follows refresh 0 but not hangs on refresh >0
-    b.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
+    try:
+        b.set_handle_robots(False)
+        # handle some other stuff
+        b.set_handle_equiv(True)
+        #b.set_handle_gzip(True)
+        b.set_handle_redirect(True)
+        b.set_handle_referer(True)
+        # follows refresh 0 but not hangs on refresh >0
+        b.set_handle_refresh(mechanize._http.HTTPRefreshProcessor(), max_time=1)
+    except:
+        pass
 
     # want debugging messages?
     #b.set_debug_http(True)
     #b.set_debug_redirects(True)
     #b.set_debug_responses(True)
-
     # User-Agent
     b.addheaders = [('User-agent', 'Mozilla/5.0 (X11; Linux x86_64) Gecko/20100101 Firefox/31.0')]
     return b
@@ -126,6 +124,7 @@ def generate_subtitle(srt_url, srt_file_path):
             file_head.write(srt_data.encode("utf-8"))
             file_head.close()
            #print srt_data
+           
     except Exception as e:
         #print e
         return False
