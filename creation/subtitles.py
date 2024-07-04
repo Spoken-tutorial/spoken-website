@@ -51,7 +51,6 @@ def getNewBrowser():
         b.set_handle_robots(False)
         # handle some other stuff
         b.set_handle_equiv(True)
-        #b.set_handle_gzip(True)
         b.set_handle_redirect(True)
         b.set_handle_referer(True)
         # follows refresh 0 but not hangs on refresh >0
