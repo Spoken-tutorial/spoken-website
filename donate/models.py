@@ -23,6 +23,7 @@ class Payee(models.Model):
     user = models.ForeignKey(User,on_delete=models.PROTECT,related_name="payment_user" )
     purpose = models.CharField(max_length=255, null=True)
     reqId = models.CharField(max_length=100, default='')
+    source = models.CharField(max_length=25, null=True, default=None)
     def get_selected_foss(self):
         selected_foss = {}
         c = 0

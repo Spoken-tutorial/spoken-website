@@ -32,6 +32,9 @@
         {% csrf_token %}
           <div class="col-md-7">
             <fieldset>
+              <input type="text"  id="source" name="source" value="{{source}}" style="display:none">
+		            <input type="text"  id="demail" name="demail" value="{{email}}" style="display:none">
+		            <input type="text"  id="callbackurl" name="callbackurl" value="{{callbackurl}}" style="display:none">
                 <input type="text"  id="event" name="event" value="{{event_obj.id}}" style="display:none">
                 <input type="text"  id="foss_id" name="foss_id" value="{{event_obj.foss.id}}" style="display:none">
                 <input type="text"  id="language_id" name="language_id" value="{{event_obj.Language_of_workshop.id}}" style="display:none">
@@ -398,6 +401,17 @@ $('#id_email').on('focusout',function(){
       if (!isReadOnly) {
       var username = $('#id_name').val();
       var email = $('#id_email').val();
+      var demail = $('#demail').val();
+      var source = $('#source').val();
+      if(source == 'deet'){
+          if(demail != email){
+                $("#email-info").html('This Email Id is not registered with DEET. Please enter the registered email id.');
+                document.getElementById("email-info").style.color = "red ";
+                return 0;
+          } else {
+                $('#email-info').html('');
+            }
+      }
       $.ajax({
           url:'/donate/send_onetime/',
           type:"POST",

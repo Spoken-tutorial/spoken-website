@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{%load trainingdata%}
+{% block title %} Error {% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> Failed :
+{% endblock %}
+{% block search %}{% endblock %}
+
+{% block content %}
+<div class="panel panel-primary">
+  <div class="panel-heading">
+    <h3 class="panel-title"><b><i class="fa fa-times" aria-hidden="true"></i> {{ error }} </b></h3>
+  </div>
+</div>
+{% endblock %}

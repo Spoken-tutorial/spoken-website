@@ -52,7 +52,7 @@ from django.conf import settings
 from donate.models import *
 
 import csv
-
+import requests
 
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
@@ -128,12 +128,26 @@ class TrainingEventsListView(ListView):
 			context['user'] = self.request.user
 		return context
 
+def _validate_parameters(parameter, value):
+	if value is None:
+		return False
+	if parameter == 'source':
+		return value.lower() == 'deet'
+	if parameter == 'phone':
+		return value.isnumeric() and len(value) < 12
+	if parameter == 'event_id':
+		return value.isnumeric()
+	return True
+
 @csrf_exempt
 def register_user(request):
 	form = RegisterUser()
 	template_name = "register_user.html"
 	context = {}
 	context['form']= form
+	context['source'] = None
+	context['email'] = None
+	context['callbackurl'] = None
 	
 	if request.user.is_authenticated():
 		user = request.user
@@ -149,6 +163,59 @@ def register_user(request):
 				context['user_college'] = college
 			except Exception as e:
 				raise e
+	if request.method == 'GET':
+		source = request.GET.get('source', None)
+		foss = request.GET.get('foss', None)
+		event_id = request.GET.get('event_id', None)
+		email = request.GET.get('email', None)
+		name = request.GET.get('name', None)
+		gender = request.GET.get('gender', None)
+		phone = request.GET.get('phone', None)
+		callbackurl = request.GET.get('callbackurl', None)
+		event_id = request.GET.get('event_id')
+		if not _validate_parameters('source', source):
+			return render(request, 'error.html', {'error': 'Invalid Source'})
+		if not _validate_parameters('foss', foss):
+			return render(request, 'error.html', {'error': 'No foss mentioned'})
+		if not _validate_parameters('email', email):
+			return render(request, 'error.html', {'error': 'No email mentioned'})
+		if not _validate_parameters('name', name):
+			return render(request, 'error.html', {'error': 'No name mentioned'})
+		if not _validate_parameters('gender', gender):
+			return render(request, 'error.html', {'error': 'No gender mentioned'})
+		if not _validate_parameters('phone', phone):
+			return render(request, 'error.html', {'error': 'Invalid Phone number'})
+		if not _validate_parameters('event_id', event_id):
+			return render(request, 'error.html', {'error': 'Invalid Event'})
+		if not _validate_parameters('callbackurl', callbackurl):
+			return render(request, 'error.html', {'error': 'Callback url not mentioned'})
+		if event_id:
+			event_register = TrainingEvents.objects.get(id=event_id)
+			langs = Language.objects.filter(id__in =
+				TutorialResource.objects.filter(
+				tutorial_detail__foss = event_register.foss, status=1).exclude(
+					language=event_register.Language_of_workshop).values('language').distinct())
+			context["langs"] = langs
+			form.fields["foss_language"].queryset = langs
+			gst = float(event_register.event_fee)* 0.18
+			context["gst"] = gst
+			form.fields["amount"].initial = float(event_register.event_fee) + gst
+			form.fields["amount"].widget.attrs['readonly'] = True
+			context['event_obj']= event_register
+			form.fields['name'].initial = name
+			form.fields['phone'].initial = phone
+			if gender.lower() == 'female':
+				form.fields['gender'].initial = 'F'
+			elif gender.lower() == 'male':
+				form.fields['gender'].initial = 'M'
+			else:
+				form.fields['gender'].initial = 'O'
+			form.fields['name'].widget.attrs['readonly'] = True
+			form.fields['phone'].widget.attrs['readonly'] = True
+			form.fields['gender'].widget.attrs['readonly'] = True
+			context['source'] = source
+			context['email'] = email
+			context['callbackurl'] = callbackurl
 	if request.method == 'POST':
 		event_id = request.POST.get("event_id_info")
 		if event_id:
@@ -175,6 +242,8 @@ def reg_success(request, user_type):
 		email = request.POST.get('email')
 		phone = request.POST.get('phone')
 		event_obj = request.POST.get('event')
+		source = request.POST.get('source')
+		callbackurl = request.POST.get('callbackurl')
 		city = request.POST.get('city')
 		company = request.POST.get('company')
 		new_company = request.POST.get('new_company')
@@ -189,6 +258,9 @@ def reg_success(request, user_type):
 			form_data = form.save(commit=False)
 			form_data.user = request.user
 			form_data.event = event
+
+			if source == 'deet':
+				form_data.source = source
 			if not event_type in ['PDP', 'CDP']:
 				try:
 					form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
@@ -231,6 +303,11 @@ def reg_success(request, user_type):
 			if user_type == 'paid':
 				# if user is already a paid user -> render reg_success.html showing registration success 
 				context = {'participant_obj':form_data}
+				if form_data.source == 'deet':
+					json = {'id': f'n{form_data.id}', 'name': form_data.name,
+						'email': form_data.email, 'paid college': True,
+						'amount': 0.0, 'status': 1}
+					requests.post(callbackurl, json)
 				return render(request, template_name, context)
 			else:
 				# if user has made payment from ILW interface -> return Participant form
