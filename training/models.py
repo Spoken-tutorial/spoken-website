@@ -86,7 +86,7 @@ class Participant(models.Model):
 	reg_approval_status = models.PositiveSmallIntegerField(default=0)
 	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
 	city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True)
-  source = models.CharField(max_length=25, null=True, default=None)
+	source = models.CharField(max_length=25, null=True, default=None)
 	
 	class Meta(object):
 		unique_together = ('event', 'user', 'payment_status')
