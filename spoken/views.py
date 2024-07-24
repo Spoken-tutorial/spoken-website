@@ -25,7 +25,7 @@ from creation.models import Language, TutorialDetail, TutorialResource
 from creation.subtitles import *
 from creation.views import get_video_info
 from events.views import get_page
-from forums.models import Question
+from forums.models import Question, Answer
 from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
  MONGO_HOST, MONGO_DB
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
@@ -316,12 +316,31 @@ def watch_tutorial(request, foss, tutorial, lang):
         # is_valid_user_for_tut = is_valid_user(request.user,foss,lang)
         is_valid_user_for_tut = True #Temporary making videos available to all
         tutorial = unquote_plus(tutorial)
+        
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status=1) | Q(status=2), tutorial_detail__foss=tr_rec.tutorial_detail.foss, language=tr_rec.language).order_by(
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
-        questions = Question.objects.filter(category=td_rec.foss.foss.replace(
-            ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
+        all_question_ids = list(Question.objects.filter(category=td_rec.foss.foss.replace(
+            ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).values_list('id', flat=True))
+        answered_question_ids = set(Answer.objects.filter(question_id__in=all_question_ids).values_list('question_id', flat=True))
+        
+        unanswered_questions = list(
+            Question.objects.filter(id__in=[q_id for q_id in all_question_ids if q_id not in answered_question_ids])
+            .order_by('-date_created')
+        )
+
+        # Fetch latest answers for answered questions and order them by answer date_created in descending order
+        latest_answers = Answer.objects.filter(question_id__in=answered_question_ids).select_related('question').order_by('-date_created')
+        
+        # Extract the latest answered questions
+        answered_questions = []
+        answered_question_ids_set = set()  # To keep track of already added questions
+        for answer in latest_answers:
+            if answer.question_id not in answered_question_ids_set:
+                answered_questions.append(answer.question)
+                answered_question_ids_set.add(answer.question_id)
+
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
@@ -334,7 +353,6 @@ def watch_tutorial(request, foss, tutorial, lang):
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
-        'questions': questions,
         'video_info': video_info,
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
@@ -342,7 +360,9 @@ def watch_tutorial(request, foss, tutorial, lang):
         'script_base': settings.SCRIPT_URL,
         'perform_analysis':analytics,
         'is_valid_user_for_tut':is_valid_user_for_tut,
-        'video_play_time':getattr(settings, 'VIDEO_TIME', 15)
+        'video_play_time':getattr(settings, 'VIDEO_TIME', 15),
+        'unanswered_questions': unanswered_questions,
+        'answered_questions': answered_questions
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
