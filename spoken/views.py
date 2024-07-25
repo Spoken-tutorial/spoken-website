@@ -11,7 +11,8 @@ from django.contrib.auth.models import User
 #change here .. no csrf 
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
+from django.db.models import Q, Count, Max, Case, When, DateTimeField, IntegerField
+
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -310,6 +311,7 @@ def is_valid_user(user,foss,lang):
             return False
     return False
 
+
 def watch_tutorial(request, foss, tutorial, lang):
     try:
         foss = unquote_plus(foss)
@@ -321,26 +323,6 @@ def watch_tutorial(request, foss, tutorial, lang):
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status=1) | Q(status=2), tutorial_detail__foss=tr_rec.tutorial_detail.foss, language=tr_rec.language).order_by(
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
-        all_question_ids = list(Question.objects.filter(category=td_rec.foss.foss.replace(
-            ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).values_list('id', flat=True))
-        answered_question_ids = set(Answer.objects.filter(question_id__in=all_question_ids).values_list('question_id', flat=True))
-        
-        unanswered_questions = list(
-            Question.objects.filter(id__in=[q_id for q_id in all_question_ids if q_id not in answered_question_ids])
-            .order_by('-date_created')
-        )
-
-        # Fetch latest answers for answered questions and order them by answer date_created in descending order
-        latest_answers = Answer.objects.filter(question_id__in=answered_question_ids).select_related('question').order_by('-date_created')
-        
-        # Extract the latest answered questions
-        answered_questions = []
-        answered_question_ids_set = set()  # To keep track of already added questions
-        for answer in latest_answers:
-            if answer.question_id not in answered_question_ids_set:
-                answered_questions.append(answer.question)
-                answered_question_ids_set.add(answer.question_id)
-
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
@@ -350,6 +332,37 @@ def watch_tutorial(request, foss, tutorial, lang):
     analytics = 0
     if int(td_rec.foss.id) in FOSS_FOR_ANALYTICS:
         analytics = 1
+
+    # filter questions based on category & tutorial
+    ques = Question.objects.filter(category=td_rec.foss.foss.replace(
+            ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-'))
+    
+    # annotate each question with its answers count
+    ques = ques.annotate(
+        answer_count=Count('answer'),
+        latest_answer_date=Max('answer__date_modified'))
+    
+    # annotate with sorting_value such that it is question's date_created or answer's date_modified depending if answer_count > 0
+    ques = ques.annotate(
+        sorting_value=Case(
+            When(answer_count=0, then='date_created'),
+            When(answer_count__gt=0, then='latest_answer_date'),
+            output_field=DateTimeField()
+        ),
+        flag=Case(
+            When(answer_count=0, then=0),
+            When(answer_count__gt=0, then=1),
+            output_field=IntegerField()
+        ) #flag will be useful to sort the unanswered question first
+    )
+
+    # final sorting. flag = 0 for unanswered ques & flag = 1 for answered question
+    sorted_questions = ques.order_by(
+        'flag',
+        '-sorting_value',
+        '-date_created'
+    )
+
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
@@ -361,8 +374,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'perform_analysis':analytics,
         'is_valid_user_for_tut':is_valid_user_for_tut,
         'video_play_time':getattr(settings, 'VIDEO_TIME', 15),
-        'unanswered_questions': unanswered_questions,
-        'answered_questions': answered_questions
+        'questions': sorted_questions
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 

@@ -309,52 +309,36 @@
 
 <div class="tab-pane active" id="forums" >
 <div id="forums_Q" class='ScrollStyle' style="width: 32%; " >
- 
-    {% if answered_questions or unanswered_questions %}
+    {% if questions %}
         <h4 style="font-family: Menlo;font-size: 16px; padding-left: 8px; ">Questions posted on ST Forums: </h4>
         <ul class="forum-questions" id="forum_Q" style="padding : 6px ">
             
-        {% for question in unanswered_questions %}
+            {% for question in questions %}
 
-        <li class="question" id="{{ question.id }}">
-            <a href="https://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank" class="{{ question.id }}">{{ question.title }}</a>
-            <p>{{ question.body|striptags|safe }}
-            <div class="timing pull-left">
-            {% if not question.minute_range == 'None' %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
-            {% if not question.second_range == 'None' %}<small class="timing">{{ question.second_range }}S</small>{% endif %}
-            <small class="unanswered">unanswered</small>
-            </div>
-            <div class="user pull-right">
-                <span>{{ question.date_created }}</span>
-        {% if not question.user == "" %}
-            <small>{{ question.user }}</small>
-        {% endif %}
-            </div>
-        </p>
-    <hr class="hline-inner" style="margin-top: 18px;margin-bottom: 4px;" />
-            </li>
-        
-        {% endfor %}
-        {% for question in answered_questions %}
+            <li class="question" id="{{ question.id }}">
+                <a href="https://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank" class="{{ question.id }}">{{ question.title }}</a>
+                <p>{{ question.body|striptags|safe }}
+                <div class="timing pull-left">
+                {% if not question.minute_range == 'None' %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
+                {% if not question.second_range == 'None' %}<small class="timing">{{ question.second_range }}S</small>{% endif %}
+                {% if question.answer_count == 0 %}<small class="unanswered">unanswered</small>{% endif %}
+                {% if not question.user == "" %}
+                <small>{{ question.user }}</small>
+            {% endif %}
+                </div>
+                <br/>
+                <div class="user pull-right">
+                    <span>{% if question.answer_count == 0 %}Question posted on: 
+                            {% else %}Answer last updated on: 
+                        {% endif %}{{ question.sorting_value }}</span>
+            
+                </div>
+            </p>
+        <hr class="hline-inner" style="margin-top: 18px;margin-bottom: 4px;" />
+                </li>
+            
+            {% endfor %}
 
-        <li class="question" id="{{ question.id }}">
-            <a href="https://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank" class="{{ question.id }}">{{ question.title }}</a>
-            <p>{{ question.body|striptags|safe }}
-            <div class="timing pull-left">
-            {% if not question.minute_range == 'None' %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
-            {% if not question.second_range == 'None' %}<small class="timing">{{ question.second_range }}S</small>{% endif %}
-            </div>
-            <div class="user pull-right">
-                <span>{{ question.date_created }}</span>
-        {% if not question.user == "" %}
-            <small>{{ question.user }}</small>
-        {% endif %}
-            </div>
-        </p>
-    <hr class="hline-inner" style="margin-top: 18px;margin-bottom: 4px;" />
-            </li>
-        
-        {% endfor %}
     {% else %}
         <p style=" text-align: center; padding: 40px"> No questions yet</p>
     {% endif %}
