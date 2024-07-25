@@ -11,7 +11,8 @@ from django.contrib.auth.models import User
 #change here .. no csrf 
 
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
+from django.db.models import Q, Count, Max, Case, When, DateTimeField, IntegerField
+
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
@@ -25,7 +26,7 @@ from creation.models import Language, TutorialDetail, TutorialResource
 from creation.subtitles import *
 from creation.views import get_video_info
 from events.views import get_page
-from forums.models import Question
+from forums.models import Question, Answer
 from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
  MONGO_HOST, MONGO_DB
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
@@ -310,18 +311,18 @@ def is_valid_user(user,foss,lang):
             return False
     return False
 
+
 def watch_tutorial(request, foss, tutorial, lang):
     try:
         foss = unquote_plus(foss)
         # is_valid_user_for_tut = is_valid_user(request.user,foss,lang)
         is_valid_user_for_tut = True #Temporary making videos available to all
         tutorial = unquote_plus(tutorial)
+        
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status=1) | Q(status=2), tutorial_detail__foss=tr_rec.tutorial_detail.foss, language=tr_rec.language).order_by(
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
-        questions = Question.objects.filter(category=td_rec.foss.foss.replace(
-            ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-')).order_by('-date_created')
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
@@ -331,10 +332,40 @@ def watch_tutorial(request, foss, tutorial, lang):
     analytics = 0
     if int(td_rec.foss.id) in FOSS_FOR_ANALYTICS:
         analytics = 1
+
+    # filter questions based on category & tutorial
+    ques = Question.objects.filter(category=td_rec.foss.foss.replace(
+            ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-'))
+    
+    # annotate each question with its answers count
+    ques = ques.annotate(
+        answer_count=Count('answer'),
+        latest_answer_date=Max('answer__date_modified'))
+    
+    # annotate with sorting_value such that it is question's date_created or answer's date_modified depending if answer_count > 0
+    ques = ques.annotate(
+        sorting_value=Case(
+            When(answer_count=0, then='date_created'),
+            When(answer_count__gt=0, then='latest_answer_date'),
+            output_field=DateTimeField()
+        ),
+        flag=Case(
+            When(answer_count=0, then=0),
+            When(answer_count__gt=0, then=1),
+            output_field=IntegerField()
+        ) #flag will be useful to sort the unanswered question first
+    )
+
+    # final sorting. flag = 0 for unanswered ques & flag = 1 for answered question
+    sorted_questions = ques.order_by(
+        'flag',
+        '-sorting_value',
+        '-date_created'
+    )
+
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
-        'questions': questions,
         'video_info': video_info,
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
@@ -342,7 +373,8 @@ def watch_tutorial(request, foss, tutorial, lang):
         'script_base': settings.SCRIPT_URL,
         'perform_analysis':analytics,
         'is_valid_user_for_tut':is_valid_user_for_tut,
-        'video_play_time':getattr(settings, 'VIDEO_TIME', 15)
+        'video_play_time':getattr(settings, 'VIDEO_TIME', 15),
+        'questions': sorted_questions
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
