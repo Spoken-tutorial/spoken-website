@@ -1,0 +1,51 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+{% block title %}School Donation{% endblock %}
+{% block content %}
+
+
+<body >
+    <div class= 'filters row col-md-offset-2 col-md-8' style="text-align: center;">
+        
+        {% if status == 'S'%}
+            <h2 style="font-size: 1.5rem;">Thank you</h2>
+            <h2 style="font-size: 1.5rem;color: green;">Your Transaction is successful.</h2>
+        {% elif status == 'F' %}
+            <h2>Transaction failed. Kindly try again.</h2>
+        {% endif %}
+
+        <table class="table " style="text-align: center;">
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Transaction Id :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>{{transId}}</b></h5></td>
+            </tr>
+            {% if status == 'S'%}
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Reference No. :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>{{refNo}}</b></h5></td>
+            </tr>
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Status message :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>{{msg}}</b></h5></td>
+            </tr>
+            {% elif status == 'F' %}
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Status message :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>Transaction failed</b></h5></td>
+            </tr>
+            {% endif %}
+            <tr class="info">
+                <td class=" col-md-4 "><h5><b>Amount :</b></h5></td>
+                <td class=" col-md-4 "><h5><b>{{amount}}</b></h5></td>
+            </tr>
+        </table>
+        <p>You will soon receive the details at the email address: {{email}}  </p>
+        <a href="/software-training/receipt">Print Receipt for Transaction Id : {{transId}}</a>
+
+</div>
+</body>
+
+
+{% endblock %}
+
+

@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 from pytz import timezone
 import json
+from events.models import City, State
 
 class Payee(models.Model):
     name = models.CharField(max_length=255)
@@ -116,3 +117,21 @@ class GoodiesTransaction(TransactionCommonInfo):
     paymentdetail = models.ForeignKey(Goodies, on_delete=models.PROTECT, related_name="goodie_payment_transaction" )
     
 
+class SchoolDonation(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255)
+    contact = models.CharField(max_length=255)
+    state = models.ForeignKey(State, on_delete=models.PROTECT)
+    city = models.ForeignKey(City, on_delete=models.PROTECT)
+    address = models.TextField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    note = models.TextField()
+    reqId = models.CharField(max_length=100, default='')
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateField(auto_now=True)
+    mail_status = models.BooleanField(default=False)
+    mail_response = models.CharField(max_length=250)
+
+
+class SchoolDonationTransactions(TransactionCommonInfo):
+    paymentdetail = models.ForeignKey(SchoolDonation, on_delete=models.PROTECT)

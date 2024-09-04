@@ -35,6 +35,7 @@ import random
 from training.views import reg_success
 from .models import *
 from .forms import *
+
 # @csrf_exempt
 # def donatehome(request):
 #     form = PayeeForm(initial={'country': 'India'})
@@ -120,7 +121,6 @@ def form_valid(request, form, purpose):
     # Save Payee record
     form_data = form.save(commit=False)
     form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
-    
     form_data.user = request.user
     form_data.status = 0
     form_data.expiry = calculate_expiry()
@@ -377,3 +377,34 @@ def receipt(request):
         print("error is ",e)
 
     return response
+
+
+def school_donation(request):
+    if request.method == 'POST':
+        form = SchoolDonationForm(request.POST)
+        if form.is_valid():
+            #prepare data for donation gateway
+            donation = form.save(commit=False)
+            reqId = CHANNEL_ID + str(donation.id)
+            donation.reqId = reqId
+            donation.save()
+            purpose = "school_donation"
+            STdata = CHANNEL_ID + str(reqId) + str(donation.id) + str(donation.email) + str(donation.amount) + purpose + CHANNEL_ID + CHANNEL_KEY
+            s = display.value(str(STdata))
+            data = {
+                "reqId": reqId,
+                "userId": 0,
+                "name": donation.name,
+                "amount": donation.amount,
+                "purpose": purpose,
+                "channelId": CHANNEL_ID,
+                "random": s
+            }
+            try:
+                return render(request, 'payment_status.html', data)
+            except Exception as e:
+                form.add_error(None, 'An error occurred. Please try again later.')
+                return render(request, 'donate/school_donation.html', {'form': form})
+    else:
+        form = SchoolDonationForm()
+    return render(request, 'donate/school_donation.html', {'form': form})
