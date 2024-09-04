@@ -6,7 +6,7 @@ import smtplib
 
 def send_transaction_email(user_email, transaction_details):
     # Render the email content using a template
-    subject = 'Spoken Tutorial - School Donation Transaction Deatils'
+    subject = 'Spoken Tutorial - School Donation Transaction Details'
 
     status = transaction_details['status']
     if status == 'S':
