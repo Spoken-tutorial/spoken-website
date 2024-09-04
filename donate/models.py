@@ -124,13 +124,14 @@ class SchoolDonation(models.Model):
     state = models.ForeignKey(State, on_delete=models.PROTECT)
     city = models.ForeignKey(City, on_delete=models.PROTECT)
     address = models.TextField()
-    amount = models.DecimalField(max_digits=10,decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
     note = models.TextField()
     reqId = models.CharField(max_length=100, default='')
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateField(auto_now=True)
     mail_status = models.BooleanField(default=False)
     mail_response = models.CharField(max_length=250)
+
 
 class SchoolDonationTransactions(TransactionCommonInfo):
     paymentdetail = models.ForeignKey(SchoolDonation, on_delete=models.PROTECT)

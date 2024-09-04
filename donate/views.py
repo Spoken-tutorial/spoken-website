@@ -378,32 +378,33 @@ def receipt(request):
 
     return response
 
+
 def school_donation(request):
     if request.method == 'POST':
         form = SchoolDonationForm(request.POST)
         if form.is_valid():
-            donation = form.save(commit=False)
             #prepare data for donation gateway
-            reqId = CHANNEL_ID+str(donation.id)
+            donation = form.save(commit=False)
+            reqId = CHANNEL_ID + str(donation.id)
             donation.reqId = reqId
             donation.save()
             purpose = "school_donation"
             STdata = CHANNEL_ID + str(reqId) + str(donation.id) + str(donation.email) + str(donation.amount) + purpose + CHANNEL_ID + CHANNEL_KEY
             s = display.value(str(STdata))
             data = {
-                "reqId" : reqId,
-                "userId" : 0,
-                "name" : donation.name,
-                "amount" : donation.amount,
-                "purpose" : purpose,
-                "channelId" : CHANNEL_ID,
-                "random" : s
+                "reqId": reqId,
+                "userId": 0,
+                "name": donation.name,
+                "amount": donation.amount,
+                "purpose": purpose,
+                "channelId": CHANNEL_ID,
+                "random": s
             }
             try:
                 return render(request, 'payment_status.html', data)
             except Exception as e:
                 form.add_error(None, 'An error occurred. Please try again later.')
-                return render(request, 'donate/school_donation.html', {'form': form}) 
+                return render(request, 'donate/school_donation.html', {'form': form})
     else:
         form = SchoolDonationForm()
     return render(request, 'donate/school_donation.html', {'form': form})

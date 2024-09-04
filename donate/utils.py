@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 import smtplib
 
+
 def send_transaction_email(user_email, transaction_details):
     # Render the email content using a template
     subject = 'Spoken Tutorial - School Donation Transaction Deatils'

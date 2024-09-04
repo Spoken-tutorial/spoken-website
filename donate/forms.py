@@ -224,4 +224,4 @@ class GoodieTransactionForm(forms.ModelForm):
 class SchoolDonationForm(forms.ModelForm):
     class Meta:
         model = SchoolDonation
-        fields = ['name', 'email', 'contact', 'state', 'city','address', 'amount', 'note']
+        fields = ['name', 'email', 'contact', 'state', 'city', 'address', 'amount', 'note']
