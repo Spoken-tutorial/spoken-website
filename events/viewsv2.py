@@ -72,6 +72,7 @@ from events.helpers import get_prev_semester_duration, get_updated_form
 from cron.tasks import async_filter_student_grades, filter_student_grades
 from spoken.config import TOPPER_WORKER_STATUS
 from django.db import connection
+from donate.utils import send_transaction_email
 
 class JSONResponseMixin(object):
   """
@@ -2783,7 +2784,6 @@ def payment_success(request):
     msg = request.POST.get('msg')
     purpose = request.POST.get('purpose')
     random = request.POST.get('random')
-
     # Update Context
     context['transId'] = transId
     context['refNo'] = refNo
@@ -2795,7 +2795,26 @@ def payment_success(request):
     STresponsedata = reqId+str(userId)+transId+refNo+amount+status+msg+purpose+CHANNEL_KEY
     STresponsedata_hexa = display.value(str(STresponsedata))
     template_name = 'payment_success.html'
+    
     if STresponsedata_hexa == random:
+      #School Donation Response
+      if purpose == 'school_donation' :
+        template = 'donate/school_donation_status.html'
+        try:
+          sd = SchoolDonation.objects.get(reqId=reqId)
+          context['email'] = sd.email
+          context['reqId'] = sd.reqId
+          context['name'] = sd.name
+          context['date'] = sd.created
+          transaction = add_transaction(purpose, sd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          #send email
+          email_status, status_msg = send_transaction_email(sd.email, context)
+          sd.mail_status = email_status
+          sd.mail_response = status_msg
+          sd.save()
+        except Exception as e:
+          messages.error(request, 'Transaction failed')
+        return render(request, template, context)
       #Subscription Responses
       if purpose == 'Subscription':
         try:
@@ -2882,6 +2901,8 @@ def add_transaction(purpose, pid, requestType, userId, amount, reqId, transId, r
     transaction = DonationTransaction()
   elif 'Goodie' in purpose:
     transaction = GoodiesTransaction()
+  elif 'school_donation' in purpose:
+    transaction = SchoolDonationTransactions()
   else:  
     transaction = PaymentTransaction()
 

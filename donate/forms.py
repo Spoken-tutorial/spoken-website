@@ -221,3 +221,7 @@ class GoodieTransactionForm(forms.ModelForm):
         pass
 
         
+class SchoolDonationForm(forms.ModelForm):
+    class Meta:
+        model = SchoolDonation
+        fields = ['name', 'email', 'contact', 'state', 'city','address', 'amount', 'note']
