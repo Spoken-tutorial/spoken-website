@@ -378,7 +378,7 @@ def receipt(request):
 
     return response
 
-
+@csrf_exempt
 def school_donation(request):
     if request.method == 'POST':
         form = SchoolDonationForm(request.POST)
