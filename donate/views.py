@@ -205,27 +205,28 @@ def controller(request, purpose):
 def calculate_expiry():
     return datetime.now() + timedelta(days = EXPIRY_DAYS)
 
+
 @csrf_exempt
 def encrypted_data(request, obj, purpose):
+    userId = "0" if purpose == "school_donation" else str(request.user.id)
     STdata = ''
     user_name = obj.name
     amount = obj.amount
-    #amount = 1.00
     purpose = purpose+"NEW"+str(obj.pk)
     request_id = obj.reqId
-    STdata =  request_id + str(request.user.id) + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
+    STdata =  request_id + userId + str(user_name) + str(amount) + purpose + CHANNEL_ID + CHANNEL_KEY
     s = display.value(str(STdata))
     return s
 
 
 @csrf_exempt
 def get_final_data(request, obj, purpose):
+    userId = "0" if purpose == "school_donation" else str(request.user.id)
     data = {
         'reqId' :  obj.reqId,
-        'userId': str(request.user.id),
+        'userId': userId,
         'name': obj.name,
         'amount': obj.amount,
-        #'amount': 1.00,
         'purpose': purpose+"NEW"+str(obj.pk) ,
         'channelId': CHANNEL_ID,
         'target': TARGET,
@@ -385,34 +386,15 @@ def school_donation(request):
         if form.is_valid():
             #prepare data for donation gateway
             donation = form.save(commit=False)
-            d = display.value(datetime.now().strftime('%Y%m%d%H%M%S'))
-            print("donate: display value", d)
-            print(str(d))
-            reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
-            print("reqId", reqId)
+            reqId = CHANNEL_ID + str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
             donation.reqId = reqId
-            # donation.save()
-            # donation.reqId = CHANNEL_ID+ str(donation.id)
             donation.save()
             purpose = "school_donation"
-            STdata = CHANNEL_ID + str(reqId) + str(donation.id) + str(donation.email) + str(donation.amount) + purpose + CHANNEL_ID + CHANNEL_KEY
-            s = display.value(str(STdata))
-            data = {
-                "reqId": reqId,
-                "userId": "0",
-                "name": donation.name,
-                "amount": donation.amount,
-                "purpose": purpose,
-                "channelId": CHANNEL_ID,
-                "random": s
-            }
-            print("donate: data **", data)
+            data = get_final_data(request, donation, purpose)
             try:
                 return render(request, 'payment_status.html', data)
             except Exception as e:
-                print("donate: error **", e)
-                # form.add_error(None, 'An error occurred. Please try again later.')
-                form.add_error(None, str(e))
+                form.add_error(None, 'An error occurred. Please try again later.')
                 return render(request, 'donate/school_donation.html', {'form': form})
     else:
         form = SchoolDonationForm()
