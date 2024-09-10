@@ -5,6 +5,7 @@ import smtplib
 
 
 def send_transaction_email(user_email, transaction_details):
+    print("donate: Transaction Mail")
     # Render the email content using a template
     subject = 'Spoken Tutorial - School Donation Transaction Details'
 
@@ -18,19 +19,29 @@ def send_transaction_email(user_email, transaction_details):
     from_email = 'no-reply@spoken-tutorial.org'
     to = user_email
     try:
+        print("donate: send mail")
         send_mail(subject, plain_message, from_email, [to], html_message)
     except BadHeaderError:
+        print("donate: BadHeaderError")
         return False, "Invalid header found"
     except smtplib.SMTPAuthenticationError:
+        print("donate: SMTPAuthenticationError")
         return False, "Authentication failed. Check your email credentials"
     except smtplib.SMTPRecipientsRefused:
+        print("donate: SMTPRecipientsRefused")
         return False, "The recipient was refused by the server"
     except smtplib.SMTPSenderRefused:
+        print("donate: SMTPSenderRefused")
         return False, "The sender address was refused by the server"
     except smtplib.SMTPDataError:
+        print("donate: SMTPDataError")
         return False, "The server returned an unexpected error code"
     except smtplib.SMTPConnectError:
+        print("donate: SMTPConnectError")
         return False, "Failed to connect to the email server"
     except Exception as e:
+        print("donate: mail exception")
+        print(str(e))
         return False, str(e)
+    print("donate: mail sent successfully")
     return True, "success"

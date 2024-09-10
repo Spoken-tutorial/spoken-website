@@ -2784,6 +2784,18 @@ def payment_success(request):
     msg = request.POST.get('msg')
     purpose = request.POST.get('purpose')
     random = request.POST.get('random')
+
+    print("donate: requestType", requestType)
+    print("donate: userId", userId)
+    print("donate: amount", amount)
+    print("donate: reqId", reqId)
+    print("donate: transId", transId)
+    print("donate: refNo", refNo)
+    print("donate: provId", provId)
+    print("donate: status", status)
+    print("donate: msg", msg)
+    print("donate: purpose", purpose)
+    print("donate: random", random)
     # Update Context
     context['transId'] = transId
     context['refNo'] = refNo
@@ -2806,14 +2818,21 @@ def payment_success(request):
           context['reqId'] = sd.reqId
           context['name'] = sd.name
           context['date'] = sd.created
+          print("donate: adding transaction")
           transaction = add_transaction(purpose, sd.id, requestType, userId, amount, reqId, transId, refNo, provId, status, msg)
+          print("donate: added transaction")
           #send email
           email_status, status_msg = send_transaction_email(sd.email, context)
+          print("donate: mail sent: ",email_status, status_msg )
           sd.mail_status = email_status
           sd.mail_response = status_msg
+          print("donate: saved transaction object")
           sd.save()
         except Exception as e:
+          print("donate: exception from payment_success")
+          print(str(e))
           messages.error(request, 'Transaction failed')
+        print("donate: return status template: ", template, context)
         return render(request, template, context)
       #Subscription Responses
       if purpose == 'Subscription':
@@ -2855,6 +2874,7 @@ def payment_success(request):
           return render(request,template_name,context)
 
       else:
+        print("donate: cdcontent")
         template_name = 'donate/templates/payment_response.html'
         # Participant of events
         if 'cdcontent' not in purpose:
