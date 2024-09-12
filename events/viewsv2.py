@@ -2810,7 +2810,7 @@ def payment_success(request):
     
     if STresponsedata_hexa == random:
       #School Donation Response
-      if purpose == 'school_donation' :
+      if 'school_donation' in purpose :
         template = 'donate/school_donation_status.html'
         try:
           sd = SchoolDonation.objects.get(reqId=reqId)
