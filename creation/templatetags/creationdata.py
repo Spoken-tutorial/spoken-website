@@ -269,6 +269,15 @@ def get_user_uploads(username, hr_code):
         return file_list
     else:
         return None
+    
+
+def docker_file(foss):
+     formatted_foss_name = foss.foss.replace(' ', '-')
+     file_path = f"{settings.MEDIA_ROOT}videos/{str(foss.id)}/{formatted_foss_name}-Dockerfile.pdf"
+     if os.path.isfile(file_path):
+          file_url = f"{settings.MEDIA_URL}videos/{str(foss.id)}/{formatted_foss_name}-Dockerfile.pdf"
+          return file_url
+     return False
 
 register.inclusion_tag('spoken/templates/tutorial_search_form.html')(tutorialsearch)
 #register.filter('tutorialsearch', tutorialsearch)
@@ -307,3 +316,4 @@ register.filter('format_component_title', format_component_title)
 register.filter('get_mp4_video', get_mp4_video)
 register.filter('get_language_manager',is_language_manager)
 register.filter('get_user_uploads', get_user_uploads)
+register.filter('docker_file', docker_file)
