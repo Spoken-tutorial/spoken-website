@@ -25,6 +25,7 @@ class Payee(models.Model):
     purpose = models.CharField(max_length=255, null=True)
     reqId = models.CharField(max_length=100, default='')
     source = models.CharField(max_length=25, null=True, default=None)
+    callbackurl = models.CharField(max_length=500, null=True, default=None)
     def get_selected_foss(self):
         selected_foss = {}
         c = 0

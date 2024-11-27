@@ -10,6 +10,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers import serialize
 from django.db.models import Q
 from django.contrib.auth.models import User
+from django.contrib.auth import logout
 from django.urls import reverse
 from django.db import IntegrityError
 # Python imports
@@ -143,26 +144,14 @@ def _validate_parameters(parameter, value):
 def register_user(request):
 	form = RegisterUser()
 	template_name = "register_user.html"
+	source = None
 	context = {}
 	context['form']= form
-	context['source'] = None
+	context['source'] = source
 	context['email'] = None
 	context['callbackurl'] = None
+	context['is_logged_in'] = False
 	
-	if request.user.is_authenticated():
-		user = request.user
-		profile = Profile.objects.get(user=user)
-		form.fields["name"].initial = user.get_full_name()
-		form.fields["email"].initial = getattr(user, 'email')
-		form.fields["phone"].initial = profile.phone
-		form.fields['email'].widget.attrs['readonly'] = True
-		if user.profile_set.all():
-			try:
-				form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
-				college = user_college(request.user)
-				context['user_college'] = college
-			except Exception as e:
-				raise e
 	if request.method == 'GET':
 		source = request.GET.get('source', None)
 		foss = request.GET.get('foss', None)
@@ -203,6 +192,7 @@ def register_user(request):
 			form.fields["amount"].widget.attrs['readonly'] = True
 			context['event_obj']= event_register
 			form.fields['name'].initial = name
+			form.fields["email"].initial = email
 			form.fields['phone'].initial = phone
 			if gender.lower() == 'female':
 				form.fields['gender'].initial = 'F'
@@ -213,9 +203,28 @@ def register_user(request):
 			form.fields['name'].widget.attrs['readonly'] = True
 			form.fields['phone'].widget.attrs['readonly'] = True
 			form.fields['gender'].widget.attrs['readonly'] = True
+			form.fields['email'].widget.attrs['readonly'] = True
 			context['source'] = source
 			context['email'] = email
 			context['callbackurl'] = callbackurl
+	if request.user.is_authenticated():
+		if source == 'deet':
+			logout(request)
+		else:
+			user = request.user
+			profile = Profile.objects.get(user=user)
+			form.fields["name"].initial = user.get_full_name()
+			form.fields["email"].initial = getattr(user, 'email')
+			form.fields["phone"].initial = profile.phone
+			form.fields['email'].widget.attrs['readonly'] = True
+			context['is_logged_in'] = True
+			if user.profile_set.all():
+				try:
+					form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
+					college = user_college(request.user)
+					context['user_college'] = college
+				except Exception as e:
+					raise e
 	if request.method == 'POST':
 		event_id = request.POST.get("event_id_info")
 		if event_id:
@@ -231,7 +240,7 @@ def register_user(request):
 			form.fields["amount"].initial = float(event_register.event_fee) + gst
 			form.fields["amount"].widget.attrs['readonly'] = True
 			context['event_obj']= event_register
-	return render(request, template_name,context)
+	return render(request, template_name, context)
 
 @csrf_exempt
 def reg_success(request, user_type):
@@ -261,6 +270,7 @@ def reg_success(request, user_type):
 
 			if source == 'deet':
 				form_data.source = source
+				form_data.callbackurl = callbackurl
 			if not event_type in ['PDP', 'CDP']:
 				try:
 					form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
@@ -304,10 +314,16 @@ def reg_success(request, user_type):
 				# if user is already a paid user -> render reg_success.html showing registration success 
 				context = {'participant_obj':form_data}
 				if form_data.source == 'deet':
-					json = {'id': f'n{form_data.id}', 'name': form_data.name,
-						'email': form_data.email, 'paid college': True,
-						'amount': 0.0, 'status': 1}
-					requests.post(callbackurl, json)
+					headers = {"Content-Type": "application/json; charset=utf-8"}
+					data = {
+						"id": f"n{form_data.id}",
+						"name": form_data.name,
+						"email":form_data.email,
+						"paid college": True,
+						"amount": 0.0,
+						"status": 1
+					}
+					response = requests.post(callbackurl, headers=headers, json=data)
 				return render(request, template_name, context)
 			else:
 				# if user has made payment from ILW interface -> return Participant form

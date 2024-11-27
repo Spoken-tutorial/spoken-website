@@ -184,7 +184,7 @@ $(document).ready(function(){
         var otp = $('#otp_value').val();
         var email = $('#id_email').val();
 
-        if(otp.length>6){
+        if(otp.length > 5){
         $.ajax({
             url:"/donate/validate",
             type:"POST",
@@ -279,13 +279,6 @@ function delete_foss(elem){
     $('.add_foss_lang').show();
 }
 
-function send_otp(){
-        $("#send_otp").show();
-        document.getElementById("otp_sent_msg").innerHTML = "OTP sent";
-        document.getElementById('otp_sent_msg').className = 'label label-success';
-        $("#otp_value").show();
-        $("#otp_sent_msg").show().delay(10000).fadeOut();
-}
 
 function show_added_foss(selected_foss){
     $.ajax({

@@ -2936,6 +2936,19 @@ def update_status(pd, status):
       pd.status = 2
       pd.description = 'Payment fail'
   pd.save()
+  if pd.source == 'deet':
+     callbackurl = pd.callbackurl
+     headers = {"Content-Type": "application/json; charset=utf-8"}
+     data = {
+               "id": f"{pd.id}",
+               "name": pd.name,
+               "email":pd.email,
+               "paid college": False,
+               "amount": pd.amount,
+               "status": pd.status
+     }
+     response = requests.post(callbackurl, headers=headers, json=data)
+     
 
 def payment_details(request,choice):
   academic_id = Accountexecutive.objects.filter(user = request.user).values('academic_id','academic_id__institution_name')
