@@ -52,7 +52,9 @@
                     <div class="col-lg-8">
                           {% render_field form.email class+="form-control email"  %}
                           {{ form.email.errors }}
-                      <a href="#" class="btn btn-primary mb-2" onclick="send_otp();" id="send_otp" style="display: none; margin-top: 10px;">Send OTP</a>
+                      {% if not is_logged_in %}  
+                      <a href="#" class="btn btn-primary mb-2" id="send_otp" style="margin-top: 10px;">Send OTP</a>
+                      {% endif %}
                       </div>
                       
                       <div id="email-info" class="col-md-8 col-md-offset-4"></div>
@@ -396,9 +398,7 @@ $('#id_gender').change(function(){
     catch{}
 });
 
-$('#id_email').on('focusout',function(){
-  var isReadOnly = $('#id_email').is('[readonly]');
-      if (!isReadOnly) {
+$('#send_otp').on('click',function(){
       var username = $('#id_name').val();
       var email = $('#id_email').val();
       var demail = $('#demail').val();
@@ -423,31 +423,20 @@ $('#id_email').on('focusout',function(){
         success: function(data) {
             if (data['valid_email']=='1') {
             $('#email-info').html('');
-            if(data['message']=="active_user"){
-                $("#send_otp").hide();
-                $("#pwd").show();
-                $("#forgot_pwd").show();
-                $("#otp_value").hide();
-                $("#otp_sent_msg").hide();
-                $("#email-info").html('This Email Id is already registered with Spoken Tutorials. Please enter your password to proceed.');
-                document.getElementById("email-info").style.color = "green";
-            }
-            else if(data['message']=='inactive_user'){
-                document.getElementById("otp_sent_msg").innerHTML = "OTP Re-sent";
-                document.getElementById('otp_sent_msg').className = 'label label-success';
+            if(data['message']=="active_user" || data['message'] == "new" || data['message'] == 'inactive_user'){
                 $("#send_otp").show();
                 $("#pwd").hide();
-            }
-            else{
-              $("#send_otp").show();
-              $("#pwd").hide();
-            }
+                $("#send_otp").show();
+                document.getElementById("otp_sent_msg").innerHTML = "OTP sent";
+                document.getElementById('otp_sent_msg').className = 'label label-success';
+                $("#otp_value").show();
+               $("#otp_sent_msg").show().delay(10000).fadeOut();
             }else{
                 $('#email-info').html(data['email_validation']);
             }
         }
+      }
     });
-  }
 });
 
  $( document ).ready(function() {

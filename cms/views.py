@@ -62,11 +62,13 @@ def dispatcher(request, permalink=''):
 
 
 def create_profile(user, phone):
-    confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(7))
+    confirmation_code = create_confirmation_code()
     profile = Profile(user=user, confirmation_code=confirmation_code, phone=phone)
     profile.save()
     return profile
 
+def create_confirmation_code():
+    return  ''.join(random.choice(string.digits) for x in range(6))
 
 def account_register(request):
     # import recaptcha validate function

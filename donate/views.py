@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.template.context_processors import csrf
 from donate.forms import PayeeForm, TransactionForm
 from donate.models import *
-from cms.views import create_profile, email_otp,send_registration_confirmation
+from cms.views import create_profile, email_otp,send_registration_confirmation, create_confirmation_code
 from django import forms
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -126,8 +126,10 @@ def form_valid(request, form, purpose):
     form_data.expiry = calculate_expiry()
     form_data.purpose = purpose
     source = request.POST.get('source')
+    callbackurl = request.POST.get('callbackurl')
     if source == 'deet':
         form_data.source = 'deet'
+        form_data.callbackurl = callbackurl
     form_data.save()
     payee_obj = form_data
     # Save CdFossLanguages record
@@ -191,14 +193,20 @@ def controller(request, purpose):
             participant_form.save()
         except :
             return redirect('training:list_events', status='myevents')
-    data = get_final_data(request, payee_obj_new, purpose)
+    final_data = get_final_data(request, payee_obj_new, purpose)
     if payee_obj_new.source == 'deet':
         callbackurl = request.POST.get('callbackurl')
-        json = {'id': f'p{payee_obj_new.id}', 'name': payee_obj_new.name,
-                 'email':payee_obj_new.email, 'paid college': False,
-                 'amount': payee_obj_new.amount, 'status': 0}
-        requests.post(callbackurl, json)
-    return render(request, 'payment_status.html', data)
+        headers = {"Content-Type": "application/json; charset=utf-8"}
+        data = {
+                   "id": f"p{payee_obj_new.id}",
+                   "name": payee_obj_new.name,
+                   "email":payee_obj_new.email,
+                   "paid college": False,
+                   "amount": payee_obj_new.amount,
+                   "status": 0
+        }
+        response = requests.post(callbackurl, headers=headers, json=data)
+    return render(request, 'payment_status.html', final_data)
 
 
 @csrf_exempt
@@ -269,6 +277,10 @@ def send_onetime(request):
         else:
             send_registration_confirmation(user)
             context['message'] = "inactive_user"
+        profile = Profile.objects.get(user=user)
+        profile.confirmation_code = create_confirmation_code()
+        profile.save()
+        email_otp(user)
 
     except MultipleObjectsReturned as e:
         pass
