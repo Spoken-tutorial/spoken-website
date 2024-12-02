@@ -1,4 +1,4 @@
-Spoken-Website
+Spoken English-Website
 ==============
 
 Spoken tutorial website in django (https://spoken-tutorial.org)
