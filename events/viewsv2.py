@@ -3554,7 +3554,7 @@ class AcademicKeyCreateView(CreateView):
 
 
       Subscription_time = int(self.object.subscription)
-      expiry_date = datetime.date.today() + timedelta(days=Subscription_time)
+      expiry_date = self.object.payment_date + timedelta(days=Subscription_time)
 
       ac_key = AcademicKey()      
       ac_key.ac_pay_status = self.object
@@ -3566,3 +3566,29 @@ class AcademicKeyCreateView(CreateView):
 
       messages.success(self.request, "Payment Details for academic is added successfully.")
       return HttpResponseRedirect(self.success_url)
+    
+
+class FetchAcademicDetailsView(View):
+  def get(self, request):
+    academic_id = request.GET.get('academic_id')
+    if academic_id:
+      try:
+      # Retrieve the latest entry for the given academic center
+        ac = AcademicCenter.objects.get(id=academic_id)
+        data = {
+          'college_type': ac.institution_type.name,
+        }
+        latest_payment = AcademicPaymentStatus.objects.filter(academic_id=academic_id).latest('entry_date')
+        data['success'] = True
+        data['name_of_the_payer'] = latest_payment.name_of_the_payer
+        data['email'] = latest_payment.email
+        data['phone'] = latest_payment.phone
+        data['pan_number'] = latest_payment.pan_number
+        data['gst_number'] = latest_payment.gst_number
+        data['payment_status'] = "Renewal"
+      except Exception as e:
+        data['success'] = False
+        data['payment_status'] = "New"
+    else:
+      data['success'] = False
+    return JsonResponse(data)

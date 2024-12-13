@@ -1748,7 +1748,6 @@ class topperlist(models.Model):
   userid = models.PositiveIntegerField()
 
 class AcademicPaymentStatus(models.Model):
-
   state = models.ForeignKey(State, on_delete=models.PROTECT )
   academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   name_of_the_payer = models.CharField(max_length=200)
@@ -1759,7 +1758,7 @@ class AcademicPaymentStatus(models.Model):
   transactionid = models.CharField(max_length=100, null=True)
   payment_date = models.DateField()
   payment_status = models.CharField(max_length = 50, choices = PAYMENT_STATUS_CHOICES)
-  college_type = models.CharField(max_length = 50, choices = COLLEGE_TYPE_CHOICES)
+  college_type = models.CharField(max_length = 50)
   pan_number = models.CharField(max_length = 100, null=True)
   gst_number = models.CharField(max_length=15, null=True)
   customer_id = models.CharField(max_length = 50, null=True)
