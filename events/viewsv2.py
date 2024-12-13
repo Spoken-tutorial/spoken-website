@@ -3591,4 +3591,5 @@ class FetchAcademicDetailsView(View):
         data['payment_status'] = "New"
     else:
       data['success'] = False
+      data['payment_status'] = "New"
     return JsonResponse(data)
