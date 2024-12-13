@@ -637,6 +637,7 @@ class StudentGradeFilterForm(forms.Form):
 
 
 class AcademicPaymentStatusForm(forms.ModelForm):
+  college_type = forms.CharField(required=False)
   email = forms.CharField(required = False)
   phone = forms.CharField(required = False)
   transactionid = forms.CharField(required = False)
@@ -653,3 +654,8 @@ class AcademicPaymentStatusForm(forms.ModelForm):
     'phone':forms.NumberInput(),
     'amount':forms.NumberInput()
     }
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields['college_type'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
+    self.fields['payment_status'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})

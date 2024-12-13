@@ -17,6 +17,11 @@
 {{message.tags}}
 <div class="row " ><!--main div 1 style="background-color:#fad7a0"-->
 	<div class='col-sm-12'>
+		<div class="alert alert-warning alert-dismissable hidden" id="alert_message">
+			The form is pre-filled with values from <b>previous payment details</b>. Please review them carefully before submitting.
+		</div> 
+	</div>
+	<div class='col-sm-12'>
 	
 	<form action="" method="POST" class='form-horizontal' id="form">
 		{% csrf_token %}
@@ -62,6 +67,14 @@
 			</div>
 
 			<div class="form-group">
+				<label class="col-sm-2 control-label" for= "id_subscription">Subscription <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+				{% render_field form.subscription class+="form-control subscription" %}
+				{{ form.subscription.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
 				<label class="col-sm-2 control-label" for= "id_amount">Amount <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.amount class+="form-control amount" %}
@@ -69,13 +82,7 @@
 				</div>
 			</div>
 
-			<div class="form-group">
-				<label class="col-sm-2 control-label" for= "id_subscription">Subscription <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.subscription class+="form-control subscription" %}
-				{{ form.subscription.errors }}
-				</div>
-			</div>
+			
 
 			<div class="form-group">
 				<label class="col-sm-2 control-label" for= "id_transactionid">Transaction ID </label>
@@ -202,6 +209,45 @@ function validateForm(event) {
 
  $( document ).ready(function() {
 
+	$('#id_academic').change(function(){
+		var academic_id = $(this).val()
+		if(academic_id){
+			$.ajax({
+				type: "GET",
+				url: "/software-training/ajax-academic-details/",
+				data: {
+					'academic_id': academic_id
+				},
+				success: function(data){
+					$('#id_college_type').val(data.college_type);
+					$('#id_payment_status').val(data.payment_status);
+					if(data.success){
+						$('#id_name_of_the_payer').val(data.name_of_the_payer);
+						$('#id_email').val(data.email);
+						$('#id_phone').val(data.phone);
+						$('#id_subscription').val(data.subscription);
+						$('#id_pan_number').val(data.pan_number);
+						$('#id_gst_number').val(data.gst_number);
+						$('#alert_message').removeClass('hidden');
+					}else{
+						$('#id_name_of_the_payer').val("");
+						$('#id_email').val("");
+						$('#id_phone').val("");
+						$('#id_subscription').val("");
+						$('#id_pan_number').val("");
+						$('#id_gst_number').val("");
+						$('#alert_message').addClass('hidden');
+					}
+					
+				},
+				error: function(error){
+					console.log(error)
+					alert("some error occured")
+				}
+			})
+		}
+	})
+
  	$('#id_state').change(function(){
    	var stateid  = $('#id_state').val();
    	$.ajax({
@@ -217,6 +263,17 @@ function validateForm(event) {
                 }
               });
    	});
+
+	$('#id_subscription').change(function(){
+		var type = $(this).val()
+		if(type == 365){
+			$('#id_amount').val(29500)
+		}else if(type == 182){
+			$('#id_amount').val(14750)
+			
+		}
+
+	})
 
  	const form = document.getElementById('form');
 	form.addEventListener('submit', validateForm);

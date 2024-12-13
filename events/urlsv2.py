@@ -355,5 +355,12 @@ urlpatterns = [
       AcademicKeyCreateView.as_view(template_name='academic_payment_details_form.html'), 
       name='academic_payment_details'
     ),
+    url(
+      # r'^software-training/ajax-academic-details/', 
+      r'^ajax-academic-details/', 
+      FetchAcademicDetailsView.as_view(), 
+      name='ajax_academic_details'
+    ),
+
 
 ]
