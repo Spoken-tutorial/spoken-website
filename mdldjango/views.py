@@ -112,7 +112,9 @@ def index(request):
             if category == 2:
                 past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4).order_by('-tdate')
             if category == 4:
-                ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), academic_id=mdluser.institution, tdate__lte=dt.date.today()).order_by('-tdate')
+                # Display only the tests relevant to the student.
+                tests = TestAttendance.objects.filter(mdluser_id=mdluser.id).values_list('test_id', flat=True)
+                ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), tdate__lte=dt.date.today(), id__in=tests).order_by('-tdate')
 
             context = {
                 #'p': p,
