@@ -329,9 +329,12 @@ def online_test(request):
         4: SortableHeader('academic__institution_name', True, 'Institution'),
         5: SortableHeader('foss__foss', True, 'FOSS'),
         6: SortableHeader('organiser__user__first_name', True, 'Organiser'),
-        7: SortableHeader('tdate', True, 'Date'),
-        8: SortableHeader('participant_count', 'True', 'Participants'),
-        9: SortableHeader('Action', False)
+        7: SortableHeader('invigilator__user__email', True, 'Invigilator'),
+        8: SortableHeader('tdate', True, 'Date'),
+        9: SortableHeader('participant_count', 'True', 'Participants'),
+        10: SortableHeader('training__department__name', True, 'Department'),
+        11: SortableHeader('Action', False)
+        
     }
 
     raw_get_data = request.GET.get('o', None)

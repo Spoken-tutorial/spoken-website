@@ -1996,10 +1996,12 @@ def test_list(request, role, status):
             3: SortableHeader('academic__academic_code', True, 'Academic Code'),
             4: SortableHeader('academic', True, 'Institution'),
             5: SortableHeader('organiser', True, 'Organiser'),
-            6: SortableHeader('foss', True, 'FOSS'),
-            7: SortableHeader('tdate', True, 'Date'),
-            8: SortableHeader('Participants', False),
-            9: SortableHeader('', False)
+            6: SortableHeader('invigilator', True, 'Invigilator'),
+            7: SortableHeader('training__department', True, 'Department'),
+            8: SortableHeader('foss', True, 'FOSS'),
+            9: SortableHeader('tdate', True, 'Date'),
+            10: SortableHeader('Participants', False),
+            11: SortableHeader('', False)
         }
         raw_get_data = request.GET.get('o', None)
         collection = get_sorted_list(request, collectionSet, header, raw_get_data)

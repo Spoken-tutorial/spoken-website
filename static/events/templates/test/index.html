@@ -120,6 +120,7 @@
                         <td>{{ record.academic }}</td>
                         <td>{{ record.organiser.user.first_name }}</td>
                         <td>{{ record.invigilator.user.first_name }}</td>
+                        <td>{{ record.training.department.name }}</td>
                         <td>{{ record.foss.foss }}</td>
                         <td>{{ record.tdate|date:"d M Y" }} {{ record.ttime }}</td>
                         {% if status == 'completed' %}
