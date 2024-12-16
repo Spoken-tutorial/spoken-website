@@ -75,12 +75,14 @@
             <table class="table table-striped table-hover table-bordered">
                 <tr>
                     <th>Technology</th>
+                    <th>Test Code</th>
                     <th>Date & Time</th>
                     <th>Score</th>
                 </tr>
                 {% for record in past_test %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.test_code }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
                         {% with grade=record.id|get_participant_mark:mdluserid %}
                             {% if grade %}
@@ -148,12 +150,14 @@
             <table class="table table-striped table-hover table-bordered">
                 <tr>
                     <th>Technology</th>
+                    <th>Test Code</th>
                     <th>Date & Time</th>
                     <th>Action</th>
                 </tr>
                 {% for record in ongoing_test %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
+                        <td>{{ record.test_code }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
                         <td>
                             {% with status=mdluserid|can_enter_test:record.id %}
@@ -206,17 +210,17 @@
             <table class="table table-striped table-hover table-bordered">
                 <tr>
                     <th>Technology</th>
-                    <th>Test Code</th>
+                    <!-- <th>Test Code</th> -->
                     <th>Date & Time</th>
-                    <th>Action</th>
+                    <!-- <th>Action</th> -->
                 </tr>
                 {% for record in upcoming_test %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
-                        <td>
-                            <!-- <a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Enroll</a> -->
-                        </td>
+                        <!-- <td>
+                            <a href="{% url 'events:student_subscribe' 'test' record.id mdluserid %}">Enroll</a>
+                        </td> -->
                     </tr>
                 {% endfor %}
             </table>

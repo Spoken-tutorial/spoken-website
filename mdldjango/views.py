@@ -99,6 +99,7 @@ def index(request):
             past_workshop = None
             past_test = None
             ongoing_test = None
+            tests = TestAttendance.objects.filter(mdluser_id=mdluser.id).values_list('test_id', flat=True)
             if category == 3:
                 upcoming_workshop = []
                 upcoming_workshop = Training.objects.filter((Q(status = 10) | Q(status = 11) | Q(status = 12) |Q(status = 3)), academic_id=mdluser.institution, tdate__lte=dt.date.today()).order_by('-tdate')
@@ -106,15 +107,14 @@ def index(request):
                 #upcoming_workshop.append(up)
                 #p = up.trainingattendance_set.get(mdluser_id=mdluser.id)
             if category == 5:
-                upcoming_test = Test.objects.filter(status=2, academic_id=mdluser.institution, tdate__gt=dt.date.today()).order_by('-tdate')
+                upcoming_test = Test.objects.filter(status=2, id__in=tests, tdate__gt=dt.date.today()).order_by('-tdate')
             if category == 1:
                 past_workshop = TrainingAttend.objects.filter(student__user__email = mdluser.email).order_by('-training__sem_start_date')
             if category == 2:
-                past_test = Test.objects.filter(id__in = TestAttendance.objects.filter(mdluser_id = mdluser.id).values_list('test_id'), status = 4).order_by('-tdate')
+                past_test = Test.objects.filter(id__in=tests, status=4).order_by('-tdate')
             if category == 4:
                 # Display only the tests relevant to the student.
-                tests = TestAttendance.objects.filter(mdluser_id=mdluser.id).values_list('test_id', flat=True)
-                ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), tdate__lte=dt.date.today(), id__in=tests).order_by('-tdate')
+                ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), id__in=tests, tdate__lte=dt.date.today()).order_by('-tdate')
 
             context = {
                 #'p': p,
