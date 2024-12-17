@@ -33,18 +33,13 @@ def check_test_enrole(rid, mdluser_id):
 def get_participant_mark(rid, mdluser_id):
     try:
         ta = TestAttendance.objects.get(test_id = rid, mdluser_id = mdluser_id)
-    except:
+        if ta.mdlquiz_id:
+            mdl = MdlQuizGrades.objects.filter(quiz = ta.mdlquiz_id, userid = mdluser_id).order_by('-grade').first()
+            if mdl:
+                return round(mdl.grade, 1)
+            return False
+    except TestAttendance.DoesNotExist:
         return False
-    
-    if not ta.mdlquiz_id:
-        return False
-        
-    try:
-        mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = mdluser_id)
-    except Exception as e:
-        return False
-        
-    return round(mdlgrade.grade, 1)
 
 def get_moodle_courseid(rid, mdluser_id):
     #print "rid =>", rid

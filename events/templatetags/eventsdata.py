@@ -111,14 +111,16 @@ def can_download_workshop_certificate(key, training):
         return False
     except:
         return 'errors'
+
 def can_enter_test(key, testcode):
     try:
         ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
-    except:
-        return None
-    if ta.status >= 0:
+        mdl = MdlQuizGrades.objects.filter(quiz=ta.mdlquiz_id, userid=key).order_by('-grade').first()
+        if mdl and mdl.grade >= 40:
+            return 3 # test completed with pass grade of 40 or more for given quiz 
         return ta.status
-    return None
+    except TestAttendance.DoesNotExist:
+        return None
 
 def training_file_exits(wid):
     file_path = settings.MEDIA_ROOT + 'training/' + str(wid) + '/' + str(wid) + '.pdf'
