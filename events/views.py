@@ -2101,6 +2101,7 @@ def test_approvel(request, role, rid):
 
 @login_required
 def test_attendance(request, tid):
+    
     user = request.user
     test = None
     onlinetest_user = ''
@@ -2114,20 +2115,21 @@ def test_attendance(request, tid):
         test.save()
     except:
         raise PermissionDenied()
-    print((test.foss_id))
+    ta_status = request.GET.get('status',None)
     if request.method == 'POST':
         users = request.POST
         if users:
             #set all record to 0 if status = 1
             if 'submit-attendance' in users:
-                TestAttendance.objects.filter(test_id = tid, status = 1).update(status = 0)
+                if ta_status is None or ta_status == '1':
+                    TestAttendance.objects.filter(test_id = tid, status = 1).update(status = 0)
                 for u in users:
                     if not (u == 'csrfmiddlewaretoken' or u == 'submit-attendance'):
                         try:
                             ta = TestAttendance.objects.get(mdluser_id = users[u], test_id = tid)
                             if ta.status > 1:
                                 continue
-                        except:
+                        except TestAttendance.DoesNotExist:
                             fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
                             ta = TestAttendance()
                             ta.test_id = test.id
@@ -2185,20 +2187,21 @@ def test_attendance(request, tid):
             """)
     mdlids = []
     participant_ids = []
-    online_participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))
-    for k in online_participant_ids:
-        mdlids.append(k[0])
-
-    if test.test_category_id == 1:
-        participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
-    elif test.test_category_id == 2:
-        participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id'))
+    if ta_status:
+        mdlids = list(TestAttendance.objects.filter(test_id = test.id, status=ta_status).values_list('mdluser_id', flat=True))
     else:
-        participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id'))
+        mdlids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True))
+    WORKSHOP = 1
+    TRAINING = 2
+    if test.test_category_id in [WORKSHOP, TRAINING]:
+        participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id', flat=True))
+    elif ta_status:
+        participant_ids = list(TestAttendance.objects.filter(test_id = test.id, status=ta_status).values_list('mdluser_id', flat=True))
+    else:
+        participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True))
 
     wp = None
-    for k in participant_ids:
-        mdlids.append(k[0])
+    mdlids = mdlids.extend(participant_ids)
     if mdlids:
         wp = MdlUser.objects.filter(id__in = mdlids)
     #check can close the test

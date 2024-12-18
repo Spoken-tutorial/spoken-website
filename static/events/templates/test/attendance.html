@@ -8,17 +8,35 @@
 {% endblock %}
 {% block content %}
     <div class='row'>
-        <form class="navbar-form navbar-left" role="search" method="POST">{% csrf_token %}
-          <div class="form-group">
-            {% render_field form.email class+="form-control email" placeholder="Participant email" %}
-          </div>
-          <!-- or 
-          <div class="form-group">
-            {% render_field form.username class+="form-control username" placeholder="Participant username" %}
-          </div>
-          -->
-          <input class="btn btn-default" name="search-participant" type="submit" value="Search Participant" />
-        </form>
+        <div class="col">
+            <form class="navbar-form navbar-left" role="search" method="POST">{% csrf_token %}
+                <div class="form-group">
+                  {% render_field form.email class+="form-control email" placeholder="Participant email" %}
+                </div>
+                <!-- or 
+                <div class="form-group">
+                  {% render_field form.username class+="form-control username" placeholder="Participant username" %}
+                </div>
+                -->
+                <input class="btn btn-default" name="search-participant" type="submit" value="Search Participant" />
+              </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <label for="statusDropdown">Filter Students by Test Status:</label>
+                <select id="statusDropdown" class="form-control" onchange="updateStatusURL(this.value)">
+                    <option value="" {% if not request.GET.status %}selected{% endif%}>Show all Students</option>
+                    <option value="0" {% if request.GET.status == '0' %}selected{% endif %}>Students waiting for attendance</option>
+                    <option value="1" {% if request.GET.status == '1' %}selected{% endif %}>Attendance already marked</option>
+                    <option value="2" {% if request.GET.status == '2' %}selected{% endif %}>Test ongoing</option>
+                    <option value="3" {% if request.GET.status == '3' %}selected{% endif %}>Test completed</option>
+                    <option value="4" {% if request.GET.status == '4' %}selected{% endif %}>Certificate issued</option>
+                </select>
+            </div>
+        </div>
+
     </div>
     {% if onlinetest_user and onlinetest_user != 'None' %}
         <div class="row well">
@@ -53,7 +71,7 @@
                         <tr>
                             <th>#</th>
                             <th><!-- <input type='checkbox' name="user" value=""> --></</th>
-                            <th>Photo</th>
+                            <!-- <th>Photo</th> -->
                             <th>Name</th>
                             <th>Email Id</th>
                             <th>Status</th>
@@ -62,7 +80,7 @@
                             <tr>
                                 <td>{{ forloop.counter }}</td>
                                 <th><input type='checkbox' name="user_{{ record.id }}" value="{{ record.id }}" {{ record.id|get_status:test.id }} ></th>
-                                <td><iframe style="width:70px; height:70px;" src="{{ record.id|participant_picture }}"></iframe></td>
+                                <!-- <td><iframe style="width:70px; height:70px;" src="{{ record.id|participant_picture }}"></iframe></td> -->
                                 <td>{{ record.firstname|lower|title }} {{ record.lastname|lower|title }}</td>
                                 <td>{{record.email}}</td>
                                 <td>
@@ -85,4 +103,20 @@
             {% endif %}
         </div>
     </div>
+{% endblock %}
+{% block jsblock %}
+    <script>
+        function updateStatusURL(status){
+            // Get the current URL
+            const url = new URL(window.location.href);
+            // alert(url)
+            if(status){
+                url.searchParams.set('status', status);
+            }else{
+                url.searchParams.delete('status');
+            }
+            // Redirect to the new URL
+            window.location.href = url.toString();
+        }
+    </script>
 {% endblock %}
