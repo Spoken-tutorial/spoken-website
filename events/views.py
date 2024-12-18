@@ -2121,7 +2121,7 @@ def test_attendance(request, tid):
         if users:
             #set all record to 0 if status = 1
             if 'submit-attendance' in users:
-                if ta_status == None or ta_status == '1':
+                if ta_status is None or ta_status == '1':
                     TestAttendance.objects.filter(test_id = tid, status = 1).update(status = 0)
                 for u in users:
                     if not (u == 'csrfmiddlewaretoken' or u == 'submit-attendance'):
@@ -2195,14 +2195,13 @@ def test_attendance(request, tid):
     TRAINING = 2
     if test.test_category_id in [WORKSHOP, TRAINING]:
         participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id', flat=True))
+    elif ta_status:
+        participant_ids = list(TestAttendance.objects.filter(test_id = test.id, status=ta_status).values_list('mdluser_id', flat=True))
     else:
-        if ta_status:
-            participant_ids = list(TestAttendance.objects.filter(test_id = test.id, status=ta_status).values_list('mdluser_id', flat=True))
-        else:
-            participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True))
+        participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True))
 
     wp = None
-    mdlids = mdlids + participant_ids
+    mdlids = mdlids.extend(participant_ids)
     if mdlids:
         wp = MdlUser.objects.filter(id__in = mdlids)
     #check can close the test
