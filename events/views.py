@@ -2187,7 +2187,8 @@ def test_attendance(request, tid):
             """)
     mdlids = []
     participant_ids = []
-    if ta_status:
+    ta_status = int(ta_status) if ta_status is not None else None
+    if ta_status is not None:
         mdlids = list(TestAttendance.objects.filter(test_id = test.id, status=ta_status).values_list('mdluser_id', flat=True))
     else:
         mdlids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True))
@@ -2195,13 +2196,12 @@ def test_attendance(request, tid):
     TRAINING = 2
     if test.test_category_id in [WORKSHOP, TRAINING]:
         participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id', flat=True))
-    elif ta_status:
+    elif ta_status is not None:
         participant_ids = list(TestAttendance.objects.filter(test_id = test.id, status=ta_status).values_list('mdluser_id', flat=True))
     else:
         participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True))
-
     wp = None
-    mdlids = mdlids.extend(participant_ids)
+    mdlids.extend(participant_ids)
     if mdlids:
         wp = MdlUser.objects.filter(id__in = mdlids)
     #check can close the test
