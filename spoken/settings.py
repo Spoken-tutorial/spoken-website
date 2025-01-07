@@ -135,10 +135,7 @@ DATABASES = {
         'USER': DB_USER,
         'PASSWORD': DB_PASS,
         'HOST': '',                            # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
-        'PORT': '',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';",
-        }
+        'PORT': '',    
     
     },
     'moodle': {	
