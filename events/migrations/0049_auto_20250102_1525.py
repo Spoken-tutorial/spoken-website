@@ -12,7 +12,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL("SET sql_mode='';"),
         migrations.AlterField(
             model_name='inductioninterest',
             name='college_address',
@@ -498,5 +497,4 @@ class Migration(migrations.Migration):
             name='ws_quality',
             field=models.CharField(choices=[('', '-----'), ('Excellent', 'Excellent'), ('Good', 'Good'), ('Fair', 'Fair'), ('Bad', 'Bad'), ('Extremelybad', 'Extremely bad')], max_length=12),
         ),
-        migrations.RunSQL("SET sql_mode='STRICT_TRANS_TABLES';"),
     ]
