@@ -1298,8 +1298,8 @@ class OrganiserFeedback(models.Model):
   overall_rating = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   trained_foss =  models.ManyToManyField(FossCategory)
   is_training_benefited = models.CharField(max_length = 50, choices = GOOD_INVESTMENT_CHOICES)
-  testimonial = models.TextField()
-  any_other_suggestions = models.TextField()
+  testimonial = models.CharField(max_length = 500)
+  any_other_suggestions = models.CharField(max_length = 500)
   can_contact = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
 
 def get_email_dir(instance, filename):
@@ -1389,10 +1389,10 @@ class STWorkshopFeedback(models.Model):
   time_management = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   experience_of_learning = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
   overall_arrangement = models.CharField(max_length = 50, choices = RATE_SPOKEN_CHOICES)
-  like_abt_ws = models.TextField()
-  how_make_better = models.TextField()
-  experience = models.TextField()
-  suggestions = models.TextField()
+  like_abt_ws = models.CharField(max_length = 500)
+  how_make_better = models.CharField(max_length = 500)
+  experience = models.CharField(max_length = 500)
+  suggestions = models.CharField(max_length = 500)
   created = models.DateTimeField(auto_now_add = True)
 
 class STWorkshopFeedbackPre(models.Model):
@@ -1565,10 +1565,10 @@ class STWorkshopFeedbackPost(models.Model):
   fees = models.CharField(max_length = 50, choices = FEES)
 
 
-  like_abt_ws = models.TextField()
-  how_make_better = models.TextField()
-  experience = models.TextField()
-  suggestions = models.TextField()
+  like_abt_ws = models.CharField(max_length = 500)
+  how_make_better = models.CharField(max_length = 500)
+  experience = models.CharField(max_length = 500)
+  suggestions = models.CharField(max_length = 500)
 
 class LearnDrupalFeedback(models.Model):
   YES_NO_CHOICES =(
@@ -1606,7 +1606,7 @@ class LearnDrupalFeedback(models.Model):
   rate_spoken = models.CharField(max_length = 20)
   useful_for_placement = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
   useful_for_placement_for_students = models.CharField(max_length = 50, choices = YES_NO_CHOICES)
-  feedback = models.TextField()
+  feedback = models.CharField(max_length = 500)
   like_to_learn_other_foss = models.CharField(max_length = 50, choices = YES_NO)
   mention_foss = models.CharField(max_length = 100)
   like_to_give_testimonial = models.CharField(max_length = 50, choices = YES_NO)
@@ -1682,7 +1682,7 @@ class InductionInterest(models.Model):
   other_designation = models.CharField(max_length = 100)
 
   college = models.CharField(max_length = 100)
-  college_address = models.TextField()
+  college_address = models.CharField(max_length = 500)
   state = models.ForeignKey(State, on_delete=models.PROTECT )
   city = models.CharField(max_length = 100)
   pincode = models.PositiveIntegerField()
@@ -1693,7 +1693,7 @@ class InductionInterest(models.Model):
   
   do_agree = models.CharField(max_length = 50, choices = yes_option)  
   no_objection = models.CharField(max_length = 50, choices = yes_option)
-  other_comments = models.TextField()
+  other_comments = models.CharField(max_length = 500)
 
   class Meta(object):
     ordering = ('city',)
