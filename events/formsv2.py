@@ -445,7 +445,7 @@ class STWorkshopFeedbackFormPre(forms.ModelForm):
 
 class STWorkshopFeedbackFormPost(forms.ModelForm):
   class Meta(object):
-    model = STWorkshopFeedbackPost
+    model = WorkshopFeedbackPost
     fields = '__all__'
     exclude = ['user']
     widgets = {
