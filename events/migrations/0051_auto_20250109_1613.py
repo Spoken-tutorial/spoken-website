@@ -12,10 +12,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='stworkshopfeedbackpost',
-            name='user',
-        ),
         migrations.DeleteModel(
             name='STWorkshopFeedbackPost',
         ),
