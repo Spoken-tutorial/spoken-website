@@ -6,6 +6,7 @@ from .helpers import is_user_paid
 from events.models import *
 from training.models import *
 from .validators import validate_csv_file
+import re
 
 class CreateTrainingEventForm(forms.ModelForm):
     courses = FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id'))
@@ -38,7 +39,7 @@ class RegisterUser(forms.ModelForm):
         required = False,
         help_text = "You can listen to the FOSS in the above Indian languages"
     )
-    phone = forms.RegexField(regex=r'^\+?1?\d{8,15}$', error_messages = {'required': 'Enter valid phone number.'},)
+    phone = forms.CharField(error_messages = {'required': 'Enter valid phone number.'},)
     class Meta(object):
         model = Participant
         fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language', 'company', 'city']
@@ -46,6 +47,14 @@ class RegisterUser(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(RegisterUser, self).__init__(*args, **kwargs)
         self.fields['amount'].required = False
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone', '')
+        # Strip unwanted characters (+, -, spaces)
+        cleaned_phone = ''.join(filter(str.isdigit, phone))
+        if not re.match(r'^\d{8,12}$', cleaned_phone):
+            raise forms.ValidationError("Enter a valid phone number with 8 to 12 digits.")
+        return cleaned_phone
 
 class UploadParticipantsForm(forms.ModelForm):
     csv_file = forms.FileField(required=True)
