@@ -39,6 +39,7 @@ Pillow==5.3.0
 pyasn1==0.4.4
 pyasn1-modules==0.2.2
 PyPDF2==1.26.0
+phonenumbers==8.13.53
 python-dateutil==2.7.3
 pytz==2018.5
 rcssmin==1.0.6
