@@ -39,7 +39,6 @@ class RegisterUser(forms.ModelForm):
         required = False,
         help_text = "You can listen to the FOSS in the above Indian languages"
     )
-    # phone = forms.RegexField(regex=r'^\+?1?\d{8,15}$', error_messages = {'required': 'Enter valid phone number.'},)
     phone = forms.CharField(required = True,
         error_messages = {'required': 'Enter valid phone number.'},)
     class Meta(object):
