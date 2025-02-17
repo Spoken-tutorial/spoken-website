@@ -6,6 +6,7 @@ from .helpers import is_user_paid
 from events.models import *
 from training.models import *
 from .validators import validate_csv_file
+import phonenumbers
 
 class CreateTrainingEventForm(forms.ModelForm):
     courses = FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id'))
@@ -38,7 +39,8 @@ class RegisterUser(forms.ModelForm):
         required = False,
         help_text = "You can listen to the FOSS in the above Indian languages"
     )
-    phone = forms.RegexField(regex=r'^\+?1?\d{8,15}$', error_messages = {'required': 'Enter valid phone number.'},)
+    phone = forms.CharField(required = True,
+        error_messages = {'required': 'Enter valid phone number.'},)
     class Meta(object):
         model = Participant
         fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language', 'company', 'city']
@@ -46,6 +48,22 @@ class RegisterUser(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(RegisterUser, self).__init__(*args, **kwargs)
         self.fields['amount'].required = False
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if not phone:
+            raise ValidationError("Enter a valid phone number")
+        phone = phone.strip()  # Remove any extra spaces
+        try:
+            # Attempt parsing with a default region (IN for India)
+            parsed_number = phonenumbers.parse(phone, "IN")
+        except phonenumbers.phonenumberutil.NumberParseException as e:
+            raise ValidationError("Invalid phone number format. Include country/area code if required.")
+            
+        if not phonenumbers.is_valid_number(parsed_number):
+                raise ValidationError("Invalid phone number. Please check the number and try again.")
+        formatted_number =  phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
+        return formatted_number
 
 class UploadParticipantsForm(forms.ModelForm):
     csv_file = forms.FileField(required=True)
