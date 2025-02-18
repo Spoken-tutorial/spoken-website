@@ -6,7 +6,8 @@ from django.contrib.auth.models import User
 
 from events.formsv2 import *
 from events.models import *
-
+import re
+import string
 
 class RpForm(forms.ModelForm):
     user = forms.ModelChoiceField(queryset = User.objects.filter(groups__name='Resource Person'))
@@ -508,3 +509,36 @@ class TrainingReUseForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super(TrainingReUseForm, self).__init__(*args, **kwargs)
+
+class StudentPasswordResetForm(forms.Form):
+    state = forms.ModelChoiceField(queryset=State.objects.all(),
+                                   empty_label="Select State",)
+    school = forms.ModelChoiceField(queryset=AcademicCenter.objects.filter(institution_type_id=5))
+    batches = forms.ModelMultipleChoiceField(queryset=StudentBatch.objects.filter(academic__institution_type_id=5))
+    new_password = forms.CharField()
+    confirm_password = forms.CharField()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        confirm_password = cleaned_data.get('confirm_password')
+        if new_password and confirm_password and new_password !=confirm_password:
+            self.add_error("confirm_password", "Passwords do not match")
+            raise ValidationError("Passwords do not match!")
+        return cleaned_data
+    
+    def clean_new_password(self):
+        SPECIAL_CHAR = string.punctuation
+        new_password = self.cleaned_data.get("new_password")
+        errors = []
+        if not re.search(r'[a-z]', new_password):
+            errors.append("Password must contain at least one lowercase letter.")
+        if not re.search(r'[A-Z]', new_password):
+            errors.append("Password must contain at least one uppercase letter.")
+        if not re.search(r'\d', new_password):
+            errors.append("Password must contain at least one number.")
+        if not any(char in SPECIAL_CHAR for char in new_password):
+            errors.append(f"Password must contain at least one special character (e.g., @, $, !, %).")
+        if errors:
+            raise ValidationError(errors)
+        return new_password

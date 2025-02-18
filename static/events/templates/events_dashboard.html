@@ -284,6 +284,16 @@
                         </div>
                     </div>
                 {% endif %}
+                {% if user|is_school_training_manager %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">School Training Manager</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li><a href="{% url 'events:reset_student_pwd' %}">Reset Student Password</a></li>
+                            </ul>                            
+                        </div>
+                    </div>
+                {% endif %}
 
             </div>
         </div>

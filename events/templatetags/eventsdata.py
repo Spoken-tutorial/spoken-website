@@ -3,7 +3,8 @@ from builtins import str
 from django import template
 from django.contrib.auth.models import User
 from events.models import *
-from events.views import is_organiser, is_invigilator, is_resource_person, is_accountexecutive, is_event_manager, can_clone_training, is_administrator, is_organiser_deactivated, is_invigilator_deactivated
+from events.views import is_organiser, is_invigilator, is_resource_person, is_accountexecutive, is_event_manager, can_clone_training, \
+    is_administrator, is_organiser_deactivated, is_invigilator_deactivated, is_school_training_manager
 import datetime
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -195,6 +196,7 @@ register.filter('is_invigilator', is_invigilator)
 register.filter('is_resource_person', is_resource_person)
 register.filter('is_accountexecutive', is_accountexecutive)
 register.filter('is_event_manager', is_event_manager)
+register.filter('is_school_training_manager', is_school_training_manager)
 register.filter('is_organiser_deactivated', is_organiser_deactivated)
 register.filter('is_invigilator_deactivated', is_invigilator_deactivated)
 register.filter('can_download_workshop_certificate', can_download_workshop_certificate)
