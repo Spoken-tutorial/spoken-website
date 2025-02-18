@@ -61,6 +61,7 @@ def send_bulk_student_reset_mail(ac, batches, count, new_password, user):
         Batches: {batch_names}
         Total student count: {count}
         New password: {new_password}
+        Changed by: {user.email}
     
         For security reasons, please inform students to change your password immediately after login.
 
