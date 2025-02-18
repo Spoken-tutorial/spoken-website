@@ -4,7 +4,7 @@ from builtins import range
 import datetime as dt
 from donate.forms import *
 from donate.models import CdFossLanguages
-
+from django.core.mail import send_mail
 # Third Party Stuff
 from django.conf import settings
 
@@ -49,3 +49,26 @@ def get_updated_form(transaction, form_type):
     form.fields['status'].initial = transaction.status
         
     return form
+
+def send_bulk_student_reset_mail(ac, batches, count, new_password, user):
+    batch_names = ", ".join([f"{x.id} - {x.batch_name}" for x in batches])
+    subject = "Password Reset Notification"
+    message = f"""
+        Dear {user.first_name},
+
+        Please find below the details of the recent student password update: 
+        Academic Center: {ac.institution_name}
+        Batches: {batch_names}
+        Total student count: {count}
+        New password: {new_password}
+        Changed by: {user.email}
+    
+        For security reasons, please inform students to change your password immediately after login.
+
+        Regards,
+        Admin Team
+    """
+
+    from_email  = settings.ADMINISTRATOR_EMAIL
+    recipient_list = [user.email, settings.DEVELOPER_EMAIL]
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False)

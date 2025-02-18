@@ -112,4 +112,7 @@ urlpatterns = [
     #url(r'delete/(\d+)$',  delete_contact', name='delete_contact'),
     # EVENTS V2 URLs
     url(r'^', include('events.urlsv2')),
+    url(r'reset-student-password/$',  reset_student_pwd, name='reset_student_pwd'),
+    url(r'^ajax-get-schools/$',  get_schools, name='get_schools'),
+    url(r'^ajax-get-batches/$',  get_batches, name='get_batches'),
 ]
