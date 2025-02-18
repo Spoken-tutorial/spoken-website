@@ -537,7 +537,7 @@ class StudentPasswordResetForm(forms.Form):
             errors.append("Password must contain at least one uppercase letter.")
         if not re.search(r'\d', new_password):
             errors.append("Password must contain at least one number.")
-        if not any(char in SPECIAL_CHAR for char in new_password):
+        if not re.search(f"[{re.escape(SPECIAL_CHAR)}]", new_password):
             errors.append(f"Password must contain at least one special character (e.g., @, $, !, %).")
         if errors:
             raise ValidationError(errors)
