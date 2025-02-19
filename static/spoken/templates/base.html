@@ -106,6 +106,7 @@
                                                                             <li class=""><a href="/participant/login/">Student Dashboard</a></li>
                                                                             <li class=""><span class="badge" id="nav-fdp" style="margin-right: 4px;">new</span><span class="text-muted" style="font-size: 1rem;">Individual Learning</span></li>
                                                                             <li class=""><a href="/training/list_events/ongoing/" target="_blank">Individual Learning Workshop</a></li>   <li class=""><a href="/training/verify-ilwtest-certificate/" target="_blank">Verify ILW test certificate </a></li>
+                                                                            <li class=""><a href="/payment/subscription/">Subscription</a></li>
                                                                         </ul>
                                                                     </div>
                                                                 </div>
@@ -174,21 +175,23 @@
                                                         <span title="" data-original-title="" class="glyphicon glyphicon-user"></span> {{ user }} <b class="caret"></b>
                                                     </a>
                                                     <ul class="dropdown-menu user-details">
-                                                        <li><a href="/accounts/change-password/">Change Password</a></li>
+                                                        <li><a href="/accounts/change-password/"><i class="fa fa-key"></i>  Change Password</a></li>
                                                         <li class="divider"></li>
-                                                        <li><a href="/accounts/profile/{{ user }}/">Edit Profile</a></li>
+                                                        <li><a href="/accounts/profile/{{ user }}/"><i class="fa fa-pencil"></i>  Edit Profile</a></li>
                                                         <li class="divider"></li>
-                                                        <li><a href="/accounts/view-profile/{{ user }}/">View Profile</a></li>
+                                                        <li><a href="/accounts/view-profile/{{ user }}/"><i class="fa fa-user"></i>  View Profile</a></li>
+                                                        <li class="divider"></li>
+                                                        <li><a href="{% url 'initiate_payment' %}"><i class="fa fa-credit-card"></i>  Subscription</a></li>
                                                         <li class="divider"></li>
                                                         {% if user|get_administrator or user.is_impersonate %}
                                                             {% if user.is_impersonate %}
-                                                                <li><a href="/masquerade/stop">Switch Back</a></li>
+                                                                <li><a href="/masquerade/stop"><i class="fa fa-exchange"></i>  Switch Back</a></li>
                                                             {% else %}
-                                                                <li><a href="/masquerade/">Masquerade</a></li>
+                                                                <li><a href="/masquerade/"><i class="fa fa-user-secret"></i>  Masquerade</a></li>
                                                             {% endif %}
                                                             <li class="divider"></li>
                                                         {% endif %}
-                                                        <li><a href="/accounts/logout/">Log Out</a></li>
+                                                        <li><a href="/accounts/logout/"><i class="fa fa-sign-out"></i>  Log Out</a></li>
                                                     </ul>
                                                 </li>
                                             {% else %}

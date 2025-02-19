@@ -147,15 +147,15 @@ DATABASES = {
         'HOST': MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
         'PORT': '',                  # Set to empty string for default.	
     },
-    'ilwmoodle': {	
-        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
-        'NAME': ILWMDB,                      # Or path to database file if using sqlite3.	
-        # The following settings are not used with sqlite3:	
-        'USER': ILW_MDB_USER,	
-        'PASSWORD': ILW_MDB_PASS,	
-        'HOST': ILW_MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
-        'PORT': ILW_MDB_PORT,                  # Set to empty string for default.	
-    },	
+    # 'ilwmoodle': {	
+    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
+    #     'NAME': ILWMDB,                      # Or path to database file if using sqlite3.	
+    #     # The following settings are not used with sqlite3:	
+    #     'USER': ILW_MDB_USER,	
+    #     'PASSWORD': ILW_MDB_PASS,	
+    #     'HOST': ILW_MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
+    #     'PORT': ILW_MDB_PORT,                  # Set to empty string for default.	
+    # },	
     # 'cdeep': {	
     #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
     #     'NAME': CDB,                      # Or path to database file if using sqlite3.	
@@ -380,9 +380,24 @@ REST_FRAMEWORK = {
     ],
 }
 
+CSRF_TRUSTED_ORIGINS=[
+    'https://smartgatewayuat.hdfcbank.com',
+    'https://smartgateway.hdfcbank.com'
+]
 EVENT_CD_CONTENT=EVENT_CD_CONTENT
 ALLOWED_INTERNAL_ROLES=ALLOWED_INTERNAL_ROLES #IDs of auth_group who are allowed to view tutorial video pages without payment
 VIDEO_TIME=VIDEO_TIME
 PDP_FEE=PDP_FEE
 CDP_FEE=CDP_FEE
+DEVELOPER_EMAIL=DEVELOPER_EMAIL
+# HDFC SmartGateway Data
+HDFC_API_URL = HDFC_API_URL #session api endpoint
+MERCHANT_ID = MERCHANT_ID
+HDFC_API_KEY = HDFC_API_KEY
+CLIENT_ID = CLIENT_ID
+ORDER_STATUS_URL=ORDER_STATUS_URL
+SUBSCRIPTION_AMOUNT=SUBSCRIPTION_AMOUNT
+HDFC_POLL_MAX_RETRIES=HDFC_POLL_MAX_RETRIES
+HDFC_POLL_INTERVAL=HDFC_POLL_INTERVAL
+RESPONSE_KEY=RESPONSE_KEY
 DEVELOPER_EMAIL=DEVELOPER_EMAIL

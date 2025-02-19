@@ -1,0 +1,152 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Academic Subscription{% endblock %}
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+    <style>
+     .text-danger{
+        font-size: 1.2rem;
+     }
+    </style>
+{% endblock %}
+{% block heading %}
+        <i class="fa fa-list-ul"></i> Annual Academic Subscription
+{% endblock %}
+
+{% block content %}
+{% if messages %}
+
+{% endif %}
+    <div class="row">
+        <div class="col-sm-8 col-md-8">
+            <form method="post">
+                {% csrf_token %}
+            
+                <div class="form-group">
+                    <label><i class="fa fa-user"></i> Name:</label>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                        {% render_field form.name class+="form-control" placeholder="Enter your full name" %}
+                    </div>
+                </div>
+            
+                <div class="form-group">
+                    <label><i class="fa fa-envelope"></i> Email:</label>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+                        {% render_field form.email class+="form-control" placeholder="Enter your email" %}
+                    </div>
+                    <div class="text-danger">
+                        {% for error in form.email.errors %}
+                            <small><i class="fa fa-exclamation-circle"></i> {{ error }}</small>
+                        {% endfor %}
+                    </div>
+                </div>
+            
+                <div class="form-group">
+                    <label><i class="fa fa-phone"></i> Phone:</label>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-phone"></i></span>
+                        {% render_field form.phone class+="form-control" placeholder="Enter 10-digit phone number" %}
+                    </div>
+                    <small class="text-muted">Enter 10-digit mobile number (e.g., 9876543210)</small>
+                    <div class="text-danger">
+                        {% for error in form.phone.errors %}
+                            <small><i class="fa fa-exclamation-circle"></i> {{ error }}</small>
+                        {% endfor %}
+                    </div>
+                </div>
+            
+                <div class="form-group">
+                    <label><i class="fa fa-map-marker"></i> State:</label>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-map-marker"></i></span>
+                        {% render_field form.state class+="form-control" %}
+                    </div>
+                </div>
+            
+                <div class="form-group">
+                    <label><i class="fa fa-university"></i> Academic Institute:</label>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-building"></i></span>
+                        <select multiple id="id_academic" style="width:300px" name="institute" class="form-control"></select>
+                    </div>
+                    <small class="text-muted">You can search institute by academic code or name.</small>
+                    <small class="text-muted">Payment can be made for multiple institutes simultaneously.</small>
+                </div>
+            
+                <div class="form-group">
+                    <label><i class="fa fa-money"></i> Amount:</label>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="fa fa-inr"></i></span>
+                        <input id="id_amount" value="10" disabled class="form-control">
+                    </div>
+                </div>
+            
+                <button class="btn btn-primary btn-block">
+                    <i class="fa fa-credit-card"></i> Make Payment
+                </button>
+            </form>
+            
+          <div id="paymentMsg">
+
+          </div>
+        </div>
+    </div>
+   
+{% endblock %}
+{% block jsblock %}
+    <script src="{% static 'spoken/js/events.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+    <script>
+       $(document).ready(function() {
+        $('#id_academic').select2();
+        $("#e1").select2();
+        $("#id_state").val("").trigger("change");
+
+        $("#id_state").change(function(){
+            console.log('state selected')
+            var stateId = $(this).val();
+            console.log(`state id: ${stateId}`)
+            let academicSelect = $("#id_academic");
+            // academicSelect.innerHTML = ""
+            academicSelect.html('<option value="">-- Select Academic Center --</option>');
+            console.log("fetching data *******")
+            if(stateId){
+                fetch(`{% url 'donate:get_academic_centers' %}?stateId=${stateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log("fetching data success *******")
+                    data.forEach(item => {
+                        academicSelect.append(new Option(`${item.academic_code} - ${item.institution_name}`, item.id))
+                    })
+                })
+                .catch(error =>alert('An error occurred. Please try later.'))
+            }
+
+        });
+
+        $('#id_academic').on('select2:select select2:unselect', function (e) {
+            var selectedCount = $(this).val() ? $(this).val().length : 0;
+            console.log("Total selected:", selectedCount);
+            let total_amount = {{subscription_amount}} * selectedCount;
+            $("#id_amount").val(total_amount);
+        });
+
+
+        // $('#id_academic').on('select2:select', function (e) {
+        //     var data = e.params.data;
+        //     var params = e.params;
+        //     console.log("select data");
+        //     console.log(data);
+        //     console.log("params");
+        //     console.log(params);
+            
+        // });
+    });
+    </script>
+{% endblock %}
