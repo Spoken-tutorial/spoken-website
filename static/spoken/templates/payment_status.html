@@ -117,10 +117,7 @@
         let orderId = "{{ data.order_id }}";
         if ("{{ status }}" === "PENDING") {
             let url  = `{% url 'check_payment_status' order_id=data.order_id %}`
-            console.log("url *****")
-            console.log(url)
             fetch(url)
-            // fetch(`/payment/status/${orderId}/`)
                 .then(response => response.json())
                 .then(data => {
                     let messageElement = document.getElementById("payment-message");

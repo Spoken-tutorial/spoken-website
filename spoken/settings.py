@@ -147,33 +147,33 @@ DATABASES = {
         'HOST': MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
         'PORT': '',                  # Set to empty string for default.	
     },
-    # 'ilwmoodle': {	
-    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
-    #     'NAME': ILWMDB,                      # Or path to database file if using sqlite3.	
-    #     # The following settings are not used with sqlite3:	
-    #     'USER': ILW_MDB_USER,	
-    #     'PASSWORD': ILW_MDB_PASS,	
-    #     'HOST': ILW_MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
-    #     'PORT': ILW_MDB_PORT,                  # Set to empty string for default.	
-    # },	
-    # 'cdeep': {	
-    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
-    #     'NAME': CDB,                      # Or path to database file if using sqlite3.	
-    #     # The following settings are not used with sqlite3:	
-    #     'USER': CDB_USER,	
-    #     'PASSWORD': CDB_PASS,	
-    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
-    #     'PORT': '',                  # Set to empty string for default.	
-    # },	
-    # 'workshop_info': {	
-    #     'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
-    #     'NAME': WDB,                      # Or path to database file if using sqlite3.	
-    #     # The following settings are not used with sqlite3:	
-    #     'USER': WDB_USER,	
-    #     'PASSWORD': WDB_PASS,	
-    #     'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
-    #     'PORT': '',                  # Set to empty string for default.	
-    # },	
+    'ilwmoodle': {	
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
+        'NAME': ILWMDB,                      # Or path to database file if using sqlite3.	
+        # The following settings are not used with sqlite3:	
+        'USER': ILW_MDB_USER,	
+        'PASSWORD': ILW_MDB_PASS,	
+        'HOST': ILW_MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
+        'PORT': ILW_MDB_PORT,                  # Set to empty string for default.	
+    },	
+    'cdeep': {	
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
+        'NAME': CDB,                      # Or path to database file if using sqlite3.	
+        # The following settings are not used with sqlite3:	
+        'USER': CDB_USER,	
+        'PASSWORD': CDB_PASS,	
+        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
+        'PORT': '',                  # Set to empty string for default.	
+    },	
+    'workshop_info': {	
+        'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
+        'NAME': WDB,                      # Or path to database file if using sqlite3.	
+        # The following settings are not used with sqlite3:	
+        'USER': WDB_USER,	
+        'PASSWORD': WDB_PASS,	
+        'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
+        'PORT': '',                  # Set to empty string for default.	
+    },	
     'forums': {	
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
         'NAME': FDB,                      # Or path to database file if using sqlite3.	

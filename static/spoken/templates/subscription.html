@@ -109,18 +109,13 @@
         $("#id_state").val("").trigger("change");
 
         $("#id_state").change(function(){
-            console.log('state selected')
             var stateId = $(this).val();
-            console.log(`state id: ${stateId}`)
             let academicSelect = $("#id_academic");
-            // academicSelect.innerHTML = ""
             academicSelect.html('<option value="">-- Select Academic Center --</option>');
-            console.log("fetching data *******")
             if(stateId){
                 fetch(`{% url 'donate:get_academic_centers' %}?stateId=${stateId}`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log("fetching data success *******")
                     data.forEach(item => {
                         academicSelect.append(new Option(`${item.academic_code} - ${item.institution_name}`, item.id))
                     })
@@ -132,21 +127,9 @@
 
         $('#id_academic').on('select2:select select2:unselect', function (e) {
             var selectedCount = $(this).val() ? $(this).val().length : 0;
-            console.log("Total selected:", selectedCount);
             let total_amount = {{subscription_amount}} * selectedCount;
             $("#id_amount").val(total_amount);
         });
-
-
-        // $('#id_academic').on('select2:select', function (e) {
-        //     var data = e.params.data;
-        //     var params = e.params;
-        //     console.log("select data");
-        //     console.log(data);
-        //     console.log("params");
-        //     console.log(params);
-            
-        // });
     });
     </script>
 {% endblock %}
