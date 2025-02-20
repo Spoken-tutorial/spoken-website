@@ -11,7 +11,6 @@ from cdeep.views import *
 from django.conf import settings
 from django.conf.urls.static import static
 
-
 app_name = 'spoken'
 admin.autodiscover()
 
@@ -62,6 +61,11 @@ urlpatterns = [
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/', include(admin.site.urls)),
+
+    #subscription urls
+    url(r'^payment/callback/$',  payment_callback, name="payment_callback"),
+    url(r'^payment/status/(?P<order_id>[\w-]+)/$', check_payment_status, name="check_payment_status"),
+    url(r'^payment/subscription/$',  subscription, name="initiate_payment"),
 
     # evens old url
     url(r'^workshops/college/view_college/(\d+)/$',  view_college, name='view_college'),

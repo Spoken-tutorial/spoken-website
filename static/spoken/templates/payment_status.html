@@ -1,0 +1,150 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Academic Subscription{% endblock %}
+
+{% block cssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/chosen.min.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <style>
+        .panel {
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            padding: 20px;
+        }
+        .panel-heading {
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+            padding: 10px 15px;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-control {
+            border-radius: 4px;
+        }
+        .btn-primary {
+            background-color: #337ab7;
+            border-color: #2e6da4;
+            width: 100%;
+            font-size: 16px;
+        }
+        .btn-primary:hover {
+            background-color: #286090;
+        }
+        .fa {
+            margin-right: 5px;
+        }
+        .status-message {
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        #payment-message{
+            font-size: 1.2rem;
+        }
+    </style>
+{% endblock %}
+
+{% block heading %}
+    <i class="fa fa-list-ul"></i> Annual Academic Subscription Payment Status
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel">
+            <div class="panel-heading">
+                <i class="fa fa-credit-card"></i> Transaction Details
+            </div>
+            <div class="panel-body">
+                {% if status == "CHARGED" %}
+                    <p id="payment-message" class="status-message text-success">
+                        <i class="fa fa-check-circle"></i> The payment was successful!
+                    </p>
+                    
+
+                {% elif status == "FAILED" %}
+                    <p id="payment-message" class="status-message text-danger">
+                        <i class="fa fa-times-circle"></i> Payment failed. Please contact Training Manager.
+                    </p>
+                   
+
+                {% elif status == "PENDING" %}
+                
+                    <p id="payment-message" class="status-message text-warning">
+                        <i class="fa fa-clock-o"></i> Your transaction is being processed. 
+                        Please do not close this window while we retrieve the latest details.
+                    </p>
+                    <div id="pending_spinner" class="text-center" style="font-size: 4rem;display: none;">
+                        <i class="fa fa-spinner fa-spin fa-2x text-primary"></i>
+                    </div>
+                {% endif %}
+                <ul class="list-group" id="details" {% if status == "CHARGED" %}style="display: block;"{% else%}style="display: none;"{% endif %}>
+                    <li class="list-group-item"><strong><i class="fa fa-file-text"></i> Order Id:</strong> {{ order_id }}</li>
+                    <li class="list-group-item"><strong><i class="fa fa-file-text"></i> Transaction ID:</strong> {{ data.id }}</li>
+                    <li class="list-group-item"><strong><i class="fa fa-user"></i> Payee:</strong> {{ data.udf3 }}</li>
+                    <li class="list-group-item"><strong><i class="fa fa-envelope"></i> Email:</strong> {{ data.customer_email }}</li>
+                    <li class="list-group-item"><strong><i class="fa fa-phone"></i> Contact:</strong> {{ data.customer_phone }}</li>
+                    <li class="list-group-item"><strong><i class="fa fa-inr"></i> Amount:</strong> ₹{{ data.amount }}</li>
+                    <li class="list-group-item"><strong><i class="fa fa-building"></i> Academic Center:</strong> {{ data.udf1 }}</li>
+                    <li class="list-group-item"><strong><i class="fa fa-university"></i> Center Code:</strong> {{ data.udf2 }}</li>
+                    <li class="list-group-item"><strong><i class="fa fa-map-marker"></i> State:</strong> {{ data.udf4 }}</li>
+                </ul>
+               
+            </div>
+            <p class="list-group-item"><strong><i class="fa fa-file-text"></i> Order Id:</strong> {{ order_id }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block jsblock %}
+<script>
+    showSpinner();
+    function hideSpinner() {
+        document.getElementById("pending_spinner").style.display = "none";
+    }
+    function showSpinner() {
+       document.getElementById("pending_spinner").style.display = "block";
+    }
+    function displayDetails(){
+        document.getElementById("details").style.display = "block";
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        let orderId = "{{ data.order_id }}";
+        if ("{{ status }}" === "PENDING") {
+            let url  = `{% url 'check_payment_status' order_id=data.order_id %}`
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    let messageElement = document.getElementById("payment-message");
+                    if (data.status === "CHARGED") {
+                        messageElement.innerHTML = '<i class="fa fa-check-circle"></i> Payment successful!';
+                        messageElement.classList.remove("text-warning");
+                        messageElement.classList.add("text-success");
+                        hideSpinner();
+                        displayDetails()
+                    } else if (data.status === "AUTHENTICATION_FAILED" || data.status === "AUTHORIZATION_FAILED" || data.status == "ERROR") {
+                        messageElement.innerHTML = '<i class="fa fa-times-circle"></i> Payment failed!';
+                        messageElement.classList.remove("text-warning");
+                        messageElement.classList.add("text-danger");
+                        hideSpinner();
+                    } else if (data.status === "TIMEOUT"){
+                        messageElement.innerHTML = '<i class="fa fa-clock-o"></i> We are still processing your payment. Don\'t worry! You will receive an email confirmation once the transaction is complete.';
+                        hideSpinner();
+                    } else {
+                        messageElement.innerHTML = '<i class="fa fa-clock-o"></i> Please hold on while we retrieve your transaction details!';
+                        showSpinner();
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("payment-message").innerHTML = '<i class="fa fa-exclamation-triangle"></i> Error checking payment status. Please contact Training Manager.';
+                    hideSpinner();
+                });
+        }
+    });
+</script>
+{% endblock %}

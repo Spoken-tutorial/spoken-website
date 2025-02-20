@@ -13,8 +13,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Count, Max, Case, When, DateTimeField, IntegerField
 
-from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse, Http404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.core.urlresolvers import reverse
@@ -36,6 +36,13 @@ from .search import search_for_results
 import pymongo
 from uuid import getnode as get_mac
 import socket
+
+from donate.models import *
+from donate.forms import AcademicSubscriptionForm
+from donate.helpers import *
+from donate.subscription import *
+import requests
+
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
     if user.groups.filter(name='Resource Person').count() == 1:
@@ -953,3 +960,128 @@ def saveVideoData(request):
 def bookfair(request):
     context = {}
     return render(request, 'spoken/templates/nep_bookfair.html',context)
+
+
+def subscription(request):
+    user = request.user
+    context = {}
+    context["subscription_amount"] = settings.SUBSCRIPTION_AMOUNT
+    template = 'spoken/templates/subscription.html'
+    if request.method == 'GET':
+        form = AcademicSubscriptionForm(user=user)
+        context['form'] = form
+        return render(request, template, context=context)
+    if request.method == 'POST':
+        form = AcademicSubscriptionForm(request.POST, user=user)
+        context['form'] = form
+        if form.is_valid():
+            academic = form.cleaned_data.get('institute')
+            expiry_date = date.today() + timedelta(days=365)
+            state = form.cleaned_data.get('state')
+            total_academic_centers = len(academic)
+            subscription_amount = settings.SUBSCRIPTION_AMOUNT * total_academic_centers
+            email = form.cleaned_data.get('email')
+            data = {
+                'name': form.cleaned_data.get('name'),
+                'email': form.cleaned_data.get('email'),
+                'phone': form.cleaned_data.get('phone'),
+                'state_id': state.id,
+                'subscription_amount': subscription_amount,
+                'subscription_days': 365,
+                'expiry_date': expiry_date,
+                'subscription_start_date': date.today(),
+                'num_academic_center': total_academic_centers
+            }
+            subscription = AcademicSubscription.objects.create(**data)
+            for ac in academic:
+                AcademicSubscriptionDetail.objects.create(
+                    subscription = subscription,
+                    academic = ac,
+                    subscription_end_date = expiry_date # Default to expiry_date
+                )
+        else:
+            messages.add_message(request, messages.ERROR, "Please see below errors.")
+            return render(request, template, context=context)
+        # Initiate hdfc session api
+        headers = get_request_headers(email)
+        data['state'] = state.name
+        payload = get_session_payload(request, email, data, academic)
+        try:
+            response = requests.post(settings.HDFC_API_URL, json=payload, headers=headers)
+            response_data = response.json()
+        except requests.exceptions.RequestException as e:
+            messages.add_message(request, messages.ERROR, "An error occurred. Please try later")
+            return render(request, template, context=context)
+        if response.status_code == 200:
+            payment_links = response_data.get("payment_links", {})
+            payment_link = payment_links.get("web")
+            if not payment_link:
+                messages.error(request, "Payment link is missing. Please contact support.")
+                return render(request, template, context=context)
+            transaction = save_hdfc_session_data(response_data)
+            subscription.transaction = transaction
+            subscription.save()
+            return redirect(payment_link)
+        else:
+            transaction = save_hdfc_session_error(response_data, subscription_amount)
+            subscription.transaction = transaction
+            subscription.save()
+            messages.add_message(request, messages.ERROR, "An error occurred. Please try later") 
+        return render(request, template, context=context)
+
+@csrf_exempt
+def payment_callback(request):
+    context = {}
+    status_template = 'spoken/templates/payment_status.html'
+    order_id = request.POST.get('order_id')
+    if not order_id:
+        raise Http404
+    
+    ac_sub = AcademicSubscription.objects.get(transaction__order_id=order_id)
+    context['order_id'] = order_id
+    try:
+        order_status_url = f"{settings.ORDER_STATUS_URL}{order_id}"
+        # order status api
+        headers = get_request_headers(ac_sub.email)
+        try:
+            response = requests.get(order_status_url, headers=headers)
+            response_data = response.json()
+        except requests.exceptions.RequestException as e:
+            context['status'] = 'FAILED'
+            return render(request, status_template, context=context)
+        if response.status_code == 200:
+            verified = verify_hmac_signature(request.POST)
+            if not verified:
+                context['status'] = 'FAILED'
+                return render(request, status_template, context=context)
+            save_hdfc_success_data(order_id, response_data)
+            context['data'] = get_display_transaction_details(response_data)
+            order_status = response_data.get('status', '')
+            amount = response_data.get('amount', '')
+            
+            if order_status == 'CHARGED' and amount == ac_sub.subscription_amount:
+                context['status'] = 'CHARGED'
+            elif order_status == 'PENDING_VBV' or order_status == 'AUTHORIZING': #This is a non-terminal transaction status. Show pending screen/polling
+                context['status'] = 'PENDING'
+            else:
+                context['status'] = 'FAILED'
+            return render(request, status_template, context=context)
+        else:
+            save_hdfc_error_data(order_id, response_data)  
+            context['status'] = 'FAILED'
+    except Exception as e:
+        context['status'] = 'FAILED'
+    return render(request, status_template, context=context) # return to payment page site
+
+
+@csrf_exempt
+def check_payment_status(request, order_id):
+    """
+    API endpoint for frontend to check payment status.
+    This triggers backend polling.
+    """
+    sub = AcademicSubscription.objects.get(transaction__order_id=order_id)
+    amount = sub.subscription_amount
+    email = sub.email
+    result = poll_payment_status(order_id, email, amount)
+    return JsonResponse(result)

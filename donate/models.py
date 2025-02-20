@@ -6,7 +6,8 @@ import uuid
 from datetime import datetime
 from pytz import timezone
 import json
-from events.models import City, State
+from events.models import City, State, AcademicCenter
+from django.core.validators import RegexValidator, MinLengthValidator
 
 class Payee(models.Model):
     name = models.CharField(max_length=255)
@@ -135,3 +136,42 @@ class SchoolDonation(models.Model):
 
 class SchoolDonationTransactions(TransactionCommonInfo):
     paymentdetail = models.ForeignKey(SchoolDonation, on_delete=models.PROTECT)
+
+
+class HDFCTransactionDetails(models.Model):
+    transaction_id = models.CharField(max_length=255) # "id" from the order status response
+    requestId = models.CharField(max_length=255)
+    order_id = models.CharField(max_length=21)
+    amount = models.DecimalField(max_digits=10,decimal_places=2)
+    session_error_code = models.CharField(max_length=255)
+    session_error_msg = models.CharField(max_length=255)
+    order_status = models.CharField(max_length=255) #order status like charged, failed etc
+    order_error_code = models.CharField(max_length=255)
+    order_error_msg = models.CharField(max_length=255)
+    customer_id = models.CharField(max_length=50)
+    udf1 = models.TextField() # academic center name
+    udf2 = models.TextField() # academic center code
+    udf3 = models.CharField(max_length=150) # payee name
+    udf4 = models.CharField(max_length=50) # academic center state name
+
+class AcademicSubscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.PROTECT, blank=True, null=True)
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    state = models.ForeignKey(State, on_delete=models.PROTECT)
+    transaction = models.ForeignKey(HDFCTransactionDetails, on_delete=models.PROTECT, blank=True, null=True)
+    expiry_date = models.DateField()
+    subscription_amount = models.DecimalField(max_digits=10,decimal_places=2)
+    num_academic_center = models.IntegerField() #Total number of academic centers to be paid for
+    subscription_days = models.IntegerField()
+    subscription_start_date = models.DateField()
+    phone = models.CharField(max_length=20)
+    response_status = models.CharField(max_length=3) # stores the session api response status code
+    error_code = models.CharField(max_length=3, blank=True, null=True) # stores the session api response error_code code
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateField(auto_now=True)
+
+class AcademicSubscriptionDetail(models.Model):
+    academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT)
+    subscription_end_date = models.DateField() # This varies from expiry date in case if institute gets extention or grace period from ST team
+    subscription = models.ForeignKey(AcademicSubscription, on_delete=models.CASCADE, related_name='academic_details')

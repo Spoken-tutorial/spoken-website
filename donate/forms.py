@@ -1,7 +1,9 @@
 from django.contrib.auth.models import User
 from donate.models import *
 from django import forms
-from events.models import State	
+from events.models import State
+import phonenumbers
+from django.core.validators import EmailValidator
 
 class PayeeForm(forms.ModelForm):
     state = forms.ModelChoiceField(
@@ -218,10 +220,37 @@ class GoodieTransactionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['user'].widget = forms.HiddenInput()
-        pass
 
         
 class SchoolDonationForm(forms.ModelForm):
     class Meta:
         model = SchoolDonation
         fields = ['name', 'email', 'contact', 'state', 'city', 'address', 'amount', 'note']
+
+class AcademicSubscriptionForm(forms.Form):
+    institute = forms.ModelMultipleChoiceField(queryset=AcademicCenter.objects.all().order_by('institution_name'))
+    state = forms.ModelChoiceField(queryset=State.objects.all().order_by('name'),
+                                   empty_label='----Select State----')
+    email = forms.EmailField(validators=[EmailValidator(message="Enter a valid email address.")], required=False)
+    name = forms.CharField(max_length=255)
+    phone = forms.CharField(max_length=20)
+    
+    class Meta:
+        model = AcademicSubscription
+        fields = ['name','email', 'state',  'phone', 'institute']
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if user and user.is_authenticated:
+            self.fields['name'].initial = f"{user.first_name} {user.last_name}"
+            self.fields['email'].initial = f"{user.email}"
+    
+    def clean_phone(self):
+        value = self.cleaned_data.get('phone')
+        try:
+            phone = phonenumbers.parse(value, "IN") #default to +91 if no country code is provided
+            if not phonenumbers.is_valid_number(phone):
+                raise forms.ValidationError("Enter a valid phone number.")
+        except phonenumbers.NumberParseException:
+            raise forms.ValidationError("Enter a valid phone number")
+        return phonenumbers.format_number(phone, phonenumbers.PhoneNumberFormat.E164)
