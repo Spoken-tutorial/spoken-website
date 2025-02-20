@@ -165,12 +165,10 @@ class AcademicSubscription(models.Model):
     num_academic_center = models.IntegerField() #Total number of academic centers to be paid for
     subscription_days = models.IntegerField()
     subscription_start_date = models.DateField()
-    phone = models.CharField(max_length=10, validators=[RegexValidator(
-        r'^\d{10}$', message="Mobile number must be exactly 10 digits."
-    )])
+    phone = models.CharField(max_length=20)
     response_status = models.CharField(max_length=3) # stores the session api response status code
     error_code = models.CharField(max_length=3, blank=True, null=True) # stores the session api response error_code code
-    created = created = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
     updated = models.DateField(auto_now=True)
 
 class AcademicSubscriptionDetail(models.Model):

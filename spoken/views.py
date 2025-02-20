@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Count, Max, Case, When, DateTimeField, IntegerField
 
-from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
@@ -1034,6 +1034,9 @@ def payment_callback(request):
     context = {}
     status_template = 'spoken/templates/payment_status.html'
     order_id = request.POST.get('order_id')
+    if not order_id:
+        raise Http404
+    
     ac_sub = AcademicSubscription.objects.get(transaction__order_id=order_id)
     context['order_id'] = order_id
     try:

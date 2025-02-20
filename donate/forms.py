@@ -233,7 +233,7 @@ class AcademicSubscriptionForm(forms.Form):
                                    empty_label='----Select State----')
     email = forms.EmailField(validators=[EmailValidator(message="Enter a valid email address.")], required=False)
     name = forms.CharField(max_length=255)
-    phone = forms.CharField(max_length=10)
+    phone = forms.CharField(max_length=20)
     
     class Meta:
         model = AcademicSubscription
@@ -248,9 +248,9 @@ class AcademicSubscriptionForm(forms.Form):
     def clean_phone(self):
         value = self.cleaned_data.get('phone')
         try:
-            phone = phonenumbers.parse(value, "IN")
+            phone = phonenumbers.parse(value, "IN") #default to +91 if no country code is provided
             if not phonenumbers.is_valid_number(phone):
-                self.add_error('phone', "Enter a valid phone number.")
+                raise forms.ValidationError("Enter a valid phone number.")
         except phonenumbers.NumberParseException:
-            self.add_error('phone', "Enter a valid phone number.")
-        return value
+            raise forms.ValidationError("Enter a valid phone number")
+        return phonenumbers.format_number(phone, phonenumbers.PhoneNumberFormat.E164)

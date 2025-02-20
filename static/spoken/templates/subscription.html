@@ -49,9 +49,8 @@
                     <label><i class="fa fa-phone"></i> Phone:</label>
                     <div class="input-group">
                         <span class="input-group-addon"><i class="fa fa-phone"></i></span>
-                        {% render_field form.phone class+="form-control" placeholder="Enter 10-digit phone number" %}
+                        {% render_field form.phone class+="form-control" placeholder="Enter phone number" %}
                     </div>
-                    <small class="text-muted">Enter 10-digit mobile number (e.g., 9876543210)</small>
                     <div class="text-danger">
                         {% for error in form.phone.errors %}
                             <small><i class="fa fa-exclamation-circle"></i> {{ error }}</small>
