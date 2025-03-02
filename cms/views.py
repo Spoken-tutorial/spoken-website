@@ -60,9 +60,11 @@ def dispatcher(request, permalink=''):
     }
     return render(request, 'cms/templates/page.html', context)
 
+def get_confirmation_code():
+    return ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(7))
 
-def create_profile(user, phone):
-    confirmation_code = ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(7))
+def create_profile(user, phone, code=None):
+    confirmation_code = code if code else get_confirmation_code()
     profile = Profile(user=user, confirmation_code=confirmation_code, phone=phone)
     profile.save()
     return profile
@@ -113,7 +115,11 @@ def account_register(request):
 
 
 def send_registration_confirmation(user):
-    p = Profile.objects.get(user=user)
+    try:
+        p = Profile.objects.get(user=user)
+        code = p.confirmation_code
+    except Profile.DoesNotExist:
+        code = get_confirmation_code()
     # user.email = "k.sanmugam2@gmail.com"
     # Sending email when an answer is posted
     subject = 'Account Active Notification'
@@ -129,7 +135,7 @@ IIT Bombay.
     """.format(
         user.username,
         "https://spoken-tutorial.org",
-        "https://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+        "https://spoken-tutorial.org/accounts/confirm/" + str(code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
@@ -141,8 +147,9 @@ IIT Bombay.
     #email.attach_alternative(message, "text/html")
     try:
         result = email.send(fail_silently=False)
-    except:
-        pass
+        return code
+    except Exception as e:
+        return None
 
 def email_otp(user):
     p = Profile.objects.get(user=user)

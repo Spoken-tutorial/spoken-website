@@ -29,7 +29,7 @@ from events.models import *
 from events.views import is_resource_person, is_administrator, get_page, id_generator, is_event_manager
 from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
-from cms.views import create_profile, send_registration_confirmation
+from cms.views import create_profile, send_registration_confirmation, get_confirmation_code
 from cms.models import Profile
 from certificate.views import _clean_certificate_certificate
 from django.http import HttpResponse
@@ -505,50 +505,56 @@ class ParticipantCreateView(CreateView):
 			registartion_type = 3
 		rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
 		csv_error = False
+		user_errors = []
 		for i, row in enumerate(rows_data):
 			user = self.get_create_user(row)
-			
-			try:
-				college = AcademicCenter.objects.get(academic_code=row[6])
-			except AcademicCenter.DoesNotExist:
-				csv_error = True
-				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " was not created.")
-				continue
-			
-			if registartion_type == 1:
-				if not(is_college_paid(college.id)):
-					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution " + row[6] + " is not a Paid college."+" Participant "+ row[2] + " was not created.")
+			if user:
+				try:
+					college = AcademicCenter.objects.get(academic_code=row[6])
+				except AcademicCenter.DoesNotExist:
+					csv_error = True
+					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " was not created.")
+					continue
+				
+				if registartion_type == 1:
+					if not(is_college_paid(college.id)):
+						messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution " + row[6] + " is not a Paid college."+" Participant "+ row[2] + " was not created.")
+						continue
+
+				try:
+					foss_language = Language.objects.get(name=row[7].strip())	
+				except :
+					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Language name " + row[7] + " does not exist."+" Participant "+ row[2] + " was not created.")
 					continue
 
-			try:
-				foss_language = Language.objects.get(name=row[7].strip())	
-			except :
-				messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Language name " + row[7] + " does not exist."+" Participant "+ row[2] + " was not created.")
-				continue
-
-			participant = Participant.objects.filter(email=row[2].strip(),event = self.event)
-			if participant.exists() and registartion_successful(user, self.event):
-				messages.add_message(self.request, messages.WARNING, "Participant with email "+row[2]+" already registered for "+self.event.event_name)
-				continue
+				participant = Participant.objects.filter(email=row[2].strip(),event = self.event)
+				if participant.exists() and registartion_successful(user, self.event):
+					messages.add_message(self.request, messages.WARNING, "Participant with email "+row[2]+" already registered for "+self.event.event_name)
+					continue
+				else:
+					try:
+						Participant.objects.create(
+							name = row[0]+" "+row[1], 
+							email = row[2].strip(), 
+							gender = row[3], 
+							amount = row[4], 
+							event = self.event, 
+							user = user, 
+							state = college.state, 
+							college = college,
+							foss_language = foss_language,
+							registartion_type = registartion_type,
+							reg_approval_status = 1
+							)
+						count = count + 1
+					except :
+						csv_error = True
+						messages.add_message(self.request, messages.ERROR, "Could not create participant having email id" + row[2])
 			else:
-				try:
-					Participant.objects.create(
-						name = row[0]+" "+row[1], 
-						email = row[2].strip(), 
-						gender = row[3], 
-						amount = row[4], 
-						event = self.event, 
-						user = user, 
-						state = college.state, 
-						college = college,
-						foss_language = foss_language,
-						registartion_type = registartion_type,
-						reg_approval_status = 1
-						)
-					count = count + 1
-				except :
-					csv_error = True
-					messages.add_message(self.request, messages.ERROR, "Could not create participant having email id" + row[2])
+				user_errors.append(row[2])
+		if user_errors:
+			user_errors = ', '.join(user_errors)
+			messages.error(self.request, f"The participants with the following emails were not created. Please verify the email addresses: {user_errors}")
 		if csv_error:
 			messages.warning(self.request, 'Some rows in the csv file has errors and are not created.')
 		if count > 0:
@@ -562,10 +568,13 @@ class ParticipantCreateView(CreateView):
 		except User.DoesNotExist:
 			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
 			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
-			user.save()
-			create_profile(user, '')
-			send_registration_confirmation(user)
-			return user
+			# confirmation_code = get_confirmation_code()
+			confirmation_code = send_registration_confirmation(user)
+			if confirmation_code:
+				user.save()
+				create_profile(user, '', confirmation_code)
+				return user
+			return None
 
 
 def mark_reg_approval(pid, eventid):
