@@ -147,24 +147,24 @@ def training(request):
     pending_attendance_participant_count = 0
     key = ''.join('None' if i == '' or i == '---------' else str(i).replace(" ", "") for i in request.GET.values())
     key = key if key else 'NoneNoneNoneNoneNoneNoneNoneNoneNoneNone1'
-    female_key = key + 'female'
-    male_key = key + 'male'
-    femalecount = cache.get(female_key)
-    malecount = cache.get(male_key)
-    if status != 0:
-        if not femalecount or not malecount:
-            gender_counts = TrainingAttend.objects.filter(training__in=collection.qs).values('student__gender').annotate(gender_count=Count('student__gender'))
+    # female_key = key + 'female'
+    # male_key = key + 'male'
+    # femalecount = cache.get(female_key)
+    # malecount = cache.get(male_key)
+    # if status != 0:
+    #     if not femalecount or not malecount:
+    #         gender_counts = TrainingAttend.objects.filter(training__in=collection.qs).values('student__gender').annotate(gender_count=Count('student__gender'))
 
-            for item in gender_counts:
-                if item['student__gender'] == 'Female':
-                    femalecount = item['gender_count']
-                if item['student__gender'] == 'Male':
-                    malecount = item['gender_count']
-            try:
-                cache.set(female_key, femalecount)
-                cache.set(male_key, malecount)
-            except Exception:
-                print('Error setting cache key values')
+    #         for item in gender_counts:
+    #             if item['student__gender'] == 'Female':
+    #                 femalecount = item['gender_count']
+    #             if item['student__gender'] == 'Male':
+    #                 malecount = item['gender_count']
+    #         try:
+    #             cache.set(female_key, femalecount)
+    #             cache.set(male_key, malecount)
+    #         except Exception:
+    #             print('Error setting cache key values')
 
     year_data_all=dict()
     visited=dict()
@@ -211,8 +211,8 @@ def training(request):
         context['participants'] = participants
     context['model'] = 'Workshop/Training'
     context['status']=status
-    context['femalecount'] = femalecount
-    context['malecount'] = malecount
+    # context['femalecount'] = femalecount
+    # context['malecount'] = malecount
     context['no_of_colleges'] = no_of_colleges
 
     context['language'] = Language.objects.values('id','name')
@@ -253,24 +253,22 @@ def fdp_training(request):
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     participants = collection.qs.aggregate(Sum('participants'))
-    gender_counts = TrainingAttend.objects.filter(training__in=collection.qs).values('student__gender').annotate(gender_count=Count('student__gender'))
-    femalecount = 0
-    malecount = 0
-    for item in gender_counts:
-        if item['student__gender'] == 'Female':
-            femalecount = item['gender_count']
-        if item['student__gender'] == 'Male':
-            malecount = item['gender_count']
+    # gender_counts = TrainingAttend.objects.filter(training__in=collection.qs).values('student__gender').annotate(gender_count=Count('student__gender'))
+    # femalecount = 0
+    # malecount = 0
+    # for item in gender_counts:
+    #     if item['student__gender'] == 'Female':
+    #         femalecount = item['gender_count']
+    #     if item['student__gender'] == 'Male':
+    #         malecount = item['gender_count']
     
     chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM sem_start_date)"}).values('year').order_by(
         '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
     chart_data = ''
     for data in chart_query_set:
         chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
-    
 
     no_of_colleges=collection.qs.filter().values('training_planner__academic_id').distinct().count()   
-    print(" ********************** no of colleges: ", no_of_colleges)
 
     context = {}
     context['form'] = collection.form
@@ -282,8 +280,8 @@ def fdp_training(request):
     context['ordering'] = ordering
     context['participants'] = participants
     context['model'] = 'Workshop/Training'
-    context['femalecount'] = femalecount
-    context['malecount'] = malecount
+    # context['femalecount'] = femalecount
+    # context['malecount'] = malecount
     context['no_of_colleges'] = no_of_colleges
     return render(request, 'statistics/templates/pmmm_stats.html', context)
 
