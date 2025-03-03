@@ -37,9 +37,9 @@ def get_participant_mark(rid, mdluser_id):
             mdl = MdlQuizGrades.objects.filter(quiz = ta.mdlquiz_id, userid = mdluser_id).order_by('-grade').first()
             if mdl:
                 return round(mdl.grade, 1)
-            return False
+            return None
     except TestAttendance.DoesNotExist:
-        return False
+        return None
 
 def get_moodle_courseid(rid, mdluser_id):
     #print "rid =>", rid
