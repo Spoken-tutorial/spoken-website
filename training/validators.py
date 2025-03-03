@@ -30,6 +30,7 @@ def validate_csv_file(csv_file):
                 line+=1
                 continue
             data = csv.reader([row.decode('utf-8')], delimiter=',', quotechar='|')
+            
             for col in data:
                 try:
                     ASCIIValidator()(col[0].strip())
@@ -42,7 +43,7 @@ def validate_csv_file(csv_file):
                 try:
                     EmailValidator()(col[2].strip())
                     ASCIIUsernameValidator()(col[2].strip())
-                    if not validate_email(col[2].strip(), verify=True):
+                    if not validate_email(col[2].strip()):
                         error.update(dict(lname="Email: "+ col[2] +" has errors."))
                 except:
                     error.update(dict(lname="Email: "+ col[2] +" has errors."))

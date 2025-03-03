@@ -34,7 +34,7 @@ for student in students:
     student.verified = True
     try:
       # validating email existance
-      if validate_email(student.user.email, verify=True):
+      if validate_email(student.user.email):
         student.user.is_active = True
         student.user.save()
         student.error = False

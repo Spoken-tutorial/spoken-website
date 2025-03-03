@@ -214,7 +214,7 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                         continue
                     if row_length > 3 and email:
                         if not flag:
-                            if not validate_email(email, verify=True):
+                            if not validate_email(email):
                                 csv_file_error, error_line_no, invalid_emails = store_error(error_line_no, count, invalid_emails, email)
                                 continue
                         # restrict the participant
