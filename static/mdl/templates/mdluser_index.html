@@ -85,7 +85,7 @@
                         <td>{{ record.test_code }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
                         {% with grade=record.id|get_participant_mark:mdluserid %}
-                            {% if grade %}
+                            {% if grade is not None %}
                                 {% if grade >= 40 %}
                                     <td>
                                         {{ grade }}%
@@ -184,7 +184,7 @@
                                     {% endwith %}
                                 {% elif status >= 3 %}
                                     {% with grade=record.id|get_participant_mark:mdluserid %}
-                                        {% if grade %}
+                                        {% if grade is not None %}
                                             {% if grade >= 40 %}
                                                 {{ grade }}%
                                                 {% if record.invigilator %}
