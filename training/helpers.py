@@ -9,10 +9,6 @@ from string import Template
 import subprocess
 from django.db.models import Count
 
-EVENT_TYPE_CHOICES =(
-	('', '-----'), ('FDP', 'Faculty Development Program (FDP)'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
-), ('SSDP', 'School Students  Development Program')
-	)
 
 EVENT_AMOUNT = {
      'FDP': '500', 'Workshop': '1000'
