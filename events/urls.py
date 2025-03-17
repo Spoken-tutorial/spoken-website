@@ -1,4 +1,4 @@
-from django.conf.urls import url, include
+from django.urls import url, include
 from events.views import *
 from events.notification import nemail
 app_name = 'events'

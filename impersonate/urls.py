@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
-from django.conf.urls import url
+from django.urls import re_path, path
 
 from . import views
 
 
 urlpatterns = [
-    url(r'^stop/$',
+    re_path(r'^stop/$',
         views.stop_impersonate,
         name='impersonate-stop'),
-    url(r'^list/$',
+    re_path(r'^list/$',
         views.list_users,
         {'template': 'impersonate/list_users.html'},
         name='impersonate-list'),
-    url(r'^search/$',
+    re_path(r'^search/$',
         views.search_users,
         {'template': 'impersonate/search_users.html'},
         name='impersonate-search'),
-    url(r'^(?P<uid>.+)/$',
+    re_path(r'^(?P<uid>.+)/$',
         views.impersonate,
         name='impersonate-start'),
-    url(r'^$', views.impersonate_home,
+    path(r'^$', views.impersonate_home,
         name="impersonate_home"),
 ]

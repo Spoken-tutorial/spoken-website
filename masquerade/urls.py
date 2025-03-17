@@ -1,9 +1,9 @@
 # Third Party Stuff
-from django.conf.urls import url
+from django.urls import re_path, path
 from masquerade.views import *
 app_name = 'masquerade'
 urlpatterns = [
-    url(r'^$',  masquerade_home, name="masquerade_home"),
-    url(r'^mask/(\d+)/$',  mask, name="mask"),
-    url(r'^unmask/$',  unmask),
+    path(r'',  masquerade_home, name="masquerade_home"),
+    re_path(r'^mask/(\d+)/$',  mask, name="mask"),
+    re_path(r'^unmask/$',  unmask),
 ]
