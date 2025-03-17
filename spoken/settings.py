@@ -74,8 +74,6 @@ INSTALLED_APPS = [
     'django_extensions',
     'widget_tweaks',
     'captcha',
-    'nicedit',
-    'report_builder',
     'compressor',
     'forums',
     'cms',
