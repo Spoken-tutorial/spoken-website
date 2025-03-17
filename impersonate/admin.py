@@ -11,7 +11,7 @@ from .helpers import User, check_allow_impersonate
 try:
     from django.urls import reverse
 except ImportError:
-    from django.core.urlresolvers import reverse
+    from django.urls import reverse
 
 logger = logging.getLogger(__name__)
 

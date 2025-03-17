@@ -32,7 +32,7 @@ from django.template.context_processors import csrf
 from django.shortcuts import render,redirect
 from django.db.models import Count, F, Q
 from django.views.generic.list import ListView
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import IntegrityError
 
 # Spoken Tutorial Stuff
@@ -50,7 +50,6 @@ from django.db.models import Count, Min, Q, Sum, F
 from django.contrib.auth.models import User
 import itertools
 from django.utils.html import format_html
-from django.core.urlresolvers import reverse
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']

@@ -5,7 +5,7 @@ from builtins import object
 from django import forms
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from ckeditor.widgets import CKEditorWidget
 from validate_email import validate_email
 from django.contrib.auth.validators import ASCIIUsernameValidator

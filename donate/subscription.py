@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from events.models import Organiser, Accountexecutive, AcademicCenter, \
 AcademicKey, AcademicPaymentStatus
 from .models import AcademicSubscription, HDFCTransactionDetails
