@@ -6,7 +6,6 @@ from datetime import datetime, date, timedelta
 from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
 from django.db.models import Q, Count, Sum, Min
-from django.utils.encoding import python_2_unicode_compatible
 
 #import auth user models
 from django.contrib.auth.models import User
@@ -36,7 +35,7 @@ SUBSCRIPTION_CHOICES = (
 
 
 # Create your models here.
-@python_2_unicode_compatible
+
 class State(models.Model):
   users = models.ManyToManyField(
     User,
@@ -70,7 +69,7 @@ class State(models.Model):
     unique_together = (("code","name"),)
 
 
-@python_2_unicode_compatible
+
 class District(models.Model):
   state = models.ForeignKey(State, on_delete=models.PROTECT )
   code = models.CharField(max_length=3)
@@ -86,7 +85,7 @@ class District(models.Model):
     #unique_together = (("state_id","name"),)
 
 
-@python_2_unicode_compatible
+
 class City(models.Model):
   state = models.ForeignKey(State, on_delete=models.PROTECT )
   name = models.CharField(max_length=200)
@@ -100,7 +99,7 @@ class City(models.Model):
     unique_together = (("name","state"),)
 
 
-@python_2_unicode_compatible
+
 class Location(models.Model):
   district = models.ForeignKey(District, on_delete=models.PROTECT )
   name = models.CharField(max_length=200)
@@ -127,7 +126,7 @@ class ResourcePerson(models.Model):
     unique_together = (("user","state"),)
 
 
-@python_2_unicode_compatible
+
 class University(models.Model):
   name = models.CharField(max_length=200)
   state = models.ForeignKey(State, on_delete=models.PROTECT )
@@ -142,7 +141,7 @@ class University(models.Model):
     unique_together = (("name","state"),)
 
 
-@python_2_unicode_compatible
+
 class InstituteCategory(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
@@ -155,7 +154,7 @@ class InstituteCategory(models.Model):
     verbose_name = "Institute Categorie"
 
 
-@python_2_unicode_compatible
+
 class InstituteType(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
@@ -168,7 +167,7 @@ class InstituteType(models.Model):
     unique_together = (("name"),)
 
 
-@python_2_unicode_compatible
+
 class AcademicCenter(models.Model):
   user = models.ForeignKey(User, on_delete=models.PROTECT )
   state = models.ForeignKey(State, on_delete=models.PROTECT )
@@ -215,7 +214,7 @@ class AcademicCenter(models.Model):
     ).aggregate(Sum('participants'))
     return training['participants__sum']
 
-@python_2_unicode_compatible
+
 class Accountexecutive(models.Model):
   user = models.OneToOneField(User, related_name = 'accountexecutive', on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
@@ -232,7 +231,7 @@ class Accountexecutive(models.Model):
     return self.user.username
 
 
-@python_2_unicode_compatible
+
 class Organiser(models.Model):
   user = models.OneToOneField(User, related_name = 'organiser', on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
@@ -249,7 +248,7 @@ class Organiser(models.Model):
     return self.user.username
 
 
-@python_2_unicode_compatible
+
 class Invigilator(models.Model):
   user = models.OneToOneField(User, on_delete=models.PROTECT )
   appoved_by = models.ForeignKey(
@@ -266,7 +265,7 @@ class Invigilator(models.Model):
     return self.user.username
 
 
-@python_2_unicode_compatible
+
 class Department(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
@@ -279,7 +278,7 @@ class Department(models.Model):
     ordering = ['name']
 
 
-@python_2_unicode_compatible
+
 class Course(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
@@ -360,7 +359,7 @@ class TrainingLog(models.Model):
   created = models.DateTimeField(auto_now_add = True)
 
 
-@python_2_unicode_compatible
+
 class TestCategory(models.Model):
   name = models.CharField(max_length=200)
   status = models.BooleanField(default = 0)
@@ -445,7 +444,7 @@ class TestLog(models.Model):
   created = models.DateTimeField(auto_now_add = True)
 
 
-@python_2_unicode_compatible
+
 class PermissionType(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
@@ -515,7 +514,7 @@ class Testimonials(models.Model):
   created = models.DateTimeField(auto_now_add=True)
   updated = models.DateTimeField(auto_now = True, null=True)
 
-@python_2_unicode_compatible
+
 class MediaTestimonials(models.Model):
     '''
     This model is required for storing audio / video testimonials
@@ -544,7 +543,7 @@ class OrganiserNotification(models.Model):
 
 
 # Create your models here.
-@python_2_unicode_compatible
+
 class Student(models.Model):
   user = models.OneToOneField(User, on_delete=models.PROTECT )
   gender = models.CharField(max_length = 15)
@@ -567,7 +566,7 @@ class Student(models.Model):
     return False
 
 
-@python_2_unicode_compatible
+
 class StudentBatch(models.Model):
   academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
   organiser = models.ForeignKey(Organiser, on_delete=models.PROTECT )
@@ -649,7 +648,7 @@ def update_batch_count(sender, instance, **kwargs):
   instance.batch.update_student_count()
 
 
-@python_2_unicode_compatible
+
 class Semester(models.Model):
   name = models.CharField(max_length = 50)
   even = models.BooleanField(default = True)
@@ -658,7 +657,7 @@ class Semester(models.Model):
     return self.name
 
 
-@python_2_unicode_compatible
+
 class LabCourse(models.Model):
   name = models.CharField(max_length=200)
   created = models.DateTimeField(auto_now_add = True)
@@ -668,7 +667,7 @@ class LabCourse(models.Model):
     return self.name
 
 
-@python_2_unicode_compatible
+
 class CourseMap(models.Model):
   #name = models.CharField(max_length=200, null=True, blank=True)
   course = models.ForeignKey(LabCourse, null=True, blank=True, on_delete=models.PROTECT )
@@ -703,7 +702,7 @@ class CourseMap(models.Model):
     ordering = ('foss',)
 
 
-@python_2_unicode_compatible
+
 class TrainingPlanner(models.Model):
   year = models.CharField(max_length = 50)
   academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
@@ -968,7 +967,7 @@ class TrainingAttend(models.Model):
     unique_together = ("training", "student")
 
 
-@python_2_unicode_compatible
+
 class TrainingCertificate(models.Model):
   student = models.ForeignKey(Student, on_delete=models.PROTECT )
   training = models.ForeignKey(TrainingRequest, on_delete=models.PROTECT )
@@ -1198,7 +1197,7 @@ class TrainingLiveFeedback(models.Model):
 ### Signals
 pre_delete.connect(revoke_student_permission, sender=Student)
 
-@python_2_unicode_compatible
+
 class StudentStream(models.Model):
   STUDENT_STREAM_CHOICES = (
   ('0', 'Engineering'), ('1', 'Science'), ('2', 'Arts and Humanities'),('3', 'Polytechnic/ Diploma programs'),
@@ -1209,7 +1208,7 @@ class StudentStream(models.Model):
   def __str__(self):
         return self.student_stream
 
-@python_2_unicode_compatible
+
 class HelpfulFor(models.Model):
   HELPFUL_FOR_CHOICES = (
   ('0', 'Academic Performance'), ('1', 'Project Assignments'), ('2', 'To get job interviews'),('3', 'To get jobs'),

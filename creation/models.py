@@ -3,7 +3,6 @@
 from builtins import object
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 import uuid
 from datetime import timedelta, date
 
@@ -41,7 +40,7 @@ HONORARIUM_STATUS = (
 import datetime
 
 
-@python_2_unicode_compatible
+
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT )
@@ -56,7 +55,7 @@ class Language(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
+
 class FossSuperCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -74,7 +73,7 @@ class FossSuperCategory(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
+
 class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length=255)
     description = models.TextField()
@@ -100,7 +99,7 @@ class FossCategory(models.Model):
         return self.foss
 
 
-@python_2_unicode_compatible
+
 class BrochureDocument(models.Model):
     foss_course = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
     foss_language = models.ForeignKey(Language, on_delete=models.PROTECT )
@@ -125,7 +124,7 @@ class BrochurePage(models.Model):
         unique_together = (('brochure', 'page_no'),)
 
 
-@python_2_unicode_compatible
+
 class PlaylistInfo(models.Model):
     foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
     language = models.ForeignKey(Language, on_delete=models.PROTECT )
@@ -152,7 +151,7 @@ class PlaylistItem(models.Model):
         unique_together = (('playlist', 'item_id'),)
 
 
-@python_2_unicode_compatible
+
 class Level(models.Model):
     level = models.CharField(max_length=255)
     code = models.CharField(max_length=10)
@@ -164,7 +163,7 @@ class Level(models.Model):
         return self.level
 
 
-@python_2_unicode_compatible
+
 class TutorialDetail(models.Model):
     foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
     tutorial = models.CharField(max_length=255)
@@ -544,7 +543,7 @@ class TutorialMissingComponentReply(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
 
-@python_2_unicode_compatible
+
 class OperatingSystem(models.Model):
     name = models.CharField(max_length=255)
 
@@ -552,7 +551,7 @@ class OperatingSystem(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
+
 class SuggestTopic(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT )
     topic_title = models.CharField(max_length=255)
@@ -566,7 +565,7 @@ class SuggestTopic(models.Model):
         return self.topic_title
 
 
-@python_2_unicode_compatible
+
 class SuggestExample(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT )
     topic_title = models.CharField(max_length=255)
@@ -579,7 +578,7 @@ class SuggestExample(models.Model):
         return self.topic_title
 
 
-@python_2_unicode_compatible
+
 class ContributeTowards(models.Model):
     name = models.CharField(max_length=255)
 

@@ -8,7 +8,6 @@ import jsonfield
 # Third Party Stuff
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 
 # Spoken Tutorial Stuff
 from events.models import City, District, Location, State
@@ -53,7 +52,7 @@ class Page(models.Model):
     visible = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
 
-@python_2_unicode_compatible
+
 class Block_Location(models.Model):
     name = models.CharField(max_length=255)
     visible = models.BooleanField()
@@ -109,7 +108,7 @@ class Notification(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now = True)
 
-@python_2_unicode_compatible
+
 class NewsType(models.Model):
     name = models.CharField(max_length = 50)
     slug = models.CharField(max_length = 50)
