@@ -278,11 +278,11 @@
                                                 <li class="disabled"><a href="#">&laquo;</a></li>
                                             {% endif %}
                                             {% for num in collection.paginator.page_range|paginator_page_cutter:collection.number %}
-                                                {% ifequal num collection.number %} 
+                                                {% if num == collection.number %} 
                                                     <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
                                                 {% else %} 
                                                     <li><a href="?{{ request.GET|combine_get_values }}page={{ num }}">{{ num }}</a></li>
-                                                {% endifequal %} 
+                                                {% endif %} 
                                             {% endfor %} 
                                             {% if collection.has_next %} 
                                                 <li><a href="?{{ request.GET|combine_get_values }}page={{ collection.next_page_number }}"><small>Next</small> &raquo;</a></li>

@@ -14,11 +14,11 @@
                         <li class="disabled"><a href="#">&laquo;</a></li>
                     {% endif %}
                     {% for num in page_obj.paginator.page_range|paginator_page_cutter:page_obj.number %}
-                        {% ifequal num page_obj.number %} 
+                        {% if num == page_obj.number %} 
                             <li class="active"><a href="#">{{ num }}<span class="sr-only">(current)</span></a></li>
                         {% else %} 
                             <li><a href="?{{ request.GET|combine_get_values }}page={{ num }}">{{ num }}</a></li>
-                        {% endifequal %} 
+                        {% endif %} 
                     {% endfor %} 
                     {% if page_obj.has_next %} 
                         <li><a href="?{{ request.GET|combine_get_values }}page={{ page_obj.next_page_number }}"><small>Next</small> &raquo;</a></li>

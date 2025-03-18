@@ -1,7 +1,7 @@
 # Third Party Stuff
 from builtins import object
 from django.db import models
-
+from django.core.validators import validate_comma_separated_integer_list
 
 class WStates(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -129,8 +129,9 @@ class WResourcePerson(models.Model):
     user_uid = models.IntegerField()
     rp_fname = models.CharField(max_length=50)
     phone = models.CharField(max_length=20)
-    states = models.CommaSeparatedIntegerField(max_length=200)
-    state_code = models.CommaSeparatedIntegerField(max_length=200)
+    states = models.CharField(max_length=200, validators=[validate_comma_separated_integer_list])
+    state_code = models.CharField(max_length=200, validators=[validate_comma_separated_integer_list])
+    
 
     class Meta(object):
         db_table = 'resource_person'

@@ -28,7 +28,7 @@ import django
 from django.test import TestCase
 from django.http import HttpResponse
 from django.utils import six, timezone
-from django.conf.urls import url, include
+from django.urls import re_path, include
 from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
 from django.contrib.admin.sites import AdminSite
@@ -64,13 +64,13 @@ def test_view(request):
 
 
 urlpatterns = [
-    url(r'^test-view/$',
+    re_path(r'^test-view/$',
         test_view,
         name='impersonate-test'),
-    url(r'^another-view/$',
+    re_path(r'^another-view/$',
         test_view,
         name='another-test-view'),
-    url('^', include('impersonate.urls')),
+    re_path('^', include('impersonate.urls')),
 ]
 
 
