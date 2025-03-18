@@ -149,7 +149,7 @@ def is_authenticated(user):
         return False
 
     if callable(user.is_authenticated):
-        return user.is_authenticated()
+        return user.is_authenticated
     else:
         return user.is_authenticated
 

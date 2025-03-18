@@ -933,7 +933,7 @@ def saveVideoData(request):
         "mongodb://"+MONGO_USER+':'+MONGO_PASS+'@'+MONGO_HOST+':'+MONGO_PORT+\
         '/?authSource='+MONGO_DB)
     mydb = myclient[MONGO_DB]
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         d = request.POST
         name = request.user.username
         if not name:

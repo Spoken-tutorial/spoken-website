@@ -3081,7 +3081,7 @@ def trainingrequest(request, role, status):
     prev_sem_year = (year - 1)
   prev_sem_start_date, prev_sem_end_date = get_prev_semester_duration(prev_sem_type, prev_sem_year)
   
-  if not (user.is_authenticated() and (is_resource_person(user) or is_administrator(user))):
+  if not (user.is_authenticated and (is_resource_person(user) or is_administrator(user))):
     raise PermissionDenied()
 
   if (not role ) or (not status):
@@ -3210,7 +3210,7 @@ def CertificateRequest(request, role, choice):
   roles = ['rp', 'em']
   context = {}
 
-  if not (user.is_authenticated() and (is_resource_person(user) or is_administrator(user))):
+  if not (user.is_authenticated and (is_resource_person(user) or is_administrator(user))):
         raise PermissionDenied()
 
   if (not 'role') or (not 'choice'):

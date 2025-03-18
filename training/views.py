@@ -149,7 +149,7 @@ def register_user(request):
 	context['email'] = None
 	context['callbackurl'] = None
 	
-	if request.user.is_authenticated():
+	if request.user.is_authenticated:
 		user = request.user
 		profile = Profile.objects.get(user=user)
 		form.fields["name"].initial = user.get_full_name()
@@ -350,7 +350,7 @@ def listevents(request, role, status):
 	today=date.today()
 	context = {}
 	user = request.user
-	if not (user.is_authenticated() and (is_resource_person(user) or is_administrator(user))):
+	if not (user.is_authenticated and (is_resource_person(user) or is_administrator(user))):
 		raise PermissionDenied()
 
 	if (not role ) or (not status):
@@ -447,7 +447,7 @@ def listevents(request, role, status):
 def close_event(request, pk):
 	context = {}
 	user = request.user
-	if not (user.is_authenticated() and is_resource_person(user)):
+	if not (user.is_authenticated and is_resource_person(user)):
 		raise PermissionDenied()
 	
 	event = TrainingEvents.objects.get(id=pk)
@@ -463,7 +463,7 @@ def close_event(request, pk):
 def approve_event_registration(request, pk):
 	context = {}
 	user = request.user
-	if not (user.is_authenticated() and is_resource_person(user)):
+	if not (user.is_authenticated and is_resource_person(user)):
 		raise PermissionDenied()
 	
 	event = TrainingEvents.objects.get(id=pk)
@@ -1040,7 +1040,7 @@ def transaction_csv(request, purpose):
 def reopen_event(request, eventid):
 	context = {}
 	user = request.user
-	if not (user.is_authenticated() and is_resource_person(user)):
+	if not (user.is_authenticated and is_resource_person(user)):
 		raise PermissionDenied()
 	
 	event = TrainingEvents.objects.get(id=eventid)

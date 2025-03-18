@@ -2740,9 +2740,9 @@ def report_missing_component(request, trid):
                     return render(request, 'creation/templates/report_missing_component.html', context)
             email = ''
             inform_me = request.POST.get('inform_me')
-            if inform_me and request.user.is_authenticated() == False:
+            if inform_me and request.user.is_authenticated == False:
                 email = request.POST.get('email', '')
-            if request.user.is_authenticated():
+            if request.user.is_authenticated:
                 TutorialMissingComponent.objects.create(
                     user = request.user,
                     tutorial_resource = tr_rec,
@@ -3765,7 +3765,7 @@ def allocate_tutorial(request, sel_status, role):
     global global_req
     global_req = request
     user = User.objects.get(id = request.user.id)
-    if not (user.is_authenticated() and
+    if not (user.is_authenticated and
         (is_contributor(user) or is_language_manager(request.user)
             or is_administrator(request.user))):
         raise PermissionDenied()

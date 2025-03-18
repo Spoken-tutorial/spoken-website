@@ -459,7 +459,7 @@ def get_academic_code(state):
 def old_training_attendance(request):
     user = request.user
     context = {}
-    if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
     collectionSet = Training.objects.exclude(id__in=TrainingAttendance.objects.all().values_list('training_id').distinct()).filter(status=4, academic__in = AcademicCenter.objects.filter(state__in = State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
     if not collectionSet:
@@ -648,7 +648,7 @@ def new_ac(request):
         if any code missing in between first assign that code then continue the serial
     """
     user = request.user
-    if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
 
     if request.method == 'POST':
@@ -679,7 +679,7 @@ def new_ac(request):
 def edit_ac(request, rid = None):
     """ Edit academic center """
     user = request.user
-    if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
 
     if request.method == 'POST':
@@ -710,7 +710,7 @@ def edit_ac(request, rid = None):
 def ac(request):
     """ Academic index page """
     user = request.user
-    if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
 
     context = {}
@@ -760,7 +760,7 @@ def has_profile_data(request, user):
 def accountexecutive_request(request, username):
     """ request to bacome a new accountexecutive """
     user = request.user
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         raise PermissionDenied()
 
     if username == request.user.username:
@@ -812,7 +812,7 @@ def accountexecutive_request(request, username):
 def accountexecutive_view(request, username):
     """ view accountexecutive details """
     user = request.user
-    if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
 
     context = {}
@@ -831,7 +831,7 @@ def accountexecutive_edit(request, username):
     """ view accountexecutive details """
     #todo: confirm event_manager and resource_center can edit accountexecutive details
     user = request.user
-    if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
 
     user = User.objects.get(username=username)
@@ -859,7 +859,7 @@ def accountexecutive_edit(request, username):
 def organiser_request(request, username):
     """ request to bacome a new organiser """
     user = request.user
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         raise PermissionDenied()
 
     if username == request.user.username:
@@ -913,7 +913,7 @@ def organiser_request(request, username):
 def organiser_view(request, username):
     """ view organiser details """
     user = request.user
-    if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
 
     context = {}
@@ -932,7 +932,7 @@ def organiser_edit(request, username):
     """ view organiser details """
     #todo: confirm event_manager and resource_center can edit organiser details
     user = request.user
-    if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
 
     user = User.objects.get(username=username)
@@ -960,7 +960,7 @@ def rp_organiser(request, status, code, userid):
     """ Resource person: active organiser """
     user = request.user
     organiser_in_rp_state = Organiser.objects.filter(user_id=userid, academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
-    if not (user.is_authenticated() and organiser_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
+    if not (user.is_authenticated and organiser_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page ')
 
     try:
@@ -984,7 +984,7 @@ def rp_organiser(request, status, code, userid):
 def invigilator_request(request, username):
     """ Request to bacome a invigilator """
     user = request.user
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         raise PermissionDenied()
 
     if username == user.username:
@@ -1038,7 +1038,7 @@ def invigilator_request(request, username):
 def invigilator_view(request, username):
     """ Invigilator view page """
     user = request.user
-    if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
 
     context = {}
@@ -1056,7 +1056,7 @@ def invigilator_view(request, username):
 def invigilator_edit(request, username):
     """ Invigilator edit page """
     user = request.user
-    if not (user.is_authenticated() and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (username == request.user.username or is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
 
     user = User.objects.get(username=username)
@@ -1083,7 +1083,7 @@ def rp_invigilator(request, status, code, userid):
     """ Resource person: active invigilator """
     user = request.user
     invigilator_in_rp_state = Invigilator.objects.filter(user_id=userid, academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
-    if not (user.is_authenticated() and invigilator_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
+    if not (user.is_authenticated and invigilator_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page')
 
     try:
@@ -1108,7 +1108,7 @@ def rp_accountexecutive(request, status, code, userid):
     """ Resource person: active accountexecutive """
     user = request.user
     accountexecutive_in_rp_state = Accountexecutive.objects.filter(user_id=userid, academic__in=AcademicCenter.objects.filter(state__in=State.objects.filter(resourceperson__user_id=user, resourceperson__status=1)))
-    if not (user.is_authenticated() and accountexecutive_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
+    if not (user.is_authenticated and accountexecutive_in_rp_state and ( is_event_manager(user) or is_resource_person(user) or (status == 'active' or status == 'block'))):
         raise PermissionDenied('You are not allowed to view this page')
 
     try:
@@ -1134,7 +1134,7 @@ def training_request(request, role, rid = None):
     ''' Training request by organiser '''
     user = request.user
     context = {}
-    if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
+    if not (user.is_authenticated and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
     form = None
     if request.method == 'POST':
@@ -1316,7 +1316,7 @@ def training_clone(request, role, rid = None):
     context = {}
     participant = None
     csv_file_error = 0
-    if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
+    if not (user.is_authenticated and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
 
     if not rid and request.method=="POST" and 'clone-training' in request.POST:
@@ -1381,7 +1381,7 @@ def training_clone(request, role, rid = None):
 def training_list(request, role, status):
     """ Organiser index page """
     user = request.user
-    if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
+    if not (user.is_authenticated and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
 
     status_dict = {'pending': 0, 'approved' : 2, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2, 'ongoing': 2, 'predated' : ''}
@@ -1457,7 +1457,7 @@ def training_list(request, role, status):
 def training_approvel(request, role, rid):
     """ Resource person: confirm or reject training """
     user = request.user
-    if not (user.is_authenticated() and (is_resource_person(user) or (is_organiser(user) and request.GET['status'] == 'completed'))):
+    if not (user.is_authenticated and (is_resource_person(user) or (is_organiser(user) and request.GET['status'] == 'completed'))):
         raise PermissionDenied()
     try:
         w = Training.objects.get(pk=rid)
@@ -1513,7 +1513,7 @@ def training_approvel(request, role, rid):
 @login_required
 def training_permission(request):
     user = request.user
-    if not (user.is_authenticated() and (is_resource_person(user) or is_event_manager(user))):
+    if not (user.is_authenticated and (is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
 
     permissions = Permission.objects.select_related().all()
@@ -1546,7 +1546,7 @@ def training_permission(request):
 @login_required
 def training_completion(request, rid):
     user = request.user
-    if not (user.is_authenticated() and is_organiser(user)):
+    if not (user.is_authenticated and is_organiser(user)):
         raise PermissionDenied()
 
     context = {}
@@ -1575,7 +1575,7 @@ def training_completion(request, rid):
 def view_training_completion(request, rid):
     user = request.user
     context = {}
-    if not (user.is_authenticated() and is_resource_person(user)):
+    if not (user.is_authenticated and is_resource_person(user)):
         raise PermissionDenied()
     try:
         context['training'] = Training.objects.get(pk = rid)
@@ -1602,7 +1602,7 @@ def training_attendance(request, wid):
     onlinetest_user = ''
     psform = ParticipantSearchForm()
     sform = TrainingScanCopyForm()
-    if not (user.is_authenticated() and (is_organiser(user))):
+    if not (user.is_authenticated and (is_organiser(user))):
         raise PermissionDenied()
     try:
         training = Training.objects.get(pk = wid)
@@ -1713,7 +1713,7 @@ def training_attendance(request, wid):
 def training_participant(request, wid=None):
     user = request.user
     training = None
-    if user.is_authenticated():
+    if user.is_authenticated:
         if not ((is_resource_person(user) or is_event_manager(user) or is_organiser(user))):
             raise PermissionDenied()
     can_download_certificate = 0
@@ -1844,7 +1844,7 @@ def training_participant_ceritificate(request, wid, participant_id):
 def test_request(request, role, rid = None):
     ''' Test request by organiser '''
     user = request.user
-    if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
+    if not (user.is_authenticated and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
     context = {}
     form = TestForm(user = user)
@@ -1950,7 +1950,7 @@ def test_request(request, role, rid = None):
 def test_list(request, role, status):
     """ Organiser test index page """
     user = request.user
-    if not (user.is_authenticated() and ( is_organiser(user) or is_invigilator(user) or is_resource_person(user) or is_event_manager(user))):
+    if not (user.is_authenticated and ( is_organiser(user) or is_invigilator(user) or is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
 
     status_dict = {'pending': 0, 'waitingforinvigilator': 1, 'approved' : 2, 'ongoing': 3, 'completed' : 4, 'rejected' : 5, 'reschedule' : 2, 'predated' : ''}
@@ -2078,7 +2078,7 @@ def test_approvel(request, role, rid):
         raise PermissionDenied()
 
     #if status = 2:
-    #    if not (user.is_authenticated() and w.academic.state in State.objects.filter(resourceperson__user_id=user, resourceperson__status=1) and ( is_event_manager(user) or is_resource_person(user))):
+    #    if not (user.is_authenticated and w.academic.state in State.objects.filter(resourceperson__user_id=user, resourceperson__status=1) and ( is_event_manager(user) or is_resource_person(user))):
     #        raise PermissionDenied('You are not allowed to view this page')
     if status == 1:
         t.appoved_by_id = user.id
@@ -2547,7 +2547,7 @@ def organiser_invigilator_index(request, role, status):
     active = status
     user = request.user
     context = {}
-    if not (user.is_authenticated() and (is_event_manager(user) or is_resource_person(user))):
+    if not (user.is_authenticated and (is_event_manager(user) or is_resource_person(user))):
         raise PermissionDenied()
     if status == 'active':
         status = 1
@@ -3219,7 +3219,7 @@ def check_email_already_organiser(userid):
 def handover(request):
     user = request.user
     context = {}
-    if not (user.is_authenticated() and (is_event_manager(user))):
+    if not (user.is_authenticated and (is_event_manager(user))):
         raise PermissionDenied()
     # ci = RequestContext(request)
     if request.method == 'POST':

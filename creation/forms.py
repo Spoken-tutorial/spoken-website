@@ -713,7 +713,7 @@ class TutorialMissingComponentForm(forms.Form):
             print((self.cleaned_data))
             if self.cleaned_data['inform_me'] == '1':
                 print((self.cleaned_data['inform_me']))
-                if not self.user.is_authenticated():
+                if not self.user.is_authenticated:
                     if 'email' in self.cleaned_data:
                         if not self.cleaned_data['email']:
                             self._errors['email'] = '<ul class="errorlist"><li>Please fill Email field</li></ul>'
