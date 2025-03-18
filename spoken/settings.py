@@ -27,14 +27,15 @@ SEARCH_INDEX_DIR = os.path.join(BASE_DIR, INDEX_PATH)
 SECRET_KEY = 'qoeg0cta8pi$#a7i8t(ufzndy)50e+l465rm7y-k@lvt(s2yae'
 
 PASSWORD_HASHERS = (
-    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
     'django.contrib.auth.hashers.BCryptPasswordHasher',
-    'django.contrib.auth.hashers.SHA1PasswordHasher',
+    # 'django.contrib.auth.hashers.SHA1PasswordHasher', # not supported in django 5.1.6
     'django.contrib.auth.hashers.MD5PasswordHasher',
-    'django.contrib.auth.hashers.CryptPasswordHasher',
+    'spoken.custom_hashers.LegacyUnsaltedMD5PasswordHasher', # to be removed later
+    # 'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher', # not supported in django 5.1.6
+    # 'django.contrib.auth.hashers.CryptPasswordHasher', # not supported in django 5.1.6
 )
 # email errors and 404
 SERVER_EMAIL = 'error-report@spoken-tutorial.org'
