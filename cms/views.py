@@ -208,7 +208,7 @@ def confirm(request, confirmation_code, username):
 def account_login(request):
     user = request.user
     error_msg = ''
-    if request.user.is_anonymous():
+    if request.user.is_anonymous:
         form = LoginForm()
         context = {
             'form' : form
@@ -438,7 +438,7 @@ def change_password(request):
             user.backend='django.contrib.auth.backends.ModelBackend'
             login(request,user)
 
-    if request.user.is_anonymous():
+    if request.user.is_anonymous:
         return HttpResponseRedirect('/accounts/login/?next=/accounts/change-password')
 
     context = {}
