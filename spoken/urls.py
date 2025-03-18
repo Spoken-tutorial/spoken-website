@@ -60,7 +60,7 @@ urlpatterns = [
     # re_path(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-    re_path(r'^admin/', include(admin.site.urls)),
+    re_path(r'^admin/', admin.site.urls),
 
     #subscription urls
     re_path(r'^payment/callback/$',  payment_callback, name="payment_callback"),
@@ -115,12 +115,12 @@ urlpatterns = [
     re_path(r'^saveVideoData/$',  saveVideoData, name='saveVideoData'),
     # Masquerade user
     # re_path(r'^masquerade/', include('masquerade.urls', namespace='masquerade')),
-    re_path(r'^masquerade/', include('impersonate.urls', namespace='impersonate')),
+    re_path(r'^masquerade/', include(('impersonate.urls', 'impersonate'))),
     # Cron links
     re_path(r'^cron/subtitle-files/create/$',  create_subtitle_files, name='create_subtitle_files'),
 
     # reports
-    re_path(r'^report_builder/', include('report_builder.urls')),
+    # re_path(r'^report_builder/', include('report_builder.urls')),
 
     # Youtube API V3
     re_path(r'^youtube/', include('youtube.urls', namespace='youtube')),
@@ -130,7 +130,7 @@ urlpatterns = [
 
     # events2
     # re_path(r'^events2/', include('events2.urls', namespace='events2')),
-    re_path(r'^cron/', include('cron.urls', namespace='cron')),
+    re_path(r'^cron/', include('cron.urls')),
 
     #donation
     re_path(r'^donate/', include('donate.urls', namespace='donate')),
