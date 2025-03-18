@@ -267,7 +267,7 @@ class TutorialResource(models.Model):
 class PaymentHonorarium(models.Model):
     amount = models.DecimalField(default=0, max_digits=7, decimal_places=2)
     code = models.CharField(max_length=20, editable=False)
-    initiated_by = models.ForeignKey(User, related_name="initiator",default=7)
+    initiated_by = models.ForeignKey(User, related_name="initiator",default=7, on_delete=models.PROTECT)
     status = models.PositiveSmallIntegerField(default=1, choices=HONORARIUM_STATUS)
     updated = models.DateTimeField(auto_now=True)
 
@@ -287,8 +287,8 @@ class PaymentHonorarium(models.Model):
 
 
 class TutorialPayment(models.Model):
-    user = models.ForeignKey(User, related_name="contributor",)
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    user = models.ForeignKey(User, related_name="contributor",on_delete=models.PROTECT)
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT)
     payment_honorarium = models.ForeignKey('PaymentHonorarium', related_name="tutorials", null=True, blank=True, on_delete=models.SET_NULL)
     user_type = models.PositiveSmallIntegerField(default=3, choices=USER_TYPE)
     seconds = models.PositiveIntegerField(default=0, help_text="Tutorial duration in seconds")
@@ -350,7 +350,7 @@ class ContributorRole(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT )
     language = models.ForeignKey(Language, on_delete=models.PROTECT )
     foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
-    tutorial_detail = models.ForeignKey(TutorialDetail, null=True)
+    tutorial_detail = models.ForeignKey(TutorialDetail, null=True, on_delete=models.PROTECT)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -486,7 +486,7 @@ class QualityReviewerNotification(models.Model):
 class RoleRequest(models.Model):
     user = models.ForeignKey(User, related_name='user', on_delete=models.PROTECT )
     role_type = models.IntegerField(default=0)
-    language = models.ForeignKey(Language, null=True)
+    language = models.ForeignKey(Language, null=True, on_delete=models.PROTECT)
     status = models.PositiveSmallIntegerField(default=0)
     approved_user = models.ForeignKey(
         User, related_name='approved_user', null=True, blank=True, on_delete=models.PROTECT )
@@ -606,18 +606,18 @@ class Collaborate(models.Model):
 
 
 class ContributorRating(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     choices = ((0,0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5))
     rating = models.PositiveIntegerField(choices=choices,default=0)
-    language = models.ForeignKey(Language)
+    language = models.ForeignKey(Language, on_delete=models.PROTECT)
 
     class Meta:
         unique_together = (('user', 'language'),)
 
 
 class TutorialsAvailable(models.Model):
-    tutorial_detail = models.ForeignKey(TutorialDetail)
-    language = models.ForeignKey(Language)
+    tutorial_detail = models.ForeignKey(TutorialDetail, on_delete=models.PROTECT)
+    language = models.ForeignKey(Language, on_delete=models.PROTECT)
 
     class Meta:
         unique_together = (('tutorial_detail', 'language'),)
@@ -625,8 +625,8 @@ class TutorialsAvailable(models.Model):
 
 class LanguageManager(models.Model):
 
-    user = models.ForeignKey(User)
-    language = models.ForeignKey(Language)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    language = models.ForeignKey(Language, on_delete=models.PROTECT)
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

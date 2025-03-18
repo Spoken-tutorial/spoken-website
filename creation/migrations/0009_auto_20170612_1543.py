@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='brochurepage',
             name='brochure',
-            field=models.ForeignKey(related_name='pages', to='creation.BrochureDocument'),
+            field=models.ForeignKey(related_name='pages', to='creation.BrochureDocument', on_delete=models.deletion.PROTECT),
         ),
         migrations.AlterUniqueTogether(
             name='brochurepage',

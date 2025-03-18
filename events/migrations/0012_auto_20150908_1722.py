@@ -14,12 +14,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='singletraining',
             name='institution_type',
-            field=models.ForeignKey(to='events.InstituteType', null=True),
+            field=models.ForeignKey(to='events.InstituteType', null=True, on_delete=models.deletion.PROTECT),
         ),
         migrations.AddField(
             model_name='singletraining',
             name='state',
-            field=models.ForeignKey(to='events.State', null=True),
+            field=models.ForeignKey(to='events.State', null=True, on_delete=models.deletion.PROTECT),
         ),
         migrations.AddField(
             model_name='singletraining',

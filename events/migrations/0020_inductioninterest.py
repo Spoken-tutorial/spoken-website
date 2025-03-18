@@ -38,8 +38,8 @@ class Migration(migrations.Migration):
                 ('do_agree', models.CharField(max_length=50, choices=[(b'', b'-----'), (b'Yes', b'Yes'), (b'No', b'No')])),
                 ('no_objection', models.CharField(max_length=50, choices=[(b'', b'-----'), (b'Yes', b'Yes'), (b'No', b'No')])),
                 ('other_comments', models.CharField(max_length=500)),
-                ('city', models.ForeignKey(to='events.City')),
-                ('state', models.ForeignKey(to='events.State')),
+                ('city', models.ForeignKey(to='events.City', on_delete=models.deletion.PROTECT)),
+                ('state', models.ForeignKey(to='events.State', on_delete=models.deletion.PROTECT)),
             ],
         ),
     ]

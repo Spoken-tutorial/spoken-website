@@ -27,6 +27,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tutorialcommoncontent',
             name='additional_material_user',
-            field=models.ForeignKey(related_name='additional_material', default=None, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(related_name='additional_material', default=None, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.deletion.PROTECT),
         ),
     ]

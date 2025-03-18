@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='testattendance',
             name='student',
-            field=models.ForeignKey(to='events.Student', null=True),
+            field=models.ForeignKey(to='events.Student', null=True, on_delete=models.deletion.PROTECT),
         ),
     ]

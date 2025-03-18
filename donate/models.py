@@ -53,8 +53,8 @@ class Payee(models.Model):
 class CdFossLanguages(models.Model):
     payment = models.ForeignKey(Payee, on_delete=models.PROTECT)
     foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT,related_name="payment_foss")
-    lang = models.ForeignKey(Language)
-    level = models.ForeignKey(Level,null=True,blank=True)
+    lang = models.ForeignKey(Language, on_delete=models.PROTECT)
+    level = models.ForeignKey(Level,null=True,blank=True, on_delete=models.PROTECT)
 
 class PaymentTransaction(models.Model):
     paymentdetail = models.ForeignKey(Payee, on_delete=models.PROTECT, related_name="payment_transaction" )

@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='trainingfeedback',
             name='training',
-            field=models.ForeignKey(to='events.TrainingRequest'),
+            field=models.ForeignKey(to='events.TrainingRequest', on_delete=models.deletion.PROTECT),
         ),
     ]

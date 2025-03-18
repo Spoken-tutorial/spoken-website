@@ -20,9 +20,9 @@ class Migration(migrations.Migration):
                 ('status', models.PositiveSmallIntegerField(default=0)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now=True)),
-                ('academic', models.ForeignKey(blank=True, to='events.AcademicCenter', null=True)),
-                ('appoved_by', models.ForeignKey(related_name='accountexecutive_approved_by', blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('user', models.OneToOneField(related_name='accountexecutive', to=settings.AUTH_USER_MODEL)),
+                ('academic', models.ForeignKey(blank=True, to='events.AcademicCenter', null=True, on_delete=models.deletion.PROTECT)),
+                ('appoved_by', models.ForeignKey(related_name='accountexecutive_approved_by', blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.deletion.PROTECT)),
+                ('user', models.OneToOneField(related_name='accountexecutive', to=settings.AUTH_USER_MODEL, on_delete=models.deletion.PROTECT)),
             ],
         ),
     ]

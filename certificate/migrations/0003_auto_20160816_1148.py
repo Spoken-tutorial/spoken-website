@@ -306,7 +306,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='answer',
             name='question',
-            field=models.ForeignKey(to='certificate.Question'),
+            field=models.ForeignKey(to='certificate.Question', on_delete=models.deletion.PROTECT),
             preserve_default=True,
         ),
         migrations.AddField(

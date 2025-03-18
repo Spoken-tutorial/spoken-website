@@ -36,11 +36,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='brochuredocument',
             name='foss_course',
-            field=models.ForeignKey(to='creation.FossCategory'),
+            field=models.ForeignKey(to='creation.FossCategory', on_delete=models.deletion.PROTECT),
         ),
         migrations.AddField(
             model_name='brochuredocument',
             name='foss_language',
-            field=models.ForeignKey(to='creation.Language'),
+            field=models.ForeignKey(to='creation.Language', on_delete=models.deletion.PROTECT),
         ),
     ]

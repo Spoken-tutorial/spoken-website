@@ -15,8 +15,8 @@ class Migration(migrations.Migration):
             name='MumbaiStudents',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('bid', models.ForeignKey(to='events.StudentBatch')),
-                ('stuid', models.ForeignKey(to='events.Student')),
+                ('bid', models.ForeignKey(to='events.StudentBatch', on_delete=models.deletion.PROTECT)),
+                ('stuid', models.ForeignKey(to='events.Student', on_delete=models.deletion.PROTECT)),
             ],
         ),
     ]

@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('roll_no', models.CharField(max_length=50)),
                 ('created', models.DateTimeField(auto_now_add=True, null=True)),
                 ('updated', models.DateTimeField(auto_now=True, null=True)),
-                ('foss', models.ForeignKey(to='creation.FossCategory', null=True)),
+                ('foss', models.ForeignKey(to='creation.FossCategory', null=True, on_delete=models.deletion.PROTECT)),
             ],
         ),
         migrations.AlterUniqueTogether(
