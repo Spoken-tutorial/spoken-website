@@ -129,8 +129,7 @@ def get_transaction_details(request, purpose):
     tdate = request.GET.get('tdate')
 
     if selected_state:
-        get_state = State.objects.filter(id=selected_state).values('name')
-
+        get_state = State.objects.filter(id=selected_state).first()
     if academic_center in ('None','0',0):
         academic_center = False
     else:
@@ -159,7 +158,7 @@ def get_transaction_details(request, purpose):
         # allpaydetails = PaymentTransaction.objects.filter().exclude(paymentdetail__purpose='cdcontent').order_by('-created')
 
         if get_state:
-            academic_centers = AcademicCenter.objects.filter(state__name=get_state)
+            academic_centers = AcademicCenter.objects.filter(state=get_state)
 
             if academic_center:
                 events = TrainingEvents.objects.filter(host_college = academic_center)

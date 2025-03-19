@@ -2940,7 +2940,8 @@ def update_status(pd, status):
 def payment_details(request,choice):
   academic_id = Accountexecutive.objects.filter(user = request.user).values('academic_id','academic_id__institution_name')
   paymentdetails = PaymentDetails.objects.filter(academic_id=academic_id[0]['academic_id'])
-  paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail_id = paymentdetails)
+  paymentdetail = paymentdetails.first()
+  paymenttransactionetails = PaymentTransactionDetails.objects.filter(paymentdetail = paymentdetail)
   user = User.objects.get(id = request.user.id)
 
   context ={}
