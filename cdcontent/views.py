@@ -356,7 +356,7 @@ def home(request):
         'states': states,
         'payment_form': PayeeForm(user=request.user),
     }
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         payee_list = Payee.objects.prefetch_related(
             'cdfosslanguages_set__foss','cdfosslanguages_set__lang',
             'payment_transaction').filter(user=request.user)
@@ -538,7 +538,7 @@ def get_user_type(request):
     # 'UR':'UnRegistered User',
     # 'RNP':'Registered but not Paid User',
     # 'RP':'Registered and Paid User'
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         try:
             AcademicKey.objects.get(academic_id=request.user.organiser.academic_id, expiry_date__gte=date.today())
             return classification['registered_paid']

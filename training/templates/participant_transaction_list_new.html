@@ -151,7 +151,7 @@
         {% for record in transactiondetails %}
           <tr>
             <td>{{ forloop.counter }}</td>
-            {% ifnotequal record.paymentdetail.purpose 'cdcontent'%}
+            {% if record.paymentdetail.purpose != 'cdcontent'%}
             <td>{% with event=record.paymentdetail.purpose|get_event_details %}
               
                 {{event.event_name}} <br><br>
@@ -159,7 +159,7 @@
                 {{event.event_start_date}} - {{event.event_end_date}}
               {% endwith %}
             </td>
-            {% endifnotequal %}
+            {% endif %}
             <td>{{ record.paymentdetail.user.first_name }}&nbsp{{ record.paymentdetail.user.last_name }}</td>
             <td>{{ record.paymentdetail.email }}</td>
             <td>{{ record.paymentdetail.state }}</td>

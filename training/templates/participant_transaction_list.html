@@ -133,11 +133,11 @@
             <td>{{ record.refNo}}</td>
             <td>{{ record.status }}</td>
             <td>
-              {% ifnotequal record.paymentdetail.purpose 'cdcontent'%}
+              {% if record.paymentdetail.purpose != 'cdcontent'%}
                 Registration
               {% else %}
                 CD-Content
-              {% endifnotequal %}
+              {% endif %}
             </td>
             <td>{{ record.requestType }}</td>
             <td>{{ record.amount }}</td>

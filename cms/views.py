@@ -338,7 +338,7 @@ def account_view_profile(request, username):
         'profile' : profile,
         'media_url' : settings.MEDIA_URL,
     }
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         payee_list = Payee.objects.prefetch_related('cdfosslanguages_set__foss','cdfosslanguages_set__lang').filter(user=request.user)
         context['payee_list'] = payee_list
         

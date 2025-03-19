@@ -7,7 +7,7 @@ from datetime import datetime,date
 register = template.Library()
 
 def is_user_paid(user_obj):
-    if not user_obj.is_authenticated():
+    if not user_obj.is_authenticated:
       return False
     academic_id = None
     organiser = Organiser.objects.filter(user=user_obj).first()

@@ -201,7 +201,6 @@ def controller(request, purpose):
     return render(request, 'payment_status.html', data)
 
 
-@csrf_exempt
 def calculate_expiry():
     return datetime.now() + timedelta(days = EXPIRY_DAYS)
 
