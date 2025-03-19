@@ -46,7 +46,7 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
-from PyPDF2 import PdfFileWriter, PdfFileReader
+from PyPDF2 import PdfWriter, PdfReader
 from io import BytesIO
 from django.conf import settings
 from donate.models import *
@@ -826,15 +826,15 @@ class FDPTrainingCertificate(object):
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
     if event_type == "FDP":
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+        page = PdfReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).pages[0]
     else:
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).getPage(0)
-    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
-    page.mergePage(overlay)
+        page = PdfReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).pages[0]
+    overlay = PdfReader(BytesIO(imgTemp.getvalue())).pages[0]
+    page.merge_page(overlay)
 
     #Save the result
-    output = PdfFileWriter()
-    output.addPage(page)
+    output = PdfWriter()
+    output.add_page(page)
 
     #stream to browser
     outputStream = response
@@ -1188,15 +1188,16 @@ class ILWTestCertificate(object):
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
     if event_type == "FDP":
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
+        page = PdfReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).pages[0]
     else:
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).getPage(0)
-    overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
-    page.mergePage(overlay)
+        page = PdfReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).pages[0]
+    overlay = PdfReader(BytesIO(imgTemp.getvalue())).pages[0]
+    # page.mergePage(overlay)
+    page.merge_page(overlay)
 
     #Save the result
-    output = PdfFileWriter()
-    output.addPage(page)
+    output = PdfWriter()
+    output.add_page(page)
 
     #stream to browser
     outputStream = response
