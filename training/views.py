@@ -1,5 +1,5 @@
 # Django imports
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.utils.decorators import method_decorator
@@ -62,19 +62,32 @@ class TrainingEventCreateView(CreateView):
 
 	@method_decorator(group_required("Resource Person"))
 	def get(self, request, *args, **kwargs):
+		form = self.form_class()
 		context = {'form': self.form_class()}
 		context['pdp_fee']=settings.PDP_FEE
 		context['cdp_fee']=settings.CDP_FEE
+		fossess = FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id'))
+		context['fossess']=fossess
 		return render(self.request, self.template_name, context)
 
 	def form_valid(self, form, **kwargs):
 		self.object = form.save(commit=False)
 		self.object.entry_user = self.request.user
 		self.object.Language_of_workshop = Language.objects.get(id=22)
+		ilw_course = form.cleaned_data.get('ilw_course', '-')
+		foss_data = form.cleaned_data.get('foss_data', [])
+		course = ILWCourse.objects.create(name = ilw_course)
+		if foss_data:
+			course.foss.set(foss_data)
+		self.object.course = course
 		self.object.save()
-
 		messages.success(self.request, "New Event created successfully.")
 		return HttpResponseRedirect(self.success_url)
+	
+	def form_invalid(self, form):
+		context = self.get_context_data(form=form)
+		return self.render_to_response(context)
+		# return super().form_invalid(form)
 
 #ILW main page
 class TrainingEventsListView(ListView):
@@ -338,6 +351,25 @@ class EventPraticipantsListView(ListView):
 		context['event']= self.event
 		return context
 
+
+def edit_training_event(request, pk):
+	event = get_object_or_404(TrainingEvents, id=pk)
+	fossess = FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id'))
+	context = {}
+	context['fossess']=fossess
+	selected_foss = event.course and event.course.foss.all().values_list('id', flat=True)
+	context['selected_foss'] = selected_foss
+	
+	if request.method == "POST":
+		form = EditTrainingEventForm(request.POST, instance=event)
+		if form.is_valid():
+			form.save(commit=True)
+			messages.add_message(request, messages.SUCCESS, f"event updated successfully")
+			return redirect(reverse('training:edit_event', args=[event.id]))
+	else:
+		form = EditTrainingEventForm(instance=event)
+	context['form']=form
+	return render(request, 'edit_event.html',context)
 
 class EventUpdateView(UpdateView):
 	model = TrainingEvents
@@ -784,7 +816,7 @@ class FDPTrainingCertificate(object):
     training_end = event.event_end_date
     event_type = event.event_type
     response = HttpResponse(content_type='application/pdf')
-    filename = (participantname+'-'+event.foss.foss+"-Participant-Certificate").replace(" ", "-");
+    filename = (participantname+'-'+"-Participant-Certificate").replace(" ", "-");
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
     imgTemp = BytesIO ()
@@ -805,13 +837,25 @@ class FDPTrainingCertificate(object):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #paragraphe
-    text = "This is to certify that <b>"+participantname +"</b> has participated in \
-    <b>"+event.get_event_type_display()+"</b> from <b>"\
-    + str(training_start) +"</b> to <b>"+ str(training_end) +\
-    "</b> on <b>"+event.foss.foss+"</b> organized by <b>"+\
-    event.host_college.institution_name+\
-    "</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.\
-    <br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay."
+    line1 = f"""
+         This is to certify that <b>{participantname}</b> has participated in 
+         <b>{event.get_event_type_display()}</b> from <b>{training_start}</b> to <b>{training_end}</b> 
+    """
+    line2 = f"""
+         organized by <b>{event.host_college.institution_name}</b> 
+         with course material provided by Spoken Tutorial Project, IIT Bombay.
+         <br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay.
+    """
+    if event.is_course:
+         text = f"""
+         {line1}
+         on the course <b>{event.course.name}</b>, which includes the following FOSS: 
+         <b>{", ".join([foss.foss for foss in event.course.foss.all()])}</b>, 
+         {line2}
+         """
+    else:
+         text = f"""{line1}
+         on <b>{event.foss.foss}</b> {line2}"""
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,

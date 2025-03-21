@@ -327,12 +327,12 @@ class ViewEventFilter(django_filters.FilterSet):
       TrainingEvents.objects.filter().order_by('host_college__institution_name').values_list('host_college__id', 'host_college__institution_name').distinct()
     )
   )
-  foss = django_filters.ChoiceFilter(
-    choices= [('', '---------')] + list(
-      TrainingEvents.objects.filter().order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()
-    )
+  foss = django_filters.ModelMultipleChoiceFilter(
+    queryset=FossCategory.objects.filter(show_on_homepage=1).order_by('foss'),
+    field_name='course__foss',
+    conjoined=False,
+    label="Foss Category"
   )
-
   event_start_date = django_filters.DateFromToRangeFilter()
   event_end_date = django_filters.DateFromToRangeFilter()
   event_type = django_filters.ChoiceFilter(choices=EVENT_TYPE_CHOICES[1:])
@@ -352,15 +352,17 @@ class ViewEventFilter(django_filters.FilterSet):
   class Meta(object):
     model = TrainingEvents
     fields = ['state', 'foss', 'host_college']
+    
 
 
 class TrEventFilter(django_filters.FilterSet):
   state = django_filters.ChoiceFilter(choices=State.objects.none())
   host_college = django_filters.ChoiceFilter()
-  foss = django_filters.ChoiceFilter(
-    choices= [('', '---------')] + list(
-      TrainingEvents.objects.filter().order_by('foss__foss').values_list('foss__id', 'foss__foss').distinct()
-    )
+  foss = django_filters.ModelMultipleChoiceFilter(
+    queryset=FossCategory.objects.filter(show_on_homepage=1).order_by('foss'),
+    field_name='course__foss',
+    conjoined=False,
+    label="Foss Category"
   )
   event_type = django_filters.ChoiceFilter(choices=EVENT_TYPE_CHOICES[1:])
   event_start_date = django_filters.DateFromToRangeFilter()
