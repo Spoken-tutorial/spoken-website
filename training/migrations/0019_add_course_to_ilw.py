@@ -9,7 +9,6 @@ from django.db import migrations
 def set_default_course(apps, schema_editor):
     ILWCourse = apps.get_model('training', 'ILWCourse')
     TrainingEvents = apps.get_model('training', 'TrainingEvents')
-    # FossCategory = apps.get_model('creation', 'FossCategory')
 
     for item in TrainingEvents.objects.all():
         course = ILWCourse.objects.create()

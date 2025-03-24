@@ -87,7 +87,6 @@ class TrainingEventCreateView(CreateView):
 	def form_invalid(self, form):
 		context = self.get_context_data(form=form)
 		return self.render_to_response(context)
-		# return super().form_invalid(form)
 
 #ILW main page
 class TrainingEventsListView(ListView):
