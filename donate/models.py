@@ -9,6 +9,23 @@ import json
 from events.models import City, State, AcademicCenter
 from django.core.validators import RegexValidator, MinLengthValidator
 
+
+class PayeeHdfcTransaction(models.Model):
+    transaction_id = models.CharField(max_length=255) # "id" from the order status response
+    requestId = models.CharField(max_length=255)
+    order_id = models.CharField(max_length=21)
+    amount = models.DecimalField(max_digits=10,decimal_places=2)
+    session_error_code = models.CharField(max_length=255)
+    session_error_msg = models.CharField(max_length=255)
+    order_status = models.CharField(max_length=255) #order status like charged, failed etc
+    order_error_code = models.CharField(max_length=255)
+    order_error_msg = models.CharField(max_length=255)
+    customer_id = models.CharField(max_length=50)
+    udf1 = models.TextField() # academic center name
+    udf2 = models.TextField() # academic center code
+    udf3 = models.CharField(max_length=150) # payee name
+    udf4 = models.CharField(max_length=50) # academic center state name
+
 class Payee(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField(max_length=255)
@@ -26,6 +43,7 @@ class Payee(models.Model):
     purpose = models.CharField(max_length=255, null=True)
     reqId = models.CharField(max_length=100, default='')
     source = models.CharField(max_length=25, null=True, default=None)
+    transaction = models.ForeignKey(PayeeHdfcTransaction, on_delete=models.PROTECT, null=True, blank=True)
     def get_selected_foss(self):
         selected_foss = {}
         c = 0
