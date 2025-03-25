@@ -122,6 +122,7 @@ def form_valid(request, form, purpose):
     CdFossLanguages record stores mapping of user and foss which the user is eligible to download.
     """
     # Save Payee record
+    print(f"\033[92m saving payee record \033[0m")
     form_data = form.save(commit=False)
     # form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
     form_data.reqId = ''
@@ -129,10 +130,12 @@ def form_valid(request, form, purpose):
     form_data.status = 0
     form_data.expiry = calculate_expiry()
     form_data.purpose = purpose
+    print(f"\033[92m getting source \033[0m")
     source = request.POST.get('source')
     if source == 'deet':
         form_data.source = 'deet'
     form_data.save()
+    print(f"\033[93m saving form data \033[0m")
     payee_obj = form_data
     # Save CdFossLanguages record
     fosses = form.cleaned_data.get('foss_id').split(',')
@@ -164,6 +167,7 @@ def form_valid(request, form, purpose):
                     cd_foss_langs.level = foss_level
                 cd_foss_langs.save()
     form.save_m2m()
+    print(f"\033[93m returning payee_obj *******  {payee_obj}\033[0m")
     return payee_obj
 
 @csrf_exempt
@@ -184,8 +188,12 @@ def controller(request, purpose):
         if form.is_valid():
             # form_valid function creates Payee & CdFossLanguages records.
             # & returns Payee record
+            print(f"\033[92m controller form is valid \033[0m")
             payee_obj_new = form_valid(request, form, purpose)
+            
         else:
+            print(f"\033[91m  controller form is invalid \033[0m")
+            print(f"\033[93m {form.errors} \033[0m")
             form_invalid(request, form)
     
     if purpose != 'cdcontent': # purpose = event_id in case of ILW
