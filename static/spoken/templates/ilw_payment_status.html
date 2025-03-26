@@ -64,8 +64,6 @@
                     <p id="payment-message" class="status-message text-success">
                         <i class="fa fa-check-circle"></i> The payment was successful!
                     </p>
-                    
-
                 {% elif status == "FAILED" %}
                     <p id="payment-message" class="status-message text-danger">
                         <i class="fa fa-times-circle"></i> Payment failed. Please contact Training Manager.
@@ -83,6 +81,7 @@
                     </div>
                 {% endif %}
                 <ul class="list-group" id="details" {% if status == "CHARGED" %}style="display: block;"{% else%}style="display: none;"{% endif %}>
+                    <li class="list-group-item"><strong><i class="fa fa-map-marker"></i> Event:</strong> {{ data.udf5 }}</li>
                     <li class="list-group-item"><strong><i class="fa fa-file-text"></i> Order Id:</strong> {{ order_id }}</li>
                     <li class="list-group-item"><strong><i class="fa fa-file-text"></i> Transaction ID:</strong> {{ data.id }}</li>
                     <li class="list-group-item"><strong><i class="fa fa-user"></i> Payee:</strong> {{ data.udf3 }}</li>
@@ -92,6 +91,7 @@
                     <li class="list-group-item"><strong><i class="fa fa-building"></i> Academic Center:</strong> {{ data.udf1 }}</li>
                     <li class="list-group-item"><strong><i class="fa fa-university"></i> Center Code:</strong> {{ data.udf2 }}</li>
                     <li class="list-group-item"><strong><i class="fa fa-map-marker"></i> State:</strong> {{ data.udf4 }}</li>
+                    
                 </ul>
                
             </div>

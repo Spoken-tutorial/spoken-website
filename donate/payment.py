@@ -5,6 +5,8 @@ from events.models import AcademicCenter
 from .subscription import generate_hashed_order_id
 from .models import PayeeHdfcTransaction
 
+from training.models import TrainingEvents
+
 import requests
 
 def save_ilw_hdfc_session_data(session_response):
@@ -25,6 +27,7 @@ def save_ilw_hdfc_success_data(order_id, data):
     transaction.udf2 = data.get('udf2')
     transaction.udf3 = data.get('udf3')
     transaction.udf4 = data.get('udf4')
+    transaction.udf5 = data.get('udf5')
     transaction.save()
 
 def save_ilw_hdfc_error_data(order_id, data):
@@ -53,6 +56,11 @@ def get_ilw_session_payload(request, payee_obj_new, participant ):
     ac = AcademicCenter.objects.get(id=participant.college_id)
     payload['udf1'] = ac.institution_name
     payload['udf2'] = ac.academic_code
+    purpose = payee_obj_new.purpose
+    if  purpose == 'cdcontent':
+        payload['udf5'] = 'cdcontent'
+    else:
+        payload['udf5'] = TrainingEvents.objects.get(id=purpose).event_name
     return payload
     
 def make_hdfc_session_request(payee_obj_new, headers, payload):

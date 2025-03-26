@@ -12,7 +12,7 @@ class CreateTrainingEventForm(forms.ModelForm):
     ilw_course = forms.CharField(required=False)
     event_coordinator_email = forms.CharField(required = False)
     event_coordinator_contact_no = forms.CharField(required = False)
-    foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.all())
+    foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id')))
     class Meta(object):
         model = TrainingEvents
         exclude = ['entry_user', 'training_status', 'Language_of_workshop', 'foss']
@@ -38,7 +38,7 @@ class EditTrainingEventForm(CreateTrainingEventForm):
         ilw_course = self.cleaned_data['ilw_course']
         foss_data = self.cleaned_data['foss_data']
         course = event.course
-        if course:
+        if course is not None:
             course.name = ilw_course
             course.save()
         else:

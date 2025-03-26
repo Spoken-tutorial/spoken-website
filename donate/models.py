@@ -25,6 +25,7 @@ class PayeeHdfcTransaction(models.Model):
     udf2 = models.TextField() # academic center code
     udf3 = models.CharField(max_length=150) # payee name
     udf4 = models.CharField(max_length=50) # academic center state name
+    udf5 = models.CharField(max_length=255) # event name 
 
 class Payee(models.Model):
     name = models.CharField(max_length=255)

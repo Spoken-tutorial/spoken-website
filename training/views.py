@@ -232,9 +232,10 @@ def register_user(request):
 		event_id = request.POST.get("event_id_info")
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
+			fosses = event_register.course.foss.all()
 			langs = Language.objects.filter(id__in = 
 				TutorialResource.objects.filter(
-				tutorial_detail__foss = event_register.foss, status=1).exclude(
+				tutorial_detail__foss__in = fosses, status=1).exclude(
 					language=event_register.Language_of_workshop).values('language').distinct())
 			context["langs"] = langs
 			form.fields["foss_language"].queryset = langs
@@ -242,6 +243,7 @@ def register_user(request):
 			context["gst"] = gst
 			form.fields["amount"].initial = float(event_register.event_fee) + gst
 			form.fields["amount"].widget.attrs['readonly'] = True
+			context["fossess"] = [foss.id for foss in event_register.course.foss.all()]
 			context['event_obj']= event_register
 	return render(request, template_name,context)
 
