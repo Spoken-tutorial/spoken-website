@@ -625,10 +625,8 @@ class EventAttendanceListView(ListView):
 		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
 		main_query = Participant.objects.filter(event_id=kwargs['eventid'])
 
-		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)))
-		self.unsuccessful_payee = main_query.filter(payment_status__status__in=(0,2))
-
-		
+		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)) | Q(payment_status__transaction__order_status="CHARGED"))
+		self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED"))
 		if self.event.training_status == 1:
 			self.queryset = main_query.filter(reg_approval_status=1)
 

@@ -100,17 +100,8 @@
 					Manual registartion
 				{% endif %}
 			</td>
-			<td><strong>
-				{% if record.payment_status.status == 0 %}
-					Payment Initiated, not paid
-				{% elif record.payment_status.status == 1 %}
-					Payment successfully completed
-				{% elif record.payment_status.status == 2 %}
-					Payment failed
-				{% elif not record.participant.payment_status %}
-					CSV Upload
-				{% endif %}
-				</strong>
+			<td>
+				<strong>{{ record.payment_status_message }}</strong>
 			</td>
 		{% endif %}
     </tr>

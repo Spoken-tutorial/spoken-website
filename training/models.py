@@ -96,6 +96,23 @@ class Participant(models.Model):
 	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
 	city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True)
 	source = models.CharField(max_length=25, null=True, default=None)
+
+	@property
+	def payment_status_message(self):
+		ps = self.payment_status
+		if not ps:
+			return "CSV Upload"
+		if ps:
+			payee_status = ps.status # asc method
+			transaction_status = ps.transaction.order_status if ps.transaction else "" #hdfc gateway
+
+			if payee_status == 1 or transaction_status == "CHARGED":
+				return "Payment successfully completed 1"
+			if payee_status == 2 and transaction_status in ["FAILED", "AUTHENTICATION_FAILED", "AUTHORIZATION_FAILED"]:
+				return "Payment failed 1"
+			if payee_status == 0 :
+				return "Payment Initiated, not paid 1"
+		return "CSV Upload"
 	
 	class Meta(object):
 		unique_together = ('event', 'user', 'payment_status')
