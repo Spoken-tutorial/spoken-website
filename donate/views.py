@@ -176,7 +176,6 @@ def form_valid(request, form, purpose):
         CdFossLanguages.objects.bulk_create(entries)
 
     form.save_m2m()
-    print(f"\033[93m returning payee_obj *******  {payee_obj}\033[0m")
     return payee_obj
 
 @csrf_exempt

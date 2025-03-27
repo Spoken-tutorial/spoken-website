@@ -266,8 +266,6 @@ def reg_success(request, user_type):
 		form = RegisterUser(request.POST)
 
 		event_type = request.POST.get('event_type', '')
-		print(f"\033[92m event_type : {event_type} \033[0m")
-		print(f"\033[93m {request.POST} \033[0m")
 		if form.is_valid():
 			form_data = form.save(commit=False)
 			form_data.user = request.user

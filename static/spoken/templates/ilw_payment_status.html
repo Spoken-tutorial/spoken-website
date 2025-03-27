@@ -115,9 +115,8 @@
     }
     document.addEventListener("DOMContentLoaded", function () {
         let orderId = "{{ data.order_id }}";
-        console.log(`orderId : ${orderId}`);
         if ("{{ status }}" === "PENDING") {
-            let url  = `{% url 'check_payment_status' order_id=data.order_id %}`
+            let url  = `{% url 'check_ilw_payment_status' order_id=data.order_id %}`
             fetch(url)
                 .then(response => response.json())
                 .then(data => {

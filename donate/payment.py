@@ -1,13 +1,17 @@
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
 from events.models import AcademicCenter
-from .subscription import generate_hashed_order_id
+from .subscription import generate_hashed_order_id, get_request_headers
 from .models import PayeeHdfcTransaction
 
 from training.models import TrainingEvents
 from donate.models import Payee
 import requests
+from django.http import JsonResponse
+import time
+
 
 def save_ilw_hdfc_session_data(session_response):
     transaction_data = {}
@@ -96,3 +100,48 @@ def make_hdfc_session_request(payee_obj_new, headers, payload):
         payee_obj_new.save()
         return None
     return None
+
+@csrf_exempt
+def check_ilw_payment_status(request, order_id):
+    """
+    API endpoint for frontend to check payment status.
+    This triggers backend polling.
+    """
+    payee = Payee.objects.get(transaction__order_id=order_id)
+    amount = payee.transaction.amount
+    email = payee.email
+    result = poll_payment_status(order_id, email, amount)
+    return JsonResponse(result)
+
+
+def poll_payment_status(order_id, email, sub_amount):
+    """
+    Polls the HDFC API every 15 seconds to check the payment status.
+    Stops polling when:
+      - The status is "charged" or "failed"
+      - The max attempts is reached
+    """
+    HDFC_STATUS_URL = f"{settings.ORDER_STATUS_URL}{order_id}"
+    headers = get_request_headers(email)
+    max_attempts = settings.HDFC_POLL_MAX_RETRIES 
+    wait_time = settings.HDFC_POLL_INTERVAL # Wait before polling again
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            response = requests.get(HDFC_STATUS_URL, headers=headers)
+            data = response.json()
+            if response.status_code == 200 and "status" in data:
+                order_status = data.get('status', '')
+                amount = data.get('amount', '')
+                order_id = data.get('order_id', '')
+                if order_status == 'CHARGED' and amount == sub_amount:
+                    save_ilw_hdfc_success_data(order_id, data)
+                    return {"status": order_status}
+                elif order_status in ["AUTHENTICATION_FAILED", "AUTHORIZATION_FAILED"]:
+                    save_ilw_hdfc_error_data()
+                    return {"status": order_status}
+            attempt+=1
+            time.sleep(wait_time)
+        except Exception as e:
+            return {"status": "ERROR", "message": str(e)}
+    return {"status": "TIMEOUT", "message": "Max attempts reached, payment is still pending."} 

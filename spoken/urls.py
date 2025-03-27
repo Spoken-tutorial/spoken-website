@@ -11,6 +11,7 @@ from cdeep.views import *
 from django.conf import settings
 from django.conf.urls.static import static
 from donate.views import ilw_payment_callback
+from donate.payment import check_ilw_payment_status
 
 app_name = 'spoken'
 admin.autodiscover()
@@ -70,7 +71,8 @@ urlpatterns = [
 
     #ilw payment urls
     url(r'^payment/ilw/callback/$',  ilw_payment_callback, name="ilw_payment_callback"),
-
+    url(r'^payment/status/ilw/(?P<order_id>[\w-]+)/$', check_ilw_payment_status, name="check_ilw_payment_status"),
+    
     # evens old url
     url(r'^workshops/college/view_college/(\d+)/$',  view_college, name='view_college'),
     url(r'^workshops/resource_center_view_college/(\d+)/$',  view_college, name='view_college'),
