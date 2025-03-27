@@ -39,6 +39,7 @@ from .forms import *
 from .subscription import get_request_headers, get_display_transaction_details, verify_hmac_signature
 from donate.payment import save_ilw_hdfc_success_data, save_ilw_hdfc_error_data, get_ilw_session_payload, make_hdfc_session_request
 from training.models import TrainingEvents
+from decimal import Decimal, InvalidOperation
 # @csrf_exempt
 # def donatehome(request):
 #     form = PayeeForm(initial={'country': 'India'})
@@ -463,9 +464,17 @@ def ilw_payment_callback(request):
             context['data'] = data
             order_status = response_data.get('status', '')
             amount = response_data.get('amount', '')
-            
-            if order_status == 'CHARGED' and amount == payee.amount:
-                context['status'] = 'CHARGED'
+            try:
+                amount_decimal = Decimal(str(amount))
+            except InvalidOperation:
+                context['status'] = 'FAILED'
+                return render(request, status_template, context=context)
+            if order_status == 'CHARGED':
+                if amount_decimal == payee.amount:
+                    context['status'] = 'CHARGED'
+                else:
+                    context['status'] = 'FAILED'
+                    save_ilw_hdfc_error_data(order_id, response_data, msg="Amount mismatch")
             elif order_status == 'PENDING_VBV' or order_status == 'AUTHORIZING': #This is a non-terminal transaction status. Show pending screen/polling
                 context['status'] = 'PENDING'
             else:

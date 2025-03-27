@@ -11,6 +11,7 @@ from donate.models import Payee
 import requests
 from django.http import JsonResponse
 import time
+from decimal import Decimal, InvalidOperation
 
 
 def save_ilw_hdfc_session_data(session_response):
@@ -42,10 +43,10 @@ def save_ilw_hdfc_success_data(order_id, data):
     except:
         pass
 
-def save_ilw_hdfc_error_data(order_id, data):
+def save_ilw_hdfc_error_data(order_id, data, msg=""):
     transaction = PayeeHdfcTransaction.objects.get(order_id=order_id)
     transaction.error_code = data.get('error_code', '-')
-    transaction.error_message = data.get('error_message', '-')
+    transaction.error_message = data.get('error_message', msg)
     transaction.save()
 
 def get_ilw_session_payload(request, payee_obj_new, participant ):
@@ -134,12 +135,22 @@ def poll_payment_status(order_id, email, sub_amount):
                 order_status = data.get('status', '')
                 amount = data.get('amount', '')
                 order_id = data.get('order_id', '')
-                if order_status == 'CHARGED' and amount == sub_amount:
-                    save_ilw_hdfc_success_data(order_id, data)
-                    return {"status": order_status}
+                try:
+                    amount_decimal = Decimal(str(amount))
+                except InvalidOperation:
+                    save_ilw_hdfc_error_data(order_id, data, msg="Amount error")
+                    return {"status": "ERROR"}
+                if order_status == 'CHARGED':
+                    if amount_decimal == sub_amount:
+                        save_ilw_hdfc_success_data(order_id, data)
+                        return {"status": order_status}
+                    else:
+                        save_ilw_hdfc_error_data(order_id, data, msg="Amount mismatch")
+                        return {"status": "ERROR"}
                 elif order_status in ["AUTHENTICATION_FAILED", "AUTHORIZATION_FAILED"]:
-                    save_ilw_hdfc_error_data()
+                    save_ilw_hdfc_error_data(order_id, data)
                     return {"status": order_status}
+                
             attempt+=1
             time.sleep(wait_time)
         except Exception as e:
