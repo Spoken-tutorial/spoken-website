@@ -135,12 +135,13 @@ def poll_payment_status(order_id, email, sub_amount):
                 order_status = data.get('status', '')
                 amount = data.get('amount', '')
                 order_id = data.get('order_id', '')
-                try:
-                    amount_decimal = Decimal(str(amount))
-                except InvalidOperation:
-                    save_ilw_hdfc_error_data(order_id, data, msg="Amount error")
-                    return {"status": "ERROR"}
+                
                 if order_status == 'CHARGED':
+                    try:
+                        amount_decimal = Decimal(str(amount))
+                    except InvalidOperation:
+                        save_ilw_hdfc_error_data(order_id, data, msg="Amount error")
+                        return {"status": "ERROR"}
                     if amount_decimal == sub_amount:
                         save_ilw_hdfc_success_data(order_id, data)
                         return {"status": order_status}

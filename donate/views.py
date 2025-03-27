@@ -464,12 +464,12 @@ def ilw_payment_callback(request):
             context['data'] = data
             order_status = response_data.get('status', '')
             amount = response_data.get('amount', '')
-            try:
-                amount_decimal = Decimal(str(amount))
-            except InvalidOperation:
-                context['status'] = 'FAILED'
-                return render(request, status_template, context=context)
             if order_status == 'CHARGED':
+                try:
+                    amount_decimal = Decimal(str(amount))
+                except InvalidOperation:
+                    context['status'] = 'FAILED'
+                    return render(request, status_template, context=context)
                 if amount_decimal == payee.amount:
                     context['status'] = 'CHARGED'
                 else:
