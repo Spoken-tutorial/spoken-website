@@ -42,14 +42,23 @@ class Company(models.Model):
 	def __str__(self):
 		return self.name
 
-class TrainingEvents(models.Model):	
 
+class ILWCourse(models.Model):
+	name = models.CharField(max_length=255)
+	foss = models.ManyToManyField(FossCategory, related_name='courses')
+
+	def __str__(self):
+		return self.name
+
+class TrainingEvents(models.Model):
 	event_type = models.CharField(max_length = 50, choices = EVENT_TYPE_CHOICES)
 	event_fee = models.PositiveIntegerField(default=500)
 	event_name = models.CharField(max_length=200)
 	state = models.ForeignKey(State, on_delete=models.PROTECT )
 	host_college = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
-	foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
+	foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT , null=True, blank=True )
+	course = models.ForeignKey(ILWCourse, on_delete=models.PROTECT, null=True, blank=True )
+	is_course = models.BooleanField(default=False) #True if the ILW consists of multiple foss packaged as a course
 	Language_of_workshop = models.ForeignKey(Language, on_delete=models.PROTECT )
 	event_start_date = models.DateField(default=datetime.now)
 	event_end_date = models.DateField(default=datetime.now)
@@ -87,20 +96,35 @@ class Participant(models.Model):
 	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
 	city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True)
 	source = models.CharField(max_length=25, null=True, default=None)
+
+	@property
+	def payment_status_message(self):
+		ps = self.payment_status
+		if not ps:
+			return "CSV Upload"
+		if ps:
+			payee_status = ps.status # asc method
+			transaction_status = ps.transaction.order_status if ps.transaction else "" #hdfc gateway
+
+			if payee_status == 1 or transaction_status == "CHARGED":
+				return "Payment successfully completed 1"
+			if payee_status == 2 and transaction_status in ["FAILED", "AUTHENTICATION_FAILED", "AUTHORIZATION_FAILED"]:
+				return "Payment failed 1"
+			if payee_status == 0 :
+				return "Payment Initiated, not paid 1"
+		return "CSV Upload"
 	
 	class Meta(object):
 		unique_together = ('event', 'user', 'payment_status')
 
 	def get_foss_langs(self):
 		selected_foss = {}
-		cd_foss_langs = TrainingEvents.objects.get(id=self.event.id)
-		foss_json = json.dumps(cd_foss_langs.foss.id)
-		def_langs_json = json.dumps(cd_foss_langs.Language_of_workshop.id)
-		if self.foss_language :
-			user_langs_json = json.dumps(self.foss_language.id)
-			selected_foss[foss_json] = [[def_langs_json,user_langs_json],0]
-		else:
-			selected_foss[foss_json] = [[def_langs_json],0]
+		event = TrainingEvents.objects.get(id=self.event.id)
+		event_lang = str(event.Language_of_workshop.id)
+		user_lang_id = str(self.foss_language.id) if self.foss_language else None
+		languages = [[event_lang, user_lang_id], 0] if user_lang_id else [[event_lang], 0]
+		for foss in event.course.foss.all():
+			selected_foss[foss.id] = languages
 		return json.dumps(selected_foss)
 
 
@@ -147,3 +171,5 @@ class EventTestStatus(models.Model):
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
 
+
+	

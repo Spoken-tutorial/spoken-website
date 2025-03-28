@@ -1,5 +1,5 @@
 # Django imports
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
 from django.utils.decorators import method_decorator
@@ -62,19 +62,31 @@ class TrainingEventCreateView(CreateView):
 
 	@method_decorator(group_required("Resource Person"))
 	def get(self, request, *args, **kwargs):
+		form = self.form_class()
 		context = {'form': self.form_class()}
 		context['pdp_fee']=settings.PDP_FEE
 		context['cdp_fee']=settings.CDP_FEE
+		fossess = FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id'))
+		context['fossess']=fossess
 		return render(self.request, self.template_name, context)
 
 	def form_valid(self, form, **kwargs):
 		self.object = form.save(commit=False)
 		self.object.entry_user = self.request.user
 		self.object.Language_of_workshop = Language.objects.get(id=22)
+		ilw_course = form.cleaned_data.get('ilw_course', '-')
+		foss_data = form.cleaned_data.get('foss_data', [])
+		course = ILWCourse.objects.create(name = ilw_course)
+		if foss_data:
+			course.foss.set(foss_data)
+		self.object.course = course
 		self.object.save()
-
 		messages.success(self.request, "New Event created successfully.")
 		return HttpResponseRedirect(self.success_url)
+	
+	def form_invalid(self, form):
+		context = self.get_context_data(form=form)
+		return self.render_to_response(context)
 
 #ILW main page
 class TrainingEventsListView(ListView):
@@ -220,9 +232,10 @@ def register_user(request):
 		event_id = request.POST.get("event_id_info")
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
+			fosses = event_register.course.foss.all()
 			langs = Language.objects.filter(id__in = 
 				TutorialResource.objects.filter(
-				tutorial_detail__foss = event_register.foss, status=1).exclude(
+				tutorial_detail__foss__in = fosses, status=1).exclude(
 					language=event_register.Language_of_workshop).values('language').distinct())
 			context["langs"] = langs
 			form.fields["foss_language"].queryset = langs
@@ -230,6 +243,7 @@ def register_user(request):
 			context["gst"] = gst
 			form.fields["amount"].initial = float(event_register.event_fee) + gst
 			form.fields["amount"].widget.attrs['readonly'] = True
+			context["fossess"] = [foss.id for foss in event_register.course.foss.all()]
 			context['event_obj']= event_register
 	return render(request, template_name,context)
 
@@ -252,8 +266,6 @@ def reg_success(request, user_type):
 		form = RegisterUser(request.POST)
 
 		event_type = request.POST.get('event_type', '')
-		print(f"\033[92m event_type : {event_type} \033[0m")
-		print(f"\033[93m {request.POST} \033[0m")
 		if form.is_valid():
 			form_data = form.save(commit=False)
 			form_data.user = request.user
@@ -338,6 +350,25 @@ class EventPraticipantsListView(ListView):
 		context['event']= self.event
 		return context
 
+
+def edit_training_event(request, pk):
+	event = get_object_or_404(TrainingEvents, id=pk)
+	fossess = FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id'))
+	context = {}
+	context['fossess']=fossess
+	selected_foss = event.course and event.course.foss.all().values_list('id', flat=True)
+	context['selected_foss'] = selected_foss
+	
+	if request.method == "POST":
+		form = EditTrainingEventForm(request.POST, instance=event)
+		if form.is_valid():
+			form.save(commit=True)
+			messages.add_message(request, messages.SUCCESS, f"event updated successfully")
+			return redirect(reverse('training:edit_event', args=[event.id]))
+	else:
+		form = EditTrainingEventForm(instance=event)
+	context['form']=form
+	return render(request, 'edit_event.html',context)
 
 class EventUpdateView(UpdateView):
 	model = TrainingEvents
@@ -592,10 +623,8 @@ class EventAttendanceListView(ListView):
 		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
 		main_query = Participant.objects.filter(event_id=kwargs['eventid'])
 
-		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)))
-		self.unsuccessful_payee = main_query.filter(payment_status__status__in=(0,2))
-
-		
+		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)) | Q(payment_status__transaction__order_status="CHARGED"))
+		self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED"))
 		if self.event.training_status == 1:
 			self.queryset = main_query.filter(reg_approval_status=1)
 
@@ -784,7 +813,7 @@ class FDPTrainingCertificate(object):
     training_end = event.event_end_date
     event_type = event.event_type
     response = HttpResponse(content_type='application/pdf')
-    filename = (participantname+'-'+event.foss.foss+"-Participant-Certificate").replace(" ", "-");
+    filename = (participantname+'-'+"-Participant-Certificate").replace(" ", "-");
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
     imgTemp = BytesIO ()
@@ -805,13 +834,25 @@ class FDPTrainingCertificate(object):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #paragraphe
-    text = "This is to certify that <b>"+participantname +"</b> has participated in \
-    <b>"+event.get_event_type_display()+"</b> from <b>"\
-    + str(training_start) +"</b> to <b>"+ str(training_end) +\
-    "</b> on <b>"+event.foss.foss+"</b> organized by <b>"+\
-    event.host_college.institution_name+\
-    "</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.\
-    <br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay."
+    line1 = f"""
+         This is to certify that <b>{participantname}</b> has participated in 
+         <b>{event.get_event_type_display()}</b> from <b>{training_start}</b> to <b>{training_end}</b> 
+    """
+    line2 = f"""
+         organized by <b>{event.host_college.institution_name}</b> 
+         with course material provided by Spoken Tutorial Project, IIT Bombay.
+         <br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay.
+    """
+    if event.is_course:
+         text = f"""
+         {line1}
+         on the course <b>{event.course.name}</b>, which includes the following FOSS: 
+         <b>{", ".join([foss.foss for foss in event.course.foss.all()])}</b>, 
+         {line2}
+         """
+    else:
+         text = f"""{line1}
+         on <b>{event.foss.foss}</b> {line2}"""
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,

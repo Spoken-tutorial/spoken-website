@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from events.models import Organiser, Accountexecutive, AcademicCenter, \
+from events.models import AcademicCenter, \
 AcademicKey, AcademicPaymentStatus
 from .models import AcademicSubscription, HDFCTransactionDetails
 from django.http import JsonResponse
@@ -222,4 +222,5 @@ def get_academic_centers(request):
         ac = AcademicCenter.objects.filter(state_id=stateId).order_by('institution_name').values('id', 'institution_name', 'academic_code')
         return JsonResponse(list(ac), safe=False)
     return JsonResponse([])
+
 

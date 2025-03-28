@@ -9,17 +9,45 @@ from .validators import validate_csv_file
 import phonenumbers
 
 class CreateTrainingEventForm(forms.ModelForm):
-    courses = FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id'))
-
-
-    foss = forms.ModelChoiceField(empty_label='---------', queryset=courses)
-
+    ilw_course = forms.CharField(required=False)
     event_coordinator_email = forms.CharField(required = False)
     event_coordinator_contact_no = forms.CharField(required = False)
+    foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id')))
     class Meta(object):
         model = TrainingEvents
-        exclude = ['entry_user', 'training_status', 'Language_of_workshop']
+        exclude = ['entry_user', 'training_status', 'Language_of_workshop', 'foss']
     
+
+class EditTrainingEventForm(CreateTrainingEventForm):
+    def __init__(self, *args, **kwargs):
+        super(EditTrainingEventForm, self).__init__(*args, **kwargs)
+        if self.instance:
+            if self.instance.course:
+                self.fields['ilw_course'].initial = self.instance.course.name
+                self.fields['foss_data'].initial = self.instance.course.foss.all()
+
+    def save(self, commit=False):
+        event = super().save(commit=False)
+        if self.instance.pk:
+            self.update_event(event)
+        if commit:
+            event.save()
+        return event
+    
+    def update_event(self, event):
+        ilw_course = self.cleaned_data['ilw_course']
+        foss_data = self.cleaned_data['foss_data']
+        course = event.course
+        if course is not None:
+            course.name = ilw_course
+            course.save()
+        else:
+            course = ILWCourse.objects.create(name=ilw_course)
+        course.foss.clear()
+        course.foss.set(foss_data)
+        event.course = course
+        event.save()
+
 
 class RegisterUser(forms.ModelForm):
     

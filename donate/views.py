@@ -1,13 +1,14 @@
 from config import TARGET, CHANNEL_ID, CHANNEL_KEY, EXPIRY_DAYS
 from .helpers import PURPOSE
 from django.shortcuts import render
+from django.conf import settings
 from creation.models import FossCategory, Language
 from cms.models import Profile
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.template.context_processors import csrf
 from donate.forms import PayeeForm, TransactionForm
 from donate.models import *
@@ -35,7 +36,10 @@ import random
 from training.views import reg_success
 from .models import *
 from .forms import *
-
+from .subscription import get_request_headers, get_display_transaction_details, verify_hmac_signature
+from donate.payment import save_ilw_hdfc_success_data, save_ilw_hdfc_error_data, get_ilw_session_payload, make_hdfc_session_request
+from training.models import TrainingEvents
+from decimal import Decimal, InvalidOperation
 # @csrf_exempt
 # def donatehome(request):
 #     form = PayeeForm(initial={'country': 'India'})
@@ -120,7 +124,8 @@ def form_valid(request, form, purpose):
     """
     # Save Payee record
     form_data = form.save(commit=False)
-    form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
+    # form_data.reqId = CHANNEL_ID+str(display.value(datetime.now().strftime('%Y%m%d%H%M%S'))[0:20])
+    form_data.reqId = ''
     form_data.user = request.user
     form_data.status = 0
     form_data.expiry = calculate_expiry()
@@ -131,34 +136,46 @@ def form_valid(request, form, purpose):
     form_data.save()
     payee_obj = form_data
     # Save CdFossLanguages record
-    fosses = form.cleaned_data.get('foss_id').split(',')
-    foss_languages = form.cleaned_data.get('language_id').split(',|')
-    levels = form.cleaned_data.get('level_id').split(',')
+    if purpose == "cdcontent":
+        fosses = form.cleaned_data.get('foss_id').split(',')
+        foss_languages = form.cleaned_data.get('language_id').split(',|')
+        levels = form.cleaned_data.get('level_id').split(',')
 
-    foss_level = 0
-    
-    for i in range(len(fosses)):
-        foss_category = FossCategory.objects.get(pk=int(fosses[i]))
-        if int(levels[i]):
-            foss_level = Level.objects.get(pk=int(levels[i]))
+        foss_level = 0
         
-        languages = foss_languages[i].split(',')
-        try:
-             custom_lang = request.POST.get('foss_language')
-             languages = languages + [str(custom_lang)]
-        except:
-             # this is coming from Events' page
-             pass
-        for language in languages:
-            if language not in ('','None'):
-                foss_language = Language.objects.get(pk=int(language))
-                cd_foss_langs = CdFossLanguages()
-                cd_foss_langs.payment = Payee.objects.get(pk=payee_obj.pk)
-                cd_foss_langs.foss = foss_category
-                cd_foss_langs.lang = foss_language
-                if foss_level:
-                    cd_foss_langs.level = foss_level
-                cd_foss_langs.save()
+        for i in range(len(fosses)):
+            foss_category = FossCategory.objects.get(pk=int(fosses[i]))
+            if int(levels[i]):
+                foss_level = Level.objects.get(pk=int(levels[i]))
+            
+            languages = foss_languages[i].split(',')
+            try:
+                custom_lang = request.POST.get('foss_language')
+                languages = languages + [str(custom_lang)]
+            except:
+                # this is coming from Events' page
+                pass
+            for language in languages:
+                if language not in ('','None'):
+                    foss_language = Language.objects.get(pk=int(language))
+                    cd_foss_langs = CdFossLanguages()
+                    cd_foss_langs.payment = Payee.objects.get(pk=payee_obj.pk)
+                    cd_foss_langs.foss = foss_category
+                    cd_foss_langs.lang = foss_language
+                    if foss_level:
+                        cd_foss_langs.level = foss_level
+                    cd_foss_langs.save()
+    else: #for ilw
+        event_id = request.POST.get('event')
+        event = TrainingEvents.objects.get(id=event_id)
+        fosses = event.course.foss.all()
+        foss_language = request.POST.get('foss_language',None)
+
+        entries = [ CdFossLanguages(payment=payee_obj, foss=foss, lang=event.Language_of_workshop) for foss in fosses ]
+        if foss_language:
+            entries += [ CdFossLanguages(payment=payee_obj, foss=foss, lang=event.Language_of_workshop) for foss in fosses ]
+        CdFossLanguages.objects.bulk_create(entries)
+
     form.save_m2m()
     return payee_obj
 
@@ -176,6 +193,7 @@ def form_invalid(request, form):
 @csrf_exempt
 def controller(request, purpose):
     form = PayeeForm(request.POST)
+    
     if request.method == 'POST':
         if form.is_valid():
             # form_valid function creates Payee & CdFossLanguages records.
@@ -198,7 +216,21 @@ def controller(request, purpose):
                  'email':payee_obj_new.email, 'paid college': False,
                  'amount': payee_obj_new.amount, 'status': 0}
         requests.post(callbackurl, json)
-    return render(request, 'payment_status.html', data)
+
+    if purpose == 'cdcontent':
+        return render(request, 'payment_status.html', data)
+    else:
+    #instead of redirecting to payment_status and starting the payment process, start hdfc transaction steps
+    #hdfc session request
+        payee_email = payee_obj_new.email
+        headers = get_request_headers(payee_email)
+        payload = get_ilw_session_payload(request,payee_obj_new, participant_form)
+        payment_link = make_hdfc_session_request(payee_obj_new, headers, payload)
+        if payment_link is not None:
+            return redirect(payment_link)
+        else:
+            return redirect('training:list_events', status='myevents')
+    # return render(request, 'payment_status.html', data)
 
 
 @csrf_exempt
@@ -399,3 +431,58 @@ def school_donation(request):
     else:
         form = SchoolDonationForm()
     return render(request, 'donate/school_donation.html', {'form': form})
+
+
+@csrf_exempt
+def ilw_payment_callback(request):
+    context = {}
+    status_template = 'spoken/templates/ilw_payment_status.html'
+    order_id = request.POST.get('order_id')
+    if not order_id:
+        raise Http404
+    
+    payee = Payee.objects.get(transaction__order_id=order_id)
+    context['order_id'] = order_id
+    try:
+        order_status_url = f"{settings.ORDER_STATUS_URL}{order_id}"
+        # order status api
+        headers = get_request_headers(payee.email)
+        try:
+            response = requests.get(order_status_url, headers=headers)
+            response_data = response.json()
+        except requests.exceptions.RequestException as e:
+            context['status'] = 'FAILED'
+            return render(request, status_template, context=context)
+        if response.status_code == 200:
+            verified = verify_hmac_signature(request.POST)
+            if not verified:
+                context['status'] = 'FAILED'
+                return render(request, status_template, context=context)
+            save_ilw_hdfc_success_data(order_id, response_data)
+            data = get_display_transaction_details(response_data)
+            data['udf5'] = response_data.get('udf5', '')
+            context['data'] = data
+            order_status = response_data.get('status', '')
+            amount = response_data.get('amount', '')
+            if order_status == 'CHARGED':
+                try:
+                    amount_decimal = Decimal(str(amount))
+                except InvalidOperation:
+                    context['status'] = 'FAILED'
+                    return render(request, status_template, context=context)
+                if amount_decimal == payee.amount:
+                    context['status'] = 'CHARGED'
+                else:
+                    context['status'] = 'FAILED'
+                    save_ilw_hdfc_error_data(order_id, response_data, msg="Amount mismatch")
+            elif order_status == 'PENDING_VBV' or order_status == 'AUTHORIZING': #This is a non-terminal transaction status. Show pending screen/polling
+                context['status'] = 'PENDING'
+            else:
+                context['status'] = 'FAILED'
+            return render(request, status_template, context=context)
+        else:
+            save_ilw_hdfc_error_data(order_id, response_data)  
+            context['status'] = 'FAILED'
+    except Exception as e:
+        context['status'] = 'FAILED'
+    return render(request, status_template, context=context) # return to payment page site

@@ -36,7 +36,7 @@
 		            <input type="text"  id="demail" name="demail" value="{{email}}" style="display:none">
 		            <input type="text"  id="callbackurl" name="callbackurl" value="{{callbackurl}}" style="display:none">
                 <input type="text"  id="event" name="event" value="{{event_obj.id}}" style="display:none">
-                <input type="text"  id="foss_id" name="foss_id" value="{{event_obj.foss.id}}" style="display:none">
+                <input type="text"  id="foss_id" name="foss_id" value="{{fossess}}" style="display:none">
                 <input type="text"  id="language_id" name="language_id" value="{{event_obj.Language_of_workshop.id}}" style="display:none">
                 <input type="text"  id="level_id" name="level_id" value="0" style="display:none">
 
@@ -186,9 +186,9 @@
                    
                
                   <div class="form-group">
-                  <label for="id_foss" class="col-lg-4 control-label">FOSS* </label>
+                  <label for="id_foss" class="col-lg-4 control-label" name="foss_id">FOSS* </label>
                   <div class="col-lg-8">
-                      <div class="form-control">{{event_obj.foss}}</div>
+                      <div class="form-control">{{ event_obj.course.foss.all|join:", " }}</div>
                   </div>
                   </div>
                   {% if langs %}

@@ -8,6 +8,9 @@
 {% block heading %}
   <i class="fa fa-list-ul"></i> List of Training Events :
 {% endblock %}
+{% block cssblock %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+{% endblock %}
 {% block compressinlinecssblock %}
 <style>
 .activities-event{
@@ -166,10 +169,9 @@
               <b>Host College :</b> <span>{{event.event.host_college}}, {{event.event.state.name}}</span><br>
             {% endif %}
               <b>Event Coordinator Name :</b> <span>{{event.event.event_coordinator_name}}</span><br>
-              <b>FOSS :</b> <span >{{event.event.foss}}</span>
+              <b>FOSS :</b> <span >{{event.course.foss.all|join:", "}}</span><span >{{event.event.course.foss.all|join:", "}}</span>
                         <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{event.get_foss_langs}}' style="display: none;">
           </p>
-
           <div style="text-align: right;">
               {% if event.reg_approval_status == 1 and user|registartion_successful:event.event %}
                   <button class="btn btn-primary" type="submit" 
@@ -182,6 +184,31 @@
                   <button class="btn btn-warning" type="submit" 
                   formaction="{% url 'training:generate_training_certificate'%}">Download Training certificate</button>
 
+
+                  {% for item in event.event.course.foss.all %}
+                    {% with fossmdlcourse=item|get_ilw_mdlcourseid %}
+                      {% for course in fossmdlcourse %}
+
+                        {% if not event|check_passgrade_exists:course.testfoss_id%}
+
+                          <input type="hidden" id="testurl{{course.mdlcourse_id}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}">
+
+                          <button class="btn btn-info" type="button" 
+                          onclick="take_to_test({{event.id}}, {{course.mdlcourse_id}}, {{course.mdlquiz_id}}, {{course.testfoss_id}}, {{event.event_id}});">
+                          Attempt {{course.testfoss.foss}} test
+                          </button>
+                        {% else %}                    
+
+                            {% with grade=event|get_grade:course.testfoss_id %}
+                            <button type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate' course.testfoss_id%}">Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
+                            {% endwith %}
+                          
+                        {% endif %}
+
+                      {% endfor %}
+                    {% endwith %}
+                  {% endfor %}
+                 
                   {% with fossmdlcourse=event.event.foss_id|get_ilw_mdlcourseid %}
                     {% for course in fossmdlcourse %}
 
@@ -225,7 +252,7 @@
         {% endif %}
         
         <b>Event Coordinator Name :</b> <span>{{event.event_coordinator_name}}</span><br>
-        <b>FOSS :</b> <span >{{event.foss}}</span>
+        <b>FOSS :</b> <span >{{event.course.foss.all|join:", "}}</span>
       </p>
 
       <p>                  
@@ -254,6 +281,8 @@
 
 
 {% block jsblock %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script type="text/javascript">
 
 function take_to_test(partid, mdlcourseid, mdlquizid, fossid, eventid){
@@ -279,9 +308,14 @@ function take_to_test(partid, mdlcourseid, mdlquizid, fossid, eventid){
 
 
                 }
-});
-
+      });
 }
+
+$('#id_foss').select2({
+		placeholder: "Select Foss",
+		allowClear: true
+    });
+
 
 </script>
 {% endblock %}

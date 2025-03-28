@@ -5,6 +5,14 @@
 {% block heading %}
   <i class="fa fa-list-ul"></i> Create New Training Event :
 {% endblock %}
+{% block cssblock %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+    <style>
+		#id_is_course{
+			height: 50%;
+		}
+    </style>
+{% endblock %}
 {% block search %}{% endblock %}
 
  {% block content %}
@@ -69,14 +77,33 @@
 				{{ form.company.errors }}
 				</div>
 			</div>
-
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Foss <sup style="color:red";>*</sup></label>
+			<div class="form-group" id="company">
+				<label class="col-sm-3 control-label" for= "id_company">Course Name</label>
 				<div class="col-sm-9">
-				{% render_field form.foss class+="form-control foss" %}
-				{{ form.foss.errors }}
+				{% render_field form.ilw_course class+="form-control ilw_course" maxlength="200" %}
+				{{ form.ilw_course.errors }}
+				<span>200 characters limit</span>
 				</div>
 			</div>
+			<div class="form-group" id="checkbox">
+				<label class="col-sm-3 control-label" for= "id_company">Is Course?</label>
+				<div class="col-sm-1">
+				{% render_field form.is_course class+="form-control is_course" %}
+				{{ form.is_course.errors }}
+				
+				</div>
+				<p>If checked, the course name will appear in the participation certificate</p>
+			</div>
+			
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_foss">FOSS <sup style="color:red";>*</sup></label>
+				<div class="col-sm-9">
+					<div class="input-group">
+						{% render_field form.foss_data class+="form-control foss_data" %}
+					</div>
+				</div>
+			</div>
+
 
 			<div class="form-group">
 				<label class="col-sm-3 control-label" for= "id_name">Event Start Date <sup style="color:red";>*</sup></label>
@@ -148,10 +175,31 @@
 
 {% block jsblock %}
 <script src="{% static 'spoken/js/events.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script type="text/javascript">
  $( document ).ready(function() {
+	$('#id_foss_data').select2({
+            placeholder: "Select Foss",
+            allowClear: true
+    });
 
+	$('#id_foss_data').on('change', function(e){
+		var selectedValues = $(this).val();
+
+		if(selectedValues && selectedValues.length > 1){
+			$('#id_is_course').prop('checked', true);
+		}
+	})
 	
+	$('#id_event_name').on('input', function(){
+		let val = $(this).val()
+		if(val.length <=200){
+			$('#id_ilw_course').val($(this).val());
+		}
+		
+	})
+
  	$('#id_state').change(function(){
    	var stateid  = $(this).val();
 	var event_type  = $('#id_event_type').val();
