@@ -68,6 +68,7 @@
             
                 <div class="form-group">
                     <label><i class="fa fa-university"></i> Academic Institute:</label>
+                    <span style="color: green; display: none;" id="ac_info">Loading academic centers data, please wait ....</span>
                     <div class="input-group">
                         <span class="input-group-addon"><i class="fa fa-building"></i></span>
                         <select multiple id="id_academic" style="width:300px" name="institute" class="form-control"></select>
@@ -80,7 +81,7 @@
                     <label><i class="fa fa-money"></i> Amount:</label>
                     <div class="input-group">
                         <span class="input-group-addon"><i class="fa fa-inr"></i></span>
-                        <input id="id_amount" value="10" disabled class="form-control">
+                        <input id="id_amount" disabled class="form-control">
                     </div>
                 </div>
             
@@ -110,18 +111,25 @@
         $("#id_state").change(function(){
             var stateId = $(this).val();
             let academicSelect = $("#id_academic");
-            academicSelect.html('<option value="">-- Select Academic Center --</option>');
+
+            // Reset and disable academic dropdown
+            academicSelect.prop('disabled', true);
+            document.getElementById("ac_info").style.display = "inline";
+            academicSelect.html('<option value="">Loading...Please wait</option>');
+
             if(stateId){
                 fetch(`{% url 'donate:get_academic_centers' %}?stateId=${stateId}`)
                 .then(response => response.json())
                 .then(data => {
+                    academicSelect.html('<option value="">-- Select Academic Center --</option>'); // reset
                     data.forEach(item => {
                         academicSelect.append(new Option(`${item.academic_code} - ${item.institution_name}`, item.id))
-                    })
+                    });
+                    academicSelect.prop('disabled', false); // enable after loading
+                    document.getElementById("ac_info").style.display = "none";
                 })
                 .catch(error =>alert('An error occurred. Please try later.'))
             }
-
         });
 
         $('#id_academic').on('select2:select select2:unselect', function (e) {
