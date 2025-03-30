@@ -8,4 +8,6 @@ urlpatterns = [
     url(r'(?P<app_label>[\d\w]+)/(?P<model_name>[\d\w]+)/csv/$',  export_csv, name='export_csv'),
     url(r'(?P<app_label>[\d\w]+)/(?P<model_name>[\d\w]+)/report/$',  report_filter, name='report_filter'),
     url(r'elibrary/$',  elibrary, name='elibrary'),
+    url(r'api_search_engine/$',  api_search_engine, name='api_search'),
+    
 ]
