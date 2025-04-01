@@ -3,6 +3,7 @@ import json
 import os
 from urllib.parse import quote, unquote_plus
 from urllib.request import urlopen
+from random import randint
 
 # Third Party Stuff
 from django.conf import settings
@@ -77,7 +78,12 @@ def home(request):
             status=2), tutorial_detail__foss_id=f, language__name='English').order_by('tutorial_detail__order')[:1].first()
         random_tutorials.append((tcount, tutorial))
     try:
-        tr_rec = TutorialResource.objects.filter(Q(status=1) | Q(status=2)).order_by('?')[:1].first()
+        tr_rec = None
+        queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2))
+        count = queryset.count()
+        if count > 0:
+            random_index = randint(0, count - 1)
+            tr_rec = queryset[random_index]
     except Exception as e:
         messages.error(request, str(e))
     context = {
@@ -166,12 +172,12 @@ def tutorial_search(request):
             elif language_get:
                 collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
             else:
-                collection = queryset.filter(tutorial_detail__foss__id__in=FossCategory.objects.values('id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
         foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
         collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
         foss_get = foss[0]
-    if collection:
+    if collection is not None:
         page = request.GET.get('page')
         collection = get_page(collection, page)
     context['form'] = form
@@ -233,12 +239,12 @@ def series_tutorial_search(request):
             elif language_get:
                 collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
             else:
-                collection = queryset.filter(tutorial_detail__foss__id__in=FossCategory.objects.values('id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
         foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
         collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
         foss_get = foss[0]
-    if collection:
+    if collection is not None:
         page = request.GET.get('page')
         collection = get_page(collection, page)
     context['form'] = form
@@ -276,12 +282,12 @@ def archived_tutorial_search(request):
             elif language_get:
                 collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
             else:
-                collection = queryset.filter(tutorial_detail__foss__id__in=FossCategory.objects.values('id'), language__id__in=Language.objects.values('id')).order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = queryset.order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
         foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
         collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
         foss_get = foss[0]
-    if collection:
+    if collection is not None:
         page = request.GET.get('page')
         collection = get_page(collection, page)
     context['form'] = form
