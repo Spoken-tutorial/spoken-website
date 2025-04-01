@@ -83,7 +83,7 @@ def home(request):
         count = queryset.count()
         if count > 0:
             random_index = randint(0, count - 1)
-            tr_rec = queryset.all()[random_index]
+            tr_rec = queryset[random_index]
     except Exception as e:
         messages.error(request, str(e))
     context = {
