@@ -790,7 +790,7 @@ class StudentMasterDeleteView(DeleteView):
 
 class TrainingCertificate(object):
   def custom_strftime(self, format, t):
-    return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
+    return t.strftime(format)
 
   def suffix(self, d):
     return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
@@ -815,7 +815,7 @@ class TrainingCertificate(object):
     #date
     if ta.training.department.id != 169:
       imgDoc.setFont('Helvetica', 18, leading=None)
-      imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+      imgDoc.drawCentredString(211, 115, self.custom_strftime('%d %B %Y', training_end))
 
     # #password
     # certificate_pass = ''
@@ -828,13 +828,13 @@ class TrainingCertificate(object):
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #paragraphe
-    text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay."
+    text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> in <b>"+sem_start+"</b> semester, with course material provided by EduPyramids, SINE, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by EduPyramids, SINE, IIT Bombay."
     if ta.training.department.id == 24:
-      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay."
+      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at <b>"+ta.training.training_planner.academic.institution_name+"</b> by <b>"+ta.training.training_planner.organiser.user.first_name+" "+ta.training.training_planner.organiser.user.last_name+"</b>, with course material provided by EduPyramids, SINE, IIT Bombay.<br /><br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by EduPyramids, SINE, IIT Bombay."
     if ta.training.department.id == 169:
-      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> has participated in <b>Faculty Development Programme</b> from <b>"+ str(ta.training.training_start_date) +"</b> to <b>"+ str(ta.training.training_end_date) +"</b> on <b>"+ta.training.course.foss.foss+"</b> organized by <b>"+ta.training.training_planner.academic.institution_name+"</b> with  course material provided by Spoken Tutorial Project, IIT Bombay.<br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by the Spoken Tutorial Project, IIT Bombay."
+      text = "This is to certify that <b>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</b> has participated in <b>Faculty Development Programme</b> from <b>"+ str(ta.training.training_start_date) +"</b> to <b>"+ str(ta.training.training_end_date) +"</b> on <b>"+ta.training.course.foss.foss+"</b> organized by <b>"+ta.training.training_planner.academic.institution_name+"</b> with  course material provided by EduPyramids, SINE, IIT Bombay.<br />A comprehensive set of topics pertaining to <b>"+ta.training.course.foss.foss+"</b> were covered in the training. This training is offered by EduPyramids, SINE, IIT Bombay."
     if ta.training.training_planner.academic.institution_type_id == 18:
-      text = "This is to certify that <u>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</u> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at "+ta.training.training_planner.academic.institution_name+" in  "+ta.training.training_planner.get_semester()+"  semester, with course material provided by the Spoken Tutorial Project, IIT Bombay.<br />A comprehensive set of topics pertaining to "+ta.training.course.foss.foss+" were covered in the training."
+      text = "This is to certify that <u>"+ta.student.user.first_name +" "+ta.student.user.last_name+"</u> participated in the <b>"+ta.training.course.foss.foss+"</b> training organized at "+ta.training.training_planner.academic.institution_name+" in  "+ta.training.training_planner.get_semester()+"  semester, with course material provided by EduPyramids, SINE, IIT Bombay.<br />A comprehensive set of topics pertaining to "+ta.training.course.foss.foss+" were covered in the training."
 
 
 
@@ -3340,7 +3340,7 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       #date
       if ta.training.department.id != 169:
         imgDoc.setFont('Helvetica', 18, leading=None)
-        imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+        imgDoc.drawCentredString(211, 115, self.custom_strftime('%d %B %Y', training_end))
 
       #password
       certificate_pass = ''
