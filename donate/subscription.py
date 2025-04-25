@@ -214,6 +214,7 @@ def get_display_transaction_details(transaction):
     data['udf3'] = transaction.get('udf3', '')
     data['udf4'] = transaction.get('udf4', '')
     data['order_id'] = transaction.get('order_id', '')
+    data['date_created'] = transaction.get('date_created', '')
     return data
 
 def get_academic_centers(request):
