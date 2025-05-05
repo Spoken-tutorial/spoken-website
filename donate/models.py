@@ -197,7 +197,6 @@ class AcademicSubscriptionDetail(models.Model):
     subscription_end_date = models.DateField() # This varies from expiry date in case if institute gets extention or grace period from ST team
     subscription = models.ForeignKey(AcademicSubscription, on_delete=models.CASCADE, related_name='academic_details')
     gst_number = models.CharField(max_length=15,
-                                  validators=[RegexValidator(regex=r'^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$', message='Invalid GST Number')],
                                   verbose_name="GST Number",
                                   null=True, blank=True)
     gst_name = models.CharField(max_length=255, verbose_name="Name as per GST", null=True, blank=True)

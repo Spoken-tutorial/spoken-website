@@ -1003,14 +1003,12 @@ def subscription(request):
             for ac in academic:
                 gst_no = request.POST.get(f"gst_no_{ac.id}")
                 gst_name = request.POST.get(f"gst_name_{ac.id}")
-                pan_no = request.POST.get(f"pan_no_{ac.id}")
                 AcademicSubscriptionDetail.objects.create(
                     subscription = subscription,
                     academic = ac,
                     subscription_end_date = expiry_date, # Default to expiry_date,
-                    gst_number = gst_no,
-                    pan_number = pan_no,
-                    gst_name = gst_name
+                    gst_number = gst_no.strip(),
+                    gst_name = gst_name.strip()
                 )
         else:
             messages.add_message(request, messages.ERROR, "Please see below errors.")
