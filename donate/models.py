@@ -8,6 +8,8 @@ from pytz import timezone
 import json
 from events.models import City, State, AcademicCenter
 from django.core.validators import RegexValidator, MinLengthValidator
+from django.core.exceptions import ValidationError
+import re
 
 
 class PayeeHdfcTransaction(models.Model):
@@ -197,9 +199,5 @@ class AcademicSubscriptionDetail(models.Model):
     gst_number = models.CharField(max_length=15,
                                   validators=[RegexValidator(regex=r'^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$', message='Invalid GST Number')],
                                   verbose_name="GST Number",
-                                  null=True, blank=True)
-    pan_number = models.CharField(max_length=10,
-                                  validators=[RegexValidator(regex=r'^[A-Z]{5}\d{4}[A-Z]{1}$', message='Invalid PAN Number')],
-                                  verbose_name="PAN Number",
                                   null=True, blank=True)
     gst_name = models.CharField(max_length=255, verbose_name="Name as per GST", null=True, blank=True)
