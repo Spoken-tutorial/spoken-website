@@ -792,7 +792,7 @@ class StudentMasterDeleteView(DeleteView):
 
 class TrainingCertificate(object):
   def custom_strftime(self, format, t):
-    return t.strftime(format).replace('{S}', str(t.day) + self.suffix(t.day))
+    return t.strftime(format)
 
   def suffix(self, d):
     return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
@@ -814,7 +814,7 @@ class TrainingCertificate(object):
     #date
     if ta.training.department.id != 169:
       imgDoc.setFont('Helvetica', 18, leading=None)
-      imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+      imgDoc.drawCentredString(211, 115, self.custom_strftime('%d %B %Y', training_end))
 
     # Draw image on Canvas and save PDF in buffer
     imgPath = get_signature(ta.training.training_start_date)
@@ -3321,7 +3321,7 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       #date
       if ta.training.department.id != 169:
         imgDoc.setFont('Helvetica', 18, leading=None)
-        imgDoc.drawCentredString(211, 115, self.custom_strftime('%B {S} %Y', training_end))
+        imgDoc.drawCentredString(211, 115, self.custom_strftime('%d %B %Y', training_end))
 
       #password
       certificate_pass = ''

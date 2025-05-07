@@ -1740,7 +1740,7 @@ def suffix(d):
     return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
 
 def custom_strftime(format, t):
-    return t.strftime(format).replace('{S}', str(t.day) + suffix(t.day))
+    return t.strftime(format)
 
 
 def training_participant_ceritificate(request, wid, participant_id):
@@ -2306,7 +2306,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     #imgDoc.drawCentredString(415, 480, "Certificate for Completion of c ")
     if ta.test.training.department.id != 169:
         imgDoc.setFont('Helvetica', 18, leading=None)
-        imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
+        imgDoc.drawCentredString(211, 115, custom_strftime('%d %B %Y', w.tdate))
 
     #password
     imgDoc.setFillColorRGB(0, 0, 0)
@@ -2406,7 +2406,7 @@ def test_participant_ceritificate_all(request, testid):
 
         if ta.test.training.department.id != 169:
             imgDoc.setFont('Helvetica', 18, leading=None)
-            imgDoc.drawCentredString(211, 115, custom_strftime('%B {S} %Y', w.tdate))
+            imgDoc.drawCentredString(211, 115, custom_strftime('%d %B %Y', w.tdate))
 
         #password
         imgDoc.setFillColorRGB(0, 0, 0)
@@ -2423,7 +2423,6 @@ def test_participant_ceritificate_all(request, testid):
 
         #paragraphe
         text = get_test_cert_text(ta)
-
         centered = ParagraphStyle(name = 'centered',
             fontSize = 15,
             leading = 24,
