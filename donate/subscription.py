@@ -12,6 +12,8 @@ import base64
 import requests
 import urllib
 import hmac
+import json
+import re
 
 
 def generate_hashed_order_id(email):
@@ -214,6 +216,7 @@ def get_display_transaction_details(transaction):
     data['udf3'] = transaction.get('udf3', '')
     data['udf4'] = transaction.get('udf4', '')
     data['order_id'] = transaction.get('order_id', '')
+    data['date_created'] = transaction.get('date_created', '')
     return data
 
 def get_academic_centers(request):
@@ -224,3 +227,32 @@ def get_academic_centers(request):
     return JsonResponse([])
 
 
+GSTIN_CHARSET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+GSTIN_CODES = {ch: idx for idx, ch in enumerate(GSTIN_CHARSET)}
+GST_REGEX = r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$'
+
+def verify_gstin(gstin):
+    gstin = gstin.upper()
+    total = 0
+    multiplier = 1
+
+    if len(gstin)!=15 or not bool(re.match(GST_REGEX, gstin.upper())):
+        return False
+
+    for char in gstin:
+        product = GSTIN_CODES[char] * multiplier
+        total += (product // 36) + (product % 36)
+
+        multiplier = 2 if multiplier == 1 else 1
+
+    return (total % 36) == 0
+
+
+def validate_gst(request):
+    data = json.loads(request.body)
+    gst_values = data.get('gst', [])
+    incorrect_gst = []
+    for item in gst_values:
+        if item and not verify_gstin(item):
+            incorrect_gst.append(item)
+    return JsonResponse(incorrect_gst, safe=False)

@@ -8,6 +8,8 @@ from pytz import timezone
 import json
 from events.models import City, State, AcademicCenter
 from django.core.validators import RegexValidator, MinLengthValidator
+from django.core.exceptions import ValidationError
+import re
 
 
 class PayeeHdfcTransaction(models.Model):
@@ -194,3 +196,7 @@ class AcademicSubscriptionDetail(models.Model):
     academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT)
     subscription_end_date = models.DateField() # This varies from expiry date in case if institute gets extention or grace period from ST team
     subscription = models.ForeignKey(AcademicSubscription, on_delete=models.CASCADE, related_name='academic_details')
+    gst_number = models.CharField(max_length=15,
+                                  verbose_name="GST Number",
+                                  null=True, blank=True)
+    gst_name = models.CharField(max_length=255, verbose_name="Name as per GST", null=True, blank=True)

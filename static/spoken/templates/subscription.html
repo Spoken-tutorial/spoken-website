@@ -9,6 +9,10 @@
      .text-danger{
         font-size: 1.2rem;
      }
+     .is-invalid {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 4px #dc3545;
+}
     </style>
 {% endblock %}
 {% block heading %}
@@ -19,75 +23,84 @@
 {% if messages %}
 
 {% endif %}
-    <div class="row">
-        <div class="col-sm-8 col-md-8">
-            <form method="post">
+    <div >
+        <div >
+            <form method="post" id="payment_form">
                 {% csrf_token %}
             
-                <div class="form-group">
-                    <label><i class="fa fa-user"></i> Name:</label>
-                    <div class="input-group">
-                        <span class="input-group-addon"><i class="fa fa-user"></i></span>
-                        {% render_field form.name class+="form-control" placeholder="Enter your full name" %}
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        <label><i class="fa fa-user"></i> Name:</label>
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+                            {% render_field form.name class+="form-control" placeholder="Enter your full name" %}
+                        </div>
                     </div>
+                
+                    <div class="form-group col-sm-6">
+                        <label><i class="fa fa-envelope"></i> Email:</label>
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+                            {% render_field form.email class+="form-control" placeholder="Enter your email" %}
+                        </div>
+                        <div class="text-danger">
+                            {% for error in form.email.errors %}
+                                <small><i class="fa fa-exclamation-circle"></i> {{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                
+                    <div class="form-group col-sm-6">
+                        <label><i class="fa fa-phone"></i> Phone:</label>
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-phone"></i></span>
+                            {% render_field form.phone class+="form-control" placeholder="Enter phone number" %}
+                        </div>
+                        <div class="text-danger">
+                            {% for error in form.phone.errors %}
+                                <small><i class="fa fa-exclamation-circle"></i> {{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    </div>
+                
+                    <div class="form-group col-sm-6">
+                        <label><i class="fa fa-map-marker"></i> State:</label>
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-map-marker"></i></span>
+                            {% render_field form.state class+="form-control" %}
+                        </div>
+                    </div>
+                
+                    <div class="form-group col-sm-12">
+                        <label><i class="fa fa-university"></i> Academic Institute:</label>
+                        <span style="color: green; display: none;" id="ac_info">Loading academic centers data, please wait ....</span>
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-building"></i></span>
+                            <select multiple id="id_academic" style="width:100%" name="institute" class="form-control"></select>
+                        </div>
+                        <small class="text-muted">You can search institute by academic code or name.</small>
+                        <small class="text-muted">Payment can be made for multiple institutes simultaneously.</small>
+                    </div>
+                
+                    <div class="form-group col-sm-6">
+                        <label><i class="fa fa-money"></i> Amount:</label>
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-inr"></i></span>
+                            <input id="id_amount" disabled class="form-control">
+                        </div>
+                    </div>
+                    <div id="gst-error-message" style="color: red; margin-top: 10px;" class="form-group col-sm-12"></div>
+                    <div id="gst-error-box" class="text-danger col-sm-12" style="margin-bottom: 10px; display: none; font-weight: 500;">
+                        Please fix the highlighted fields below.
+                    </div>
+                    
+
+                    <div id="gst-fields-container" class="col-sm-12"></div>
+                
+                    <button class="btn btn-primary btn-block" type="submit">
+                        <i class="fa fa-credit-card"></i> Make Payment
+                    </button>
                 </div>
-            
-                <div class="form-group">
-                    <label><i class="fa fa-envelope"></i> Email:</label>
-                    <div class="input-group">
-                        <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
-                        {% render_field form.email class+="form-control" placeholder="Enter your email" %}
-                    </div>
-                    <div class="text-danger">
-                        {% for error in form.email.errors %}
-                            <small><i class="fa fa-exclamation-circle"></i> {{ error }}</small>
-                        {% endfor %}
-                    </div>
-                </div>
-            
-                <div class="form-group">
-                    <label><i class="fa fa-phone"></i> Phone:</label>
-                    <div class="input-group">
-                        <span class="input-group-addon"><i class="fa fa-phone"></i></span>
-                        {% render_field form.phone class+="form-control" placeholder="Enter phone number" %}
-                    </div>
-                    <div class="text-danger">
-                        {% for error in form.phone.errors %}
-                            <small><i class="fa fa-exclamation-circle"></i> {{ error }}</small>
-                        {% endfor %}
-                    </div>
-                </div>
-            
-                <div class="form-group">
-                    <label><i class="fa fa-map-marker"></i> State:</label>
-                    <div class="input-group">
-                        <span class="input-group-addon"><i class="fa fa-map-marker"></i></span>
-                        {% render_field form.state class+="form-control" %}
-                    </div>
-                </div>
-            
-                <div class="form-group">
-                    <label><i class="fa fa-university"></i> Academic Institute:</label>
-                    <span style="color: green; display: none;" id="ac_info">Loading academic centers data, please wait ....</span>
-                    <div class="input-group">
-                        <span class="input-group-addon"><i class="fa fa-building"></i></span>
-                        <select multiple id="id_academic" style="width:300px" name="institute" class="form-control"></select>
-                    </div>
-                    <small class="text-muted">You can search institute by academic code or name.</small>
-                    <small class="text-muted">Payment can be made for multiple institutes simultaneously.</small>
-                </div>
-            
-                <div class="form-group">
-                    <label><i class="fa fa-money"></i> Amount:</label>
-                    <div class="input-group">
-                        <span class="input-group-addon"><i class="fa fa-inr"></i></span>
-                        <input id="id_amount" disabled class="form-control">
-                    </div>
-                </div>
-            
-                <button class="btn btn-primary btn-block">
-                    <i class="fa fa-credit-card"></i> Make Payment
-                </button>
             </form>
             
           <div id="paymentMsg">
@@ -105,9 +118,7 @@
     <script>
        $(document).ready(function() {
         $('#id_academic').select2();
-        $("#e1").select2();
         $("#id_state").val("").trigger("change");
-
         $("#id_state").change(function(){
             var stateId = $(this).val();
             let academicSelect = $("#id_academic");
@@ -137,6 +148,163 @@
             let total_amount = {{subscription_amount}} * selectedCount;
             $("#id_amount").val(total_amount);
         });
+
+        //GST fields 
+        // Trigger on page load and on selection change
+        const academicSelect = $('select[name="institute"]');
+        generateGstFields(academicSelect.find('option:selected'));
+    
+        academicSelect.change(function () {
+            generateGstFields($(this).find('option:selected'));
+        });
+
+        document.getElementById('payment_form').addEventListener('submit', function (e) {
+        e.preventDefault(); // Stop form submission
+        validateGstFields().then(valid => {
+                if (valid) {
+                    this.submit(); // Manually submit after all checks pass
+                }
+            });
+        });
+
+
     });
-    </script>
+
+    function generateGstFields(selectedOptions) {
+    const container = $('#gst-fields-container');
+    container.empty(); // Clear previous inputs
+
+    selectedOptions.each(function () {
+        const val = $(this).val();
+        const text = $(this).text();
+        const idSafe = val.replace(/[^a-zA-Z0-9]/g, '_');
+
+        const block = `
+            <div class="gst-entry institute-block" id="gst-${idSafe}" style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom:5px;">
+                <h5><b><i class="fa fa-university"></i> ${text}</b></h5>
+                <div class="form-group">
+                    <label>Do you want a GST-compliant invoice? <span style="color:red">*</span></label><br>
+                    <label class="radio-inline">
+                        <input type="radio" name="want_gst_${idSafe}" value="yes" required> Yes
+                    </label>
+                    <label class="radio-inline" style="margin-left:10px;">
+                        <input type="radio" name="want_gst_${idSafe}" value="no" required> No
+                    </label>
+                    <br/>
+                    <p><b>Note</b>: A GST-compliant invoice will be provided only if you select "Yes" and enter valid GST details.</p>
+                </div>
+
+                <div class="gst-fields" id="gst-fields-${idSafe}" style="display:none; margin-top:10px;">
+                    <div class="row">
+                        <div class="form-group col-sm-3">
+                            <label for="gst_no_${idSafe}">GST Number:*</label>
+                            <input type="text" class="form-control gst-number" name="gst_no_${val}" id="gst_no_${idSafe}" maxlength="15">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="gst_name_${idSafe}">Name as per GST:*</label>
+                            <input type="text" class="form-control gst-name" name="gst_name_${val}" id="gst_name_${idSafe}">
+                        </div>
+                    </div>
+                </div>
+                <hr>
+            </div>
+        `;
+
+        container.append(block);
+
+        // Attach change listener after appending
+        container.find(`input[name="want_gst_${idSafe}"]`).change(function () {
+            if (this.value === 'yes') {
+                $(`#gst-fields-${idSafe}`).slideDown();
+            } else {
+                $(`#gst-fields-${idSafe}`).slideUp();
+            }
+        });
+    });
+}
+
+function validateGstFields() {
+    return new Promise((resolve, reject) => {
+        let valid = true;
+        const gstRegex = /^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}$/;
+        $('#gst-error-box').hide();
+
+        const gstValues = [];
+
+        $('.gst-entry').each(function () {
+            const entry = $(this);
+            const idSafe = entry.attr('id').replace('gst-', '');
+            const selectedValue = entry.find(`input[name="want_gst_${idSafe}"]:checked`).val();
+
+            const gstNoInput = entry.find(`#gst_no_${idSafe}`);
+            const gstNameInput = entry.find(`#gst_name_${idSafe}`);
+
+            gstNoInput.removeClass('is-invalid');
+            gstNameInput.removeClass('is-invalid');
+
+            if (selectedValue === 'yes') {
+                const gstNo = gstNoInput.val().trim().toUpperCase();
+                const gstName = gstNameInput.val().trim();
+
+                if (!gstNo || !gstRegex.test(gstNo)) {
+                    gstNoInput.addClass('is-invalid');
+                    valid = false;
+                } else {
+                    gstValues.push(gstNo);
+                }
+
+                if (!gstName) {
+                    gstNameInput.addClass('is-invalid');
+                    valid = false;
+                }
+            }
+        });
+
+        if (!valid) {
+            $('#gst-error-box').show();
+            resolve(false);
+            return;
+        }
+
+        // validate gst fields via server
+        if (gstValues.length > 0) {
+            fetch("{% url 'donate:validate_gst' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ gst: gstValues })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const errorDiv = document.getElementById("gst-error-message");
+                let hasErrors = false;
+                errorDiv.innerHTML = '';
+
+                $('.gst-number').each(function () {
+                    const val = $(this).val().trim();
+                    if (val && data.includes(val)) {
+                        $(this).css('border', '2px solid red');
+                        hasErrors = true;
+                    } else {
+                        $(this).css('border', '');
+                    }
+                });
+
+                if (hasErrors) {
+                    errorDiv.innerHTML = "<p>Following GST numbers are incorrect.</p>";
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            })
+            .catch(error => {
+                resolve(false);
+            });
+        } else {
+            resolve(true);
+        }
+    });
+}
+</script>
 {% endblock %}
