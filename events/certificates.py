@@ -7,57 +7,53 @@ SCHOOL = 24
 FDP = 169
 CSC = 18
 
+SPK = {
+   'stp': 'Blank-Certificate.pdf',
+   'fdp': 'fdptr-certificate.pdf',
+   'csc': 'Certificate_CSC_blank.pdf',
+   'fdp_test': 'fdp-test-certificate.pdf',
+}
+EDUPYRAMIDS = {
+   'stp': 'Blank-Certificate_edupyramids.pdf',
+   'fdp': 'fdptr-certificate_edupyramids.pdf',
+   'csc': 'Certificate_CSC_blank_edupyramids.pdf',
+   'fdp_test': 'fdp-test-certificate_edupyramids.pdf',
+}
+
+def get_cert_template(event_date, cert_type):
+   if event_date < EDUPYRAMIDS_CERTIFICATE_DATE:
+      return os.path.join(settings.MEDIA_ROOT, SPK[cert_type])
+   return os.path.join(settings.MEDIA_ROOT, EDUPYRAMIDS[cert_type])
+
+
 def get_training_certificate(ta):
    """
       return training certificate template path
       ta : TrainingAttend obj
    """
-   spk = {
-      'stp': 'Blank-Certificate.pdf',
-      'fdp': 'fdptr-certificate.pdf',
-      'csc': 'Certificate_CSC_blank.pdf'
-   }
-   edupyramids = {
-      'stp': 'Blank-Certificate_edupyramids.pdf',
-      'fdp': 'fdptr-certificate_edupyramids.pdf',
-      'csc': 'Certificate_CSC_blank_edupyramids.pdf'
-   }
+   
    if ta.training.department.id == FDP:
       cert_type = 'fdp'
    elif ta.training.training_planner.academic.institution_type_id == CSC:
       cert_type = 'csc'
    else:
       cert_type = 'stp'
-   
-   if ta.training.training_start_date < EDUPYRAMIDS_CERTIFICATE_DATE:
-      return os.path.join(settings.MEDIA_ROOT, spk[cert_type])
-   return os.path.join(settings.MEDIA_ROOT, edupyramids[cert_type])
+   return get_cert_template(ta.training.training_start_date, cert_type)
+
 
 def get_test_certificate(ta):
    """
       return test certificate template path
       ta : TestAttendance obj
    """
-   spk = {
-      'stp': 'Blank-Certificate.pdf',
-      'fdp': 'fdp-test-certificate.pdf',
-      'csc': 'Certificate_CSC_blank.pdf'
-   }
-   edupyramids = {
-      'stp': 'Blank-Certificate_edupyramids.pdf',
-      'fdp': 'fdp-test-certificate_edupyramids.pdf',
-      'csc': 'Certificate_CSC_blank_edupyramids.pdf'
-   }
    if ta.test.training.department.id == FDP:
-      type = 'fdp'
+      cert_type = 'fdp_test'
    elif ta.test.academic.institution_type_id == CSC:
-      type = 'csc'
+      cert_type = 'csc'
    else:
-      type = 'stp'
-   
-   if ta.test.tdate < EDUPYRAMIDS_CERTIFICATE_DATE:
-      return os.path.join(settings.MEDIA_ROOT, spk[type])
-   return os.path.join(settings.MEDIA_ROOT, edupyramids[type])
+      cert_type = 'stp'
+   return get_cert_template(ta.test.tdate, cert_type)
+
 
 def get_signature(event_date):
    if event_date < EDUPYRAMIDS_CERTIFICATE_DATE:
@@ -88,11 +84,11 @@ def get_training_cert_text(ta):
    if ta.training.department.id == SCHOOL:
       organiser_name = f"{ta.training.training_planner.organiser.user.first_name} {ta.training.training_planner.organiser.user.last_name}"
       text = f"This is to certify that <b>{name}</b> participated in the <b>{foss}</b> training organized at <b>{institution_name}</b> by <b>{organiser_name}</b>, with course material provided by {organization}.<br /><br />{text_end}."
-   if ta.training.department.id == FDP:
+   elif ta.training.department.id == FDP:
       training_start_date = str(ta.training.training_start_date)
       training_end_date = str(ta.training.training_end_date)
       text = f"This is to certify that <b>{name}</b> has participated in <b>Faculty Development Programme</b> from <b>{training_start_date}</b> to <b>{training_end_date}</b> on <b>{foss}</b> organized by <b>{institution_name}</b> with course material provided by {organization}.<br />{text_end}."
-   if ta.training.training_planner.academic.institution_type_id == CSC:
+   elif ta.training.training_planner.academic.institution_type_id == CSC:
       sem = ta.training.training_planner.get_semester()
       text = f"This is to certify that <u>{name}</u> participated in the <b>{foss}</b> training organized at {institution_name} in {sem} semester, with course material provided by {institution_name}.<br />{text_end}."
    return text
@@ -112,12 +108,8 @@ def get_test_cert_text(ta, mdluser, test, credits=''):
    organization = get_organization(ta.training.training_start_date)
    organizer = f"{test.organiser.user.first_name} {test.organiser.user.last_name}"
    invigilator = f"{test.invigilator.user.first_name} {test.invigilator.user.last_name}"
-
    text_end = f"This training is offered by {organization}"
-   # constants
-   FDP = 169
-   CSC = 18
-
+   
    #paragraphe
    if ta.test.training.department.id == FDP:
       text = f"This is to certify that <b>{name}</b> has successfully completed <b>{foss}</b> test on <b>{test_date}</b> organized at <b>{institution}</b> by <b>{organizer}</b> with course material provided by {organization}. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>{invigilator}</b> at <b>{institution}</b> invigilated this examination. {text_end}."
