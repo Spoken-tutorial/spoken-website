@@ -76,6 +76,8 @@ from django.contrib.auth.hashers import make_password
 
 from mdldjango.get_or_create_participant import encript_password
 from .helpers import send_bulk_student_reset_mail
+from .certificates import *
+
 def can_clone_training(training):
     if training.tdate > datetime.datetime.strptime('01-02-2015', "%d-%m-%Y").date() and training.organiser.academic.institution_type.name != 'School':
         return True
@@ -2314,18 +2316,11 @@ def test_participant_ceritificate(request, wid, participant_id):
 
 
     # Draw image on Canvas and save PDF in buffer
-    imgPath = settings.MEDIA_ROOT +"sign.jpg"
+    imgPath = get_signature(ta.test.tdate)
     imgDoc.drawImage(imgPath, 600, 95, 150, 76)    ## at (399,760) with size 160x160
     credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
-    #paragraphe
-    if ta.test.training.department.id == 169: #fdp
-        text = " This is to certify that <b>" + mdluser.firstname + " " + mdluser.lastname + "</b> has successfully completed <b>" + w.foss.foss + "</b> test on <b>" + str(w.tdate) + "</b> organized at <b>" + w.academic.institution_name + "</b> by <b>" + w.organiser.user.first_name + " " + w.organiser.user.last_name + "</b> with course material provided by EduPyramids, SINE, IIT Bombay. Passing an online exam, conducted remotely from SINE, IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>" + w.invigilator.user.first_name + " " + w.invigilator.user.last_name + "</b> at <b>" + w.academic.institution_name + "</b> invigilated this examination. This training is offered by EduPyramids, SINE, IIT Bombay."
-    elif ta.test.academic.institution_type_id == 18: #csc
-        text = "This is to certify that <b><u>"+mdluser.firstname +" "+mdluser.lastname+"</u></b>  has successfully completed <b>"+w.foss.foss+"</b> test organized at "+w.academic.institution_name+" by <u>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</u> with course material provided by EduPyramids, SINE, IIT Bombay. Passing an online exam, conducted remotely from SINE, IIT Bombay, is a pre-requisite for completing this training. <u>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</u> at "+w.academic.institution_name+" invigilated this examination.<br/>This training is offered by EduPyramids, SINE, IIT Bombay."
-    else:
-        text = "This is to certify that <b>"+mdluser.firstname +" "+mdluser.lastname+"</b> has successfully completed <b>"+w.foss.foss+"</b> test organized at <b>"+w.academic.institution_name+"</b> by <b>"+w.organiser.user.first_name + " " + w.organiser.user.last_name+"</b>  with course material provided by EduPyramids, SINE, IIT Bombay. Passing an online exam, conducted remotely from SINE, IIT Bombay, is a pre-requisite for completing this training. <br /><p><b>"+w.invigilator.user.first_name + " "+w.invigilator.user.last_name+"</b> from <b>"+w.academic.institution_name+"</b> invigilated this examination. This training is offered by EduPyramids, SINE, IIT Bombay.</p><br /><br />"+credits
-
+    text = get_test_cert_text(ta, credits=credits)
     centered = ParagraphStyle(name = 'centered',
         fontSize = 15,
         leading = 24,
@@ -2354,12 +2349,9 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc.save()
 
     # Use PyPDF to merge the image-PDF into the template
-    if ta.test.training.department.id == 169:
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdp-test-certificate.pdf","rb")).getPage(0)
-    elif ta.test.academic.institution_type_id == 18:
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"Certificate_CSC_blank.pdf","rb")).getPage(0)
-    else:
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)  
+    template_path = get_test_certificate(ta)
+    page = PdfFileReader(open(template_path,"rb")).getPage(0)  
+
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -2383,7 +2375,7 @@ def test_participant_ceritificate_all(request, testid):
     testattendances = TestAttendance.objects.filter(test_id = testid)
 
     response = HttpResponse(content_type='application/pdf')
-    filename = (w.foss.foss+"-Participant-Certificate").replace(" ", "-");
+    filename = (w.foss.foss+"-Participant-Certificate").replace(" ", "-")
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
 
@@ -2424,32 +2416,13 @@ def test_participant_ceritificate_all(request, testid):
 
 
         # Draw image on Canvas and save PDF in buffer
-        imgPath = settings.MEDIA_ROOT +"sign.jpg"
+        imgPath = get_signature(ta.test.tdate)
         imgDoc.drawImage(imgPath, 600, 95, 150, 76)    ## at (399,760) with size 160x160
 
         credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
         #paragraphe
-        common_text = "This is to certify that <b>{mdl_fullname}</b> \
-        has successfully completed <b>{foss}</b> test {date} \
-        organized at <b>{institute}</b> by <b>{org_fullname}</b> \
-        with course material provided by EduPyramids, SINE, IIT Bombay. Passing an online exam, \
-        conducted remotely from SINE, IIT Bombay, is a pre-requisite for completing this {test}<br/><br/> \
-        <b>{invi_fullname}</b> at <b>{institute}</b> invigilated this examination. \
-        This training is offered by EduPyramids, SINE, IIT Bombay.<br/><br/>"
-        
-        is_fdp = ta.test.training.department.id == 169
-        is_csc = ta.test.academic.institution_type_id == 18
-
-        text = common_text.format(mdl_fullname=f"{mdluser.firstname} {mdluser.lastname}",
-                           foss=w.foss.foss,
-                           date=f"on <b>{w.tdate}</b>" if is_fdp else "",
-                           institute=w.academic.institution_name,
-                           org_fullname=f"{w.organiser.user.first_name} {w.organiser.user.last_name}",
-                           test='Faculty Development Programme.' if is_fdp else 'training.',
-                           invi_fullname=f"{w.invigilator.user.first_name} {w.invigilator.user.last_name}",
-                           )
-
+        text = get_test_cert_text(ta)
         centered = ParagraphStyle(name = 'centered',
             fontSize = 15,
             leading = 24,
@@ -2459,8 +2432,6 @@ def test_participant_ceritificate_all(request, testid):
         p = Paragraph(text, centered)
         p.wrap(700, 200)
         p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
-
-
 
         credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
         centered = ParagraphStyle(name = 'centered',
@@ -2486,18 +2457,9 @@ def test_participant_ceritificate_all(request, testid):
         p = Paragraph(text, centered)
         p.wrap(500,20)
         p.drawOn(imgDoc, 6.2 * cm, 17 * cm)
-
-
-
         imgDoc.save()
-
-        # Use PyPDF to merge the image-PDF into the template
-        if ta.test.training.department.id == 169:
-            page = PdfFileReader(open(settings.MEDIA_ROOT +"fdp-test-certificate.pdf","rb")).getPage(0)
-        elif ta.test.academic.institution_type_id == 18:
-            page = PdfFileReader(open(settings.MEDIA_ROOT +"Certificate_CSC_blank.pdf","rb")).getPage(0)
-        else:
-            page = PdfFileReader(open(settings.MEDIA_ROOT +"Blank-Certificate.pdf","rb")).getPage(0)
+        template_path = get_test_certificate(ta)
+        page = PdfFileReader(open(template_path,"rb")).getPage(0)
         overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
         page.mergePage(overlay)
 

@@ -8,6 +8,9 @@ import os
 from string import Template
 import subprocess
 from django.db.models import Count
+from django.conf import settings
+from spoken.config import EDUPYRAMIDS_CERTIFICATE_DATE
+
 
 
 EVENT_AMOUNT = {
@@ -227,3 +230,11 @@ def get_all_events_detail(queryset, status, event_type=None):
         elif item[key] in ['F', 'f','Female','female']:
             fcount += item['count']
     return pcount, mcount, fcount
+
+
+def get_ilw_certificate(event):
+    if event.event_start_date < EDUPYRAMIDS_CERTIFICATE_DATE:
+        template = "fdptr-certificate.pdf" if event.event_type == "FDP" else "tr-certificate.pdf"
+    else:
+        template = "fdptr-certificate_edupyramids.pdf" if event.event_type == "FDP" else "tr-certificate_edupyramids.pdf"
+    return os.path.join(settings.MEDIA_ROOT, template)

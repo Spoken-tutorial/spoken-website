@@ -38,6 +38,7 @@ from .filters import CompanyFilter
 import os, sys
 from string import Template
 import subprocess
+from events.certificates import get_organization, get_signature
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -830,9 +831,10 @@ class FDPTrainingCertificate(object):
     imgDoc.drawString(10, 6, certificate_pass)
 
     # Draw image on Canvas and save PDF in buffer
-    imgPath = settings.MEDIA_ROOT +"sign.jpg"
+    imgPath = get_signature(training_start)
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
+    organization = get_organization(training_start)
     #paragraphe
     line1 = f"""
          This is to certify that <b>{participantname}</b> has participated in 
@@ -840,8 +842,8 @@ class FDPTrainingCertificate(object):
     """
     line2 = f"""
          organized by <b>{event.host_college.institution_name}</b> 
-         with course material provided by Spoken Tutorial Project, IIT Bombay.
-         <br /><br /> This training is offered by the Spoken Tutorial Project, IIT Bombay.
+         with course material provided by {organization}.
+         <br /><br /> This training is offered by {organization}.
     """
     if event.is_course:
          text = f"""
@@ -866,10 +868,8 @@ class FDPTrainingCertificate(object):
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
-    if event_type == "FDP":
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
-    else:
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).getPage(0)
+    template_path = get_ilw_certificate(event)
+    page = PdfFileReader(open(template_path,"rb")).getPage(0)
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -1204,15 +1204,16 @@ class ILWTestCertificate(object):
     imgDoc.drawString(10, 6, certificate_pass)
 
     # Draw image on Canvas and save PDF in buffer
-    imgPath = settings.MEDIA_ROOT +"sign.jpg"
+    imgPath = get_signature(training_start)
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
 
     #paragraphe
-    text = "This is to certify that <b>"+participantname +"</b> successfully passed a \
-    <b>"+teststatus.fossid.foss+"</b> test, remotely conducted by the Spoken Tutorial project, IIT Bombay, under an honour invigilation system.\
-    <br /> Self learning through Spoken Tutorials and passing an online test completes the training programme.<br />"+credits
+    organization = get_organization(training_start)
+    text = f"This is to certify that <b>"+participantname +"</b> successfully passed a \
+    <b>"+teststatus.fossid.foss+"</b> test, remotely conducted by {organization}, under an honour invigilation system.\
+    <br /> Self learning through {organization} and passing an online test completes the training programme.<br />{credits}"
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -1228,10 +1229,8 @@ class ILWTestCertificate(object):
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
-    if event_type == "FDP":
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"fdptr-certificate.pdf","rb")).getPage(0)
-    else:
-        page = PdfFileReader(open(settings.MEDIA_ROOT +"tr-certificate.pdf","rb")).getPage(0)
+    template_path = get_ilw_certificate(event)
+    page = PdfFileReader(open(template_path,"rb")).getPage(0)
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
