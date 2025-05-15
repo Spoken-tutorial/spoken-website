@@ -256,6 +256,11 @@ def get_mp4_video(tr):
         return 'videos/' + str(tr.tutorial_detail.foss_id) + '/' + str(tr.tutorial_detail_id) + '/' + tname + '.mp4'
     return False
 
+def get_sample_video(video):
+    data = video.split('.')
+    sample_video=f"{data[0]}-sample.{data[1]}"
+    return sample_video
+
 def get_user_uploads(username, hr_code):
     fs = FileSystemStorage(location=settings.MEDIA_ROOT+ DOCS)
     file_list = []
@@ -317,3 +322,4 @@ register.filter('get_mp4_video', get_mp4_video)
 register.filter('get_language_manager',is_language_manager)
 register.filter('get_user_uploads', get_user_uploads)
 register.filter('docker_file', docker_file)
+register.filter('get_sample_video', get_sample_video)

@@ -256,6 +256,29 @@
         background: white;
     }
     .video-js.vjs-fullscreen .vjs-tt-cue { font-size: 22px; }
+
+    #video-container {
+        position: relative;
+    }
+    #overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        text-align: center;
+        padding-top: 30%;
+    }
+    #overlay a {
+        color: #fff;
+        background-color: #337AB7;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+    }
     </style>
 {% endblock %}
 {% load creationdata %}
@@ -282,12 +305,25 @@
 {% block content %}
     {% if tr_rec.video_status %}
     <row>
-        {% if not is_valid_user_for_tut %} <div class="bg-danger" style="padding:12px;margin-bottom:12px;font-weight:bold">Please enroll to gain access to the full video and its resources.</div>{% endif %}
+        {% if not user_authorized %} <div class="bg-danger" style="padding:12px;margin-bottom:12px;font-weight:bold; font-size: 16px;">
+            {% if user.is_authenticated %}
+                Please  <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers </a> to gain access to the full tutorial video and its resources.
+            {% else %}
+                Please  <a href="http://127.0.0.1:8000/accounts/login/?next={{request.path}}">login</a> to gain access to the full tutorial video and its resources. If not registered, please <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers </a>.
+            {% endif %}
+        </div>
+        {% endif %}
         <div class='container playlist-container col-lg-12 col-md-12 col-sm-12'>
-            <div class="video-container col-lg-8 col-md-8 col-sm-8 {% if not is_valid_user_for_tut %}invalid_user{% endif %}" >
+                <div class="video-container col-lg-8 col-md-8 col-sm-8" id="video-container">
                         <video id="st_video" class="video-js vjs-default-skin" controls preload="none" poster="{{ tr_rec.tutorial_detail|get_thumb_path:'Big' }}" width="auto" height="auto" data-setup="{}">
-                            <!-- <source src="/static/spoken/images/Overview-and-Installation-of-Git-English.ogv" type="video/ogg" /> -->
-			    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/webm" />
+                             {% with sample_video=tr_rec.video|get_sample_video %}
+                                {% if user_authorized %}
+                                    <source src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ tr_rec.video }}" type="video/webm" />
+                                {% else %}
+                                    <source id="sample" src="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/{{ sample_video }}" type="video/webm" />
+                                {% endif %}
+                             {% endwith %}
+                             
                              {% with has_mp4=tr_rec|get_mp4_video %}
                                  {% if has_mp4 %}
                                      <source src="{{ media_url }}{{ has_mp4 }}" type="video/mp4" />
@@ -295,6 +331,9 @@
                              {% endwith %}
                             {{ tr_rec|get_srt_path|safe }}
                         </video>
+                        <div id="overlay">
+                            <p style="font-size: 1.5rem;">This is a sample video. To access the full content, please {% if user.is_authenticated %} <a href="http://127.0.0.1:8000/subscription/?foss={{tr_rec.tutorial_detail.foss_id}}">Subscribe</a> {% else %} <a href="http://127.0.0.1:8000/accounts/login/?next={{request.path}}">Login</a> {% endif %} </p>
+                        </div>
             </div>
 
 
@@ -460,42 +499,51 @@
                 <div class="list-group">
                     {% if tr_rec.common_content.assignment_status and tr_rec.common_content.assignment_status != 6 %}
                         <div  class="list-group-item-container">
-                            <a {% if is_valid_user_for_tut %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.assignment }}"{% else %}href="#"{% endif %} target="_blank" class="list-group-item">
+                            <a {% if user_authorized %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.assignment }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %} target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-file-text"></i>&nbsp; Assignment</h4>
+                                {% if not user_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
                             </a>
                         </div>
                     {% endif %}
                     {% if tr_rec.common_content.code_status and tr_rec.common_content.code_status != 6 %}
                         <div  class="list-group-item-container">
-                            <a {% if is_valid_user_for_tut %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.code }}"{% else %}href="#"{% endif %} target="_blank" class="list-group-item">
+                            <a {% if user_authorized %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.code }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %} target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-archive"></i> Code files</h4>
-                                {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.code %}
-                                    {% with code_files=path|get_zip_content %}
-                                        {% if code_files %}
-                                            <hr class="hline" />
-                                            <ul class="list-zipfiles">
-                                                {% for code_file in code_files %}
-                                                    <li>{{ code_file }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% endif %}
+                                {% if user_authorized %}
+                                    {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.code %}
+                                        {% with code_files=path|get_zip_content %}
+                                            {% if code_files %}
+                                                <hr class="hline" />
+                                                <ul class="list-zipfiles">
+                                                    {% for code_file in code_files %}
+                                                        <li>{{ code_file }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        {% endwith %}
                                     {% endwith %}
-                                {% endwith %}
+                                {% endif %}
+                                {% if not user_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
                             </a>
                         </div>
                     {% endif %}
                     {% if tr_rec.script_status %}
                         <div class="list-group-item-container">
-                            <a {% if is_valid_user_for_tut %}href="{{ script_base|add:tr_rec.script }}"{% else %}href="#"{% endif %} target="_blank" class="list-group-item">
-                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> Script</h4>
+                            
+                            <a {% if user_authorized %}href="{{ script_base|add:tr_rec.script }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %}target="_blank" class="list-group-item">
+                                <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> 
+                                    Script 
+                                </h4>
+                                {% if not user_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
                             </a>
                         </div>
                         {% if tr_rec.language.name == 'English' %}
                             {% with timed_script=tr_rec.script|get_timed_script:tr_rec.timed_script %}
                                 {% if timed_script %}
                                     <div class="list-group-item-container">
-                                        <a {% if is_valid_user_for_tut %}href="{{ timed_script }}"{% else %}href="#"{% endif %} target="_blank" class="list-group-item">
+                                        <a {% if user_authorized %}href="{{ timed_script }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %} target="_blank" class="list-group-item">
                                             <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> Timed Script</h4>
+                                            {% if not user_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
                                         </a>
                                     </div>
                                 {% endif %}
@@ -504,7 +552,7 @@
                     {% endif %}
                     {% if tr_rec.common_content.slide_status and tr_rec.common_content.slide_status != 6 %}
                         <div class="list-group-item-container">
-                            <a  {% if is_valid_user_for_tut %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}"{% else %}href="#"{% endif %} target="_blank" class="list-group-item">
+                            <a  {% if user_authorized %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %} target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-archive"></i> Slides</h4>
                                 {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.slide %}
                                     {% with slide_files=path|get_zip_content %}
@@ -518,13 +566,15 @@
                                         {% endif %}
                                     {% endwith %}
                                 {% endwith %}
+                                {% if not user_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
                             </a>
                         </div>
                     {% endif %}
                     {% if tr_rec.common_content.additional_material_status and tr_rec.common_content.additional_material_status != 6 %}
                         <div  class="list-group-item-container">
-                            <a {% if is_valid_user_for_tut %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.additional_material }}"{% else %}href="#"{% endif%} target="_blank" class="list-group-item">
+                            <a {% if user_authorized %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.additional_material }}"{% else %}style="pointer-events: none; cursor: default;"{% endif%} target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-file-text"></i>&nbsp; Additional reading material</h4>
+                                {% if not user_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
                             </a>
                         </div>
                     {% endif %}
@@ -565,22 +615,16 @@
 {% block compressinlinejsblock %}
     <script type="text/javascript">
         $(document).ready(function(){
-            
-            //const vid_element = document.querySelector('.valid_user');
-            const videoElement = document.querySelector('div.invalid_user video');
-
-            if(videoElement){
-                videoElement.addEventListener('timeupdate', () => {
-                    // Check if the video has played for more than 10 seconds
-                    if (videoElement.currentTime > {{video_play_time}}) {
-                        // Pause the video
-                        videoElement.currentTime = 0;
-                        videoElement.pause();
-                    }
-                    });
-            }else{
-                // Add an event listener for the 'timeupdate' event
-                console.log("Valid Video");
+            var video = document.getElementById('st_video');
+            var overlay = document.getElementById('overlay');
+            let videoElement = document.getElementById("st_video_html5_api")
+            let sampleSource = document.getElementById("sample");
+            console.log("videoElement");
+            console.log(videoElement);
+            if( videoElement && sampleSource){
+                    videoElement.addEventListener('ended', function(){
+                    overlay.style.display = 'block';
+                });
             }
             currentVideo = $('.playlist-item.active');
             nextVideo = currentVideo.next('li');
@@ -588,13 +632,11 @@
             var tmpHtml = currentVideo.attr('data') + '/' + $('.video-count').html()
             $('.video-count').html(tmpHtml)
             if(nextVideo.length){
-                //console.log(nextVideo.children('a').attr('href'));
                 $('.forward').html('<a href="'+nextVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-forward"></i></a>');
             } else {
                 $('.forward').html('<i class="fa fa-1 fa-fast-forward"></i>');
             }
             if(prevVideo.length){
-                //console.log(prevVideo.children('a').attr('href'));
                 $('.backward').html('<a href="'+prevVideo.children('a').attr('href')+'"><i class="fa fa-1 fa-fast-backward"></i></a>');
             } else {
                 $('.backward').html('<i class="fa fa-1 fa-fast-backward"></i>');
