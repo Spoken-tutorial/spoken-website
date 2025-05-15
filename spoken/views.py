@@ -29,7 +29,7 @@ from creation.views import get_video_info
 from events.views import get_page
 from forums.models import Question, Answer
 from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
- MONGO_HOST, MONGO_DB
+ MONGO_HOST, MONGO_DB, TUTORIAL_RESTRICTION_DATE
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
 from .search import search_for_results
@@ -296,44 +296,32 @@ def archived_tutorial_search(request):
     context['current_foss'] = foss_get
     return render(request, 'spoken/templates/archived_tutorial_search.html', context)
 
-def is_valid_user(user,foss,lang):
-    allowed_internal_roles = getattr(settings, 'ALLOWED_INTERNAL_ROLES', [1,4,5,6,7,8,9,10,15,20]) #IDs of auth_group 
-    # 1: Resource Person, 4:Contributor, 5:External-Contributor, 6: Video-Reviewer, 7:Domain-Reviewer, 8: Quality-Reviewer
-    # 9: Administrator, 10:Event Manager, 15:Content-Editor, 20:Forums-Admin
+def is_valid_user(user,foss,lang,tr_rec):
+    # Allow access to all tutorials published before a set restriction date
+    if tr_rec.publish_at and tr_rec.publish_at.date() < TUTORIAL_RESTRICTION_DATE:
+        return True # No restriction on tutorials published before restricted_date
+    
     foss = FossCategory.objects.get(foss=foss)
-    if foss.is_fossee:
+    if not isinstance(user,User):
+        return False
+    
+    if check_auth_internal_roles(user):
         return True
-    if isinstance(user,User):
-        groups = user.groups.all().values_list('id',flat=True)
-        allowed_grps = set(allowed_internal_roles).intersection(set(groups))
-        if allowed_grps:
-            return True
-        try:
-            ut = UserType.objects.get(user=user)
-            subs = ut.subscription
-            ilw = ut.ilw
-            foss = str(FossCategory.objects.get(foss=foss).id)
-            lang = Language.objects.get(name=lang).id
-            if subs:
-                if datetime.date.today() <= subs:
-                    return True
-            if ilw:
-                if foss in ilw and lang in ilw.get(foss, []):
-                    return True
-        except UserType.DoesNotExist:
-            return False
-    return False
+    
+    # Check if the user belongs to paid college or has paid for cdcontent/ilw
+    try:    
+        return check_auth_external_roles(user, foss, lang)
+    except:
+        return False    
 
 
 def watch_tutorial(request, foss, tutorial, lang):
     try:
         foss = unquote_plus(foss)
-        # is_valid_user_for_tut = is_valid_user(request.user,foss,lang)
-        is_valid_user_for_tut = True #Temporary making videos available to all
         tutorial = unquote_plus(tutorial)
-        
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
+        is_authorized_user = is_valid_user(request.user, foss, lang, tr_rec)
         tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status=1) | Q(status=2), tutorial_detail__foss=tr_rec.tutorial_detail.foss, language=tr_rec.language).order_by(
             'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
     except Exception as e:
@@ -385,9 +373,10 @@ def watch_tutorial(request, foss, tutorial, lang):
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
         'script_base': settings.SCRIPT_URL,
         'perform_analysis':analytics,
-        'is_valid_user_for_tut':is_valid_user_for_tut,
+        # 'is_valid_user_for_tut':is_valid_user_for_tut,
         'video_play_time':getattr(settings, 'VIDEO_TIME', 15),
-        'questions': sorted_questions
+        'questions': sorted_questions,
+        'user_authorized': is_authorized_user
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 

@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from events.models import AcademicCenter, \
-AcademicKey, AcademicPaymentStatus
-from .models import AcademicSubscription, HDFCTransactionDetails
+AcademicKey, AcademicPaymentStatus, Organiser, StudentMaster
+from .models import AcademicSubscription, HDFCTransactionDetails, AcademicSubscriptionDetail, CdFossLanguages, PaymentTransaction
+from training.models import Participant
 from django.http import JsonResponse
 import hashlib
 import time
@@ -256,3 +257,66 @@ def validate_gst(request):
         if item and not verify_gstin(item):
             incorrect_gst.append(item)
     return JsonResponse(incorrect_gst, safe=False)
+
+def is_organiser_insti_subscribed(user):
+    try:
+        academic = Organiser.objects.get(user=user).academic
+        return has_active_subscription(academic.id)
+    except Exception as e:
+        return False
+
+def is_student_insti_subscribed(user):
+    try:
+        academic = StudentMaster.objects.select_related('student','batch').get(student__user=user).batch.academic
+        return has_active_subscription(academic.id)
+    except Exception as e:
+        return False
+
+def check_auth_internal_roles(user):
+    # Check if the user has ST internal roles
+    allowed_internal_roles = getattr(settings, 'ALLOWED_INTERNAL_ROLES', [1,9,20]) #IDs of auth_group
+    # 1: Resource Person, 9: Administrator, 20:Forums-Admin
+    groups = user.groups.all().values_list('id',flat=True)
+    is_allowed = set(allowed_internal_roles).intersection(set(groups))
+    return is_allowed
+
+def has_cdcontent_access(user,foss,lang):
+    payee_ids = list(CdFossLanguages.objects.filter(payment__user=user, foss=foss, lang__name=lang).values_list('payment_id', flat=True))
+    if payee_ids:
+        return PaymentTransaction.objects.filter(status='S', paymentdetail_id__in=payee_ids).exists()
+    return False
+
+def has_ilw_access(user, foss, lang):
+    return Participant.objects.filter(event__foss=foss,user=user,payment_status__status=1).exists()
+
+def check_auth_external_roles(user, foss, lang):
+    # check if user has organiser role and belongs to paid college
+    if hasattr(user, 'organiser') and is_organiser_insti_subscribed(user):
+        return True
+    
+    # check if user has student role and belongs to paid college
+    if hasattr(user, 'student') and is_student_insti_subscribed(user):
+        return True
+
+    if has_cdcontent_access(user, foss, lang):
+        return True
+    
+    if has_ilw_access(user, foss, lang):
+        return True
+    
+    return False
+
+def has_active_subscription(academic_id):
+    # true if institution subscription is active
+    # check in old payment system : AcademicKey
+    ak = AcademicKey.objects.filter(academic_id=academic_id).order_by('-expiry_date').first()
+    if (ak and ak.expiry_date >= date.today()):
+      return True
+    else: # check in hdfc integration
+      try:
+        sub = AcademicSubscriptionDetail.objects.filter(academic_id=academic_id).order_by('-subscription_end_date').first()
+        transaction = sub.subscription.transaction.order_status
+        is_active = (transaction == "CHARGED" and sub.subscription.expiry_date >= date.today())
+        return is_active
+      except:
+          return False
