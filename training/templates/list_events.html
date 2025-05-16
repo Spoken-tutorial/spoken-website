@@ -208,30 +208,6 @@
                       {% endfor %}
                     {% endwith %}
                   {% endfor %}
-                 
-                  {% with fossmdlcourse=event.event.foss_id|get_ilw_mdlcourseid %}
-                    {% for course in fossmdlcourse %}
-
-                      {% if not event|check_passgrade_exists:course.testfoss_id%}
-
-                        <input type="hidden" id="testurl{{course.mdlcourse_id}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}">
-
-                        <button class="btn btn-info" type="button" 
-                        onclick="take_to_test({{event.id}}, {{course.mdlcourse_id}}, {{course.mdlquiz_id}}, {{course.testfoss_id}}, {{event.event_id}});">
-                        Attempt {{course.testfoss.foss}} test
-                        </button>
-                      {% else %}                    
-
-                          {% with grade=event|get_grade:course.testfoss_id %}
-                          <button type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate' course.testfoss_id%}">Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
-                          {% endwith %}
-                        
-                      {% endif %}
-
-                    {% endfor %}
-                  {% endwith %}
-
-
               {% endif %} 
           </div>
    </div>
