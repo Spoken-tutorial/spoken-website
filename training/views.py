@@ -1211,8 +1211,8 @@ class ILWTestCertificate(object):
 
     #paragraphe
     organization = get_organization(training_start)
-    text = f"This is to certify that <b>"+participantname +"</b> successfully passed a \
-    <b>"+teststatus.fossid.foss+"</b> test, remotely conducted by {organization}, under an honour invigilation system.\
+    text = f"This is to certify that <b>{participantname}</b> successfully passed a \
+    <b>{teststatus.fossid.foss}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
     <br /> Self learning through {organization} and passing an online test completes the training programme.<br />{credits}"
 
     centered = ParagraphStyle(name = 'centered',
