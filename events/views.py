@@ -2320,7 +2320,7 @@ def test_participant_ceritificate(request, wid, participant_id):
     imgDoc.drawImage(imgPath, 600, 95, 150, 76)    ## at (399,760) with size 160x160
     credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
-    text = get_test_cert_text(ta, credits=credits)
+    text = get_test_cert_text(ta.test, mdluser, credits=credits)
     centered = ParagraphStyle(name = 'centered',
         fontSize = 15,
         leading = 24,
@@ -2422,7 +2422,7 @@ def test_participant_ceritificate_all(request, testid):
         credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
         #paragraphe
-        text = get_test_cert_text(ta)
+        text = get_test_cert_text(ta.test, mdluser, credits=credits)
         centered = ParagraphStyle(name = 'centered',
             fontSize = 15,
             leading = 24,

@@ -236,5 +236,5 @@ def get_ilw_certificate(event):
     if event.event_start_date < EDUPYRAMIDS_CERTIFICATE_DATE:
         template = "fdptr-certificate.pdf" if event.event_type == "FDP" else "tr-certificate.pdf"
     else:
-        template = "fdptr-certificate_edupyramids.pdf" if event.event_type == "FDP" else "tr-certificate_edupyramids.pdf"
+        template = "fdptr-certificate_edupyramids.pdf" if event.event_type == "FDP" else "fdptr-certificate_edupyramids.pdf"
     return os.path.join(settings.MEDIA_ROOT, template)
