@@ -868,7 +868,7 @@ class FDPTrainingCertificate(object):
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
-    template_path = get_ilw_certificate(event)
+    template_path = get_ilw_certificate(event, 'training')
     page = PdfFileReader(open(template_path,"rb")).getPage(0)
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
@@ -1229,7 +1229,7 @@ class ILWTestCertificate(object):
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
-    template_path = get_ilw_certificate(event)
+    template_path = get_ilw_certificate(event, 'test')
     page = PdfFileReader(open(template_path,"rb")).getPage(0)
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
