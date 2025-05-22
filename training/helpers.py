@@ -232,9 +232,9 @@ def get_all_events_detail(queryset, status, event_type=None):
     return pcount, mcount, fcount
 
 
-def get_ilw_certificate(event):
+def get_ilw_certificate(event, cert_type):
     if event.event_start_date < EDUPYRAMIDS_CERTIFICATE_DATE:
-        template = "fdptr-certificate.pdf" if event.event_type == "FDP" else "tr-certificate.pdf"
+        template = "fdptr-certificate.pdf" if cert_type == "training" else "tr-certificate.pdf"
     else:
-        template = "fdptr-certificate_edupyramids.pdf" if event.event_type == "FDP" else "tr-certificate_edupyramids.pdf"
+        template = "fdptr-certificate_edupyramids.pdf" if cert_type == "training" else "Blank-Certificate_edupyramids.pdf"
     return os.path.join(settings.MEDIA_ROOT, template)

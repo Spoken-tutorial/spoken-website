@@ -284,6 +284,11 @@ def docker_file(foss):
           return file_url
      return False
 
+def get_sample_video(video):
+     data = video.split('.')
+     sample_video=f"{data[0]}-sample.{data[1]}"
+     return sample_video
+
 register.inclusion_tag('spoken/templates/tutorial_search_form.html')(tutorialsearch)
 #register.filter('tutorialsearch', tutorialsearch)
 register.filter('get_timed_script', get_timed_script)
