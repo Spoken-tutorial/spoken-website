@@ -309,7 +309,10 @@
             {% if user.is_authenticated %}
                 Please  <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers </a> to gain access to the full tutorial video and its resources.
             {% else %}
-                Please  <a href="http://127.0.0.1:8000/accounts/login/?next={{request.path}}">login</a> to gain access to the full tutorial video and its resources. If not registered, please <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers </a>.
+                {% with login_url="http://"|add:request.get_host|add:"/accounts/login/?next="|add:request.path %}
+                    Please  <a href="{{ login_url }}">login</a> to gain access to the full tutorial video and its resources. If not registered, please <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers </a>.
+                {% endwith %}
+                
             {% endif %}
         </div>
         {% endif %}
@@ -332,7 +335,11 @@
                             {{ tr_rec|get_srt_path|safe }}
                         </video>
                         <div id="overlay">
-                            <p style="font-size: 1.5rem;">This is a sample video. To access the full content, please {% if user.is_authenticated %} <a href="http://127.0.0.1:8000/subscription/?foss={{tr_rec.tutorial_detail.foss_id}}">Subscribe</a> {% else %} <a href="http://127.0.0.1:8000/accounts/login/?next={{request.path}}">Login</a> {% endif %} </p>
+                            <p style="font-size: 1.5rem;">This is a sample video. To access the full content,<br/> please {% if user.is_authenticated %} <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" style="padding: 4px 10px;" target="_blank">contact Training Managers.</a> {% else %} 
+                                {% with login_url="http://"|add:request.get_host|add:"/accounts/login/?next="|add:request.path %}
+                                     <a href="{{login_url}}">Login</a>
+                                {% endwith %}
+                                {% endif %} </p>
                         </div>
             </div>
 
