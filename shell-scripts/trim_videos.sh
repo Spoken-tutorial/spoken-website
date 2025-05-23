@@ -73,7 +73,7 @@ while read originalVideoFile; do
     sampleVideoFile="$( echo "$originalVideoFile" | sed 's/\.webm$/-sample.webm/i')"
 
     # Check if the sample file already exists
-    if test -f "$sampleVideoFile" && file -b "$sampleVideoFile" | grep -q "-sample.webm";then
+    if test -f "$sampleVideoFile" && file -b "$sampleVideoFile" | grep -q WebM; then
         continue
     fi
 
