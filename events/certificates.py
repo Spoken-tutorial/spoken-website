@@ -85,9 +85,9 @@ def get_training_cert_text(ta):
       organiser_name = f"{ta.training.training_planner.organiser.user.first_name} {ta.training.training_planner.organiser.user.last_name}"
       text = f"This is to certify that <b>{name}</b> participated in the <b>{foss}</b> training organized at <b>{institution_name}</b> by <b>{organiser_name}</b>, with course material provided by {organization}.<br /><br />{text_end}."
    elif ta.training.department.id == FDP:
-      training_start_date = str(ta.training.training_start_date)
-      training_end_date = str(ta.training.training_end_date)
-      text = f"This is to certify that <b>{name}</b> has participated in <b>Faculty Development Programme</b> from <b>{training_start_date}</b> to <b>{training_end_date}</b> on <b>{foss}</b> organized by <b>{institution_name}</b> with course material provided by {organization}.<br />{text_end}."
+      formatted_start_date = ta.training.training_start_date.strftime("%d-%m-%Y")
+      formatted_end_date = ta.training.training_end_date.strftime("%d-%m-%Y")
+      text = f"This is to certify that <b>{name}</b> has participated in <b>Faculty Development Programme</b> from <b>{formatted_start_date}</b> to <b>{formatted_end_date}</b> on <b>{foss}</b> organized by <b>{institution_name}</b> with course material provided by {organization}.<br />{text_end}."
    elif ta.training.training_planner.academic.institution_type_id == CSC:
       sem = ta.training.training_planner.get_semester()
       text = f"This is to certify that <u>{name}</u> participated in the <b>{foss}</b> training organized at {institution_name} in {sem} semester, with course material provided by {institution_name}.<br />{text_end}."

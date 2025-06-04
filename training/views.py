@@ -812,7 +812,9 @@ class FDPTrainingCertificate(object):
   def create_fdptraining_certificate(self, event, participantname):
     training_start = event.event_start_date
     training_end = event.event_end_date
-    event_type = event.event_type
+    formatted_start_date = training_start.strftime("%d-%m-%Y")
+    formatted_end_date = training_end.strftime("%d-%m-%Y")
+    
     response = HttpResponse(content_type='application/pdf')
     filename = (participantname+'-'+"-Participant-Certificate").replace(" ", "-");
 
@@ -838,7 +840,7 @@ class FDPTrainingCertificate(object):
     #paragraphe
     line1 = f"""
          This is to certify that <b>{participantname}</b> has participated in 
-         <b>{event.get_event_type_display()}</b> from <b>{training_start}</b> to <b>{training_end}</b> 
+         <b>{event.get_event_type_display()}</b> from <b>{formatted_start_date}</b> to <b>{formatted_end_date}</b> 
     """
     line2 = f"""
          organized by <b>{event.host_college.institution_name}</b> 
@@ -1174,8 +1176,6 @@ class ILWTestCertificate(object):
     training_end = event.event_end_date
     event_type = event.event_type
 
-
-
     response = HttpResponse(content_type='application/pdf')
     filename = (participantname+'-'+teststatus.fossid.foss+"-Participant-Test-Certificate").replace(" ", "-");
 
@@ -1223,9 +1223,9 @@ class ILWTestCertificate(object):
       spaceAfter = 20
     )
     imgDoc.setFillColorRGB(0, 0, 0)
-    imgDoc.drawCentredString(150, 115, self.custom_strftime('%B {S} %Y', training_end))
-    p = Paragraph(text, centered)						
-
+    imgDoc.drawCentredString(150, 115, training_end.strftime('%d %B %Y'))
+	
+    p = Paragraph(text, centered)
     p.wrap(650, 200)
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
