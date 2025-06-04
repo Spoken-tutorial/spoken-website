@@ -853,8 +853,9 @@ class FDPTrainingCertificate(object):
          {line2}
          """
     else:
+         foss = [x.foss for x in event.course.foss.all()]
          text = f"""{line1}
-         on <b>{event.foss.foss}</b> {line2}"""
+         on <b>{', '.join(foss)}</b> {line2}"""
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
