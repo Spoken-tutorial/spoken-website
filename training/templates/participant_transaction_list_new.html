@@ -155,7 +155,11 @@
             <td>{% with event=record.paymentdetail.purpose|get_event_details %}
               
                 {{event.event_name}} <br><br>
-                <b>{{event.foss.foss}}</b><br>
+                <b>
+                  {% for foss in event.course.foss.all %}
+                    {{ foss.foss }}{% if not forloop.last %}, {% endif %}
+                  {% endfor %}
+                </b><br>
                 {{event.event_start_date}} - {{event.event_end_date}}
               {% endwith %}
             </td>

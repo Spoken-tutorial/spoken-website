@@ -1054,7 +1054,7 @@ def transaction_csv(request, purpose):
 		if purpose != 'cdcontent':
 			event  = get_event_details(record.paymentdetail.purpose)
 			writer.writerow([count,
-	            event.event_name+','+event.foss.foss,
+				f"{event.event_name}, {', '.join(x.foss for x in event.course.foss.all())}",
 	            record.paymentdetail.user.first_name+' '+record.paymentdetail.user.first_name,
 	            record.paymentdetail.email,
 	            record.paymentdetail.state,

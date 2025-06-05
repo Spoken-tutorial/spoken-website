@@ -78,13 +78,13 @@ def create_certificate(eventid,pname):
                              (certificate_path, template), 'r')
         content = Template(template_file.read())
         template_file.close()
-
+        foss = ', '.join([x.foss for x in event.course.foss.all()])
         content_tex = content.safe_substitute(
             name = pname,
             event_name = event.event_name,
             college = event.host_college.institution_name,
             host_college = event.host_college.institution_name,
-            foss = event.foss.foss,
+            foss = foss,
             event_start_date = event.event_start_date
             )
         create_tex = open('{0}{1}.tex'.format
