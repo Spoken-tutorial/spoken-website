@@ -307,10 +307,17 @@
     <row>
         {% if not user_authorized %} <div class="bg-danger" style="padding:12px;margin-bottom:12px;font-weight:bold; font-size: 16px;">
             {% if user.is_authenticated %}
-                Please  <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers </a> to gain access to the full tutorial video and its resources.
+                Spoken Tutorials published before 1 Feb. 2025 are accessible to all. 
+                To access subsequent ones, Please  
+                <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers</a>. 
             {% else %}
                 {% with login_url="http://"|add:request.get_host|add:"/accounts/login/?next="|add:request.path %}
-                    Please  <a href="{{ login_url }}">login</a> to gain access to the full tutorial video and its resources. If not registered, please <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers </a>.
+                    Spoken Tutorials published before 1 Feb. 2025 are accessible without login. 
+                    To access subsequent ones, one has to <a href="{{ login_url }}">log in</a>.<br/>
+                    If you don't have a login, please contact our 
+                    <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">
+                        Training Manager
+                    </a>.
                 {% endwith %}
                 
             {% endif %}
