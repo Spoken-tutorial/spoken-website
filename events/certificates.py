@@ -111,7 +111,7 @@ def get_test_cert_text(test, mdluser, credits=''):
    
    #paragraphe
    if test.training.department.id == FDP:
-      text = f"This is to certify that <b>{name}</b> has successfully completed <b>{foss}</b> test on <b>{test_date}</b> organized at <b>{institution}</b> by <b>{organizer}</b> with course material provided by {organization}. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>{invigilator}</b> at <b>{institution}</b> invigilated this examination. {text_end}."
+      text = f"This is to certify that <b>{name}</b> has successfully completed <b>{foss}</b> test on <b>{test_date}</b> organized at <b>{institution}</b> by <b>{organizer}</b> with course material provided by {organization}. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this Faculty Development Programme.<br/><br/><b>{invigilator}</b> at <b>{institution}</b> invigilated this examination. {text_end}.</p><br /><br />{credits}"
    elif test.academic.institution_type_id == CSC: # CHECK #TODO
       text = f"This is to certify that <b>{name}</b> has successfully completed <b>{foss}</b> test organized at {institution} by <u>{organizer}</u> with course material provided by {organization}. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <u>{invigilator}</u> at {institution} invigilated this examination.<br/>This training is offered by the Spoken Tutorial Project, IIT Bombay, funded by National Mission on Education through ICT, Ministry of Education, Govt., of India."
    else:
