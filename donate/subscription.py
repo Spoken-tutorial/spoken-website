@@ -287,7 +287,7 @@ def has_cdcontent_access(user,foss,lang):
     return False
 
 def has_ilw_access(user, foss, lang):
-    return Participant.objects.filter(event__foss=foss,user=user,payment_status__status=1).exists()
+    return Participant.objects.filter(event__course__foss=foss,user=user,payment_status__status=1).exists()
 
 def check_auth_external_roles(user, foss, lang):
     # check if user has organiser role and belongs to paid college

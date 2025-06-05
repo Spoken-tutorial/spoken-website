@@ -376,7 +376,8 @@ def watch_tutorial(request, foss, tutorial, lang):
         # 'is_valid_user_for_tut':is_valid_user_for_tut,
         'video_play_time':getattr(settings, 'VIDEO_TIME', 15),
         'questions': sorted_questions,
-        'user_authorized': is_authorized_user
+        'user_authorized': is_authorized_user,
+        'restriction_date': TUTORIAL_RESTRICTION_DATE.strftime("%-d %b. %Y")
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 

@@ -94,7 +94,11 @@
       <br>
       <h5>FOSS</h5>
       <hr>
-      <p>{{participant_obj.event.foss}}</p>
+      <p>
+         {% for foss in participant_obj.event.course.foss.all %}
+            {{ foss.foss }}{% if not forloop.last %}, {% endif %}
+          {% endfor %}
+      </p>
       <p>{{participant_obj.event.Language_of_workshop}}
         	{% if participant_obj.foss_language %}
         , {{participant_obj.foss_language}}
