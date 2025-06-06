@@ -2433,18 +2433,6 @@ def test_participant_ceritificate_all(request, testid):
         p.wrap(700, 200)
         p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
 
-        credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
-        centered = ParagraphStyle(name = 'centered',
-            fontSize = 15,
-            leading = 24,
-            alignment = 1,
-            spaceAfter = 20)
-
-        p = Paragraph(credits, centered)
-        p.wrap(700, 200)
-        p.drawOn(imgDoc, 2 * cm, 6 * cm)
-
-
         #paragraphe
         text = "Certificate for Completion of <br/>"+w.foss.foss+" Training"
 
