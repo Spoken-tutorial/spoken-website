@@ -101,7 +101,7 @@ def get_test_cert_text(test, mdluser, credits=''):
    """
    name = f"{mdluser.firstname} {mdluser.lastname}"
    foss = test.foss.foss
-   test_date = test.tdate
+   test_date = test.tdate.strftime("%d-%m-%Y")
    
    institution = test.academic.institution_name
    organization = get_organization(test.training.training_start_date)
