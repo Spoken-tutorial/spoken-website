@@ -294,8 +294,8 @@ def reg_success(request, user_type):
 						form_data.company = company
 					except IntegrityError:
 						pass
-			user_data = is_user_paid(request.user, form_data.college.id)
-			if user_data[0]:
+			user_data = is_user_paid(form_data.college.id)
+			if user_data:
 				form_data.registartion_type = 1 #Subscribed College
 			else:
 				form_data.registartion_type = 2 #Manual reg- paid 500
@@ -687,10 +687,8 @@ class EventAttendanceListView(ListView):
 @csrf_exempt
 def ajax_check_college(request):
 	college_id = request.POST.get("college_id")
-	user_details = is_user_paid(request.user, int(college_id))
-	check = False
-	if user_details[0]:
-			check = True
+	user_details = is_user_paid(int(college_id))
+	check = user_details
 	return HttpResponse(json.dumps(check), content_type='application/json')
 
 
