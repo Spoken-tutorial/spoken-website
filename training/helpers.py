@@ -21,20 +21,9 @@ REGISTRATION_TYPE_CHOICES =(
     ('', '-----'),  (1, 'Subscribed College'),(2, 'Manual Registration')
     )
 
-def is_user_paid(user_obj, academic_id):
-    try:
-        idcase = AcademicKey.objects.filter(academic_id=academic_id).order_by('-expiry_date').first()
-        user_paid = [True, user_obj.organiser.academic] if (idcase.expiry_date >= date.today()) else [False]
-        return user_paid
-    except:
-        user_paid = [False]
-    try:
-        idcase = AcademicKey.objects.filter(academic_id=academic_id).order_by('-expiry_date').first()
-        user_paid = [True, user_obj.invigilator.academic] if (idcase.expiry_date >= date.today()) else [False]
-        return user_paid
-    except:
-        user_paid = [False]
-    return user_paid
+def is_user_paid(academic_id):
+    idcase = AcademicKey.objects.filter(academic_id=academic_id).order_by('-expiry_date').first()
+    return (idcase and (idcase.expiry_date >= date.today()))
 
 def user_college(user_obj):
     college = ''
