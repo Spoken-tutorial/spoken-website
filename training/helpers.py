@@ -102,14 +102,12 @@ def get_transaction_details(request, purpose):
     allpaydetails = ''
 
     if purpose == 'cdcontent':
-        allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose='cdcontent', paymentdetail__state__in=state).order_by('-created')
+        allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose='cdcontent', paymentdetail__state__in=state).order_by('-created').select_related('paymentdetail', 'paymentdetail__user')
         
     else:
         rp_events = TrainingEvents.objects.filter(state__name__in = state)
-        allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose__in=rp_events).exclude(paymentdetail__purpose='cdcontent').order_by('-created')
+        allpaydetails = PaymentTransaction.objects.filter(paymentdetail__purpose__in=rp_events).exclude(paymentdetail__purpose='cdcontent').order_by('-created').select_related('paymentdetail', 'paymentdetail__user')
 
-    
-    
     selected_state = request.GET.get('state')
     academic_center = request.GET.get('college')
     selected_event = request.GET.get('events')

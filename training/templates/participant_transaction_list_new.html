@@ -9,9 +9,50 @@
 {% block uncompresscssblock %}
   <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.pack.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock %}
+
 {% block compresscssblock %}
   <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
 {% endblock%}
+{% block compressinlinecssblock %}
+<style type="text/css">
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    font-family: Arial, sans-serif;
+}
+
+.step-links {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background-color: #f8f9fa;
+    padding: 10px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.step-links a {
+    color: #007bff;
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.step-links a:hover {
+    background-color: #e2e6ea;
+}
+
+.step-links .current {
+    font-weight: bold;
+    color: #495057;
+    padding: 6px 10px;
+    background-color: #dee2e6;
+    border-radius: 4px;
+}
+</style>
+{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
 <div class= 'filters row'>
@@ -128,7 +169,7 @@
 </div>
   
   <div class='table-responsive' style="width:120%; margin-left:-10%;">
-      {% if transactiondetails %}
+      {% if page_obj %}
       <table class="paleblue table table-striped table-hover table-bordered">
         <tr>
           <th>Sr No</th>
@@ -148,19 +189,15 @@
           <th>Phone Number</th>
           
         </tr>
-        {% for record in transactiondetails %}
+        {% for record in page_obj %}
           <tr>
             <td>{{ forloop.counter }}</td>
             {% ifnotequal record.paymentdetail.purpose 'cdcontent'%}
-            <td>{% with event=record.paymentdetail.purpose|get_event_details %}
-              
-                {{event.event_name}} <br><br>
-                <b>
-                  {% for foss in event.course.foss.all %}
-                    {{ foss.foss }}{% if not forloop.last %}, {% endif %}
-                  {% endfor %}
-                </b><br>
-                {{event.event_start_date}} - {{event.event_end_date}}
+            <td>
+               {% with event=event_dict|get_item:record.paymentdetail.purpose %}
+                <span>{{event.name}}</span><br/>
+                <b>{{event.course}}</b><br/>
+                <span>{{event.event_start_date}} - {{event.event_end_date}}</span>
               {% endwith %}
             </td>
             {% endifnotequal %}
@@ -175,9 +212,8 @@
             <td>{{ record.amount }}</td>
             <td>{{ record.created }}</td>
             <td>
-              {% with phonenumber=record.paymentdetail.user|get_user_detail %}
-              
-                {{phonenumber}}
+               {% with phonenumber=phone_dict|get_item:record.paymentdetail.user.id %}
+                  {{phonenumber}}
               {% endwith %}
             </td>
           </tr>
@@ -186,6 +222,24 @@
       {% else %}
         <p class='no-record'>No record found!</p>
       {% endif %}
+      <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+      </div>
+
   </div>
 {% endblock %}
 

@@ -159,7 +159,6 @@ def get_event_details(eventid):
     event = TrainingEvents.objects.get(id=eventid)
   except TrainingEvents.DoesNotExist:
     return None
-
   return event
 
 @register.filter
@@ -199,7 +198,10 @@ def get_grade(event, testfossid):
 
   return ilwmdlgradeentry.mdlgrade
 
-
+@register.filter
+def get_item(dictionary, key):
+   key = str(key)
+   return dictionary.get(key, None)
 
 
 register.filter('is_user_paid', is_user_paid)
