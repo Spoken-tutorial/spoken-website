@@ -640,3 +640,13 @@ class TutorialDuration(models.Model):
     tresource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT , null=True)
     duration = models.CharField(max_length=15)
     created = models.DateTimeField(null=True)
+
+class TutorialSummaryCache(models.Model):
+    foss = models.ForeignKey(FossCategory,on_delete=models.CASCADE, unique=True)
+    tutorial_count = models.PositiveIntegerField()
+    first_tutorial = models.ForeignKey(TutorialResource, on_delete=models.CASCADE, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"FOSS {self.foss_id}: {self.tutorial_count} tutorials"
+
