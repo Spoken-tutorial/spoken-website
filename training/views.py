@@ -1111,35 +1111,30 @@ def reopen_event(request, eventid):
 
 
 class EventParticipantsListView(ListView):
-	queryset = ""
+	queryset = None
 	unsuccessful_payee = ""
 	paginate_by = 500
-	success_url = ""
 
-	def dispatch(self, *args, **kwargs):
-		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
-		main_query = Participant.objects.filter(event_id=kwargs['eventid'])
-
-		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)))
-		# self.unsuccessful_payee = main_query.filter(payment_status__status__in=(0,2))
-
-		
-		if self.event.training_status == 1:
-			self.queryset = main_query.filter(reg_approval_status=1)
+	def get_queryset(self):
+		event_id = self.kwargs['eventid']
+		self.event = get_object_or_404(TrainingEvents, pk=event_id)
+		main_query = Participant.objects.filter(event_id=event_id)
 
 		if self.event.training_status == 2:
-			self.queryset = self.event.eventattendance_set.all()
-		return super(EventParticipantsListView, self).dispatch(*args, **kwargs)
-
+			return EventAttendance.objects.filter(event_id=event_id).select_related(
+				'participant', 'participant__college', 'participant__state'
+			)
+		elif self.event.training_status == 1:
+			return main_query.filter(reg_approval_status=1).select_related('college', 'state')
+		else:
+			return main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)))
 
 	def get_context_data(self, **kwargs):
 		context = super(EventParticipantsListView, self).get_context_data(**kwargs)
-		
 		context['event'] = self.event
 		context['eventid'] = self.event.id
+		context['is_event_closed'] = self.event.training_status == 2
 		return context
-
-
 
 
 @csrf_exempt

@@ -17,23 +17,28 @@
 		<th>College Name</th>
 		<th>State</th>
 	</tr>
-{% for record in object_list %}
+	
+{% if is_event_closed %}
+	{% for record in object_list %}
 	<tr>
 		<td>{{ forloop.counter }}</td>
+		<td>{{ record.participant.name}}</td>
+		<td>{{ record.participant.college.institution_name}}</td>
+		<td>{{ record.participant.state.name}}</td>
+	</tr>
+	{% endfor %}
+{% else %}
+	{% for record in object_list %}
+	<tr>
+		<td>{{ forloop.counter }}</td>
+		<td>{{ record.name}}</td>
+		<td>{{ record.college.institution_name}}</td>
+		<td>{{ record.state.name}}</td>
+	</tr>
+	{% endfor %}
+{% endif %}
 
 
-		{% if eventid|is_event_closed %}
-			<td>{{ record.participant.name}}</td>
-			<td>{{ record.participant.college.institution_name}}</td>
-			<td>{{ record.participant.state.name}}</td>
-		{% else %}
-
-			<td>{{ record.name}}</td>
-			<td>{{ record.college.institution_name}}</td>
-			<td>{{ record.state.name}}</td>
-		{% endif %}
-    </tr>
-{% endfor %}
 </table>
 
 {% endblock %}
