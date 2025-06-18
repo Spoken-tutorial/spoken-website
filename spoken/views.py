@@ -3,7 +3,7 @@ import json
 import os
 from urllib.parse import quote, unquote_plus
 from urllib.request import urlopen
-from random import randint
+from random import randint, sample
 
 # Third Party Stuff
 from django.conf import settings
@@ -23,7 +23,7 @@ from django.core.urlresolvers import reverse
 # Spoken Tutorial Stuff
 from cms.forms import *
 from cms.models import Event, News, NewsType, Notification, SiteFeedback
-from creation.models import Language, TutorialDetail, TutorialResource
+from creation.models import Language, TutorialDetail, TutorialResource, TutorialSummaryCache
 from creation.subtitles import *
 from creation.views import get_video_info
 from events.views import get_page
@@ -66,17 +66,13 @@ def site_feedback(request):
 
 def home(request):
     tr_rec = ''
-
-    foss = list(TutorialResource.objects.filter(Q(status=1) | Q(status=2)).order_by(
-        '?').values_list('tutorial_detail__foss_id').distinct()[:9])
     random_tutorials = []
-    # eng_lang = Language.objects.get(name='English')
-    for f in foss:
-        tcount = TutorialResource.objects.filter(Q(status=1) | Q(
-            status=2), tutorial_detail__foss_id=f, language__name='English').order_by('tutorial_detail__order').count()
-        tutorial = TutorialResource.objects.filter(Q(status=1) | Q(
-            status=2), tutorial_detail__foss_id=f, language__name='English').order_by('tutorial_detail__order')[:1].first()
-        random_tutorials.append((tcount, tutorial))
+    try:
+        random_tutorials_ids = list(TutorialSummaryCache.objects.all().values_list('id', flat=True))
+        sample_ids = sample(random_tutorials_ids, 9)
+        random_tutorials = TutorialSummaryCache.objects.filter(id__in=sample_ids).select_related('foss', 'first_tutorial', 'first_tutorial__tutorial_detail', 'first_tutorial__language')
+    except:
+        pass
     try:
         tr_rec = None
         queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2))

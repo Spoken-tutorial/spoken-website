@@ -141,7 +141,6 @@ def get_user_detail(user):
 def get_participant_count(eventid):
   try:
     event = TrainingEvents.objects.get(id=eventid)
-    print()
     if event.training_status <= 1 :
       #completed state
       pcount = Participant.objects.filter(event_id=eventid, reg_approval_status=1).count()
@@ -159,7 +158,6 @@ def get_event_details(eventid):
     event = TrainingEvents.objects.get(id=eventid)
   except TrainingEvents.DoesNotExist:
     return None
-
   return event
 
 @register.filter
@@ -199,8 +197,16 @@ def get_grade(event, testfossid):
 
   return ilwmdlgradeentry.mdlgrade
 
-
-
+@register.filter
+def get_item(dictionary, key):
+   """
+    retrieve a value from a dictionary using either the key or its string representation (handles int/str mismatches).
+    """
+   if key in dictionary:
+      return dictionary[key]
+   elif str(key) in dictionary:
+      return dictionary[str(key)]
+   return None
 
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)

@@ -324,14 +324,15 @@
                     {% endif %}
                 </div>
                 {% endif %}
+                
                 <div class="col-lg-6 col-md-6 col-sm-6 video-lists">
-                    {% for k, record in random_tutorials %}
+                    {% for item in random_tutorials %}
                         <div class="video-item">
                             <div class="thump">
-                                <a href="/watch/{{ record.tutorial_detail.foss.foss|get_url_name }}/{{ record.tutorial_detail.tutorial|get_url_name }}/{{ record.language }}">
-                                    <img alt="{{ record.tutorial_detail.tutorial }}" src="{{ record.tutorial_detail|get_thumb_path:'Small' }}">
+                                <a href="/watch/{{ item.foss.foss|get_url_name }}/{{ item.first_tutorial.tutorial_detail.tutorial|get_url_name }}/{{ item.first_tutorial.language }}">
+                                    <img alt="{{ item.first_tutorial.tutorial_detail.tutorial }}" src="{{ item.first_tutorial.tutorial_detail|get_thumb_path:'Small' }}">
                                     <div class="video-item-playlist">
-                                    <h5> {{ record.tutorial_detail.foss.foss }} {{ k }} +</h5>
+                                    <h5> {{ item.foss.foss }} {{ item.tutorial_count }} +</h5>
                                     </div>
                                 </a>
                             </div>
