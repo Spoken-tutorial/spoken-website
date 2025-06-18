@@ -647,27 +647,48 @@ def ilw_stats(request):
     femalecount =0
     malecount =0
 
+    qs = collection.qs.select_related('state', 'foss', 'host_college')
     if status == REG_COMPLETED:
-        participants = Participant.objects.filter(event_id__in=collection.qs, reg_approval_status=1)
+        participants = Participant.objects.filter(event_id__in=qs, reg_approval_status=1)
         pcount = participants.count()
         femalecount = participants.filter(gender__in=('f','F','female','Female','FEMALE')).count()
         malecount = participants.filter(gender__in=('m','M','male','Male','MALE')).count()
         
     
     elif status == CLOSED_TRAINING:
-        participants = EventAttendance.objects.filter(event_id__in=collection.qs)
+        participants = EventAttendance.objects.filter(event_id__in=qs)
         pcount=participants.count()
         femalecount = participants.filter(participant__gender__in=('f','F','female','Female','FEMALE')).count()
         malecount = participants.filter(participant__gender__in=('m','M','male','Male','MALE')).count()
-
     
     context['form'] = collection.form
     page = request.GET.get('page')
-    collection = get_page(collection.qs, page)
+    collection = get_page(qs, page)
+
+    # map of TrainingEvent id and participant count
+    paginated_qs = collection.object_list
+    ongoing_event_id = []
+    completed_event_id = []
+    
+    for event in paginated_qs:
+        if event.training_status <= 1:
+            ongoing_event_id.append(event.id)
+        elif event.training_status == 2:
+            completed_event_id.append(event.id)
+    
+    participants = list(Participant.objects.filter(event_id__in=ongoing_event_id, reg_approval_status=1).values('event_id').annotate(count=Count('event_id')))
+    ea = list(EventAttendance.objects.filter(event_id__in=completed_event_id).values('event_id').annotate(count=Count('event_id')))
+    
+    event_pcount_map = {}
+    for d in participants + ea:
+        event_pcount_map[d['event_id']] = d['count']
+    
+    # context values
     context['collection'] = collection
     context['header'] = header
     context['participants'] = pcount
     context['femalecount'] = femalecount
     context['malecount'] = malecount
     context['status'] = status
+    context['event_pcount_map'] = event_pcount_map
     return render(request, 'statistics/templates/ilw_stats.html', context)

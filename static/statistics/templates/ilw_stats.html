@@ -149,10 +149,9 @@
             <td>{{ record.event_start_date }}</td>
             <td>{{ record.event_end_date }}</td>
             <td>
-              {% with pcount=record.id|get_participant_count %}
+              {% with pcount=event_pcount_map|get_item:record.id%}
                 {{pcount}}
               {% endwith %}
-
             </td>
             <td>
               {% if record.training_status >= 1 %}
