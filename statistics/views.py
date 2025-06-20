@@ -80,6 +80,10 @@ def get_state_info(request, code):
 
 
 def training(request):
+    okay = False # Temporary hardcoded block
+    if not okay:
+        return render(request, 'statistics/templates/temporary_disabled.html', {})
+
     """ Organiser index page """
     collectionSet = TrainingRequest.objects.filter(
             sem_start_date__lte=datetime.now()
@@ -219,6 +223,9 @@ def training(request):
     return render(request, 'statistics/templates/training.html', context)
 
 def fdp_training(request):
+    okay = False # Temporary hardcoded block
+    if not okay:
+        return render(request, 'statistics/templates/temporary_disabled.html', {})
     """ Organiser index page """
     collectionSet = None
     state = None
@@ -315,6 +322,9 @@ def studentmaster_ongoing(request, rid):
 
 
 def online_test(request):
+    okay = False # Temporary hardcoded block
+    if not okay:
+        return render(request, 'statistics/templates/temporary_disabled.html', {})
     """ Organiser index page """
     collectionSet = None
     participant_count = 0
