@@ -14,7 +14,8 @@ def rate_limited_view(view_func):
         if not whitelisted:
             okay = check_server_status()
             if not okay:
-                return render(request, 'statistics/templates/temporary_disabled.html', {})
+                message = "This page is temporarily unavailable due to high server load. We’re working to restore access soon — thank you for your patience."
+                return render(request, 'statistics/templates/temporary_disabled.html', {"message": message})
             # check rate limit
             key = f'rl:{ip}'
             data = cache.get(key, {'count': 0, 'start': time()})
@@ -22,7 +23,8 @@ def rate_limited_view(view_func):
 
             if now - data['start'] < TIME_WINDOW:
                 if data['count'] >= MAX_REQUEST:
-                    return render(request, 'statistics/templates/temporary_disabled.html', {})
+                    message = "You’ve exceeded the allowed number of requests. Please wait a few moments before trying again."
+                    return render(request, 'statistics/templates/temporary_disabled.html', {"message": message})
                 data['count'] +=1
             else:
                 data = {"count": 1, "start": now}
