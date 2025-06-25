@@ -16,3 +16,7 @@ class Learner(models.Model):
 
     class Meta(object):
         unique_together = (("email"),)
+
+class RateLimitWhitelist(models.Model):
+    ip_address = models.GenericIPAddressField(unique=True)
+    description = models.TextField(blank=True, null=True)

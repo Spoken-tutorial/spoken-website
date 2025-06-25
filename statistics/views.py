@@ -21,6 +21,7 @@ from creation.filters import CreationStatisticsFilter
 from events.views import get_page
 from .forms import LearnerForm
 from django.core.cache import cache
+from spoken.decorators import rate_limited_view
 
 # Create your views here.
 def maphome(request):
@@ -78,12 +79,8 @@ def get_state_info(request, code):
         print(e)
         return HttpResponse('<h4 style="margin: 30px;">Permission Denied!</h4>')
 
-
+@rate_limited_view
 def training(request):
-    okay = False # Temporary hardcoded block
-    if not okay:
-        return render(request, 'statistics/templates/temporary_disabled.html', {})
-
     """ Organiser index page """
     collectionSet = TrainingRequest.objects.filter(
             sem_start_date__lte=datetime.now()
@@ -222,10 +219,8 @@ def training(request):
     context['language'] = Language.objects.values('id','name')
     return render(request, 'statistics/templates/training.html', context)
 
+@rate_limited_view
 def fdp_training(request):
-    okay = False # Temporary hardcoded block
-    if not okay:
-        return render(request, 'statistics/templates/temporary_disabled.html', {})
     """ Organiser index page """
     collectionSet = None
     state = None
@@ -320,11 +315,8 @@ def studentmaster_ongoing(request, rid):
         raise ObjectDoesNotExist()
     return render(request, 'statistics/templates/training_participant.html', context)
 
-
+@rate_limited_view
 def online_test(request):
-    okay = False # Temporary hardcoded block
-    if not okay:
-        return render(request, 'statistics/templates/temporary_disabled.html', {})
     """ Organiser index page """
     collectionSet = None
     participant_count = 0
