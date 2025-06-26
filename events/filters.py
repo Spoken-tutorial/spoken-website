@@ -257,30 +257,19 @@ class TrainingRequestFilter(django_filters.FilterSet):
         pass
     choices = None
     if user:
+      states = set(ResourcePerson.objects.filter(user=user).values_list('state_id', flat=True))
       if rp_completed:
-        foss_list = TrainingRequest.objects.filter(
-          status = 1,
-          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
-        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+        courses = TrainingRequest.objects.filter(status=1, training_planner__academic__state_id__in=states).values_list('course_id', flat=True).distinct()
       elif rp_ongoing:
-        foss_list = TrainingRequest.objects.filter(
-          status = 0,
-          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
-        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+        courses = TrainingRequest.objects.filter(status=0, training_planner__academic__state_id__in=states).values_list('course_id', flat=True).distinct()
       elif rp_markcomplete:
-        foss_list = TrainingRequest.objects.filter(
-          status = 2,
-          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
-        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+        courses = TrainingRequest.objects.filter(status=2, training_planner__academic__state_id__in=states).values_list('course_id', flat=True).distinct()
       elif rp_pendingattendance:
-        foss_list = TrainingRequest.objects.filter(
-          status = 1,
-          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
-        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+        courses = TrainingRequest.objects.filter(status=1, training_planner__academic__state_id__in=states).values_list('course_id', flat=True).distinct()
       else:
-        foss_list = TrainingRequest.objects.filter(
-          training_planner__academic__state_id__in=user.resourceperson_set.all().values_list('state_id').distinct()
-        ).order_by('course__foss__foss').values_list('course__foss__id', 'course__foss__foss').distinct()
+        courses = TrainingRequest.objects.filter(training_planner__academic__state_id__in=states).values_list('course_id', flat=True).distinct()
+      foss_list = CourseMap.objects.filter(id__in=list(courses)).values_list('foss_id', 'foss__foss').distinct().order_by('foss__foss')
+
       choices = [('', '---------')] + list(foss_list)
       self.filters['course__foss'].extra.update(
         {'choices' : choices}
