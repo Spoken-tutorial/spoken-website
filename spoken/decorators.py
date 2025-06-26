@@ -1,17 +1,29 @@
 from .utils import check_server_status
 from django.shortcuts import render
 from django.core.cache import cache
-from statistics.models import RateLimitWhitelist
+from statistics.models import WhitelistedIP
 from time import time
 from .config import TIME_WINDOW, MAX_REQUEST
+import ipaddress
+
+
+def is_ip_whitelisted(ip_str):
+    ip = ipaddress.ip_address(ip_str)
+    for entry in WhitelistedIP.objects.all():
+        try:
+            net = ipaddress.ip_network(entry.ip_address, strict=False)
+            if ip in net:
+                return True
+        except ValueError:
+            continue
+    return False
 
 
 def rate_limited_view(view_func):
     def _wrapped_view(request, *args, **kwargs):
         ip = request.META.get("REMOTE_ADDR")
-        whitelisted = RateLimitWhitelist.objects.filter(ip_address=ip).exists()
 
-        if not whitelisted:
+        if not is_ip_whitelisted(ip):
             okay = check_server_status()
             if not okay:
                 message = "This page is temporarily unavailable due to high server load. We’re working to restore access soon — thank you for your patience."

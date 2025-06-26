@@ -1,6 +1,8 @@
 # Third Party Stuff
 from builtins import object
 from django.db import models
+from django.core.exceptions import ValidationError
+import ipaddress
 
 # Spoken Tutorial Stuff
 from creation.models import FossCategory
@@ -17,6 +19,15 @@ class Learner(models.Model):
     class Meta(object):
         unique_together = (("email"),)
 
-class RateLimitWhitelist(models.Model):
-    ip_address = models.GenericIPAddressField(unique=True)
+class WhitelistedIP(models.Model):
+    ip_address = models.CharField(max_length=43, unique=True, help_text="Enter an IP address or CIDR range (IPv4/IPv6)")  
     description = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.ip_address
+
+    def clean(self):
+        try:
+            ipaddress.ip_network(self.ip_address, strict=False)
+        except ValueError:
+            raise ValidationError({'ip_address': "Invalid IP or CIDR notation."})

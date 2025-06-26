@@ -1,4 +1,4 @@
 from django.contrib import admin
-from .models import RateLimitWhitelist
+from .models import WhitelistedIP
 
-admin.site.register(RateLimitWhitelist)
+admin.site.register(WhitelistedIP)
