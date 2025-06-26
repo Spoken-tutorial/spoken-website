@@ -7,7 +7,7 @@ def check_server_status():
         load1, load5, load15 = os.getloadavg() # CPU load average        
         cpu_cores = os.cpu_count()
         # rule 1 - load
-        if load1 > ( cpu_cores * load1 ):
+        if load1 > ( cpu_cores * MAX_LOAD_1 ):
             return False
 
         # rule 2 - ram 
