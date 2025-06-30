@@ -2,6 +2,7 @@
 from builtins import str
 from datetime import datetime
 import collections
+from hashlib import md5
 # Third Party Stuff
 from django.core.exceptions import PermissionDenied,ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -81,6 +82,159 @@ def get_state_info(request, code):
 
 @rate_limited_view
 def training(request):
+    """ Organiser index page """
+    stats_key = 'stats:' + md5(str(sorted(request.GET.items())).encode()).hexdigest()
+    cached_page = cache.get(stats_key)
+    if cached_page:
+        return HttpResponse(cached_page)
+    collectionSet = TrainingRequest.objects.filter(
+            sem_start_date__lte=datetime.now()
+        ).select_related('training_planner__academic__state', 'training_planner__academic__city', 'training_planner__organiser__user', 'course', 'course__foss', 'department').order_by('-sem_start_date')
+    state = None
+    TRAINING_COMPLETED = '1'
+    TRAINING_PENDING = '0'
+    if request.method == 'GET':
+        status = request.GET.get('status')
+        print(f"\033[93m status ******* {status} \033[0m")
+        if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
+            status = TRAINING_COMPLETED
+
+        lang= request.GET.get('lang')
+        if status == TRAINING_COMPLETED:
+            if lang and '---------' not in lang:
+                print(f"\033[92m Lang ******* \033[0m")
+                training_attend_lang = TrainingAttend.objects.filter(language__name=lang).values_list('training_id').distinct()
+                collectionSet= collectionSet.filter(id__in=training_attend_lang)
+        
+        
+    if status == TRAINING_PENDING:
+        collectionSet = collectionSet.filter(participants=0, status=TRAINING_COMPLETED)
+        
+    else:
+        collectionSet = collectionSet.filter(participants__gt=0)
+    header = {
+        1: SortableHeader('#', False),
+        2: SortableHeader('training_planner__academic__state__name', True, 'State'),
+        3: SortableHeader('training_planner__academic__city__name', True, 'City'),
+        4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
+        5: SortableHeader('course__foss__foss', True, 'FOSS'),
+        6: SortableHeader('department', True, 'Department'),
+        7: SortableHeader('course__category', True, 'Type'),
+        8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
+        9: SortableHeader('sem_start_date', True, 'Date'),
+        10: SortableHeader('participants', 'True', 'Participants'),
+        11: SortableHeader('Action', False)
+    }
+
+    raw_get_data = request.GET.get('o', None)
+    collection = get_sorted_list(request, collectionSet, header, raw_get_data)
+    ordering = get_field_index(raw_get_data)
+
+    
+    # find state id
+    if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
+        state = State.objects.get(id=request.GET['training_planner__academic__state'])
+    collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
+    # find participants count
+    
+    participants = collection.qs.aggregate(Sum('participants'))
+    
+
+    if lang == 'English':
+        participants = participants['participants__sum']+294593
+
+    else:
+        participants = participants['participants__sum']
+
+    chart_query_set = collection.qs.extra(select={'year': "EXTRACT(year FROM sem_start_date)"}).values('year').order_by(
+            '-year').annotate(total_training=Count('sem_start_date'), total_participant=Sum('participants'))
+    chart_data = ''
+    
+    get_year = []
+    pending_attendance_participant_count = 0
+    key = ''.join('None' if i == '' or i == '---------' else str(i).replace(" ", "") for i in request.GET.values())
+    key = key if key else 'NoneNoneNoneNoneNoneNoneNoneNoneNoneNone1'
+    # female_key = key + 'female'
+    # male_key = key + 'male'
+    # femalecount = cache.get(female_key)
+    # malecount = cache.get(male_key)
+    # if status != 0:
+    #     if not femalecount or not malecount:
+    #         gender_counts = TrainingAttend.objects.filter(training__in=collection.qs).values('student__gender').annotate(gender_count=Count('student__gender'))
+
+    #         for item in gender_counts:
+    #             if item['student__gender'] == 'Female':
+    #                 femalecount = item['gender_count']
+    #             if item['student__gender'] == 'Male':
+    #                 malecount = item['gender_count']
+    #         try:
+    #             cache.set(female_key, femalecount)
+    #             cache.set(male_key, malecount)
+    #         except Exception:
+    #             print('Error setting cache key values')
+
+    year_data_all=dict()
+    visited=dict()
+    if status == TRAINING_PENDING:
+
+        pending_attendance_student_batches = StudentBatch.objects.filter(
+            id__in=(collection.qs.filter(status=TRAINING_COMPLETED,participants=0,batch_id__gt=0).values('batch_id'))
+            )
+        pending_attendance_training = collection.qs.filter(batch_id__in = pending_attendance_student_batches.filter().values('id')).distinct()
+
+        for batch in pending_attendance_student_batches:
+            pending_attendance_participant_count += batch.stcount
+        for a_traning in pending_attendance_training:
+            if a_traning.batch_id not in visited:
+                if a_traning.sem_start_date.year in year_data_all:
+                    visited[a_traning.batch_id] = [a_traning.batch_id]
+                    year_data_all[a_traning.sem_start_date.year] +=  a_traning.batch.stcount
+                else:
+                    visited[a_traning.batch_id] = [a_traning.batch_id]
+                    year_data_all[a_traning.sem_start_date.year] =  a_traning.batch.stcount
+
+
+    if status == TRAINING_COMPLETED:
+        for data in chart_query_set:
+            chart_data += "['" + str(data['year']) + "', " + str(data['total_participant']) + "],"
+    else:
+        for year,count in list(year_data_all.items()):
+            chart_data += "['" + str(year) + "', " + str(count) + "],"
+    
+    no_of_colleges=collection.qs.filter().values('training_planner__academic_id').distinct().count()
+    context = {}
+    context['form'] = collection.form
+    context['chart_data'] = chart_data
+    page = request.GET.get('page')    
+    collection = get_page(collection.qs, page )
+    context['collection'] = collection
+    participants_attended = {}
+    training_ids = [training.id for training in collection.object_list[:10]]
+    data = (TrainingAttend.objects.filter(training_id__in=training_ids).values('training_id').annotate(student_count=Count('student_id')))
+
+    participants_attended = {entry['training_id']: entry['student_count'] for entry in data} 
+    context['participants_attended'] = participants_attended
+    context['header'] = header
+    context['ordering'] = ordering
+    if status == TRAINING_PENDING:
+        context['participants'] = pending_attendance_participant_count
+    else:
+        context['participants'] = participants
+    context['model'] = 'Workshop/Training'
+    context['status']=status
+    # context['femalecount'] = femalecount
+    # context['malecount'] = malecount
+    context['no_of_colleges'] = no_of_colleges
+
+    context['language'] = Language.objects.values('id','name')
+
+    #render without cache
+    response = render(request, 'statistics/templates/training.html', context)
+    cache.set(stats_key, response.content, 60 * 30) # 30 min
+    return response
+
+
+def training1(request):
     """ Organiser index page """
     collectionSet = TrainingRequest.objects.filter(
             sem_start_date__lte=datetime.now()
@@ -217,7 +371,11 @@ def training(request):
     context['no_of_colleges'] = no_of_colleges
 
     context['language'] = Language.objects.values('id','name')
-    return render(request, 'statistics/templates/training.html', context)
+    return render(request, 'statistics/templates/training1.html', context)
+
+
+
+
 
 @rate_limited_view
 def fdp_training(request):
