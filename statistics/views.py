@@ -138,8 +138,6 @@ def training(request):
     # find participants count
     
     participants = collection.qs.aggregate(Sum('participants'))
-    
-
     if lang == 'English':
         participants = participants['participants__sum']+294593
 
@@ -209,7 +207,7 @@ def training(request):
     collection = get_page(collection.qs, page )
     context['collection'] = collection
     participants_attended = {}
-    training_ids = [training.id for training in collection.object_list[:10]]
+    training_ids = [training.id for training in collection.object_list]
     data = (TrainingAttend.objects.filter(training_id__in=training_ids).values('training_id').annotate(student_count=Count('student_id')))
 
     participants_attended = {entry['training_id']: entry['student_count'] for entry in data} 
@@ -451,7 +449,7 @@ def training_participant(request, rid):
     try:
         context['model_label'] = 'Workshop / Training'
         context['model'] = TrainingRequest.objects.get(id=rid)
-        context['collection'] = TrainingAttend.objects.filter(training_id=rid)
+        context['collection'] = TrainingAttend.objects.filter(training_id=rid).select_related('student', 'student__user')
     except Exception as e:
         print(e)
         raise PermissionDenied()
