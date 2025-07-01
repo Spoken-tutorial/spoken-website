@@ -187,8 +187,8 @@
                 {{ record.participants }}
               </td>
               <td>
-                {% if record.get_partipants_from_attendance %}
-                  <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">View Participants</a>
+                {% if record.id in participants_attended %}
+                    <a href="{% url 'statistics:statistics_training_participants' record.id %}" target="_blank">View Participants</a>
                 {% endif %}
               </td>
             {% elif status == '0' %}

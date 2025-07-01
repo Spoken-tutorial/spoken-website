@@ -2,6 +2,9 @@
 from builtins import str
 from datetime import datetime
 import collections
+from hashlib import md5
+from time import sleep
+
 # Third Party Stuff
 from django.core.exceptions import PermissionDenied,ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -82,21 +85,30 @@ def get_state_info(request, code):
 @rate_limited_view
 def training(request):
     """ Organiser index page """
+    stats_key = 'stats:' + md5(str(sorted(request.GET.items())).encode()).hexdigest()
+    cached_page = cache.get(stats_key)
+    while cached_page and cached_page == 'In progress':
+        sleep(60)
+        cached_page = cache.get(stats_key)
+    if cached_page:
+        return HttpResponse(cached_page)
+    cache.set(stats_key, 'In progress', 60 * 30)  # 30 min
     collectionSet = TrainingRequest.objects.filter(
             sem_start_date__lte=datetime.now()
-        ).order_by('-sem_start_date')
+        ).select_related('training_planner__academic__state', 'training_planner__academic__city', 'training_planner__organiser__user', 'course', 'course__foss', 'department').order_by('-sem_start_date')
     state = None
     TRAINING_COMPLETED = '1'
     TRAINING_PENDING = '0'
     if request.method == 'GET':
         status = request.GET.get('status')
-        print('###################', status)
+        print(f"\033[93m status ******* {status} \033[0m")
         if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
             status = TRAINING_COMPLETED
 
         lang= request.GET.get('lang')
         if status == TRAINING_COMPLETED:
             if lang and '---------' not in lang:
+                print(f"\033[92m Lang ******* \033[0m")
                 training_attend_lang = TrainingAttend.objects.filter(language__name=lang).values_list('training_id').distinct()
                 collectionSet= collectionSet.filter(id__in=training_attend_lang)
         
@@ -132,8 +144,6 @@ def training(request):
     # find participants count
     
     participants = collection.qs.aggregate(Sum('participants'))
-    
-
     if lang == 'English':
         participants = participants['participants__sum']+294593
 
@@ -195,15 +205,19 @@ def training(request):
         for year,count in list(year_data_all.items()):
             chart_data += "['" + str(year) + "', " + str(count) + "],"
     
-    no_of_colleges=collection.qs.filter().values('training_planner__academic_id').distinct().count()   
-    print(" ********************** no of colleges: ", no_of_colleges)
-
+    no_of_colleges=collection.qs.filter().values('training_planner__academic_id').distinct().count()
     context = {}
     context['form'] = collection.form
     context['chart_data'] = chart_data
     page = request.GET.get('page')    
     collection = get_page(collection.qs, page )
     context['collection'] = collection
+    participants_attended = {}
+    training_ids = [training.id for training in collection.object_list]
+    data = (TrainingAttend.objects.filter(training_id__in=training_ids).values('training_id').annotate(student_count=Count('student_id')))
+
+    participants_attended = {entry['training_id']: entry['student_count'] for entry in data} 
+    context['participants_attended'] = participants_attended
     context['header'] = header
     context['ordering'] = ordering
     if status == TRAINING_PENDING:
@@ -217,7 +231,12 @@ def training(request):
     context['no_of_colleges'] = no_of_colleges
 
     context['language'] = Language.objects.values('id','name')
-    return render(request, 'statistics/templates/training.html', context)
+
+    #render without cache
+    response = render(request, 'statistics/templates/training.html', context)
+    cache.set(stats_key, response.content, 60 * 30) # 30 min
+    return response
+
 
 @rate_limited_view
 def fdp_training(request):
@@ -293,7 +312,7 @@ def training_participant(request, rid):
     try:
         context['model_label'] = 'Workshop / Training'
         context['model'] = TrainingRequest.objects.get(id=rid)
-        context['collection'] = TrainingAttend.objects.filter(training_id=rid)
+        context['collection'] = TrainingAttend.objects.filter(training_id=rid).select_related('student', 'student__user')
     except Exception as e:
         print(e)
         raise PermissionDenied()
