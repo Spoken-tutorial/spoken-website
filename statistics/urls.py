@@ -9,7 +9,6 @@ urlpatterns =  [ # noqa
     url(r'^get-state-info/(\w+)/$',  get_state_info, name="get_state_info"),
     url(r'^training-onlinetest/$',  training, name="statistics_training"),
     url(r'^training/$',  training, name="statistic_training"),
-    url(r'^training1/$',  training1, name="statistic_training"),
     url(r'^tutorial-content/$',  tutorial_content, name="statistics_content"),
     url(r'^training/(?P<rid>\d+)/participants/$',  training_participant,
         name="statistics_training_participants"),
