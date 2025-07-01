@@ -3,6 +3,8 @@ from builtins import str
 from datetime import datetime
 import collections
 from hashlib import md5
+from time import sleep
+
 # Third Party Stuff
 from django.core.exceptions import PermissionDenied,ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
