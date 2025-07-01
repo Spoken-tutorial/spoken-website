@@ -85,8 +85,12 @@ def training(request):
     """ Organiser index page """
     stats_key = 'stats:' + md5(str(sorted(request.GET.items())).encode()).hexdigest()
     cached_page = cache.get(stats_key)
+    while cached_page and cached_page == 'In progress':
+        sleep(60)
+        cached_page = cache.get(stats_key)
     if cached_page:
         return HttpResponse(cached_page)
+    cache.set(stats_key, 'In progress', 60 * 30)  # 30 min
     collectionSet = TrainingRequest.objects.filter(
             sem_start_date__lte=datetime.now()
         ).select_related('training_planner__academic__state', 'training_planner__academic__city', 'training_planner__organiser__user', 'course', 'course__foss', 'department').order_by('-sem_start_date')
