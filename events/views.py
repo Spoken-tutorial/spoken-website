@@ -60,7 +60,7 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 from django.template.context_processors import csrf
 
 from io import StringIO, BytesIO
-from config import MAX_ROWS, ACADEMIC_CSV_TEMPLATE
+from config import MAX_ROWS, ACADEMIC_CSV_TEMPLATE, MAX_ERROR_COUNT
 
 #randon string
 import string
@@ -689,7 +689,7 @@ def upload_ac_csv(request):
                 ]
         RATING_CHOICES = {1, 2, 3, 4, 5}
         INSTITUTE_CATEGORIES = [x.name for x in InstituteCategory.objects.all()]
-        
+
         form = AcademicCenterCSVUploadForm(request.POST, request.FILES)
         if not form.is_valid():
             messages.error(request, f"Form is not valid: {form.errors}")
@@ -699,7 +699,11 @@ def upload_ac_csv(request):
         
         try:
             decoded_file = csv_file.read().decode('utf-8')
-            reader = list(csv.DictReader(io.StringIO(decoded_file)))  # Convert to list
+            reader = csv.DictReader(io.StringIO(decoded_file))
+            row_count = sum(1 for _ in reader)
+            if row_count > MAX_ROWS:
+                messages.error(request, f"CSV has too many rows ({row_count}). Limit is {MAX_ROWS}.")
+                return redirect('events:new_ac')
         except UnicodeDecodeError:
             messages.error(request, f"File is not UTF-8 encoded. Please upload a valid CSV.")
             return redirect('events:new_ac')
@@ -710,16 +714,13 @@ def upload_ac_csv(request):
         if not reader:
             messages.error(request, f"CSV is empty.")
             return redirect('events:new_ac')
-        
-        if len(reader) > MAX_ROWS:
-            messages.error(request, f"CSV has too many rows ({len(reader)}). Limit is {MAX_ROWS}.")
-            return redirect('events:new_ac')
-            
-        header = reader[0].keys()
+
+        header = reader.fieldnames
         if set(header) != set(EXPECTED_COLUMNS):
             messages.error(request, f"CSV columns do not match the expected format. Expected columns: {', '.join(EXPECTED_COLUMNS)}")
             return redirect('events:new_ac')
         
+        reader = csv.DictReader(io.StringIO(decoded_file))
         # Prepare data
         _states = set()
         _universities = set()
@@ -735,13 +736,13 @@ def upload_ac_csv(request):
 
         # Bulk query
         states = { s.name.lower(): s for s in State.objects.filter(name__in=_states)}
-        universities = { (u.name.lower(), u.state.name.lower()): u for u in University.objects.filter(name__in=_universities)}
-        districts = { (d.name.lower(), d.state.name.lower()): d for d in District.objects.filter(name__in=_districts)}
-        cities = { (c.name.lower(), c.state.name.lower()): c for c in City.objects.filter(name__in=_cities)}
+        universities = { (u.name.lower(), u.state.name.lower()): u for u in University.objects.filter(name__in=_universities).select_related('state')}
+        districts = { (d.name.lower(), d.state.name.lower()): d for d in District.objects.filter(name__in=_districts).select_related('state')}
+        cities = { (c.name.lower(), c.state.name.lower()): c for c in City.objects.filter(name__in=_cities).select_related('state')}
         institution_types = { i.name.lower(): i for i in InstituteType.objects.filter(name__in=_institution_types)}
         
         success_count, failure_count = 0, 0
-        success_institutes, error_rows, validation_errors = [], [], []
+        success_institutes, error_rows, validation_errors, duplicate_val = [], [], [], []
         
         # Inner function
         def get_cleaned_value(row, key, default='', to_lower=True, to_int=False):
@@ -763,8 +764,12 @@ def upload_ac_csv(request):
                 return 1 if val == 'yes' else 0
             else:
                 return 0
-        
+        reader = csv.DictReader(io.StringIO(decoded_file))
         for idx, row in enumerate(reader, start=2): # Start from 2nd row  
+            if failure_count >= MAX_ERROR_COUNT:
+                messages.error(request, "Too many errors. Stopping CSV processing.")
+                break
+
             csv_row_error = False
             # Extract fields
             institution_name = get_cleaned_value(row, 'institution_name', to_lower=False)
@@ -813,7 +818,10 @@ def upload_ac_csv(request):
             if university_val != "":
                 university = universities.get((university_val, state_val))
                 if not university:
-                    university = University.objects.create(state=state, name=university_val, user=request.user)
+                    try:
+                        university = University.objects.create(state=state, name=university_val, user=request.user)
+                    except: 
+                        pass
             else:
                 csv_row_error = True
                 validation_errors.append(f"Error in row: {idx} : {institution_name} --> Please select university.")
@@ -866,6 +874,15 @@ def upload_ac_csv(request):
                     'status': 1,
                     'institute_category': institute_category_obj
                 }
+                filters = {
+                    'institution_name': institution_name,
+                    'state_id': state.id,
+                    'district_id': district.id,
+                    'city_id': city.id,
+                }
+                if AcademicCenter.objects.filter(**filters).exists():
+                    duplicate_val.append((idx, institution_name))
+                    continue
                 academic_center = AcademicCenter.objects.create(**data)
                 success_count += 1
                 success_institutes.append(institution_name)
@@ -880,6 +897,10 @@ def upload_ac_csv(request):
             messages.error(request, f"Academic centers not added.") # display if none of the institutes is added
 
         # Added Errors
+        if len(duplicate_val) > 0:
+            messages.error(request, f"{len(duplicate_val)} Duplicate enteries detected as listed below. These academic centers already exist for given state, district & city. ")
+            for entry in duplicate_val:
+                messages.warning(request, f"Duplicate entry : Row {entry[0]} - {entry[1]}")
         if failure_count > 0:
             messages.error(request, f"{failure_count} rows failed to upload.")
             for row, err in error_rows:
@@ -887,6 +908,7 @@ def upload_ac_csv(request):
         if len(validation_errors) > 0:
             for error in validation_errors:
                 messages.warning(request, error)
+        
     return redirect('events:new_ac')
 
 
