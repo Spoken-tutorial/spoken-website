@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^ac/$',  ac, name='ac'),
     url(r'^ac/new/$',  new_ac, name='new_ac'),
     url(r'^ac/(\d+)/edit/$',  edit_ac, name='edit_ac'),
+    url(r'^ac/upload/$',  upload_ac_csv, name='upload_ac_csv'),
     
     #url(r'^xmlparse/$',  xmlparse', name='xmlparse'),
     #url(r'^pdf/$',  pdf', name='pdf'),
