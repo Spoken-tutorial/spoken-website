@@ -270,8 +270,9 @@ def internal_computation(request, user_type):
             for rec in tr_recs:
                 filepath = 'videos/{}/{}/{}'.format(key, rec.tutorial_detail_id, rec.video)
                  # get list of questions of a particular tutorial
-                question_s = Question.objects.filter(category=foss_rec.foss.replace(' ','-'),tutorial=rec.tutorial_detail.tutorial.replace(' ','-')).order_by('-date_created')
-
+                # Temporarily disable questions
+                # question_s = Question.objects.filter(category=foss_rec.foss.replace(' ','-'),tutorial=rec.tutorial_detail.tutorial.replace(' ','-')).order_by('-date_created')
+                question_s = Question.objects.none()
 
                 if os.path.isfile(settings.MEDIA_ROOT + filepath):
                     archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
