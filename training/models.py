@@ -13,6 +13,7 @@ import json
 EVENT_TYPE_CHOICES =(
 	('', '-----'), ('FDP', 'Faculty Development Program (FDP)'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
 ), ('SSDP', 'School Students  Development Program'), ('PDP', 'Professional Development Program'), ('CDP', 'Community Development Program'),
+('HN', 'Health And Nutrition Program'),
 	)
 
 
@@ -91,6 +92,7 @@ class Participant(models.Model):
 	registartion_type = models.PositiveSmallIntegerField(choices= REGISTRATION_TYPE_CHOICES, default=1)
 	created = models.DateTimeField(auto_now_add = True)
 	foss_language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True )
+	language_hn = models.IntegerField( null=True, blank=True )
 	payment_status = models.ForeignKey(Payee, on_delete=models.PROTECT, null=True)
 	reg_approval_status = models.PositiveSmallIntegerField(default=0)
 	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
@@ -172,4 +174,11 @@ class EventTestStatus(models.Model):
 	updated = models.DateTimeField(auto_now = True)
 
 
-	
+class ExternalCourseMap(models.Model):
+	"""mapping of spoken foss id & external course ids"""
+	foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT)
+	external_course = models.IntegerField() # HN category id
+	tag = models.CharField(max_length=120) # Tag for external projects
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
+

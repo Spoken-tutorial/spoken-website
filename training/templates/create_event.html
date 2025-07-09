@@ -58,7 +58,7 @@
 				<label class="col-sm-3 control-label" for= "id_city">City <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.city class+="form-control city" %}
-				{{ form.state.errors }}
+				{{ form.city.errors }}
 				</div>
 			</div>
 
@@ -77,8 +77,8 @@
 				{{ form.company.errors }}
 				</div>
 			</div>
-			<div class="form-group" id="company">
-				<label class="col-sm-3 control-label" for= "id_company">Course Name</label>
+			<div class="form-group" id="ilw_course">
+				<label class="col-sm-3 control-label" for= "id_ilw_course">Course Name</label>
 				<div class="col-sm-9">
 				{% render_field form.ilw_course class+="form-control ilw_course" maxlength="200" %}
 				{{ form.ilw_course.errors }}
@@ -86,7 +86,7 @@
 				</div>
 			</div>
 			<div class="form-group" id="checkbox">
-				<label class="col-sm-3 control-label" for= "id_company">Is Course?</label>
+				<label class="col-sm-3 control-label" for= "is_course">Is Course?</label>
 				<div class="col-sm-1">
 				{% render_field form.is_course class+="form-control is_course" %}
 				{{ form.is_course.errors }}
@@ -204,7 +204,7 @@
    	var stateid  = $(this).val();
 	var event_type  = $('#id_event_type').val();
 
-	if(event_type === "PDP" || event_type === "CDP"){
+	if(event_type === "PDP" || event_type === "CDP" || event_type === "HN"){
 		// Display cities associated with the selected state
 		ajaxStrateFillDatas('', 'city', '');
 	}else{
@@ -224,23 +224,32 @@
 	}	
    	});
 
-	$('#id_event_type').change(function(){		
+	$('#id_event_type').change(function(){
 		var event_type = $(this).val();
+		// var state = $("#id_state").val("");
+
+		// reset state 
+		if(event_type === "PDP" || event_type === "CDP" || event_type === "HN"){
+			var state = $("#id_state").val("");
+		}
+		
 		// Change visibility of college, company & city based on event type
 		$('#company').toggle(event_type === "PDP");
-		$('#city').toggle(event_type === "PDP" || event_type === "CDP");
-		$('#institute').toggle(event_type !== "PDP" && event_type !== "CDP");
+		$('#city').toggle(event_type === "PDP" || event_type === "CDP" || event_type === "HN");
+		$('#institute').toggle(event_type !== "PDP" && event_type !== "CDP" && event_type !== "HN");
 
 		// Set default college [IIT Bombay (academic id : 621)] and fees if event type is PDP or CDP
 		const host_college = $('#id_host_college');
 		const event_fee = $('#id_event_fee')
 		if(event_type === "PDP"){
 			event_fee.val("{{ pdp_fee }}");
-			host_college.val(621); 
+			host_college.val({{ DEFAULT_ILW_HOST_COLLEGE }}); 
 
 		}else if(event_type === "CDP"){
 			event_fee.val("{{ cdp_fee }}");
-			host_college.val(621); 
+			host_college.val({{ DEFAULT_ILW_HOST_COLLEGE }}); 
+		}else if(event_type === "HN"){
+			host_college.val({{ DEFAULT_ILW_HOST_COLLEGE }}); 
 		}	
 	});
   });

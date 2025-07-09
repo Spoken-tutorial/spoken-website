@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import ILWFossMdlCourses, Company, CompanyType
+from .models import ILWFossMdlCourses, Company, CompanyType, ExternalCourseMap
 
 class CompanyAdmin(admin.ModelAdmin):
     pass
@@ -12,4 +12,4 @@ class CompanyTypeAdmin(admin.ModelAdmin):
 admin.site.register(ILWFossMdlCourses)
 admin.site.register(Company, CompanyAdmin)
 admin.site.register(CompanyType, CompanyTypeAdmin)
-
+admin.site.register(ExternalCourseMap)
