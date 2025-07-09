@@ -10,6 +10,7 @@ import phonenumbers
 from spoken.config import DEFAULT_ILW_HOST_COLLEGE
 from health_app.models import *
 
+CITY_DEPENDENT_EVENTS=['HN', 'PDP', 'CDP']
 class CreateTrainingEventForm(forms.ModelForm):
     ilw_course = forms.CharField(required=False)
     event_coordinator_email = forms.CharField(required = False)
@@ -26,7 +27,7 @@ class CreateTrainingEventForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         selected_state = self.data.get('state')
         event_type = self.data.get('event_type')
-        if event_type in ['HN', 'PDP', 'CDP']:
+        if event_type in CITY_DEPENDENT_EVENTS:
             self.fields['host_college'].queryset = AcademicCenter.objects.filter(id=DEFAULT_ILW_HOST_COLLEGE)
         else:
             self.fields['host_college'].queryset = AcademicCenter.objects.filter(state=selected_state)
@@ -40,7 +41,7 @@ class CreateTrainingEventForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         event_type = cleaned_data.get('event_type')
-        if event_type in ['HN', 'PDP', 'CDP']:
+        if event_type in CITY_DEPENDENT_EVENTS:
             cleaned_data['host_college'] = AcademicCenter.objects.get(id=DEFAULT_ILW_HOST_COLLEGE)
         return cleaned_data
 
@@ -56,7 +57,7 @@ class EditTrainingEventForm(CreateTrainingEventForm):
                 self.fields['foss_data'].initial = self.instance.course.foss.all()
             event_type = self.instance.event_type
             selected_state = self.instance.state
-            if event_type in ['HN', 'PDP', 'CDP']:
+            if event_type in CITY_DEPENDENT_EVENTS:
                 self.fields['city'].queryset = City.objects.filter(state=selected_state)
             else:
                 self.fields['host_college'].queryset = AcademicCenter.objects.filter(state=selected_state)
