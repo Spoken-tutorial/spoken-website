@@ -139,7 +139,7 @@
                           {{ form.state.errors }}
                       </div>
                   </div>
-                  {% if event_obj.event_type == "CDP" or event_obj.event_type == "PDP" %}
+                  {% if event_obj.event_type == "CDP" or event_obj.event_type == "PDP" or event_obj.event_type == "HN" %}
                     <div class="form-group">
                       <label for="id_city" class="col-lg-4 control-label">City*</label>
                       <div class="col-lg-8">
@@ -148,7 +148,7 @@
                       </div>
                     </div>
                   {% endif %}
-                  {% if event_obj.event_type == "CDP" or event_obj.event_type == "PDP" %}
+                  {% if event_obj.event_type == "CDP" or event_obj.event_type == "PDP" or event_obj.event_type == "HN" %}
                     <input type="hidden" id="id_college" class="form-control"  name="college"  value="621">
                     <input type="hidden" id="id_event_type" class="form-control"  name="event_type"  value="{{event_obj.event_type}}">
                    
@@ -188,23 +188,33 @@
                   <div class="form-group">
                   <label for="id_foss" class="col-lg-4 control-label" name="foss_id">FOSS* </label>
                   <div class="col-lg-8">
-                      <div class="form-control">{{ event_obj.course.foss.all|join:", " }}</div>
+                      <div class="form-control" style="height: 80px;;" >{{ event_obj.course.foss.all|join:", " }}</div>
                   </div>
                   </div>
                   {% if langs %}
                   <div class="form-group">
-                  <label for="id_foss_language" class="col-lg-4 control-label">Language* </label>
-                  <div class="col-lg-8">
-                      {% render_field form.foss_language class+="form-control foss_language"  %}
-                      {{ form.name.errors }}
-                        <span class="help-block">Select Language of Tutorial Instructions
-                        <br>English language will be offered by default in CD-content.
-                        <br>In addition, you can choose any other language also.
-                        </span>
-
-
+                    <label for="id_foss_language" class="col-lg-4 control-label">Language* </label>
+                    <div class="col-lg-8">
+                        {% render_field form.foss_language class+="form-control foss_language"  %}
+                        {{ form.name.errors }}
+                          <span class="help-block">Select Language of Tutorial Instructions
+                          <br>English language will be offered by default in CD-content.
+                          <br>In addition, you can choose any other language also.
+                          </span>
+                    </div>
                   </div>
-
+                  {% endif %}
+                   {% if language_hn %}
+                  <div class="form-group">
+                    <label for="id_foss_language" class="col-lg-4 control-label">Language* </label>
+                    <div class="col-lg-8">
+                        {% render_field form.language_hn class+="form-control language_hn"  %}
+                        {{ form.language_hn.errors }}
+                          <span class="help-block">Select Language of Tutorial Instructions
+                          <br>English language will be offered by default in CD-content.
+                          <br>In addition, you can choose any other language also.
+                          </span>
+                    </div>
                   </div>
                   {% endif %}
                   {% if user|is_user_paid %}
@@ -237,14 +247,14 @@
                         <div class=" col-md-offset-4 col-md-4">
                           {% if  user|is_user_paid %}
                           <!-- if user belongs to a paid college -->
-                          <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" disabled>Register
+                          <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" disabled>Register 1
                           </button>
-      <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled  style="display:none;">Make Payment</button>
+      <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled  style="display:none;">Make Payment 1</button>
                           {% else %}
                           <!-- all other -->
-                          <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" style="display:none;">Register
+                          <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" style="display:none;">Register 2
                           </button>
-                          <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled >Make Payment</button>
+                          <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled >Make Payment 2</button>
                           {% endif %}
                         </div>
                       </div>
@@ -373,7 +383,7 @@ $('#id_state').change(function(){
   var event_type  = "{{event_obj.event_type}}";
   var stateid  = $('#id_state').val();
    	show_clg_list();
-     if(event_type === "PDP" || event_type === "CDP"){
+     if(event_type === "PDP" || event_type === "CDP" || event_type === "HN"){
 		    ajaxStrateFillDatas('', 'city', '');
       }else{
         show_clg_list();
@@ -382,10 +392,9 @@ $('#id_state').change(function(){
 
 
 $('#id_gender').change(function(){
-    var stateid = $('#id_state').val();
     var college = $('#id_college').val();
     var saved_college = $('#college_user_details').val();
-    if( stateid && (college||saved_college))
+    if(college||saved_college)
     {
       $('#amount_back').show();
       payment_btn_activate();
@@ -452,6 +461,9 @@ $('#id_email').on('focusout',function(){
 
  $( document ).ready(function() {
 
+  var state = $("#id_state").val();
+  $('#id_state').val(state).trigger('change');
+
   // Handle company select & input option
   const selectCompany = $('#id_company');
   const inputCompany = $('#id_new_company');
@@ -514,8 +526,6 @@ $('#pwd').on('focusout',function(){
                 },
     error: function(data){
       alert("Pulling up your data ... Hold on !!!");
-      console.log("error data for ilw: ");
-                  console.log(data);
                   location.reload();
                 },
     });

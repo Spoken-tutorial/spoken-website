@@ -40,6 +40,8 @@ import os, sys
 from string import Template
 import subprocess
 from events.certificates import get_organization, get_signature
+from health_app.models import TopicCategory, HNContributorRole, HNLanguage
+from spoken.config import HN_API
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -70,6 +72,7 @@ class TrainingEventCreateView(CreateView):
 		context['cdp_fee']=settings.CDP_FEE
 		fossess = FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id'))
 		context['fossess']=fossess
+		context['DEFAULT_ILW_HOST_COLLEGE']=DEFAULT_ILW_HOST_COLLEGE
 		return render(self.request, self.template_name, context)
 
 	def form_valid(self, form, **kwargs):
@@ -138,6 +141,8 @@ class TrainingEventsListView(ListView):
 		context['events'] =  self.events
 		context['show_myevents'] = self.show_myevents
 		context['ILW_ONLINE_TEST_URL'] = settings.ILW_ONLINE_TEST_URL
+		context['HN_API'] = HN_API
+		
 		if self.request.user:
 			context['user'] = self.request.user
 		return context
@@ -205,10 +210,13 @@ def register_user(request):
 			return render(request, 'error.html', {'error': 'Callback url not mentioned'})
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
-			langs = Language.objects.filter(id__in =
-				TutorialResource.objects.filter(
-				tutorial_detail__foss = event_register.foss, status=1).exclude(
-					language=event_register.Language_of_workshop).values('language').distinct())
+			if event_register.event_type == 'HN':
+				ExternalCourseMap.objects.filter(foss=foss)
+			else:
+				langs = Language.objects.filter(id__in =
+					TutorialResource.objects.filter(
+					tutorial_detail__foss = event_register.foss, status=1).exclude(
+						language=event_register.Language_of_workshop).values('language').distinct())
 			context["langs"] = langs
 			form.fields["foss_language"].queryset = langs
 			gst = float(event_register.event_fee)* 0.18
@@ -235,11 +243,19 @@ def register_user(request):
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
 			fosses = event_register.course.foss.all()
-			langs = Language.objects.filter(id__in = 
-				TutorialResource.objects.filter(
-				tutorial_detail__foss__in = fosses, status=1).exclude(
-					language=event_register.Language_of_workshop).values('language').distinct())
-			context["langs"] = langs
+			if event_register.event_type == 'HN':
+				hn_categories = [x.external_course for x in ExternalCourseMap.objects.filter(foss__in=fosses)]
+				topic_categories = TopicCategory.objects.filter(category_id__in=hn_categories).values_list('topic_category_id', flat=True)
+				languages = HNContributorRole.objects.filter(topic_cat_id__in=topic_categories).values_list('language_id', flat=True)
+				langs = HNLanguage.objects.filter(lan_id__in=languages).distinct()
+				context["language_hn"] = langs
+				form.fields["language_hn"].queryset = langs
+			else:
+				langs = Language.objects.filter(id__in = 
+					TutorialResource.objects.filter(
+					tutorial_detail__foss__in = fosses, status=1).exclude(
+						language=event_register.Language_of_workshop).values('language').distinct())
+				context["langs"] = langs
 			form.fields["foss_language"].queryset = langs
 			gst = float(event_register.event_fee)* 0.18
 			context["gst"] = gst
@@ -266,7 +282,6 @@ def reg_success(request, user_type):
 		event = TrainingEvents.objects.get(id=event_obj)
 		
 		form = RegisterUser(request.POST)
-
 		event_type = request.POST.get('event_type', '')
 		if form.is_valid():
 			form_data = form.save(commit=False)
@@ -277,17 +292,16 @@ def reg_success(request, user_type):
 				form_data.source = source
 			if not event_type in ['PDP', 'CDP']:
 				try:
-					form_data.college = AcademicCenter.objects.get(institution_name=request.POST.get('college'))
-				except:
+					college = request.POST.get('college')
+					form_data.college = AcademicCenter.objects.get(Q(institution_name=college) | Q(id=college))
+				except Exception as e:
 					form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
 			else:
 				city_obj = City.objects.get(id=city)	
 				form_data.city = city_obj
-				print(f"\033[94m city : {city_obj} \033[0m")
 				form_data.college = AcademicCenter.objects.get(id=request.POST.get('college'))	
 				if company:
-					comp_obj = Company.objects.get(id=company)	
-					print(f"\033[94m company : {comp_obj} \033[0m")
+					comp_obj = Company.objects.get(id=company)
 					form_data.company = comp_obj
 				else:
 					try:

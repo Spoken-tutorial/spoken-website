@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     'ckeditor',
     'cron',
     'ilwmoodle',
+    'health_app',
 ]
 
 
@@ -182,6 +183,14 @@ DATABASES = {
         'PASSWORD': FDB_PASS,	
         'HOST': '',                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
         'PORT': '',                  # Set to empty string for default.	
+    },
+    'healthdb': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': HN,
+        'USER': HN_USER,
+        'PASSWORD': HN_PASS,
+        'HOST': HN_HOST,
+        'PORT': HN_PORT,
     }
         
 }
@@ -275,7 +284,8 @@ DATABASE_ROUTERS = [
     'ilwmoodle.router.ILWMoodleRouter',
     'cdeep.router.CdeepRouter',
     'workshop.router.WorkshopRouter',
-    'forums.router.ForumsRouter'
+    'forums.router.ForumsRouter',
+    'health_app.router.HealthRouter'
 ]
 #AUTHENTICATION_BACKENDS = ( 'mdldjango.backend.MdlBackend', )
 

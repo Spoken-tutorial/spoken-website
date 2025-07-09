@@ -4,6 +4,9 @@ from training.models import *
 from cms.models import Profile
 from django import template
 from datetime import datetime,date
+from health_app.models import HNLanguage, Category
+from spoken.config import HN_URL
+
 register = template.Library()
 
 def is_user_paid(user_obj):
@@ -208,8 +211,46 @@ def get_item(dictionary, key):
       return dictionary[str(key)]
    return None
 
+
+@register.filter
+def get_hn_categories(event):
+  foss_ids = [x.id for x in event.course.foss.all()]
+  categories = [str(x.external_course) for x in ExternalCourseMap.objects.filter(foss_id__in=foss_ids)]
+  return ','.join(categories)
+
+@register.filter
+def get_hn_tutorial_links(event):
+   foss_ids = [x.id for x in event.course.foss.all()]
+   categories = [str(x.external_course) for x in ExternalCourseMap.objects.filter(foss_id__in=foss_ids)]
+   data = []
+   categories = Category.objects.filter(category_id__in=categories)
+   for item in categories:
+      url = f"{HN_URL}?categoryName={item.category_id}"
+      data.append((item.category_name, url))
+   return data
+
+@register.filter
+def get_hn_test(event):
+   # Get all FOSS categories linked to the event
+   fosses = FossCategory.objects.filter(id__in=event.course.foss.values_list('id', flat=True))
+   # Collect quiz IDs for each FOSS
+   quiz_sets = [
+        set(ILWFossMdlCourses.objects.filter(foss=foss).values_list('mdlquiz_id', flat=True))
+        for foss in fosses
+    ]
+   # Find common quiz IDs across all FOSS
+   common_quiz = set.intersection(*quiz_sets) if quiz_sets else set()
+   if not common_quiz:
+      return None, None, None
+   fm = ILWFossMdlCourses.objects.filter(mdlquiz_id__in=common_quiz, foss__in=fosses).first()
+   if fm:
+      return fm.mdlquiz_id, fm.mdlcourse_id, fm.foss_id
+   else:
+      return None, None, None
+
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)
 register.filter('is_user_registered', is_user_registered)
 register.filter('format_date', format_date)
 register.filter('is_event_closed', is_event_closed)
+

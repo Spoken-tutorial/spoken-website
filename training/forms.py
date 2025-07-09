@@ -7,15 +7,45 @@ from events.models import *
 from training.models import *
 from .validators import validate_csv_file
 import phonenumbers
+from spoken.config import DEFAULT_ILW_HOST_COLLEGE
+from health_app.models import *
 
+CITY_DEPENDENT_EVENTS=['HN', 'PDP', 'CDP']
 class CreateTrainingEventForm(forms.ModelForm):
     ilw_course = forms.CharField(required=False)
     event_coordinator_email = forms.CharField(required = False)
     event_coordinator_contact_no = forms.CharField(required = False)
     foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id')))
+    city = forms.ModelChoiceField(queryset=City.objects.none(), required=False)
+    host_college = forms.ModelChoiceField(queryset=AcademicCenter.objects.none(), required=False)
+    
     class Meta(object):
         model = TrainingEvents
         exclude = ['entry_user', 'training_status', 'Language_of_workshop', 'foss']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        selected_state = self.data.get('state')
+        event_type = self.data.get('event_type')
+        if event_type in CITY_DEPENDENT_EVENTS:
+            self.fields['host_college'].queryset = AcademicCenter.objects.filter(id=DEFAULT_ILW_HOST_COLLEGE)
+        else:
+            self.fields['host_college'].queryset = AcademicCenter.objects.filter(state=selected_state)
+        if selected_state:
+            self.fields['city'].queryset = City.objects.filter(state=selected_state)
+        else:            
+            self.fields['city'].queryset = City.objects.none()
+
+    
+
+    def clean(self):
+        cleaned_data = super().clean()
+        event_type = cleaned_data.get('event_type')
+        if event_type in CITY_DEPENDENT_EVENTS:
+            cleaned_data['host_college'] = AcademicCenter.objects.get(id=DEFAULT_ILW_HOST_COLLEGE)
+        return cleaned_data
+
+    
     
 
 class EditTrainingEventForm(CreateTrainingEventForm):
@@ -25,6 +55,13 @@ class EditTrainingEventForm(CreateTrainingEventForm):
             if self.instance.course:
                 self.fields['ilw_course'].initial = self.instance.course.name
                 self.fields['foss_data'].initial = self.instance.course.foss.all()
+            event_type = self.instance.event_type
+            selected_state = self.instance.state
+            if event_type in CITY_DEPENDENT_EVENTS:
+                self.fields['city'].queryset = City.objects.filter(state=selected_state)
+            else:
+                self.fields['host_college'].queryset = AcademicCenter.objects.filter(state=selected_state)
+            
 
     def save(self, commit=False):
         event = super().save(commit=False)
@@ -69,13 +106,37 @@ class RegisterUser(forms.ModelForm):
     )
     phone = forms.CharField(required = True,
         error_messages = {'required': 'Enter valid phone number.'},)
+    city = forms.ModelChoiceField(queryset=City.objects.none())
+    language_hn = forms.ModelChoiceField(queryset=HNLanguage.objects.all())
     class Meta(object):
         model = Participant
-        fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language', 'company', 'city']
+        fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language', 'company', 'city', 'language_hn']
 
     def __init__(self, *args, **kwargs):
         super(RegisterUser, self).__init__(*args, **kwargs)
         self.fields['amount'].required = False
+        self.fields['state'].initial = State.objects.get(id=21)
+        selected_state = self.data.get('state')
+        if selected_state: 
+            self.fields['city'].queryset = City.objects.filter(state=selected_state)
+        # Fetch languages if event_type is HN
+        event_id = self.data.get('event')
+        event_type = self.data.get('event_type')
+        if event_id and event_type == 'HN':
+            event = TrainingEvents.objects.get(id=event_id)
+            hn_categories = [x.external_course for x in ExternalCourseMap.objects.filter(foss__in=event.course.foss.all())]
+            topic_categories = TopicCategory.objects.filter(category_id__in=hn_categories).values_list('topic_category_id', flat=True)
+            languages = HNContributorRole.objects.filter(topic_cat_id__in=topic_categories).values_list('language_id', flat=True)
+            langs = HNLanguage.objects.filter(lan_id__in=languages).distinct()
+            # self.fields['foss_language'].queryset = langs
+            self.fields['language_hn'].queryset = langs
+     
+
+    def clean(self):
+        cleaned_data = super().clean()
+        hn_lang = cleaned_data.get('language_hn')
+        cleaned_data['language_hn'] = hn_lang.lan_id
+        return cleaned_data
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
