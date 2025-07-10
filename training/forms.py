@@ -36,17 +36,16 @@ class CreateTrainingEventForm(forms.ModelForm):
         else:            
             self.fields['city'].queryset = City.objects.none()
 
-    
 
     def clean(self):
         cleaned_data = super().clean()
         event_type = cleaned_data.get('event_type')
         if event_type in CITY_DEPENDENT_EVENTS:
             cleaned_data['host_college'] = AcademicCenter.objects.get(id=DEFAULT_ILW_HOST_COLLEGE)
+        if event_type != 'INTERN':
+            cleaned_data['payment_required'] = False
         return cleaned_data
 
-    
-    
 
 class EditTrainingEventForm(CreateTrainingEventForm):
     def __init__(self, *args, **kwargs):
@@ -106,8 +105,8 @@ class RegisterUser(forms.ModelForm):
     )
     phone = forms.CharField(required = True,
         error_messages = {'required': 'Enter valid phone number.'},)
-    city = forms.ModelChoiceField(queryset=City.objects.none())
-    language_hn = forms.ModelChoiceField(queryset=HNLanguage.objects.all())
+    city = forms.ModelChoiceField(queryset=City.objects.none(), required=False)
+    language_hn = forms.ModelChoiceField(queryset=HNLanguage.objects.all(), required=False)
     class Meta(object):
         model = Participant
         fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language', 'company', 'city', 'language_hn']
@@ -135,7 +134,8 @@ class RegisterUser(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         hn_lang = cleaned_data.get('language_hn')
-        cleaned_data['language_hn'] = hn_lang.lan_id
+        if cleaned_data.get('language_hn'):
+            cleaned_data['language_hn'] = hn_lang.lan_id
         return cleaned_data
 
     def clean_phone(self):

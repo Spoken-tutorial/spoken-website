@@ -13,7 +13,7 @@ import json
 EVENT_TYPE_CHOICES =(
 	('', '-----'), ('FDP', 'Faculty Development Program (FDP)'), ('Workshop', 'Blended Mode Workshop'),('sdp', 'Student Training Programme'),('TPDP', 'Teachers Professional Development Program'
 ), ('SSDP', 'School Students  Development Program'), ('PDP', 'Professional Development Program'), ('CDP', 'Community Development Program'),
-('HN', 'Health And Nutrition Program'),
+('HN', 'Health And Nutrition Program'), ('INTERN', 'Internship Program'),
 	)
 
 
@@ -73,6 +73,9 @@ class TrainingEvents(models.Model):
 	entry_user = models.ForeignKey(User, on_delete=models.PROTECT)
 	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
 	city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True)
+	payment_required = models.BooleanField(default=False)
+	# False => Payment only from non-subscribed college organisers and students.
+	# True  => Payment from ALL users, regardless of group or college payment status.
 
 
 	def __str__(self):

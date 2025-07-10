@@ -58,6 +58,23 @@
     font-size: 4em;
     text-align: center;
 }
+.glyphicon-refresh-animate {
+    font-size: 60px; /* Make spinner larger */
+    color: orange; /* Darker color */
+    animation: spin 1s infinite linear;
+    -webkit-animation: spin 1s infinite linear;
+}
+
+@-webkit-keyframes spin {
+    0%   { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
 </style>
 {% endblock %}
 {% block search %}{% endblock %}
@@ -175,7 +192,7 @@
           {% if event.event.event_type == "HN"%}
               <div>
                     <p style="text-decoration: underline;"><b>Online Video Tutorial Links</b></p>
-                    {% with links=event.event|get_hn_tutorial_links %}
+                    {% with links=event|get_hn_tutorial_links %}
                       {% for name, url in links %}
                         <div style="margin-bottom: 12px;"><a href="{{url}}" target="_blank">{{name}}</a></div>
                       {% endfor %}
@@ -185,7 +202,13 @@
           <div style="text-align: right;">
               {% if event.event.event_type == "HN"%}
                 {% with categories=event.event|get_hn_categories  %}
-                  <div><a class="btn btn-primary" href="{{ HN_API }}?courseName=BetaHealthtutorial&catIds={{categories}}&lanIds={{event.language_hn}},22"> Download CD Content</a></div>
+                  <div>
+                    <button type="button" class="btn btn-primary downloadBtn" data-categories="{{ categories }}"  data-language="{{ event.language_hn }}"> Download CD Content 1</button>
+                  </div>
+                  <div id="loadingSpinner" style="display: none; position: fixed; top: 50%; left: 50%; z-index: 9999;">
+                    <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                  </div>
+
                   
                 {% endwith %}
               {% else %}
@@ -254,7 +277,7 @@
         <b>Event Coordinator Name :</b> <span>{{event.event_coordinator_name}}</span><br>
         <b>FOSS :</b> <span >{{event.course.foss.all|join:", "}}</span>
       </p>
-
+      
       <p>                  
         Registration open from <b>{{event.registartion_start_date}}, till {{event.registartion_end_date}}</b>
         {% if status == 'ongoing' %}
@@ -274,6 +297,10 @@
 </div> 
 {% endif %}
 </form>
+
+
+
+
 {% endfor %}
     </div>
 </div>
@@ -313,8 +340,42 @@ function take_to_test(partid, mdlcourseid, mdlquizid, fossid, eventid){
 $('#id_foss').select2({
 		placeholder: "Select Foss",
 		allowClear: true
-    });
+});
+$(document).on('click', '.downloadBtn', function() {
+  $('#loadingSpinner').show();  // Show spinner
+  const categories = $(this).data('categories');
+  let language = $(this).data('language');
+  if (language === undefined || language === null || language === "" || language === "None") {
+    language = null;
+  }
 
+  let apiUrl = "/training/proxy_health_api/?courseName=BetaHealthtutorial&catIds=" + categories;
+  if (language) {
+    apiUrl += "&lanIds=22," + language;
+  } else {
+    apiUrl += "&lanIds=22";
+  }
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      $('#loadingSpinner').hide();  // Hide spinner
+      if (data["0"]) {
+        alert(data["0"]);
+      } else if (data["1"]) {
+        const downloadUrl = data["1"];
+        window.open(downloadUrl, "_blank");
+      } else if (data["2"]) {
+        alert(data["2"]);
+      } else {
+        alert("Unexpected response from server.");
+      }
+    })
+    .catch(error => {
+      $('#loadingSpinner').hide();  // Hide spinner
+      console.error("Error:", error);
+      alert("Failed to connect to the server.");
+    });
+});
 
 </script>
 {% endblock %}
