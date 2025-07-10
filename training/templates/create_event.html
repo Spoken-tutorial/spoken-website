@@ -8,7 +8,7 @@
 {% block cssblock %}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
     <style>
-		#id_is_course{
+		#id_is_course, #id_payment_required{
 			height: 50%;
 		}
     </style>
@@ -29,6 +29,16 @@
 				{{ form.event_type.errors }}
 				</div>
 			</div>
+			<div class="form-group" id="payment_required">
+				<label class="col-sm-3 control-label" for= "payment_required">Make Payment Mandatory</label>
+				<div class="col-sm-1">
+				{% render_field form.payment_required class+="form-control payment_required" checked="checked"  %}
+				{{ form.payment_required.errors }}
+				</div>
+				<p>When checked, payment is required from all users, including subscribed college users.</p>
+			</div>
+
+			
 
 			<div class="form-group">
 				<label class="col-sm-3 control-label" for= "id_event_fee">Event Charges <sup style="color:red";>*</sup></label>
@@ -90,7 +100,6 @@
 				<div class="col-sm-1">
 				{% render_field form.is_course class+="form-control is_course" %}
 				{{ form.is_course.errors }}
-				
 				</div>
 				<p>If checked, the course name will appear in the participation certificate</p>
 			</div>
@@ -235,9 +244,9 @@
 		
 		// Change visibility of college, company & city based on event type
 		$('#company').toggle(event_type === "PDP");
-		$('#city').toggle(event_type === "PDP" || event_type === "CDP" || event_type === "HN");
-		$('#institute').toggle(event_type !== "PDP" && event_type !== "CDP" && event_type !== "HN");
-
+		$('#city').toggle(event_type === "PDP" || event_type === "CDP" || event_type === "HN" );
+		$('#institute').toggle(event_type !== "PDP" && event_type !== "CDP" && event_type !== "HN" );
+		$('#payment_required').toggle(event_type === "INTERN");
 		// Set default college [IIT Bombay (academic id : 621)] and fees if event type is PDP or CDP
 		const host_college = $('#id_host_college');
 		const event_fee = $('#id_event_fee')

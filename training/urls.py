@@ -89,4 +89,5 @@ urlpatterns = [
     url(r'^companies/new/$', add_company, name='add_company'),
     url(r'^companies/$', list_companies, name='list_companies'),
     url(r'^edit_company/(\d+)/$', edit_company, name='edit_company'),
+    url(r'^proxy_health_api/', proxy_health_api, name='proxy_health_api'),
     ]

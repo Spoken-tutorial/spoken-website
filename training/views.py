@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.contrib import messages
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.serializers import serialize
 from django.db.models import Q
 from django.contrib.auth.models import User
@@ -76,6 +76,7 @@ class TrainingEventCreateView(CreateView):
 		return render(self.request, self.template_name, context)
 
 	def form_valid(self, form, **kwargs):
+		
 		self.object = form.save(commit=False)
 		self.object.entry_user = self.request.user
 		self.object.Language_of_workshop = Language.objects.get(id=22)
@@ -290,10 +291,10 @@ def reg_success(request, user_type):
 
 			if source == 'deet':
 				form_data.source = source
-			if not event_type in ['PDP', 'CDP']:
+			if not event_type in ['PDP', 'CDP', 'HN']:
 				try:
 					college = request.POST.get('college')
-					form_data.college = AcademicCenter.objects.get(Q(institution_name=college) | Q(id=college))
+					form_data.college = AcademicCenter.objects.get(Q(institution_name=college))
 				except Exception as e:
 					form_data.college = AcademicCenter.objects.get(id=request.POST.get('dropdown_college'))	
 			else:
@@ -1398,3 +1399,17 @@ def edit_company(request, rid = None):
 		except:
 			raise PermissionDenied()
 
+
+@csrf_exempt
+def proxy_health_api(request):
+    url = HN_API
+    params = {
+        "courseName": request.GET.get("courseName"),
+        "catIds": request.GET.get("catIds"),
+        "lanIds": request.GET.get("lanIds"),
+    }
+    resp = requests.get(url, params=params)
+    try:
+        return JsonResponse(resp.json())
+    except Exception as e:
+        return JsonResponse({"error": "Invalid response from remote API"}, status=500)

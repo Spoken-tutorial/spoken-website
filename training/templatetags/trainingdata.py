@@ -219,13 +219,14 @@ def get_hn_categories(event):
   return ','.join(categories)
 
 @register.filter
-def get_hn_tutorial_links(event):
+def get_hn_tutorial_links(participant):
+   event = participant.event
    foss_ids = [x.id for x in event.course.foss.all()]
    categories = [str(x.external_course) for x in ExternalCourseMap.objects.filter(foss_id__in=foss_ids)]
    data = []
    categories = Category.objects.filter(category_id__in=categories)
    for item in categories:
-      url = f"{HN_URL}?categoryName={item.category_id}"
+      url = f"{HN_URL}?categoryName={item.category_id}&lan=22"
       data.append((item.category_name, url))
    return data
 

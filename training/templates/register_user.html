@@ -41,6 +41,8 @@
                 <input type="text"  id="level_id" name="level_id" value="0" style="display:none">
 
                 <div class="form-group">
+                  
+
                   <label for="id_name" class="col-lg-4 control-label">Full Name* </label>
                   <div class="col-lg-8">
                       {% render_field form.name class+="form-control name"  %}
@@ -217,7 +219,7 @@
                     </div>
                   </div>
                   {% endif %}
-                  {% if user|is_user_paid %}
+                  {% if user|is_user_paid and not event_obj.payment_required %}
                   <div class="form-group" id="paid-info">
                     <div class="panel panel-primary col-lg-8 col-md-offset-4">
                       <div class="panel-body">You are a part of a paid college.</div>
@@ -245,16 +247,16 @@
                   </fieldset>
                       <div class="row">
                         <div class=" col-md-offset-4 col-md-4">
-                          {% if  user|is_user_paid %}
+                          {% if  user|is_user_paid  and not event_obj.payment_required %}
                           <!-- if user belongs to a paid college -->
-                          <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" disabled>Register 1
+                          <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" disabled>Register
                           </button>
-      <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled  style="display:none;">Make Payment 1</button>
+      <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled  style="display:none;">Make Payment</button>
                           {% else %}
                           <!-- all other -->
-                          <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" style="display:none;">Register 2
+                          <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" style="display:none;">Register
                           </button>
-                          <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled >Make Payment 2</button>
+                          <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled >Make Payment</button>
                           {% endif %}
                         </div>
                       </div>
