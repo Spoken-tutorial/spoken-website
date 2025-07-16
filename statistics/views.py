@@ -27,6 +27,7 @@ from django.core.cache import cache
 from spoken.decorators import rate_limited_view
 
 # Create your views here.
+@rate_limited_view
 def maphome(request):
     states = State.objects.filter(has_map=1)
 
@@ -50,7 +51,7 @@ def maphome(request):
     }
     return render(request, 'statistics/templates/maphome.html', context)
 
-
+@rate_limited_view
 def get_state_info(request, code):
     state = None
     try:
@@ -306,7 +307,7 @@ def fdp_training(request):
     context['no_of_colleges'] = no_of_colleges
     return render(request, 'statistics/templates/pmmm_stats.html', context)
 
-
+@rate_limited_view
 def training_participant(request, rid):
     context = {}
     try:
@@ -318,6 +319,7 @@ def training_participant(request, rid):
         raise PermissionDenied()
     return render(request, 'statistics/templates/training_participant.html', context)
 
+@rate_limited_view
 def studentmaster_ongoing(request, rid):
     
     context = {}
@@ -391,7 +393,7 @@ def online_test(request):
     context['no_of_colleges'] = no_of_colleges
     return render(request, 'statistics/templates/online_test.html', context)
 
-
+@rate_limited_view
 def test_participant(request, rid):
     context = {}
     if not rid:
@@ -409,7 +411,7 @@ def test_participant(request, rid):
         raise PermissionDenied()
     return render(request, 'statistics/templates/participant.html', context)
 
-
+@rate_limited_view
 def academic_center(request, slug=None):
     context = {}
     header = {
@@ -480,7 +482,7 @@ def academic_center(request, slug=None):
 
     return render(request, 'statistics/templates/academic-center.html', context)
 
-
+@rate_limited_view
 def academic_center_view(request, academic_id=None, slug=None):
     collection = get_object_or_404(AcademicCenter, id=academic_id)
     slug_title = slugify(collection.institution_name)
@@ -491,7 +493,7 @@ def academic_center_view(request, academic_id=None, slug=None):
     }
     return render(request, 'statistics/templates/view-academic-center.html', context)
 
-
+@rate_limited_view
 def motion_chart(request):
     collection = TrainingRequest.objects.filter(
         participants__gt=0, sem_start_date__lte=datetime.now()
@@ -528,7 +530,7 @@ def motion_chart(request):
 
     return render(request, 'statistics/templates/motion_charts.html', context)
 
-
+@rate_limited_view
 def learners(request):
     context = {}
     form = LearnerForm()
@@ -546,7 +548,7 @@ def learners(request):
     context['form'] = form
     return render(request, 'statistics/templates/learners.html', context)
 
-
+@rate_limited_view
 def tutorial_content(request, template='statistics/templates/statistics_content.html'):
     header = {
         1: SortableHeader('# ', False),
@@ -568,7 +570,6 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     # because single tutorial might have multiple pushish objects
     qs = tutorials_filter.qs.distinct()
     no_of_foss = qs.filter().values('tutorial_detail__foss_id').distinct().count()
-    print('************ no of foss: ',no_of_foss)
 
     context = {}
 
@@ -594,7 +595,7 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
     return render(request, template, context)
 
 
-
+@rate_limited_view
 def ilw_stats(request):
     queryset =TrainingEvents.objects.filter(training_status=2).order_by('-event_start_date')
     context = {} 
