@@ -180,12 +180,16 @@ def check_passgrade_exists(event,testfossid):
   # testfossid = arg_list[1]
   # print("@@@@@@@@@@@@@@@",email, arg_list)
 
-
   ilwmdlgradeentry = EventTestStatus.objects.filter(event=event.event, fossid=testfossid, mdlemail=event.email, part_status__gte=2, mdlgrade__gte=40.00)
   if ilwmdlgradeentry:
     return True
   else:
     return False
+
+@register.filter
+def check_hn_passgrade_exists(participant):
+   ilwmdlgradeentry = EventTestStatus.objects.filter(participant=participant, event=participant.event, mdlemail=participant.email, part_status__gte=2, mdlgrade__gte=40.00).exists()
+   return ilwmdlgradeentry
 
 
 @register.filter
@@ -197,6 +201,12 @@ def get_grade(event, testfossid):
   # email= arg_list[0]
   # testfossid = arg_list[1]
   ilwmdlgradeentry = EventTestStatus.objects.filter(event=event.event, fossid=testfossid, mdlemail=event.email, part_status__gte=2, mdlgrade__gte=40.00).order_by('-mdlgrade').first()
+
+  return ilwmdlgradeentry.mdlgrade
+
+@register.filter
+def get_hn_grade(participant):
+  ilwmdlgradeentry = EventTestStatus.objects.filter(participant=participant, event=participant.event, mdlemail=participant.email, part_status__gte=2, mdlgrade__gte=40.00).order_by('-mdlgrade').first()
 
   return ilwmdlgradeentry.mdlgrade
 

@@ -883,6 +883,7 @@ class FDPTrainingCertificate(object):
     p = Paragraph(text, centered)
     p.wrap(650, 200)
     p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
     template_path = get_ilw_certificate(event, 'training')
@@ -1200,7 +1201,10 @@ class ILWTestCertificate(object):
     event_type = event.event_type
 
     response = HttpResponse(content_type='application/pdf')
-    filename = (participantname+'-'+teststatus.fossid.foss+"-Participant-Test-Certificate").replace(" ", "-");
+    if event_type == "HN":
+        filename = (participantname+'-'+event.course.name+"-Participant-Test-Certificate").replace(" ", "-")
+    else:
+        filename = (participantname+'-'+teststatus.fossid.foss+"-Participant-Test-Certificate").replace(" ", "-")
 
     response['Content-Disposition'] = 'attachment; filename='+filename+'.pdf'
     imgTemp = BytesIO ()
@@ -1231,13 +1235,21 @@ class ILWTestCertificate(object):
     imgPath = get_signature(training_start)
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
-    credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
+    if event_type != "HN":
+        credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
 
     #paragraphe
     organization = get_organization(training_start)
-    text = f"This is to certify that <b>{participantname}</b> successfully passed a \
-    <b>{teststatus.fossid.foss}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
-    <br /> Self learning through {organization} and passing an online test completes the training programme.<br />{credits}"
+    
+
+    if event.event_type == "HN":
+        text = f"This is to certify that <b>{participantname}</b> successfully passed the course: \
+        <b>{event.course.name}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
+        <br /> Self learning through {organization} and passing an online test completes the training programme.<br />"
+    else:
+        text = f"This is to certify that <b>{participantname}</b> successfully passed a \
+        <b>{teststatus.fossid.foss}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
+        <br /> Self learning through {organization} and passing an online test completes the training programme.<br />{credits}"
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -1282,7 +1294,10 @@ class EventTestCertificateView(ILWTestCertificate, View):
     print(eventid)
     event = TrainingEvents.objects.get(id=eventid)
     participantname = self.request.user.first_name+" "+self.request.user.last_name
-    teststatus = EventTestStatus.objects.filter(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email, mdlgrade__gte=settings.PASS_GRADE).order_by('-mdlgrade').first()
+    if event.event_type == "HN":
+        teststatus = EventTestStatus.objects.filter(event_id=eventid, participant__user=self.request.user, mdlemail=self.request.user.email, mdlgrade__gte=settings.PASS_GRADE).order_by('-mdlgrade').first()
+    else:
+        teststatus = EventTestStatus.objects.filter(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email, mdlgrade__gte=settings.PASS_GRADE).order_by('-mdlgrade').first()
     if event:
       return self.create_ilwtest_certificate(event, participantname, teststatus)
     else:

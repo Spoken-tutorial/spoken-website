@@ -203,13 +203,11 @@
               {% if event.event.event_type == "HN"%}
                 {% with categories=event.event|get_hn_categories  %}
                   <div>
-                    <button type="button" class="btn btn-primary downloadBtn" data-categories="{{ categories }}"  data-language="{{ event.language_hn }}"> Download CD Content 1</button>
+                    <button type="button" class="btn btn-primary downloadBtn" data-categories="{{ categories }}"  data-language="{{ event.language_hn }}"> Download CD Content</button>
                   </div>
                   <div id="loadingSpinner" style="display: none; position: fixed; top: 50%; left: 50%; z-index: 9999;">
                     <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
                   </div>
-
-                  
                 {% endwith %}
               {% else %}
                 {% if event.reg_approval_status == 1 and user|registartion_successful:event.event %}
@@ -220,16 +218,34 @@
 
 
               {% if event.event.event_type == "HN"%}
-                    {% if event.event.id|is_event_closed and event.event.id|is_attendance_marked:event.id and user|registartion_successful:event.event %}    
-                    {% with data=event.event|get_hn_test %}
-                     <div style="margin-top: 12px;;">
-                       <input type="hidden" id="testurl{{data.1}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{data.1}}">
-                       <button class="btn btn-info" type="button" 
-                              onclick="take_to_test({{event.id}}, {{data.1}}, {{data.0}}, {{data.2}}, {{event.event_id}});">
-                              Attempt {{course.testfoss.foss}} test
-                        </button>
+                    {% if event.event.id|is_event_closed and event.event.id|is_attendance_marked:event.id and user|registartion_successful:event.event %}  
+                    <!-- show training certi as event is closed    -->
+                     <div style="margin-top: 12px;">
+                        <input type="hidden" name="eventid" value="{{event.event.id}}">
+                    <button class="btn btn-warning" type="submit" 
+                        formaction="{% url 'training:generate_training_certificate'%}">Download Training certificate</button>
                      </div>
-                    {% endwith %}
+                     {% if not event|check_hn_passgrade_exists %}
+                     <!-- if pass grade does not exist, then show tattempt link  -->
+                        {% with data=event.event|get_hn_test %}
+                        <div style="margin-top: 12px;;">
+                          <input type="hidden" id="testurl{{data.1}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{data.1}}">
+                          <button class="btn btn-info" type="button" 
+                                  onclick="take_to_test({{event.id}}, {{data.1}}, {{data.0}}, {{data.2}}, {{event.event_id}});">
+                                  Attempt {{course.testfoss.foss}} test
+                            </button>
+                        </div>
+                        {% endwith %}
+                    
+                      {% else %}
+                     <!-- if pass grade exist, then show certificate download link -->
+                          {% with grade=event|get_hn_grade %}
+                                  <div style="margin-top: 12px;">
+                                    <button type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate' 0%}">Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
+                                  </div>
+                          {% endwith %}
+                      
+                     {% endif %}
                     {% endif %}
               {% else %}
                   {% if event.event.id|is_event_closed and event.event.id|is_attendance_marked:event.id and user|registartion_successful:event.event %}    
