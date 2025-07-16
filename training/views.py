@@ -861,10 +861,11 @@ class FDPTrainingCertificate(object):
          with course material provided by {organization}.
          <br /><br /> This training is offered by {organization}.
     """
+    label = "topic" if event.event_type == "HN" else "FOSS"
     if event.is_course:
          text = f"""
          {line1}
-         on the course <b>{event.course.name}</b>, which includes the following FOSS: 
+         on the course <b>{event.course.name}</b>, which includes the following {label}: 
          <b>{", ".join([foss.foss for foss in event.course.foss.all()])}</b>, 
          {line2}
          """
