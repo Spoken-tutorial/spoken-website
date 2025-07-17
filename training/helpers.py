@@ -10,7 +10,7 @@ import subprocess
 from django.db.models import Count
 from django.conf import settings
 from spoken.config import EDUPYRAMIDS_CERTIFICATE_DATE
-
+from events.certificates import get_organization
 
 
 EVENT_AMOUNT = {
@@ -225,3 +225,84 @@ def get_ilw_certificate(event, cert_type):
     else:
         template = "fdptr-certificate_edupyramids.pdf" if cert_type == "training" else "Blank-Certificate_edupyramids.pdf"
     return os.path.join(settings.MEDIA_ROOT, template)
+
+def get_training_certi_text(event, user):
+    training_start = event.event_start_date
+    training_end = event.event_end_date
+    formatted_start_date = training_start.strftime("%d-%m-%Y")
+    formatted_end_date = training_end.strftime("%d-%m-%Y")
+    organization = get_organization(training_start)
+    
+    participant = Participant.objects.filter(
+        user=user, event=event, reg_approval_status=1
+        ).order_by('-created').first()
+    
+    participantname = f"{user.first_name} {user.last_name}"
+    text = ""
+    if event.event_type == "INTERN": # For internship
+        text = f"""
+            This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b>, has successfully 
+            completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay from
+            <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed 
+            self-paced training on <b>{", ".join([foss.foss for foss in event.course.foss.all()])}</b>
+            under the supervision of {event.instructor_name}.<br />
+
+            This internship is officially approved and recognized by the receiving institution, 
+            ensuring compliance with institutional norms and standards.
+        """
+    else: # For other events
+        line1 = f"""
+            This is to certify that <b>{participantname}</b> has participated in 
+            <b>{event.get_event_type_display()}</b> from <b>{formatted_start_date}</b> to <b>{formatted_end_date}</b> 
+        """
+        line2 = f"""
+            organized by <b>{event.host_college.institution_name}</b> 
+            with course material provided by {organization}.
+            <br /><br /> This training is offered by {organization}.
+        """
+        label = "topic" if event.event_type == "HN" else "FOSS"
+        # Insert course name if it is a course
+        if event.is_course:
+            text = f"""
+            {line1}
+            on the course <b>{event.course.name}</b>, which includes the following {label}: 
+            <b>{", ".join([foss.foss for foss in event.course.foss.all()])}</b>, 
+            {line2}
+            """
+        else:
+            foss = [x.foss for x in event.course.foss.all()]
+            text = f"""{line1}
+            on <b>{', '.join(foss)}</b> {line2}"""
+
+    return text
+
+
+def get_test_certi_text(event, user, teststatus):
+    participantname = f"{user.first_name} {user.last_name}"
+    training_start = event.event_start_date
+    training_end = event.event_end_date
+    formatted_start_date = training_start.strftime("%d-%m-%Y")
+    formatted_end_date = training_end.strftime("%d-%m-%Y")
+    organization = get_organization(training_start)
+    participant = Participant.objects.filter(
+        user=user, event=event, reg_approval_status=1
+        ).order_by('-created').first()
+    
+    text = ""
+    if event.event_type == "HN":
+        text = f"This is to certify that <b>{participantname}</b> successfully passed the course: \
+        <b>{event.course.name}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
+        <br /> Self learning through {organization} and passing an online test completes the training programme.<br />"
+    elif event.event_type == "INTERN":
+        text = f"""
+            This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b>, has successfully \
+            completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay \
+            from <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed \
+            self-paced training on <b>{teststatus.fossid.foss}</b> under the supervision of <b>{event.instructor_name}</b>.
+            This internship is officially approved and recognized by the receiving institution, \
+            ensuring compliance with institutional norms and standards."""
+    else:
+        text = f"This is to certify that <b>{participantname}</b> successfully passed a \
+        <b>{teststatus.fossid.foss}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
+        <br /> Self learning through {organization} and passing an online test completes the training programme.<br />{credits}"
+    return text
