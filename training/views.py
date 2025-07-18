@@ -823,11 +823,9 @@ class FDPTrainingCertificate(object):
   def suffix(self, d):
     return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
 
-  def create_fdptraining_certificate(self, event, participantname):
+  def create_fdptraining_certificate(self, event, user):
+    participantname = f"{user.first_name} {user.last_name}"
     training_start = event.event_start_date
-    training_end = event.event_end_date
-    formatted_start_date = training_start.strftime("%d-%m-%Y")
-    formatted_end_date = training_end.strftime("%d-%m-%Y")
     
     response = HttpResponse(content_type='application/pdf')
     filename = (participantname+'-'+"-Participant-Certificate").replace(" ", "-");
@@ -850,29 +848,9 @@ class FDPTrainingCertificate(object):
     imgPath = get_signature(training_start)
     imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
-    organization = get_organization(training_start)
+
     #paragraphe
-    line1 = f"""
-         This is to certify that <b>{participantname}</b> has participated in 
-         <b>{event.get_event_type_display()}</b> from <b>{formatted_start_date}</b> to <b>{formatted_end_date}</b> 
-    """
-    line2 = f"""
-         organized by <b>{event.host_college.institution_name}</b> 
-         with course material provided by {organization}.
-         <br /><br /> This training is offered by {organization}.
-    """
-    label = "topic" if event.event_type == "HN" else "FOSS"
-    if event.is_course:
-         text = f"""
-         {line1}
-         on the course <b>{event.course.name}</b>, which includes the following {label}: 
-         <b>{", ".join([foss.foss for foss in event.course.foss.all()])}</b>, 
-         {line2}
-         """
-    else:
-         foss = [x.foss for x in event.course.foss.all()]
-         text = f"""{line1}
-         on <b>{', '.join(foss)}</b> {line2}"""
+    text = get_training_certi_text(event, user)
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -915,7 +893,7 @@ class EventTrainingCertificateView(FDPTrainingCertificate, View):
     event = TrainingEvents.objects.get(id=eventid)
     participantname = self.request.user.first_name+" "+self.request.user.last_name
     if event:
-      return self.create_fdptraining_certificate(event, participantname)
+      return self.create_fdptraining_certificate(event, self.request.user)
     else:
       messages.error(self.request, "Permission Denied!")
     return HttpResponseRedirect("/")
@@ -1196,11 +1174,11 @@ class ILWTestCertificate(object):
   def suffix(self, d):
     return 'th' if 11<=d<=13 else {1:'st',2:'nd',3:'rd'}.get(d%10, 'th')
 
-  def create_ilwtest_certificate(self, event, participantname, teststatus):
+  def create_ilwtest_certificate(self, event, user, teststatus):
     training_start = event.event_start_date
     training_end = event.event_end_date
     event_type = event.event_type
-
+    participantname = f"{user.first_name} {user.last_name}"
     response = HttpResponse(content_type='application/pdf')
     if event_type == "HN":
         filename = (participantname+'-'+event.course.name+"-Participant-Test-Certificate").replace(" ", "-")
@@ -1240,18 +1218,7 @@ class ILWTestCertificate(object):
         credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
 
     #paragraphe
-    organization = get_organization(training_start)
-    
-
-    if event.event_type == "HN":
-        text = f"This is to certify that <b>{participantname}</b> successfully passed the course: \
-        <b>{event.course.name}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
-        <br /> Self learning through {organization} and passing an online test completes the training programme.<br />"
-    else:
-        text = f"This is to certify that <b>{participantname}</b> successfully passed a \
-        <b>{teststatus.fossid.foss}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
-        <br /> Self learning through {organization} and passing an online test completes the training programme.<br />{credits}"
-
+    text = get_test_certi_text(event, user, teststatus)
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
       leading = 30,
@@ -1291,16 +1258,13 @@ class EventTestCertificateView(ILWTestCertificate, View):
 
   def post(self, request, *args, **kwargs):
     eventid = self.request.POST.get("eventid")
-
-    print(eventid)
     event = TrainingEvents.objects.get(id=eventid)
-    participantname = self.request.user.first_name+" "+self.request.user.last_name
     if event.event_type == "HN":
         teststatus = EventTestStatus.objects.filter(event_id=eventid, participant__user=self.request.user, mdlemail=self.request.user.email, mdlgrade__gte=settings.PASS_GRADE).order_by('-mdlgrade').first()
     else:
         teststatus = EventTestStatus.objects.filter(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email, mdlgrade__gte=settings.PASS_GRADE).order_by('-mdlgrade').first()
     if event:
-      return self.create_ilwtest_certificate(event, participantname, teststatus)
+      return self.create_ilwtest_certificate(event, self.request.user, teststatus)
     else:
       messages.error(self.request, "Permission Denied!")
     return HttpResponseRedirect("/")
