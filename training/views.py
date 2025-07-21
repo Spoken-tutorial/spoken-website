@@ -836,7 +836,8 @@ class FDPTrainingCertificate(object):
 
     # Title
     imgDoc.setFont('Helvetica', 35, leading=None)
-    imgDoc.drawCentredString(405, 470, "Certificate of Participation")
+    if event.event_type != "INTERN":
+        imgDoc.drawCentredString(405, 470, "Certificate of Participation")
 
     #password
     certificate_pass = ''
@@ -1191,7 +1192,8 @@ class ILWTestCertificate(object):
 
     # Title
     imgDoc.setFont('Helvetica', 25, leading=None)
-    imgDoc.drawCentredString(405, 470, "Certificate for Completion of Training")
+    if event.event_type != "INTERN":
+        imgDoc.drawCentredString(405, 470, "Certificate for Completion of Training")
 
     #password
     certificate_pass = ''
