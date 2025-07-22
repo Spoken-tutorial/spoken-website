@@ -247,7 +247,7 @@ def get_training_certi_text(event, user):
             completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay from
             <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed 
             self-paced training on <b>{", ".join([foss.foss for foss in event.course.foss.all()])}</b>
-            under the supervision of {event.instructor_name}.<br />
+            under the supervision of <b>{event.instructor_name}</b>.<br />
 
             This internship is officially approved and recognized by the receiving institution, 
             ensuring compliance with institutional norms and standards.

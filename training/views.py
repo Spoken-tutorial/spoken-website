@@ -838,17 +838,15 @@ class FDPTrainingCertificate(object):
     imgDoc.setFont('Helvetica', 35, leading=None)
     if event.event_type != "INTERN":
         imgDoc.drawCentredString(405, 470, "Certificate of Participation")
+        # Draw image on Canvas and save PDF in buffer
+        imgPath = get_signature(training_start)
+        imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #password
     certificate_pass = ''
     imgDoc.setFillColorRGB(211, 211, 211)
     imgDoc.setFont('Helvetica', 10, leading=None)
     imgDoc.drawString(10, 6, certificate_pass)
-
-    # Draw image on Canvas and save PDF in buffer
-    imgPath = get_signature(training_start)
-    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
-
 
     #paragraphe
     text = get_training_certi_text(event, user)
@@ -1194,6 +1192,9 @@ class ILWTestCertificate(object):
     imgDoc.setFont('Helvetica', 25, leading=None)
     if event.event_type != "INTERN":
         imgDoc.drawCentredString(405, 470, "Certificate for Completion of Training")
+        # Draw image on Canvas and save PDF in buffer
+        imgPath = get_signature(training_start)
+        imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #password
     certificate_pass = ''
@@ -1211,10 +1212,6 @@ class ILWTestCertificate(object):
     imgDoc.setFillColorRGB(211, 211, 211)
     imgDoc.setFont('Helvetica', 10, leading=None)
     imgDoc.drawString(10, 6, certificate_pass)
-
-    # Draw image on Canvas and save PDF in buffer
-    imgPath = get_signature(training_start)
-    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     if event_type != "HN":
         credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
