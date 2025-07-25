@@ -860,7 +860,7 @@ class FDPTrainingCertificate(object):
 
     p = Paragraph(text, centered)
     p.wrap(650, 200)
-    p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+    p.drawOn(imgDoc, 4.2 * cm, 5.5 * cm)
 
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
@@ -1229,7 +1229,7 @@ class ILWTestCertificate(object):
 	
     p = Paragraph(text, centered)
     p.wrap(650, 200)
-    p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+    p.drawOn(imgDoc, 4.2 * cm, 5.5 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
     template_path = get_ilw_certificate(event, 'test')
