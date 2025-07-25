@@ -102,7 +102,6 @@ def training(request):
     TRAINING_PENDING = '0'
     if request.method == 'GET':
         status = request.GET.get('status')
-        print(f"\033[93m status ******* {status} \033[0m")
         if status not in [TRAINING_COMPLETED, TRAINING_PENDING]:
             status = TRAINING_COMPLETED
 

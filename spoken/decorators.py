@@ -1,4 +1,4 @@
-from .utils import check_server_status
+from .utils import check_server_status, is_valid_page_param
 from django.shortcuts import render
 from django.core.cache import cache
 from statistics.models import WhitelistedIP
@@ -22,10 +22,12 @@ def is_ip_whitelisted(ip_str):
 def rate_limited_view(view_func):
     def _wrapped_view(request, *args, **kwargs):
         ip = request.META.get("REMOTE_ADDR")
-
         if not is_ip_whitelisted(ip):
-            # okay = check_server_status()
-            okay = False
+            if not is_valid_page_param(request):
+                message = "Invalid or malformed page parameter."
+                return render(request, 'statistics/templates/temporary_disabled.html', {"message": message})
+
+            okay = check_server_status()
             if not okay:
                 message = "This page is temporarily unavailable due to high server load. We’re working to restore access soon — thank you for your patience."
                 return render(request, 'statistics/templates/temporary_disabled.html', {"message": message})

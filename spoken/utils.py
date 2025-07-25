@@ -2,6 +2,17 @@ import os
 import psutil
 from .config import MAX_LOAD_1, MAX_MEM
 
+MAX_PAGE_NUMBER=100
+def is_valid_page_param(request):
+    page = request.GET.get('page')
+    if page is None:
+        return True
+    try:
+        page_num = int(page)
+        return 1 <= page_num <= MAX_PAGE_NUMBER
+    except ValueError:
+        return False
+
 def check_server_status():
     try:
         load1, load5, load15 = os.getloadavg() # CPU load average        
