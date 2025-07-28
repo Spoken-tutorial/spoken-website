@@ -23,7 +23,7 @@ def rate_limited_view(view_func):
     def _wrapped_view(request, *args, **kwargs):
         ip = request.META.get("REMOTE_ADDR")
         if not is_ip_whitelisted(ip):
-            if not is_valid_page_param(request):
+            if not request.user.is_authenticated and not is_valid_page_param(request):
                 message = "Invalid or malformed page parameter."
                 return render(request, 'statistics/templates/temporary_disabled.html', {"message": message})
 

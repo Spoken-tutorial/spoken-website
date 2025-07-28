@@ -304,6 +304,7 @@ def get_test_certi_text(event, user, teststatus):
             This internship is officially approved and recognized by the receiving institution, \
             ensuring compliance with institutional norms and standards."""
     else:
+        credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
         text = f"This is to certify that <b>{participantname}</b> successfully passed a \
         <b>{teststatus.fossid.foss}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
         <br /> Self learning through {organization} and passing an online test completes the training programme.<br />{credits}"

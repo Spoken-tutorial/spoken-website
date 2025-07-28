@@ -45,7 +45,7 @@ from spoken.config import HN_API
 
 #pdf generate
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.pagesizes import letter, landscape, A4
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
@@ -859,8 +859,14 @@ class FDPTrainingCertificate(object):
     )
 
     p = Paragraph(text, centered)
-    p.wrap(650, 200)
-    p.drawOn(imgDoc, 4.2 * cm, 5.5 * cm)
+
+	# Set alignment from top
+    _, page_height = A4 # Get page height
+    p_width, p_height = p.wrap(650, 200) # Wrap returns (width, height) — get paragraph height
+    top_margin = 15.5 * cm  # Distance from top you want, for example, 10 cm from top 
+
+    y_position = page_height - top_margin - p_height # Compute y from bottom = page_height - top_margin - p_height
+    p.drawOn(imgDoc, 4.2 * cm, y_position) # Draw paragraph
 
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
@@ -1213,9 +1219,6 @@ class ILWTestCertificate(object):
     imgDoc.setFont('Helvetica', 10, leading=None)
     imgDoc.drawString(10, 6, certificate_pass)
 
-    if event_type != "HN":
-        credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
-
     #paragraphe
     text = get_test_certi_text(event, user, teststatus)
     centered = ParagraphStyle(name = 'centered',
@@ -1226,10 +1229,18 @@ class ILWTestCertificate(object):
     )
     imgDoc.setFillColorRGB(0, 0, 0)
     imgDoc.drawCentredString(150, 115, training_end.strftime('%d %B %Y'))
-	
+    
     p = Paragraph(text, centered)
-    p.wrap(650, 200)
-    p.drawOn(imgDoc, 4.2 * cm, 5.5 * cm)
+
+    # Set alignment from top
+    _, page_height = A4 # Get page height
+    p_width, p_height = p.wrap(650, 200) # Wrap returns (width, height) — get paragraph height
+    top_margin = 15.5 * cm  # Distance from top you want, for example, 10 cm from top 
+
+    y_position = page_height - top_margin - p_height # Compute y from bottom = page_height - top_margin - p_height
+    p.drawOn(imgDoc, 4.2 * cm, y_position) # Draw paragraph
+
+    # p.drawOn(imgDoc, 4.2 * cm, 5.5 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
     template_path = get_ilw_certificate(event, 'test')
