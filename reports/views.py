@@ -162,18 +162,19 @@ def events_training_csv(request):
     writer = csv.writer(response)
 
     # header
-    writer.writerow(['State', 'City', 'Institution', 'FOSS', 'Department', 'Type', 'Organiser', 'Date', 'Participants'])
+    writer.writerow(['State', 'City', 'Institution', 'Institution Type', 'FOSS', 'Department', 'Type', 'Organiser', 'Date', 'Participants'])
 
     # records
     for record in collection.qs:
         writer.writerow([
             record.training_planner.academic.state,
             record.training_planner.academic.city,
-            record.training_planner.academic.institution_name.encode('utf-8'),
+            record.training_planner.academic.institution_name,
+            record.training_planner.academic.institution_type.name,
             record.course.foss.foss,
             record.department,
-            record.course.category,
-            record.training_planner.organiser.user.first_name.encode('utf-8'),
+            record.course.category_name(),
+            record.training_planner.organiser.user.first_name,
             record.sem_start_date,
             record.participants
         ])

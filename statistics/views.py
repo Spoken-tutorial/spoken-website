@@ -96,7 +96,8 @@ def training(request):
     cache.set(stats_key, 'In progress', 60 * 30)  # 30 min
     collectionSet = TrainingRequest.objects.filter(
             sem_start_date__lte=datetime.now()
-        ).select_related('training_planner__academic__state', 'training_planner__academic__city', 'training_planner__organiser__user', 'course', 'course__foss', 'department').order_by('-sem_start_date')
+        ).select_related('training_planner__academic__state', 'training_planner__academic__city', 'training_planner__organiser__user', 'course', 'course__foss', 'department',
+                         'training_planner__academic__institution_type').order_by('-sem_start_date')
     state = None
     TRAINING_COMPLETED = '1'
     TRAINING_PENDING = '0'
@@ -123,20 +124,20 @@ def training(request):
         2: SortableHeader('training_planner__academic__state__name', True, 'State'),
         3: SortableHeader('training_planner__academic__city__name', True, 'City'),
         4: SortableHeader('training_planner__academic__institution_name', True, 'Institution'),
-        5: SortableHeader('course__foss__foss', True, 'FOSS'),
-        6: SortableHeader('department', True, 'Department'),
-        7: SortableHeader('course__category', True, 'Type'),
-        8: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
-        9: SortableHeader('sem_start_date', True, 'Date'),
-        10: SortableHeader('participants', 'True', 'Participants'),
-        11: SortableHeader('Action', False)
+        5: SortableHeader('training_planner__academic__institution_type__name', True, 'Institution Type'),
+        6: SortableHeader('course__foss__foss', True, 'FOSS'),
+        7: SortableHeader('department', True, 'Department'),
+        8: SortableHeader('course__category', True, 'Type'),
+        9: SortableHeader('training_planner__organiser__user__first_name', True, 'Organiser'),
+        10: SortableHeader('sem_start_date', True, 'Date'),
+        11: SortableHeader('participants', 'True', 'Participants'),
+        12: SortableHeader('Action', False)
     }
 
     raw_get_data = request.GET.get('o', None)
     collection = get_sorted_list(request, collectionSet, header, raw_get_data)
     ordering = get_field_index(raw_get_data)
 
-    
     # find state id
     if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
         state = State.objects.get(id=request.GET['training_planner__academic__state'])
