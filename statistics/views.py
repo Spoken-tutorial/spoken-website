@@ -29,15 +29,15 @@ from spoken.decorators import rate_limited_view
 # Create your views here.
 @rate_limited_view
 def maphome(request):
-    states = State.objects.filter(has_map=1)
+    states = State.objects.using('stats').filter(has_map=1)
 
-    counts = TrainingRequest.objects.filter(
+    counts = TrainingRequest.objects.using('stats').filter(
         participants__gt=0,
         sem_start_date__lte=datetime.now()
     ).aggregate(Count('id'), Sum('participants'))
 
-    institution_count = AcademicCenter.objects.filter(
-        id__in=TrainingRequest.objects.filter(
+    institution_count = AcademicCenter.objects.using('stats').filter(
+        id__in=TrainingRequest.objects.using('stats').filter(
             participants__gt=0,
             sem_start_date__lte=datetime.now()
         ).values_list('training_planner__academic_id').distinct()
@@ -55,18 +55,18 @@ def maphome(request):
 def get_state_info(request, code):
     state = None
     try:
-        state = State.objects.get(code=code)
+        state = State.objects.using('stats').get(code=code)
         # academic_list = AcademicCenter.objects.filter(state = state).values_list('id')
 
-        academic_centers = AcademicCenter.objects.filter(
+        academic_centers = AcademicCenter.objects.using('stats').filter(
             state=state,
-            id__in=TrainingRequest.objects.filter(
+            id__in=TrainingRequest.objects.using('stats').filter(
                 participants__gt=0,
                 sem_start_date__lte=datetime.now()
             ).values_list('training_planner__academic_id').distinct()
         ).count()
         # workshop_details = Training.objects.filter(academic_id__in = academic_list, status = 4).aggregate(Sum('participant_count'), Count('id'), Min('tdate'))
-        workshop_details = TrainingRequest.objects.filter(
+        workshop_details = TrainingRequest.objects.using('stats').filter(
             participants__gt=0,
             sem_start_date__lte=datetime.now(),
             training_planner__academic__state_id=state.id
@@ -94,7 +94,7 @@ def training(request):
     if cached_page:
         return HttpResponse(cached_page)
     cache.set(stats_key, 'In progress', 60 * 30)  # 30 min
-    collectionSet = TrainingRequest.objects.filter(
+    collectionSet = TrainingRequest.objects.using('stats').filter(
             sem_start_date__lte=datetime.now()
         ).select_related('training_planner__academic__state', 'training_planner__academic__city', 'training_planner__organiser__user', 'course', 'course__foss', 'department').order_by('-sem_start_date')
     state = None
@@ -109,7 +109,7 @@ def training(request):
         if status == TRAINING_COMPLETED:
             if lang and '---------' not in lang:
                 print(f"\033[92m Lang ******* \033[0m")
-                training_attend_lang = TrainingAttend.objects.filter(language__name=lang).values_list('training_id').distinct()
+                training_attend_lang = TrainingAttend.objects.using('stats').filter(language__name=lang).values_list('training_id').distinct()
                 collectionSet= collectionSet.filter(id__in=training_attend_lang)
         
         
@@ -139,7 +139,7 @@ def training(request):
     
     # find state id
     if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
-        state = State.objects.get(id=request.GET['training_planner__academic__state'])
+        state = State.objects.using('stats').get(id=request.GET['training_planner__academic__state'])
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
     
@@ -181,7 +181,7 @@ def training(request):
     visited=dict()
     if status == TRAINING_PENDING:
 
-        pending_attendance_student_batches = StudentBatch.objects.filter(
+        pending_attendance_student_batches = StudentBatch.objects.using('stats').filter(
             id__in=(collection.qs.filter(status=TRAINING_COMPLETED,participants=0,batch_id__gt=0).values('batch_id'))
             )
         pending_attendance_training = collection.qs.filter(batch_id__in = pending_attendance_student_batches.filter().values('id')).distinct()
@@ -214,7 +214,7 @@ def training(request):
     context['collection'] = collection
     participants_attended = {}
     training_ids = [training.id for training in collection.object_list]
-    data = (TrainingAttend.objects.filter(training_id__in=training_ids).values('training_id').annotate(student_count=Count('student_id')))
+    data = (TrainingAttend.objects.using('stats').filter(training_id__in=training_ids).values('training_id').annotate(student_count=Count('student_id')))
 
     participants_attended = {entry['training_id']: entry['student_count'] for entry in data} 
     context['participants_attended'] = participants_attended
@@ -230,7 +230,7 @@ def training(request):
     # context['malecount'] = malecount
     context['no_of_colleges'] = no_of_colleges
 
-    context['language'] = Language.objects.values('id','name')
+    context['language'] = Language.objects.using('stats').values('id','name')
 
     #render without cache
     response = render(request, 'statistics/templates/training.html', context)
@@ -244,7 +244,7 @@ def fdp_training(request):
     collectionSet = None
     state = None
 
-    collectionSet = TrainingRequest.objects.filter(
+    collectionSet = TrainingRequest.objects.using('stats').filter(
         participants__gt=0,
         department=169,
         sem_start_date__lte=datetime.now()
@@ -269,7 +269,7 @@ def fdp_training(request):
 
     # find state id
     if 'training_planner__academic__state' in request.GET and request.GET['training_planner__academic__state']:
-        state = State.objects.get(id=request.GET['training_planner__academic__state'])
+        state = State.objects.using('stats').get(id=request.GET['training_planner__academic__state'])
 
     collection = TrainingRequestFilter(request.GET, queryset=collection, state=state)
     # find participants count
@@ -311,8 +311,8 @@ def training_participant(request, rid):
     context = {}
     try:
         context['model_label'] = 'Workshop / Training'
-        context['model'] = TrainingRequest.objects.get(id=rid)
-        context['collection'] = TrainingAttend.objects.filter(training_id=rid).select_related('student', 'student__user')
+        context['model'] = TrainingRequest.objects.using('stats').get(id=rid)
+        context['collection'] = TrainingAttend.objects.using('stats').filter(training_id=rid).select_related('student', 'student__user')
     except Exception as e:
         print(e)
         raise PermissionDenied()
@@ -324,10 +324,10 @@ def studentmaster_ongoing(request, rid):
     context = {}
     try:
         context['model_label'] = 'Workshop / Training'
-        context['model'] = TrainingRequest.objects.get(id=rid)
-        current_batch = TrainingRequest.objects.filter(id=rid)
+        context['model'] = TrainingRequest.objects.using('stats').get(id=rid)
+        current_batch = TrainingRequest.objects.using('stats').filter(id=rid)
         for ab in current_batch:
-            row_data = StudentMaster.objects.filter(batch_id=ab.batch_id)
+            row_data = StudentMaster.objects.using('stats').filter(batch_id=ab.batch_id)
         context['collection'] = row_data
 
     except Exception as e:
@@ -341,7 +341,7 @@ def online_test(request):
     collectionSet = None
     participant_count = 0
 
-    collectionSet = Test.objects.filter(status=4, participant_count__gt=0).order_by('-tdate')
+    collectionSet = Test.objects.using('stats').filter(status=4, participant_count__gt=0).order_by('-tdate')
     header = {
         1: SortableHeader('#', False),
         2: SortableHeader('academic__state__name', True, 'State'),
@@ -364,7 +364,7 @@ def online_test(request):
     # find state id
     state = None
     if 'academic__state' in request.GET and request.GET['academic__state']:
-        state = State.objects.get(id=request.GET['academic__state'])
+        state = State.objects.using('stats').get(id=request.GET['academic__state'])
 
     collection = TestFilter(request.GET, queryset=collection, state=state)
     # find participants count
@@ -399,8 +399,8 @@ def test_participant(request, rid):
         raise PermissionDenied()
     try:
         context['model_label'] = 'Online-Test'
-        context['model'] = Test.objects.get(id=rid)
-        test_mdlusers = TestAttendance.objects.using('default').filter(
+        context['model'] = Test.objects.using('stats').get(id=rid)
+        test_mdlusers = TestAttendance.objects.using('stats').filter(
             test_id=rid, status__gte=2).values_list('mdluser_id')
         ids = []
         for wp in test_mdlusers:
@@ -426,7 +426,7 @@ def academic_center(request, slug=None):
     start_date = request.GET.get('training__tdate_0', 0)
     end_date = request.GET.get('training__tdate_1', 0)
     lookup = None
-    training_query = TrainingRequest.objects.filter(
+    training_query = TrainingRequest.objects.using('stats').filter(
         participants__gt=0,
         sem_start_date__lte=datetime.now()
     )
@@ -438,7 +438,7 @@ def academic_center(request, slug=None):
         else:
             lookup = [datetime.strptime('1970-01-01', '%Y-%m-%d'), end_date]
     if slug:
-        collection = AcademicCenter.objects.filter(
+        collection = AcademicCenter.objects.using('stats').filter(
             id__in=training_query.values_list(
                 'training_planner__academic_id'
             ).distinct(),
@@ -446,17 +446,17 @@ def academic_center(request, slug=None):
         ).order_by('state__name', 'institution_name')
     else:
         if lookup:
-            training_query = TrainingRequest.objects.filter(
+            training_query = TrainingRequest.objects.using('stats').filter(
                 Q(sem_start_date__range=lookup) & Q(sem_start_date__lte=datetime.now()),
                 participants__gt=0
             )
-            collection = AcademicCenter.objects.filter(
+            collection = AcademicCenter.objects.using('stats').filter(
                 id__in=training_query.values_list(
                     'training_planner__academic_id'
                 ).distinct()
             ).order_by('state__name', 'institution_name')
         else:
-            collection = AcademicCenter.objects.filter(
+            collection = AcademicCenter.objects.using('stats').filter(
                 id__in=training_query.values_list(
                     'training_planner__academic_id'
                 ).distinct()
@@ -494,7 +494,7 @@ def academic_center_view(request, academic_id=None, slug=None):
 
 @rate_limited_view
 def motion_chart(request):
-    collection = TrainingRequest.objects.filter(
+    collection = TrainingRequest.objects.using('stats').filter(
         participants__gt=0, sem_start_date__lte=datetime.now()
     ).values(
         'training_planner__academic__state__name', 'sem_start_date'
@@ -558,7 +558,7 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
         6: SortableHeader('publish_at', True, 'Date Published')
     }
 
-    published_tutorials_set = TutorialResource.objects.filter(Q(status=1) | Q(status=2))
+    published_tutorials_set = TutorialResource.objects.using('stats').filter(Q(status=1) | Q(status=2))
 
     raw_get_data = request.GET.get('o', None)
     tutorials = get_sorted_list(request, published_tutorials_set, header, raw_get_data)
@@ -596,7 +596,7 @@ def tutorial_content(request, template='statistics/templates/statistics_content.
 
 @rate_limited_view
 def ilw_stats(request):
-    queryset =TrainingEvents.objects.filter(training_status=2).order_by('-event_start_date')
+    queryset =TrainingEvents.objects.using('stats').filter(training_status=2).order_by('-event_start_date')
     context = {} 
 
     REG_COMPLETED = '1'
@@ -607,9 +607,9 @@ def ilw_stats(request):
         if status not in [REG_COMPLETED, CLOSED_TRAINING]:
             status = CLOSED_TRAINING
     if status == REG_COMPLETED:
-        queryset = TrainingEvents.objects.filter(training_status=1).order_by('-event_start_date')
+        queryset = TrainingEvents.objects.using('stats').filter(training_status=1).order_by('-event_start_date')
     elif status == CLOSED_TRAINING:
-        queryset = TrainingEvents.objects.filter(training_status=2).order_by('-event_start_date')
+        queryset = TrainingEvents.objects.using('stats').filter(training_status=2).order_by('-event_start_date')
 
 
     header = {
@@ -670,14 +670,14 @@ def ilw_stats(request):
 
     qs = collection.qs.select_related('state', 'foss', 'host_college')
     if status == REG_COMPLETED:
-        participants = Participant.objects.filter(event_id__in=qs, reg_approval_status=1)
+        participants = Participant.objects.using('stats').filter(event_id__in=qs, reg_approval_status=1)
         pcount = participants.count()
         femalecount = participants.filter(gender__in=('f','F','female','Female','FEMALE')).count()
         malecount = participants.filter(gender__in=('m','M','male','Male','MALE')).count()
         
     
     elif status == CLOSED_TRAINING:
-        participants = EventAttendance.objects.filter(event_id__in=qs)
+        participants = EventAttendance.objects.using('stats').filter(event_id__in=qs)
         pcount=participants.count()
         femalecount = participants.filter(participant__gender__in=('f','F','female','Female','FEMALE')).count()
         malecount = participants.filter(participant__gender__in=('m','M','male','Male','MALE')).count()
@@ -697,8 +697,8 @@ def ilw_stats(request):
         elif event.training_status == 2:
             completed_event_id.append(event.id)
     
-    participants = list(Participant.objects.filter(event_id__in=ongoing_event_id, reg_approval_status=1).values('event_id').annotate(count=Count('event_id')))
-    ea = list(EventAttendance.objects.filter(event_id__in=completed_event_id).values('event_id').annotate(count=Count('event_id')))
+    participants = list(Participant.objects.using('stats').filter(event_id__in=ongoing_event_id, reg_approval_status=1).values('event_id').annotate(count=Count('event_id')))
+    ea = list(EventAttendance.objects.using('stats').filter(event_id__in=completed_event_id).values('event_id').annotate(count=Count('event_id')))
     
     event_pcount_map = {}
     for d in participants + ea:
