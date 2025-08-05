@@ -296,13 +296,16 @@ def get_test_certi_text(event, user, teststatus):
         <b>{event.course.name}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
         <br /> Self learning through {organization} and passing an online test completes the training programme.<br />"
     elif event.event_type == "INTERN":
+
         text = f"""
             This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b>, has successfully \
             completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay \
             from <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed \
-            self-paced training on <b>{teststatus.fossid.foss}</b> under the supervision of <b>{event.instructor_name}</b>.
+            self-paced training on <b>{teststatus.fossid.foss}</b> under the supervision of <b>{event.instructor_name}</b>. <br/>
             This internship is officially approved and recognized by the receiving institution, \
-            ensuring compliance with institutional norms and standards."""
+            ensuring compliance with institutional norms and standards. <br/>
+            <b>Grade</b> : {str('{:.2f}'.format(teststatus.mdlgrade))}%
+            """
     else:
         credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
         text = f"This is to certify that <b>{participantname}</b> successfully passed a \
