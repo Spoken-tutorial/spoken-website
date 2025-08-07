@@ -67,7 +67,7 @@ def create_certificate(eventid,pname):
                              (certificate_path, template), 'r')
         content = Template(template_file.read())
         template_file.close()
-        foss = ', '.join([x.foss for x in event.course.foss.all()])
+        foss = format_foss_list([x.foss for x in event.course.foss.all()])
         content_tex = content.safe_substitute(
             name = pname,
             event_name = event.event_name,
@@ -228,6 +228,9 @@ def get_ilw_certificate(event, cert_type):
         template = "fdptr-certificate_edupyramids.pdf" if cert_type == "training" else "Blank-Certificate_edupyramids.pdf"
     return os.path.join(settings.MEDIA_ROOT, template)
 
+
+
+
 def get_training_certi_text(event, user):
     training_start = event.event_start_date
     training_end = event.event_end_date
@@ -246,7 +249,7 @@ def get_training_certi_text(event, user):
             This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b>, has successfully 
             completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay from
             <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed 
-            self-paced training on <b>{", ".join([foss.foss for foss in event.course.foss.all()])}</b>
+            self-paced training on <b>{format_foss_list([foss.foss for foss in event.course.foss.all()])}</b>
             under the supervision of <b>{event.instructor_name}</b>.<br />
 
             This internship is officially approved and recognized by the receiving institution, 
@@ -268,11 +271,11 @@ def get_training_certi_text(event, user):
             text = f"""
             {line1}
             on the course <b>{event.course.name}</b>, which includes the following {label}: 
-            <b>{", ".join([foss.foss for foss in event.course.foss.all()])}</b>, 
+            <b>{format_foss_list([foss.foss for foss in event.course.foss.all()])}</b>, 
             {line2}
             """
         else:
-            foss = [x.foss for x in event.course.foss.all()]
+            foss = format_foss_list([x.foss for x in event.course.foss.all()])
             text = f"""{line1}
             on <b>{', '.join(foss)}</b> {line2}"""
 
@@ -296,16 +299,27 @@ def get_test_certi_text(event, user, teststatus):
         <b>{event.course.name}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
         <br /> Self learning through {organization} and passing an online test completes the training programme.<br />"
     elif event.event_type == "INTERN":
+
         text = f"""
             This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b>, has successfully \
             completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay \
             from <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed \
-            self-paced training on <b>{teststatus.fossid.foss}</b> under the supervision of <b>{event.instructor_name}</b>.
+            self-paced training on <b>{teststatus.fossid.foss}</b> under the supervision of <b>{event.instructor_name}</b>. <br/>
             This internship is officially approved and recognized by the receiving institution, \
-            ensuring compliance with institutional norms and standards."""
+            ensuring compliance with institutional norms and standards. <br/>
+            <b>Grade</b> : {str('{:.2f}'.format(teststatus.mdlgrade))}%
+            """
     else:
         credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
         text = f"This is to certify that <b>{participantname}</b> successfully passed a \
         <b>{teststatus.fossid.foss}</b> test, remotely conducted by {organization}, under an honour invigilation system.\
         <br /> Self learning through {organization} and passing an online test completes the training programme.<br />{credits}"
     return text
+
+
+def format_foss_list(foss_list):
+    if not foss_list:
+        return ''
+    if len(foss_list) == 1:
+        return foss_list[0]
+    return ', '.join(foss_list[:-1]) + " and " + foss_list[-1]
