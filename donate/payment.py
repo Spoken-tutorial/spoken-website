@@ -67,13 +67,13 @@ def get_ilw_session_payload(request, payee_obj_new, participant ):
         "udf4": payee_obj_new.state,
     }
     ac = AcademicCenter.objects.get(id=participant.college_id)
-    payload['udf1'] = ac.institution_name
+    payload['udf1'] = ac.institution_name[:90]
     payload['udf2'] = ac.academic_code
     purpose = payee_obj_new.purpose
     if  purpose == 'cdcontent':
         payload['udf5'] = 'cdcontent'
     else:
-        payload['udf5'] = TrainingEvents.objects.get(id=purpose).event_name
+        payload['udf5'] = str(TrainingEvents.objects.get(id=purpose).id)
     return payload
     
 def make_hdfc_session_request(payee_obj_new, headers, payload):

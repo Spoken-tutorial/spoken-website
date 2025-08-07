@@ -57,7 +57,7 @@ def get_session_payload(request, email, data, academic):
         for item in values:
             ac_name.append(item.get('institution_name'))
             ac_code.append(item.get('academic_code'))
-    udf1 = ' ** '.join(ac_name)
+    udf1 = ' ** '.join(ac_name)[:90] # hdfc character limit - 100
     udf2 = ' ** '.join(ac_code)
     payload["udf1"] = udf1
     payload["udf2"] = udf2
