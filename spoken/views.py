@@ -293,6 +293,9 @@ def archived_tutorial_search(request):
     return render(request, 'spoken/templates/archived_tutorial_search.html', context)
 
 def is_valid_user(user,foss,lang,tr_rec):
+    # Allow access to unrestricted tutorials
+    if tr_rec.is_unrestricted:
+        return True
     # Allow access to all tutorials published before a set restriction date
     if tr_rec.publish_at and tr_rec.publish_at.date() < TUTORIAL_RESTRICTION_DATE:
         return True # No restriction on tutorials published before restricted_date
