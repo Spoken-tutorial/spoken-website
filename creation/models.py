@@ -256,6 +256,7 @@ class TutorialResource(models.Model):
     assignment_status = models.PositiveSmallIntegerField(default=0)
     # 0 - Not Extended , 1 - Extended , 2 - Tutorial Terminated from user
     extension_status = models.PositiveIntegerField(default=0)
+    is_unrestricted = models.BooleanField(default=False) # True if tutorial is accessibile without any restriction
 
     class Meta:
         unique_together = ('tutorial_detail', 'language',)
