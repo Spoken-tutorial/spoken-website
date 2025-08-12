@@ -245,11 +245,15 @@ def get_training_certi_text(event, user):
     participantname = f"{user.first_name} {user.last_name}"
     text = ""
     if event.event_type == "INTERN": # For internship
+        course_name_text = ""
+        if event.is_course:
+            label = "topic" if event.event_type == "HN" else "FOSS"
+            course_name_text = f" the course <b>{event.course.name}</b> which includes the following {label}:"
         text = f"""
             This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b>, has successfully 
             completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay from
-            <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed 
-            self-paced training on <b>{format_foss_list([foss.foss for foss in event.course.foss.all()])}</b>
+            <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed
+            self-paced training on{course_name_text} <b>{format_foss_list([foss.foss for foss in event.course.foss.all()])}</b>
             under the supervision of <b>{event.instructor_name}</b>.<br />
 
             This internship is officially approved and recognized by the receiving institution, 
