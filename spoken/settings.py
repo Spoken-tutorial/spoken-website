@@ -191,6 +191,14 @@ DATABASES = {
         'PASSWORD': HN_PASS,
         'HOST': HN_HOST,
         'PORT': HN_PORT,
+    },
+    'stats': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': STATS_DB,
+        'USER': STATS_USER,
+        'PASSWORD': STATS_PWD,
+        'HOST': STATS_HOST,
+        'PORT': STATS_PORT,
     }
         
 }
