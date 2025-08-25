@@ -186,33 +186,61 @@
               <b>Host College :</b> <span>{{event.event.host_college}}, {{event.event.state.name}}</span><br>
             {% endif %}
               <b>Event Coordinator Name :</b> <span>{{event.event.event_coordinator_name}}</span><br>
-              <b>FOSS :</b> <span >{{event.course.foss.all|join:", "}}</span><span >{{event.event.course.foss.all|join:", "}}</span>
+              <b>{% if event.event.event_type == "HN"%}Course :{% else %} FOSS:{% endif %}</b> <span >{{event.course.foss.all|join:", "}}</span><span >{{event.event.course.foss.all|join:", "}}</span>
                         <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{event.get_foss_langs}}' style="display: none;">
           </p>
           {% if event.event.event_type == "HN"%}
-              <div>
-                    <p style="text-decoration: underline;"><b>Online Video Tutorial Links</b></p>
-                    {% with links=event|get_hn_tutorial_links %}
-                      {% for name, url in links %}
-                        <div style="margin-bottom: 12px;"><a href="{{url}}" target="_blank">{{name}}</a></div>
-                      {% endfor %}
-                    {% endwith %}
-                  </div>
+              <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Online Video Tutorial Links</div>
+                        <div class="panel-body">
+                            <ul>
+                               {% with links=event|get_hn_tutorial_links %}
+                                  {% for name, url in links %}
+                                    <li><a href="{{url}}" target="_blank">{{name}}</a></li>
+                                  {% endfor %}
+                                {% endwith %}
+                            </ul>
+                        </div>
+                    </div>
           {% endif %}
-          <div style="text-align: right;">
+          <div >
               {% if event.event.event_type == "HN"%}
                 {% with categories=event.event|get_hn_categories  %}
-                  <div>
-                    <button type="button" class="btn btn-primary downloadBtn" data-categories="{{ categories }}"  data-language="{{ event.language_hn }}"> Download CD Content</button>
-                  </div>
-                  <div id="loadingSpinner" style="display: none; position: fixed; top: 50%; left: 50%; z-index: 9999;">
+                  <div id="loadingSpinner" style="display: none; position: fixed; top: 50%; left: 50%; z-index: 9999; text-align: center;">
                     <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                    
+                    <h4>Please wait while we process your request....</h4>
                   </div>
+                  <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Download Course Tutorials</div>
+                        <div class="panel-body">
+                          <div class="form-group">
+                            <label for="mySelect">Select video quality for download:</label>
+                            <select class="form-control" id="select_quality">
+                              <option value="L">Low (recommended for faster downloads)</option>
+                              <option value="M">Medium</option>
+                              <!-- <option value="H">High</option> -->
+                            </select>
+                          </div>
+                         
+                              {% with course=event|get_hn_course_id %}
+                                  {% with langs=event|get_hn_part_lang %}
+                                      {% for lang in langs %}
+                                          <button type="button" class="btn btn-primary downloadBtn" data-course="{{ course }}"  data-language="{{ lang.1 }}"><span><i class="fa fa-download" aria-hidden="true"></i></span> Download CD Content ({{lang.0}})</button>
+                                      {% endfor %}
+                                  {% endwith %}    
+                              {% endwith %}
+                            <ul>
+                              
+                            </ul>
+                        </div>
+                    </div>
                 {% endwith %}
               {% else %}
                 {% if event.reg_approval_status == 1 and user|registartion_successful:event.event %}
-                  <button class="btn btn-primary" type="submit" 
+                        <button class="btn btn-primary" type="submit" 
                   formaction="{% url 'cdcontent:create_cd_download' 'general' %}">Download CD Content</button>
+                  
                 {% endif %}
               {% endif %}
 
@@ -230,9 +258,10 @@
                         {% with data=event.event|get_hn_test %}
                         <div style="margin-top: 12px;;">
                           <input type="hidden" id="testurl{{data.1}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{data.1}}">
-                          <button class="btn btn-info" type="button" 
+                          <button style="margin-top: 12px;" class="btn btn-info" type="button" 
                                   onclick="take_to_test({{event.id}}, {{data.1}}, {{data.0}}, {{data.2}}, {{event.event_id}});">
-                                  Attempt {{course.testfoss.foss}} test
+                                  <!-- Attempt {{course.testfoss.foss}} 1test -->
+                                   Attempt Test
                             </button>
                         </div>
                         {% endwith %}
@@ -257,13 +286,14 @@
                             {% for course in fossmdlcourse %}
                               {% if not event|check_passgrade_exists:course.testfoss_id%}
                                 <input type="hidden" id="testurl{{course.mdlcourse_id}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}">
-                                <button class="btn btn-info" type="button" 
+                                <button class="btn btn-info" type="button" style="margin-top: 12px;"
                                 onclick="take_to_test({{event.id}}, {{course.mdlcourse_id}}, {{course.mdlquiz_id}}, {{course.testfoss_id}}, {{event.event_id}});">
                                 Attempt {{course.testfoss.foss}} test
                                 </button>
                               {% else %}                    
                                   {% with grade=event|get_grade:course.testfoss_id %}
-                                  <button type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate' course.testfoss_id%}">Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
+                                  
+                                  <button style="margin-top: 12px;" type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate' course.testfoss_id%}"><span><i class="fa fa-download" aria-hidden="true"></i></span> Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
                                   {% endwith %}
                               {% endif %}
                             {% endfor %}
@@ -330,6 +360,7 @@
 
 function take_to_test(partid, mdlcourseid, mdlquizid, fossid, eventid){
   // var mdlcourseid  = $('#mdlcourseid').val();
+  
   var testurl = $('#testurl'+mdlcourseid).val();
   alert(testurl)
   $.ajax({
@@ -359,13 +390,17 @@ $('#id_foss').select2({
 });
 $(document).on('click', '.downloadBtn', function() {
   $('#loadingSpinner').show();  // Show spinner
-  const categories = $(this).data('categories');
+  const course = $(this).data('course');
+  let select_quality = document.getElementById("select_quality");
+  let videoQuality = select_quality.value;
+  
   let language = $(this).data('language');
   if (language === undefined || language === null || language === "" || language === "None") {
     language = null;
   }
 
-  let apiUrl = "/training/proxy_health_api/?courseName=BetaHealthtutorial&catIds=" + categories;
+  let apiUrl = `/training/proxy_health_api/?courseName=HealthTutorial&courseId=${course}&quality=${videoQuality}&lanId=${language}`;
+  
   if (language) {
     apiUrl += "&lanIds=22," + language;
   } else {

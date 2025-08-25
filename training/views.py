@@ -1394,9 +1394,9 @@ def edit_company(request, rid = None):
 def proxy_health_api(request):
     url = HN_API
     params = {
-        "courseName": request.GET.get("courseName"),
-        "catIds": request.GET.get("catIds"),
-        "lanIds": request.GET.get("lanIds"),
+        "courseId": request.GET.get("courseId"),
+        "lanIds": request.GET.get("lanId"),
+        "videoQuality": request.GET.get("quality"),
     }
     resp = requests.get(url, params=params)
     try:
