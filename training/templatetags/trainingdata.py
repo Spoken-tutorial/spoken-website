@@ -5,7 +5,8 @@ from cms.models import Profile
 from django import template
 from datetime import datetime,date
 from health_app.models import HNLanguage, Category
-from spoken.config import HN_URL
+from spoken.config import HN_URL, HN_API
+from collections import defaultdict
 
 register = template.Library()
 
@@ -240,24 +241,33 @@ def get_hn_tutorial_links(participant):
       data.append((item.category_name, url))
    return data
 
+
+@register.filter
+def get_hn_course_id(participant):
+   event = participant.event
+   try:
+    hn_course_id = ExternalEventCourse.objects.filter(event=event).first().external_course
+    return hn_course_id
+   except :
+      return 1
+
+@register.filter
+def get_hn_part_lang(participant):
+   lang_id = participant.language_hn
+   if lang_id is not None and lang_id != 22:
+    lang = HNLanguage.objects.get(lan_id=lang_id)
+    return [(lang.lang_name, lang.lan_id), ("English", 22)] #Default English
+   return [("English", 22)] #English only
+
+
 @register.filter
 def get_hn_test(event):
-   # Get all FOSS categories linked to the event
-   fosses = FossCategory.objects.filter(id__in=event.course.foss.values_list('id', flat=True))
-   # Collect quiz IDs for each FOSS
-   quiz_sets = [
-        set(ILWFossMdlCourses.objects.filter(foss=foss).values_list('mdlquiz_id', flat=True))
-        for foss in fosses
-    ]
-   # Find common quiz IDs across all FOSS
-   common_quiz = set.intersection(*quiz_sets) if quiz_sets else set()
-   if not common_quiz:
-      return None, None, None
-   fm = ILWFossMdlCourses.objects.filter(mdlquiz_id__in=common_quiz, foss__in=fosses).first()
-   if fm:
-      return fm.mdlquiz_id, fm.mdlcourse_id, fm.foss_id
-   else:
-      return None, None, None
+   try:
+    obj = ExternalEventCourse.objects.filter(event=event).first()
+    return obj.mdl_quiz, obj.mdl_course, 1
+   except Exception as e:
+    return None
+
 
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)

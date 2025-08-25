@@ -186,3 +186,11 @@ class ExternalCourseMap(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
 
+class ExternalEventCourse(models.Model):
+	"""mapping of external course ids & events""" # HN course & event
+	event = models.ForeignKey(TrainingEvents, on_delete=models.PROTECT)
+	external_course = models.IntegerField() # HN course id
+	mdl_quiz = models.IntegerField() # Moodle quiz id
+	mdl_course = models.IntegerField() # Moodle course id
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
