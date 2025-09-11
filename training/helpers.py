@@ -281,7 +281,7 @@ def get_training_certi_text(event, user):
         else:
             foss = format_foss_list([x.foss for x in event.course.foss.all()])
             text = f"""{line1}
-            on <b>{', '.join(foss)}</b> {line2}"""
+            on <b>{foss}</b> {line2}"""
 
     return text
 
