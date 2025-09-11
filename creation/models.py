@@ -74,6 +74,13 @@ class FossSuperCategory(models.Model):
         return self.name
 
 
+class Domain(models.Model):
+    name = models.CharField(unique=True, max_length=255)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    show_on_homepage = models.BooleanField(default=False)
+
+
 @python_2_unicode_compatible
 class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length=255)
@@ -91,6 +98,7 @@ class FossCategory(models.Model):
     csc_dca_programme = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for csc-dca programme' )
     credits = models.PositiveSmallIntegerField(default=0)
     is_fossee = models.BooleanField(verbose_name="Added by FOSSEE", default=False)
+    domain = models.ManyToManyField(Domain)
     class Meta(object):
         verbose_name = 'FOSS'
         verbose_name_plural = 'FOSSes'
