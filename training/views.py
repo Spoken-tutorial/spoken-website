@@ -1186,7 +1186,8 @@ class ILWTestCertificate(object):
     participantname = f"{user.first_name} {user.last_name}"
     response = HttpResponse(content_type='application/pdf')
     if event_type == "HN":
-        filename = (participantname+'-'+event.course.name+"-Participant-Test-Certificate").replace(" ", "-")
+        course_name = event.course.name.replace(",","-")
+        filename = (participantname+'-'+course_name+"-Participant-Test-Certificate").replace(" ", "-")
     else:
         filename = (participantname+'-'+teststatus.fossid.foss+"-Participant-Test-Certificate").replace(" ", "-")
 
