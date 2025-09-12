@@ -79,6 +79,10 @@ class Domain(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     show_on_homepage = models.BooleanField(default=False)
+    icon = models.ImageField(upload_to='domain_icons/', null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 
 @python_2_unicode_compatible
@@ -99,6 +103,8 @@ class FossCategory(models.Model):
     credits = models.PositiveSmallIntegerField(default=0)
     is_fossee = models.BooleanField(verbose_name="Added by FOSSEE", default=False)
     domain = models.ManyToManyField(Domain)
+    icon = models.ImageField(upload_to='foss_icons/', null=True, blank=True)
+    
     class Meta(object):
         verbose_name = 'FOSS'
         verbose_name_plural = 'FOSSes'
