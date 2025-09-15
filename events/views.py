@@ -1,4 +1,3 @@
-# --- BEGIN: get_batches view for AJAX batch dropdown ---
 from django.http import JsonResponse
 from .models import StudentBatch
 
