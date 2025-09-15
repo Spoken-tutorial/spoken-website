@@ -513,10 +513,30 @@ class TrainingReUseForm(forms.Form):
 class StudentPasswordResetForm(forms.Form):
     state = forms.ModelChoiceField(queryset=State.objects.all(),
                                    empty_label="Select State",)
-    school = forms.ModelChoiceField(queryset=AcademicCenter.objects.filter(institution_type_id=5))
-    batches = forms.ModelMultipleChoiceField(queryset=StudentBatch.objects.filter(academic__institution_type_id=5))
+    school = forms.ModelChoiceField(queryset=AcademicCenter.objects.none())
+    batches = forms.ModelMultipleChoiceField(queryset=StudentBatch.objects.none())
     new_password = forms.CharField()
     confirm_password = forms.CharField()
+
+    def __init__(self, *args, **kwargs):
+        state_id = None
+        school_id = None
+        if 'data' in kwargs:
+            state_id = kwargs['data'].get('state')
+            school_id = kwargs['data'].get('school')
+        elif 'initial' in kwargs:
+            state_id = kwargs['initial'].get('state')
+            school_id = kwargs['initial'].get('school')
+        else:
+            state_id = None
+            school_id = None
+        super().__init__(*args, **kwargs)
+        if state_id:
+            self.fields['school'].queryset = AcademicCenter.objects.filter(state_id=state_id)
+        if school_id:
+            self.fields['batches'].queryset = StudentBatch.objects.filter(academic_id=school_id)
+        else:
+            self.fields['batches'].queryset = StudentBatch.objects.none()
 
     def clean(self):
         cleaned_data = super().clean()

@@ -1,3 +1,14 @@
+# --- BEGIN: get_batches view for AJAX batch dropdown ---
+from django.http import JsonResponse
+from .models import StudentBatch
+
+def get_batches(request):
+    school_id = request.GET.get('school_id')
+    if school_id:
+        batches = StudentBatch.objects.filter(academic_id=school_id).values('id', 'batch_name')
+        return JsonResponse(list(batches), safe=False)
+    return JsonResponse([])
+
 from django.core.exceptions import PermissionDenied
 
 from django.contrib.auth.decorators import login_required
@@ -1344,7 +1355,7 @@ def training_clone(request, role, rid = None):
                 messages.error(request, "You have already scheduled <b>"+ str(request.POST['tdate']) + "</b> training on <b>"+ str(master_training.tdate) + "</b>. Please select some other date.")
 
 
-            if not csv_file_error:# and request.POST.get('remove-error')):
+            if not csv_file_error:# and request.POST.get('remove-error'):
                 existing_emails = None
                 if reattempt_list and more_then_two_per_day_list:
                     existing_emails = set(reattempt_list.split(',')).union(set(more_then_two_per_day_list.split(',')))
@@ -2248,7 +2259,7 @@ def test_participant(request, tid=None):
         #if t.status == 4 and (user == t.organiser or user == t.invigilator):
         #    can_download_certificate = 1
         context = {'collection' : test_mdlusers, 'test' : t, 'can_download_certificate':can_download_certificate}
-        return render(request, 'events/templates/test/test_participant.html', context)
+        return render(request, 'events/templates/test_participant.html', context)
 
 def test_participant_ceritificate(request, wid, participant_id):
     #response = HttpResponse(content_type='application/pdf')
@@ -2318,8 +2329,10 @@ def test_participant_ceritificate(request, wid, participant_id):
     # Draw image on Canvas and save PDF in buffer
     imgPath = get_signature(ta.test.tdate)
     imgDoc.drawImage(imgPath, 600, 95, 150, 76)    ## at (399,760) with size 160x160
+
     credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
+    #paragraphe
     text = get_test_cert_text(ta.test, mdluser, credits=credits)
     centered = ParagraphStyle(name = 'centered',
         fontSize = 15,
@@ -2330,7 +2343,6 @@ def test_participant_ceritificate(request, wid, participant_id):
     p = Paragraph(text, centered)
     p.wrap(700, 200)
     p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
-
 
     #paragraphe
     text = "Certificate for the Completion of <br/>"+w.foss.foss+" Training"
@@ -2351,7 +2363,6 @@ def test_participant_ceritificate(request, wid, participant_id):
     # Use PyPDF to merge the image-PDF into the template
     template_path = get_test_certificate(ta)
     page = PdfFileReader(open(template_path,"rb")).getPage(0)  
-
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -2859,13 +2870,13 @@ def ajax_district_data(request):
                     tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
                 data['location'] = tmp
 
-        if request.POST.get('fields[institute]'):
-            collages = AcademicCenter.objects.filter(district=district).order_by('institution_name')
-            if collages:
-                tmp = '<option value = None> -- None -- </option>'
-                for i in collages:
-                    tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
-                data['institute'] = tmp
+            if request.POST.get('fields[institute]'):
+                collages = AcademicCenter.objects.filter(district=district).order_by('institution_name')
+                if collages:
+                    tmp = '<option value = None> -- None -- </option>'
+                    for i in collages:
+                        tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
+                    data['institute'] = tmp
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
@@ -3247,18 +3258,13 @@ def get_schools(request):
     state_id = request.GET.get('state_id')
     if state_id:
         schools = AcademicCenter.objects.filter(
-            institution_type_id=5, state_id=state_id,
+            state_id=state_id,
             studentbatch__isnull=False).distinct().values(
-                'id', 'institution_name', 'academic_code').order_by('institution_name') # 5 for school
+                'id', 'institution_name', 'academic_code').order_by('institution_name')
+        print('DEBUG: state_id:', state_id)
+        print('DEBUG: schools queryset:', list(schools))
         return JsonResponse(list(schools), safe=False)
-    return JsonResponse([])
-
-
-def get_batches(request):
-    school_id = request.GET.get('school_id')
-    if school_id:
-        batches = StudentBatch.objects.filter(academic_id=school_id).values('id', 'batch_name')
-        return JsonResponse(list(batches), safe=False)
+    print('DEBUG: No state_id provided')
     return JsonResponse([])
 
 
