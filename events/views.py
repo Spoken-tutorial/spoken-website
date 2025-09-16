@@ -3229,13 +3229,16 @@ def reset_student_pwd(request):
     template = 'events/templates/reset_student_password.html'
     form = StudentPasswordResetForm()
     context['form'] = form
+    
     if request.method == "POST":
         form = StudentPasswordResetForm(request.POST)
         context['form'] = form
+        
         if form.is_valid():
             school = form.cleaned_data['school']
             batches = form.cleaned_data['batches']
             new_password = form.cleaned_data['new_password']
+            
             batch_ids = [x.id for x in batches]
             batches = StudentBatch.objects.filter(id__in=batch_ids)
             student_ids = StudentMaster.objects.filter(batch__in=batches).values_list('student_id', flat=True)
@@ -3248,8 +3251,15 @@ def reset_student_pwd(request):
             emails = [user.email for user in users]
             mdlUsers = MdlUser.objects.filter(email__in=emails)
             mdlUsers.update(password=encript_password(new_password))
-            send_bulk_student_reset_mail(school,batches,users.count(), new_password,request.user)
-            messages.add_message(request, messages.SUCCESS, f"Password updated for {users.count()} students.")
+            # send_bulk_student_reset_mail(school,batches,users.count(), new_password,request.user)  # Temporarily disabled
+            
+            # Add the success message
+            success_msg = "Password updated for {} students.".format(users.count())
+            messages.success(request, success_msg)
+            
+            from django.urls import reverse
+            redirect_url = reverse('events:reset_student_pwd')
+            return HttpResponseRedirect(redirect_url)
     return render(request,template,context)
 
 
@@ -3260,10 +3270,7 @@ def get_schools(request):
             state_id=state_id,
             studentbatch__isnull=False).distinct().values(
                 'id', 'institution_name', 'academic_code').order_by('institution_name')
-        print('DEBUG: state_id:', state_id)
-        print('DEBUG: schools queryset:', list(schools))
         return JsonResponse(list(schools), safe=False)
-    print('DEBUG: No state_id provided')
     return JsonResponse([])
 
 

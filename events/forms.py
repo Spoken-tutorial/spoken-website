@@ -521,16 +521,19 @@ class StudentPasswordResetForm(forms.Form):
     def __init__(self, *args, **kwargs):
         state_id = None
         school_id = None
-        if 'data' in kwargs:
-            state_id = kwargs['data'].get('state')
-            school_id = kwargs['data'].get('school')
+        
+        # Extract data from args (when form is created with POST data)
+        if args and len(args) > 0 and hasattr(args[0], 'get'):
+            state_id = args[0].get('state')
+            school_id = args[0].get('school')
+        # Extract data from kwargs (when form has initial data)
         elif 'initial' in kwargs:
             state_id = kwargs['initial'].get('state')
             school_id = kwargs['initial'].get('school')
-        else:
-            state_id = None
-            school_id = None
+        
         super().__init__(*args, **kwargs)
+        
+        # Set querysets based on the extracted data
         if state_id:
             self.fields['school'].queryset = AcademicCenter.objects.filter(state_id=state_id)
         if school_id:
