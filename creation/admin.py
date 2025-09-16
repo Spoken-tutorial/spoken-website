@@ -207,6 +207,9 @@ class CollaborateAdmin(admin.ModelAdmin):
 
 class DomainAdmin(admin.ModelAdmin):
     list_display = ('name', 'show_on_homepage')
+
+class FosscategoryDomainAdmin(admin.ModelAdmin):
+    list_display = ('domain','fosscategory', 'is_primary')
     
 
 
@@ -224,3 +227,4 @@ admin.site.register(LanguageManager, LanguagManagerAdmin)
 admin.site.register(BankDetail, BankDetailAdmin)
 admin.site.register(Collaborate, CollaborateAdmin)
 admin.site.register(Domain, DomainAdmin)
+admin.site.register(FosscategoryDomain, FosscategoryDomainAdmin)

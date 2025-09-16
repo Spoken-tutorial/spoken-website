@@ -102,7 +102,7 @@ class FossCategory(models.Model):
     csc_dca_programme = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for csc-dca programme' )
     credits = models.PositiveSmallIntegerField(default=0)
     is_fossee = models.BooleanField(verbose_name="Added by FOSSEE", default=False)
-    domain = models.ManyToManyField(Domain)
+    # domain = models.ManyToManyField(Domain)
     icon = models.ImageField(upload_to='foss_icons/', null=True, blank=True)
     
     class Meta(object):
@@ -112,6 +112,14 @@ class FossCategory(models.Model):
 
     def __str__(self):
         return self.foss
+    
+class FosscategoryDomain(models.Model):
+    fosscategory = models.ForeignKey(FossCategory, on_delete=models.PROTECT)
+    domain = models.ForeignKey(Domain, on_delete=models.PROTECT)
+    is_primary = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = (('fosscategory', 'domain'),)
 
 
 @python_2_unicode_compatible
