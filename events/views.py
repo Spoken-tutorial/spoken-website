@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from .models import StudentBatch
+from django.urls import reverse
 
 def get_batches(request):
     school_id = request.GET.get('school_id')
@@ -2258,7 +2259,7 @@ def test_participant(request, tid=None):
         #if t.status == 4 and (user == t.organiser or user == t.invigilator):
         #    can_download_certificate = 1
         context = {'collection' : test_mdlusers, 'test' : t, 'can_download_certificate':can_download_certificate}
-        return render(request, 'events/templates/test_participant.html', context)
+        return render(request, 'events/templates/test/test_participant.html', context)
 
 def test_participant_ceritificate(request, wid, participant_id):
     #response = HttpResponse(content_type='application/pdf')
@@ -3251,13 +3252,13 @@ def reset_student_pwd(request):
             emails = [user.email for user in users]
             mdlUsers = MdlUser.objects.filter(email__in=emails)
             mdlUsers.update(password=encript_password(new_password))
-            # send_bulk_student_reset_mail(school,batches,users.count(), new_password,request.user)  # Temporarily disabled
+            send_bulk_student_reset_mail(school,batches,users.count(), new_password,request.user)  
             
             # Add the success message
             success_msg = "Password updated for {} students.".format(users.count())
             messages.success(request, success_msg)
             
-            from django.urls import reverse
+            
             redirect_url = reverse('events:reset_student_pwd')
             return HttpResponseRedirect(redirect_url)
     return render(request,template,context)
