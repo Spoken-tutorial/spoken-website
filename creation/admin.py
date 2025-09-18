@@ -206,7 +206,7 @@ class CollaborateAdmin(admin.ModelAdmin):
     list_display = ('user','foss_name','language','created',)
 
 class DomainAdmin(admin.ModelAdmin):
-    list_display = ('name', 'show_on_homepage')
+    list_display = ('name', 'show_on_homepage', 'is_active')
 
 class FosscategoryDomainAdmin(admin.ModelAdmin):
     list_display = ('domain','fosscategory', 'is_primary')

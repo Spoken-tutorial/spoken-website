@@ -80,6 +80,8 @@ class Domain(models.Model):
     updated = models.DateTimeField(auto_now=True)
     show_on_homepage = models.BooleanField(default=False)
     icon = models.ImageField(upload_to='domain_icons/', null=True, blank=True)
+    description = models.TextField()
+    is_active = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
