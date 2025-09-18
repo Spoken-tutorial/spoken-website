@@ -27,7 +27,8 @@ def rate_limited_view(view_func):
                 message = "Invalid or malformed page parameter."
                 return render(request, 'statistics/templates/temporary_disabled.html', {"message": message})
 
-            okay = check_server_status()
+            # okay = check_server_status()
+            okay = False
             if not okay:
                 message = "This page is temporarily unavailable due to high server load. We’re working to restore access soon — thank you for your patience."
                 return render(request, 'statistics/templates/temporary_disabled.html', {"message": message})
