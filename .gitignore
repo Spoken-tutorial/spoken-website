@@ -104,3 +104,6 @@ cron/*
 creation/hr-receipts/
 *.DS_Store
 static/spoken/embedding/
+
+*.sql
+env/

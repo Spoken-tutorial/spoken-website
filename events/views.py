@@ -1,3 +1,14 @@
+from django.http import JsonResponse
+from .models import StudentBatch
+from django.urls import reverse
+
+def get_batches(request):
+    school_id = request.GET.get('school_id')
+    if school_id:
+        batches = StudentBatch.objects.filter(academic_id=school_id).values('id', 'batch_name')
+        return JsonResponse(list(batches), safe=False)
+    return JsonResponse([])
+
 from django.core.exceptions import PermissionDenied
 
 from django.contrib.auth.decorators import login_required
@@ -1344,7 +1355,7 @@ def training_clone(request, role, rid = None):
                 messages.error(request, "You have already scheduled <b>"+ str(request.POST['tdate']) + "</b> training on <b>"+ str(master_training.tdate) + "</b>. Please select some other date.")
 
 
-            if not csv_file_error:# and request.POST.get('remove-error')):
+            if not csv_file_error:# and request.POST.get('remove-error'):
                 existing_emails = None
                 if reattempt_list and more_then_two_per_day_list:
                     existing_emails = set(reattempt_list.split(',')).union(set(more_then_two_per_day_list.split(',')))
@@ -2318,8 +2329,10 @@ def test_participant_ceritificate(request, wid, participant_id):
     # Draw image on Canvas and save PDF in buffer
     imgPath = get_signature(ta.test.tdate)
     imgDoc.drawImage(imgPath, 600, 95, 150, 76)    ## at (399,760) with size 160x160
+
     credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
+    #paragraphe
     text = get_test_cert_text(ta.test, mdluser, credits=credits)
     centered = ParagraphStyle(name = 'centered',
         fontSize = 15,
@@ -2330,7 +2343,6 @@ def test_participant_ceritificate(request, wid, participant_id):
     p = Paragraph(text, centered)
     p.wrap(700, 200)
     p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
-
 
     #paragraphe
     text = "Certificate for the Completion of <br/>"+w.foss.foss+" Training"
@@ -2351,7 +2363,6 @@ def test_participant_ceritificate(request, wid, participant_id):
     # Use PyPDF to merge the image-PDF into the template
     template_path = get_test_certificate(ta)
     page = PdfFileReader(open(template_path,"rb")).getPage(0)  
-
     overlay = PdfFileReader(BytesIO(imgTemp.getvalue())).getPage(0)
     page.mergePage(overlay)
 
@@ -2859,13 +2870,13 @@ def ajax_district_data(request):
                     tmp +='<option value='+str(i.id)+'>'+i.name+'</option>'
                 data['location'] = tmp
 
-        if request.POST.get('fields[institute]'):
-            collages = AcademicCenter.objects.filter(district=district).order_by('institution_name')
-            if collages:
-                tmp = '<option value = None> -- None -- </option>'
-                for i in collages:
-                    tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
-                data['institute'] = tmp
+            if request.POST.get('fields[institute]'):
+                collages = AcademicCenter.objects.filter(district=district).order_by('institution_name')
+                if collages:
+                    tmp = '<option value = None> -- None -- </option>'
+                    for i in collages:
+                        tmp +='<option value='+str(i.id)+'>'+i.institution_name+'</option>'
+                    data['institute'] = tmp
 
     return HttpResponse(json.dumps(data), content_type='application/json')
 
@@ -3219,13 +3230,16 @@ def reset_student_pwd(request):
     template = 'events/templates/reset_student_password.html'
     form = StudentPasswordResetForm()
     context['form'] = form
+    
     if request.method == "POST":
         form = StudentPasswordResetForm(request.POST)
         context['form'] = form
+        
         if form.is_valid():
             school = form.cleaned_data['school']
             batches = form.cleaned_data['batches']
             new_password = form.cleaned_data['new_password']
+            
             batch_ids = [x.id for x in batches]
             batches = StudentBatch.objects.filter(id__in=batch_ids)
             student_ids = StudentMaster.objects.filter(batch__in=batches).values_list('student_id', flat=True)
@@ -3238,8 +3252,15 @@ def reset_student_pwd(request):
             emails = [user.email for user in users]
             mdlUsers = MdlUser.objects.filter(email__in=emails)
             mdlUsers.update(password=encript_password(new_password))
-            send_bulk_student_reset_mail(school,batches,users.count(), new_password,request.user)
-            messages.add_message(request, messages.SUCCESS, f"Password updated for {users.count()} students.")
+            send_bulk_student_reset_mail(school,batches,users.count(), new_password,request.user)  
+            
+            # Add the success message
+            success_msg = "Password updated for {} students.".format(users.count())
+            messages.success(request, success_msg)
+            
+            
+            redirect_url = reverse('events:reset_student_pwd')
+            return HttpResponseRedirect(redirect_url)
     return render(request,template,context)
 
 
@@ -3247,18 +3268,10 @@ def get_schools(request):
     state_id = request.GET.get('state_id')
     if state_id:
         schools = AcademicCenter.objects.filter(
-            institution_type_id=5, state_id=state_id,
+            state_id=state_id,
             studentbatch__isnull=False).distinct().values(
-                'id', 'institution_name', 'academic_code').order_by('institution_name') # 5 for school
+                'id', 'institution_name', 'academic_code').order_by('institution_name')
         return JsonResponse(list(schools), safe=False)
-    return JsonResponse([])
-
-
-def get_batches(request):
-    school_id = request.GET.get('school_id')
-    if school_id:
-        batches = StudentBatch.objects.filter(academic_id=school_id).values('id', 'batch_name')
-        return JsonResponse(list(batches), safe=False)
     return JsonResponse([])
 
 

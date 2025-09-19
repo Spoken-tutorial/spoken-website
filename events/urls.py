@@ -1,6 +1,8 @@
 from django.conf.urls import url, include
 from events.views import *
 from events.notification import nemail
+from .views import get_schools, get_batches
+
 app_name = 'events'
 urlpatterns = [
     url(r'^$',  events_dashboard, name='events_dashboard'),

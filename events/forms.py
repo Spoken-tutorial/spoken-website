@@ -513,10 +513,33 @@ class TrainingReUseForm(forms.Form):
 class StudentPasswordResetForm(forms.Form):
     state = forms.ModelChoiceField(queryset=State.objects.all(),
                                    empty_label="Select State",)
-    school = forms.ModelChoiceField(queryset=AcademicCenter.objects.filter(institution_type_id=5))
-    batches = forms.ModelMultipleChoiceField(queryset=StudentBatch.objects.filter(academic__institution_type_id=5))
+    school = forms.ModelChoiceField(queryset=AcademicCenter.objects.none())
+    batches = forms.ModelMultipleChoiceField(queryset=StudentBatch.objects.none())
     new_password = forms.CharField()
     confirm_password = forms.CharField()
+
+    def __init__(self, *args, **kwargs):
+        state_id = None
+        school_id = None
+        
+        # Extract data from args (when form is created with POST data)
+        if args and len(args) > 0 and hasattr(args[0], 'get'):
+            state_id = args[0].get('state')
+            school_id = args[0].get('school')
+        # Extract data from kwargs (when form has initial data)
+        elif 'initial' in kwargs:
+            state_id = kwargs['initial'].get('state')
+            school_id = kwargs['initial'].get('school')
+        
+        super().__init__(*args, **kwargs)
+        
+        # Set querysets based on the extracted data
+        if state_id:
+            self.fields['school'].queryset = AcademicCenter.objects.filter(state_id=state_id)
+        if school_id:
+            self.fields['batches'].queryset = StudentBatch.objects.filter(academic_id=school_id)
+        else:
+            self.fields['batches'].queryset = StudentBatch.objects.none()
 
     def clean(self):
         cleaned_data = super().clean()
