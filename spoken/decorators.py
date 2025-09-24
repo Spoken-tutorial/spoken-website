@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.core.cache import cache
 from statistics.models import WhitelistedIP
 from time import time
-from .config import TIME_WINDOW, MAX_REQUEST
+from .config import TIME_WINDOW, MAX_REQUEST, USE_STATS
 import ipaddress
 
 
@@ -26,9 +26,9 @@ def rate_limited_view(view_func):
             if not request.user.is_authenticated and not is_valid_page_param(request):
                 message = "Invalid or malformed page parameter."
                 return render(request, 'statistics/templates/temporary_disabled.html', {"message": message})
-
-            # okay = check_server_status()
             okay = False
+            if USE_STATS:
+                okay = check_server_status()
             if not okay:
                 message = "This page is temporarily unavailable due to high server load. We’re working to restore access soon — thank you for your patience."
                 return render(request, 'statistics/templates/temporary_disabled.html', {"message": message})
