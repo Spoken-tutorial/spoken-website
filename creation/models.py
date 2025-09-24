@@ -104,7 +104,6 @@ class FossCategory(models.Model):
     csc_dca_programme = models.BooleanField(default=True, help_text ='If unchecked, this foss will not be available for csc-dca programme' )
     credits = models.PositiveSmallIntegerField(default=0)
     is_fossee = models.BooleanField(verbose_name="Added by FOSSEE", default=False)
-    # domain = models.ManyToManyField(Domain)
     icon = models.ImageField(upload_to='foss_icons/', null=True, blank=True)
     
     class Meta(object):
