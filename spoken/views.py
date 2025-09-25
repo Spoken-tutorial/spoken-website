@@ -962,9 +962,50 @@ def subscription(request):
     context = {}
     context["subscription_amount"] = settings.SUBSCRIPTION_AMOUNT
     template = 'spoken/templates/subscription.html'
+    
+    # Get user's past transactions
+    if user.is_authenticated:        
+        # Get subscriptions for this user - try multiple matching strategies
+        # since existing data might not have user field properly set
+        user_subscriptions = AcademicSubscription.objects.filter(
+            Q(user=user) | Q(email=user.email)
+        ).select_related('transaction').prefetch_related('academic_details__academic').order_by('-created')
+        
+        # Prepare transaction data for template
+        transactions = []
+        for subscription in user_subscriptions:
+            # Get academic details for this subscription
+            academic_details = subscription.academic_details.all()
+            
+            if academic_details.exists():
+                for detail in academic_details:
+                    transaction_data = {
+                        'payment_date': subscription.created.date(),
+                        'subscription_end_date': detail.subscription_end_date,
+                        'institute_name': detail.academic.institution_name,
+                        'gst_number': detail.gst_number or 'N/A',
+                    }
+                    
+                    # Add transaction details if available
+                    if subscription.transaction:
+                        transaction_data.update({
+                            'transaction_id': subscription.transaction.transaction_id or subscription.transaction.order_id,
+                            'order_status': subscription.transaction.order_status or 'PENDING'
+                        })
+                    else:
+                        transaction_data.update({
+                            'transaction_id': 'N/A',
+                            'order_status': 'NO_TRANSACTION'
+                        })
+                    
+                    transactions.append(transaction_data)
+        
+        context['user_transactions'] = transactions
+    
     if request.method == 'GET':
         form = AcademicSubscriptionForm(user=user)
         context['form'] = form
+        
         return render(request, template, context=context)
     if request.method == 'POST':
         form = AcademicSubscriptionForm(request.POST, user=user)
@@ -977,6 +1018,7 @@ def subscription(request):
             subscription_amount = settings.SUBSCRIPTION_AMOUNT * total_academic_centers
             email = form.cleaned_data.get('email')
             data = {
+                'user': user,  # Add the user to link subscription to logged-in user
                 'name': form.cleaned_data.get('name'),
                 'email': form.cleaned_data.get('email'),
                 'phone': form.cleaned_data.get('phone'),
