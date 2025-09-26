@@ -1763,6 +1763,8 @@ class AcademicPaymentStatus(models.Model):
   remarks = models.CharField(max_length = 200, null=True)
   entry_date = models.DateTimeField(auto_now_add = True)
   entry_user = models.ForeignKey(User, on_delete=models.PROTECT )
+  via_subscription_page = models.BooleanField(default=False,
+                                              verbose_name="Payment made via Spoken Tutorial Subscription page?") 
   
   def __str__(self):
     return self.academic.institution_name
