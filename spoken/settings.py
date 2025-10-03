@@ -129,6 +129,8 @@ SITE_ID = 1
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+CONN_MAX_AGE = DB_CONN_MAX_AGE_DEFAULT
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -137,6 +139,7 @@ DATABASES = {
         'PASSWORD': DB_PASS,
         'HOST': '',                            # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '',    
+        "CONN_MAX_AGE": DB_CONN_MAX_AGE_FREQUENT,
     
     },
     'moodle': {	
@@ -147,6 +150,7 @@ DATABASES = {
         'PASSWORD': MDB_PASS,	
         'HOST': MDB_HOST,                  # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.	
         'PORT': '',                  # Set to empty string for default.	
+        "CONN_MAX_AGE": DB_CONN_MAX_AGE_FREQUENT,
     },
     'ilwmoodle': {	
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.	
@@ -199,6 +203,7 @@ DATABASES = {
         'PASSWORD': STATS_PWD,
         'HOST': STATS_HOST,
         'PORT': STATS_PORT,
+        "CONN_MAX_AGE": DB_CONN_MAX_AGE_FREQUENT,
     }
         
 }
@@ -241,8 +246,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-
-CONN_MAX_AGE = 100
 
 #events settings
 ONLINE_TEST_URL = ONLINE_TEST_URL
