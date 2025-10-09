@@ -20,6 +20,9 @@ try:
 except ImportError:
     from bs4 import BeautifulSoup
 
+import subprocess
+import re
+
 class MLStripper(HTMLParser):
     def __init__(self):
         self.reset()
@@ -174,7 +177,7 @@ def get_duration_info(path):
     """Uses ffmpeg to determine information about a video."""
     info_m = {}
     try:
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-nostdin', '-hide_banner', '-nostats', '-y', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
         stdout, stderr = process.communicate()
         duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout, re.DOTALL).groupdict()
 

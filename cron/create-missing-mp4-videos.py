@@ -14,6 +14,7 @@ def convert_tmp_video(src_path, dst_path):
     process = subprocess.Popen(
         [
             '/usr/bin/mffmpeg',
+            '-nostdin', '-hide_banner', '-nostats', '-y',
             '-i', src_path,
             '-strict', 'experimental',
             '-pix_fmt', 'yuv420p',
@@ -22,7 +23,8 @@ def convert_tmp_video(src_path, dst_path):
             dst_path
         ],
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT
+        stderr=subprocess.STDOUT,
+        start_new_session=True
     )
     stdout, stderr = process.communicate()
     return stdout, stderr
@@ -37,6 +39,7 @@ def convert_video(src_path, dst_path):
     process = subprocess.Popen(
         [
             '/usr/bin/ffmpeg',
+            '-nostdin', '-hide_banner', '-nostats', '-y',
             '-i', src_path,
             '-strict', 'experimental',
             '-vcodec', 'libx264',
@@ -45,7 +48,8 @@ def convert_video(src_path, dst_path):
             dst_path
         ],
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT
+        stderr=subprocess.STDOUT,
+        start_new_session=True
     )
     stdout, stderr = process.communicate()
     return stdout, stderr

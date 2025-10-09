@@ -1,6 +1,5 @@
 
 from builtins import str
-import subprocess
 import MySQLdb
 import os
 import time

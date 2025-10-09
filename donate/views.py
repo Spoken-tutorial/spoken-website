@@ -395,7 +395,9 @@ def receipt(request):
         out = certificate_path
         command = 'user_receipt'
         process = subprocess.Popen('make -C {0} {1} file_name={2}'.format(certificate_path, command, file_name),
-            stderr=subprocess.PIPE, shell=True)
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, shell=True)
         
         err = process.communicate()[1]
         if process.returncode == 0:
@@ -404,7 +406,11 @@ def receipt(request):
                         filename=%s' % (download_file_name)
             response.write(pdf.read())
             clean_process = subprocess.Popen('make -C {0} clean file_name={1}'.format(
-                certificate_path, file_name), shell=True)
+                certificate_path, file_name), 
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                shell=True)
             return response
     except Exception as e:
         print("error is ",e)

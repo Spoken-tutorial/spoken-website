@@ -198,6 +198,10 @@ def _get_detail(serial_no):
 
 def _clean_certificate_certificate(path, file_name):
     clean_process = subprocess.Popen('make -C {0} clean file_name={1}'.format(path, file_name),
+                                     stdin=subprocess.DEVNULL,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.STDOUT,
+                                     start_new_session=True,
                                      shell=True)
     clean_process.wait()
 
@@ -210,7 +214,9 @@ def _make_certificate_certificate(path, type, file_name):
     elif type == 'W':
         command = 'workshop_cert'
     process = subprocess.Popen('timeout 15 make -C {0} {1} file_name={2}'.format(path, command, file_name),
-                               stderr=subprocess.PIPE, shell=True)
+                               stdin=subprocess.DEVNULL,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT, start_new_session=True, shell=True)
     err = process.communicate()[1]
     return process.returncode, err
 

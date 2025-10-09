@@ -7,6 +7,7 @@ import sys
 #sys.path.insert(0, '../../spoken')
 from youtube_upload import *
 from config import *
+import subprocess
 
 def convert_video(path):
     file_name, file_extension = os.path.splitext(path)
@@ -17,6 +18,7 @@ def convert_video(path):
         process = subprocess.Popen(
             [
                 '/usr/bin/ffmpeg',
+                '-nostdin', '-hide_banner', '-nostats', '-y',
                 '-i', path,
                 '-acodec', 'libfaac',
                 '-ac', '2',
@@ -27,7 +29,8 @@ def convert_video(path):
                 new_path
             ],
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT
+            stderr=subprocess.STDOUT,
+            start_new_session=True
         )
         stdout, stderr = process.communicate()
         return new_path

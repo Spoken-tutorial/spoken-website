@@ -38,7 +38,6 @@ from django.template import RequestContext
 from .filters import CompanyFilter
 import os, sys
 from string import Template
-import subprocess
 from events.certificates import get_organization, get_signature
 from health_app.models import TopicCategory, HNContributorRole, HNLanguage
 from spoken.config import HN_API
