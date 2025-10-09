@@ -131,7 +131,7 @@ def run_cron_worker(request):
     print(f"cron_cmd ".ljust(20,'*')+f"{cron_cmd}")
     try:
         print(f"starting subprocess ....".ljust(20,'*'))
-        subprocess.run(cron_cmd,shell=True)
+        subprocess.run(cron_cmd,shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
     except Exception as e:
         print(f"Exception raised while running subprocess ....".ljust(20,'*'))
         print(f"Exception :: {e}")

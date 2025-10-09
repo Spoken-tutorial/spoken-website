@@ -133,7 +133,7 @@ def get_video_info(path):
     """Uses ffmpeg to determine information about a video."""
     info_m = {}
     try:
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-nostdin', '-hide_banner', '-nostats', '-y', '-i', path], stdout = subprocess.PIPE, stderr = subprocess.STDOUT, start_new_session=True)
         stdout, stderr = process.communicate()
         print("stdout : ", stdout)
         print("stderr : ", stderr)
@@ -181,7 +181,7 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
     try:
         #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-nostdin', '-hide_banner', '-nostats', '-y', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT, start_new_session=True)
         stdout, stderr = process.communicate()
         if stderr:
             print((filepath + filename))
@@ -4946,7 +4946,7 @@ def make_latex(certificate_path, file_name, content_tex):
     create_tex.close()
     command = 'user_receipt'
     process = subprocess.Popen('make -C {0} {1} file_name={2}'.format(certificate_path, command, file_name),
-        stderr=subprocess.PIPE, shell=True)
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  shell=True, start_new_session=True)
     err = process.communicate(timeout=10)[1]
     if process.returncode == 0:
         pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
@@ -4954,7 +4954,7 @@ def make_latex(certificate_path, file_name, content_tex):
                     filename=%s' % (download_file_name)
         response.write(pdf.read())
         clean_process = subprocess.Popen('make -C {0} clean file_name={1}'.format(
-           certificate_path, file_name), shell=True)
+           certificate_path, file_name), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,  shell=True, start_new_session=True)
         return response
     else:
         return False

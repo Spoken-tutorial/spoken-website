@@ -12,6 +12,7 @@ import sys
 import os
 import mechanicalsoup as mechanize
 from config import *
+import subprocess
 
 
 class MLStripper(HTMLParser):
@@ -138,7 +139,7 @@ def get_video_info(path):
     """Uses ffmpeg to determine information about a video."""
     info_m = {}
     try:
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        process = subprocess.Popen(['/usr/bin/ffmpeg', '-nostdin', '-hide_banner', '-nostats', '-y', '-i', path], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
         stdout, stderr = process.communicate()
         duration_m = re.search(r"Duration:\s{1}(?P<hours>\d+?):(?P<minutes>\d+?):(?P<seconds>\d+\.\d+?)", stdout.decode('utf-8'), re.DOTALL).groupdict()
         info_m = re.search(r": Video: (?P<codec>.*?), (?P<profile>.*?), (?P<width>.*?)x(?P<height>.*?), ", stdout.decode('utf-8'), re.DOTALL).groupdict()

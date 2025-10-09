@@ -81,8 +81,16 @@ def create_certificate(eventid,pname):
         create_tex.write(content_tex)
         create_tex.close()
         out = certificate_path
-        
-        subprocess.run(['pdflatex','--output-directory',certificate_path,certificate_path+file_name+'.tex'])
+
+        subprocess.run([
+            'pdflatex',
+            '-interaction=nonstopmode',        # prevents prompts
+            '--output-directory',
+            certificate_path,certificate_path+file_name+'.tex'],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            )
         pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
         response['Content-Disposition'] = 'attachment; \
                     filename=%s' % (download_file_name)
