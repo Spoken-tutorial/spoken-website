@@ -90,6 +90,7 @@ def create_certificate(eventid,pname):
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
+            start_new_session=True
             )
         pdf = open('{0}{1}.pdf'.format(certificate_path, file_name), 'rb')
         response['Content-Disposition'] = 'attachment; \
