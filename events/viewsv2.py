@@ -11,7 +11,7 @@ from django.conf import settings
 from rq import Queue
 import os
 
-from config import TARGET, CHANNEL_ID, CHANNEL_KEY
+from config import TARGET, CHANNEL_ID, CHANNEL_KEY, EXCLUDE_FROM_STP
 # Create your views here.
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -1111,7 +1111,7 @@ class GetCourseOptionView(JSONResponseMixin, View):
     context = {}
 
     course_option = "<option value=''>---------</option>"
-    courses = CourseMap.objects.filter(category=0, test=foss_category)
+    courses = CourseMap.objects.filter(category=0, test=foss_category).exclude(foss_id__in=EXCLUDE_FROM_STP)
 
     for course in courses:
       course_option += "<option value=" + str(course.id) + ">" + str(course) + "</option>"
