@@ -1921,14 +1921,14 @@ def test_request(request, role, rid = None):
                         except Exception as e:
                             print(e)
                             instance = TestAttendance()
-                        instance.student_id = tra.student.id
-                        instance.test_id = t.id
-                        instance.mdluser_id = mdluser.id
-                        instance.mdlcourse_id = fossmdlcourse.mdlcourse_id
-                        instance.mdlquiz_id = fossmdlcourse.mdlquiz_id
-                        instance.mdlattempt_id = 0
-                        instance.status = 0
-                        instance.save()
+                            instance.student_id = tra.student.id
+                            instance.test_id = t.id
+                            instance.mdluser_id = mdluser.id
+                            instance.mdlcourse_id = fossmdlcourse.mdlcourse_id
+                            instance.mdlquiz_id = fossmdlcourse.mdlquiz_id
+                            instance.mdlattempt_id = 0
+                            instance.status = 0
+                            instance.save()
 
                         print("test_attendance created for ",tra.student.id)
                     else:
@@ -2205,20 +2205,45 @@ def test_attendance(request, tid):
     mdlids = []
     participant_ids = []
     ta_status = int(ta_status) if ta_status is not None else None
+
+    # Ensure Training Attendance records match with Test Attendance
+    test_mdl_ids = TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True) # Test Mdl Ids
+    test_student_emails = MdlUser.objects.filter(id__in=test_mdl_ids).values_list('email', flat=True)
+
+    # Find users who have attented training but does not have test attendance records
+    tr_users = TrainingAttend.objects.filter(training_id = test.training_id).exclude(student__user__email__in=test_student_emails).select_related(
+                                                          'student','student__user',
+                                                          'training__training_planner__academic')
+    # create test attendance records for missing students
+    for tra in tr_users:
+        user = tra.student.user
+        mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, user.email)
+        if mdluser:
+            try:
+                instance = TestAttendance.objects.get(test_id=test.id, mdluser_id=mdluser.id)
+            except TestAttendance.DoesNotExist:
+                instance = TestAttendance()
+                instance.mdluser_firstname = user.first_name
+                instance.mdluser_lastname = user.last_name
+                instance.student_id = tra.student.id
+                instance.test_id = test.id
+                instance.mdluser_id = mdluser.id
+                # get course and quiz id
+                foss = test.foss
+                f = FossMdlCourses.objects.get(foss=foss)
+                instance.mdlcourse_id = f.mdlcourse_id
+                instance.mdlquiz_id = f.mdlquiz_id
+                instance.mdlattempt_id = 0
+                instance.status = 0
+                instance.save()
+
     if ta_status is not None:
         mdlids = list(TestAttendance.objects.filter(test_id = test.id, status=ta_status).values_list('mdluser_id', flat=True))
     else:
         mdlids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True))
-    WORKSHOP = 1
-    TRAINING = 2
-    if test.test_category_id in [WORKSHOP, TRAINING]:
-        participant_ids = list(TrainingAttendance.objects.filter(training_id = test.training_id).values_list('mdluser_id', flat=True))
-    elif ta_status is not None:
-        participant_ids = list(TestAttendance.objects.filter(test_id = test.id, status=ta_status).values_list('mdluser_id', flat=True))
-    else:
-        participant_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True))
     wp = None
     mdlids.extend(participant_ids)
+
     if mdlids:
         wp = MdlUser.objects.filter(id__in = mdlids)
     #check can close the test
