@@ -33,7 +33,6 @@ def get_moodle_user(academic_id, firstname, lastname, gender, email):
             mdluser.password = password"""
         mdluser.save()
     except Exception as e:
-      print(f"No moodle user found : {e} - {email}\033[0m")
       try:
         mdluser = MdlUser()
         mdluser.auth = 'manual'
