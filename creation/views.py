@@ -1213,23 +1213,28 @@ def upload_component(request, trid, component):
                         add_domainreviewer_notification(tr_rec, comp_title, component.title() + ' waiting for domain review')
                         response_msg = 'Code files uploaded successfully!'
                     elif component == 'assignment':
+                        print(" assignment 1")
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Assignment' + file_extension
                         file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/resources/' + file_name
+                        print(" assignment 2")
                         fout = open(file_path, 'wb+')
                         f = request.FILES['comp']
                         # Iterate through the chunks.
                         for chunk in f.chunks():
                             fout.write(chunk)
                         fout.close()
+                        print(" assignment 3")
                         comp_log.status = tr_rec.common_content.assignment_status
                         tr_rec.common_content.assignment = file_name
                         tr_rec.common_content.assignment_status = 2
                         tr_rec.common_content.assignment_user = request.user
                         tr_rec.common_content.save()
                         comp_log.save()
+                        print(" assignment 4")
                         add_domainreviewer_notification(tr_rec, comp_title, component.title() + ' waiting for domain review')
                         response_msg = 'Assignment file uploaded successfully!'
+                        print(" assignment 5")
                     elif component == 'additional_material':
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Additionalmaterial' + file_extension
@@ -1251,8 +1256,9 @@ def upload_component(request, trid, component):
                             '{} waiting for domain review'.format(component.replace('_', ' ').title()))
                         response_msg = 'Additional material uploaded successfully!'
                 except Exception as e:
+                    print(f" assignment Error : {str(e)}")
                     print(e)
-                    error_msg = 'Something went wrong, please try again later.'
+                    error_msg = f'Something went wrong, please try again later. {str(e)}'
                 form = ComponentForm(component)
                 if response_msg:
                     messages.success(request, response_msg)
