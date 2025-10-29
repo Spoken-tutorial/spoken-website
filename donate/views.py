@@ -25,7 +25,6 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from datetime import datetime
 from datetime import timedelta, date
-from events import display
 import requests
 import json
 from string import Template
