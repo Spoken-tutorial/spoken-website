@@ -287,7 +287,7 @@ STATICFILES_DIRS = (
 
 #debugging
 #INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
-INTERNAL_IPS = ('127.0.0.1',)
+INTERNAL_IPS = ('127.0.0.1','hhttp://127.0.0.1:8000')
 
 #Moodle Auth
 #AUTH_USER_MODEL = 'mdldjango.Users'

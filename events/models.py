@@ -966,8 +966,8 @@ class TrainingAttend(models.Model):
   language = models.ForeignKey(Language, default=None, on_delete=models.PROTECT )
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
-  #created = models.DateTimeField()
-  #updated = models.DateTimeField()
+  language = models.ForeignKey(Language, on_delete=models.PROTECT)
+  level = models.ForeignKey(Level, on_delete=models.PROTECT, null=True, blank=True)
 
   class Meta(object):
     unique_together = ("training", "student")
