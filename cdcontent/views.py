@@ -19,7 +19,7 @@ from django.template.context_processors import csrf
 from cdcontent.forms import *
 from creation.models import *
 from forums.models import Answer, Question
-from events.models import AcademicCenter, State, AcademicKey
+from events.models import AcademicCenter, State, AcademicKey, Student, StudentMaster, StudentBatch
 from donate.forms import PayeeForm
 from donate.models import Payee
 
@@ -561,10 +561,10 @@ def get_user_type(request):
             return classification['registered_paid']
         except:
             user_type = classification['registered_not_paid']
-        
-
         try:
-            AcademicKey.objects.get(academic_id=request.user.student.academic_id, expiry_date__gte=date.today())
+            student = Student.objects.get(user=request.user)
+            academic = StudentMaster.objects.get(student=student).batch.academic
+            AcademicKey.objects.get(academic=academic, expiry_date__gte=date.today())
             return classification['registered_paid']
         except AcademicKey.DoesNotExist:
             user_type = classification['registered_not_paid']
