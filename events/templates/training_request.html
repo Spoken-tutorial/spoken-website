@@ -56,100 +56,118 @@
         {% if form %}
           <div class="row well">
               <div class='col-sm-8'>
-                  <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
-                      {% render_field form.training_planner type="hidden" value=training_planner_id class+="training-planner" %}
-                      {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
-                      {% if form.non_field_errors %}
-                      <ul>
-                        {% for error in form.non_field_errors %}
-                          <li>{{ error }}</li>
-                        {% endfor %}
-                      </ul>
-                      {% endif %}
-                      <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Department</label>
-                          {% render_field form.department class+="form-control department" tabindex="1" %}
-                          {{ form.department.errors }}
-                        </div>
-                      </div>
+                 <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">
+                  <div id="debug-test" style="background: lightblue; padding: 10px; margin: 10px 0;">
+    JavaScript Test: <span id="test-result">Not loaded</span>
+</div>
+    {% csrf_token %}
+    {% render_field form.training_planner type="hidden" value=training_planner_id class+="training-planner" %}
+    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
 
-                      <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Batch</label>
-                          {% render_field form.batch class+="form-control batch" tabindex="1" %}
-                          {{ form.batch.errors }}
-                        </div>
-                      </div>
+    {% if form.non_field_errors %}
+        <ul>
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
 
-                      <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Training Type</label>
-                          {% render_field form.course_type class+="form-control course_type" tabindex="1" %}
-                          {{ form.course_type.errors }}
-                        </div>
-                      </div>
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label'>Department</label>
+            {% render_field form.department class+="form-control department" tabindex="1" %}
+            {{ form.department.errors }}
+        </div>
+    </div>
 
-                      <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
-                          <label class='control-label' id="sem_start_date">Semester Start Date</label>
-                          {% render_field form.sem_start_date class+="form-control date sem_start_date" tabindex="1" readonly='true' style="cursor:pointer"%}
-                          {{ form.sem_start_date.errors }}
-                          <small>Odd Semester July to Aug, Even Semester Jan to Feb </small>
-                        </div>
-                      </div>
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label'>Batch</label>
+            {% render_field form.batch class+="form-control batch" tabindex="1" %}
+            {{ form.batch.errors }}
+        </div>
+    </div>
 
-                      <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
-                          <label class='control-label' id="training_start_date">Training Start Date</label>
-                          {% render_field form.training_start_date class+="form-control training_start_date training_start_date" tabindex="1" readonly='true' style="cursor:pointer"%}
-                          {{ form.training_start_date.errors }}
-                          <small>Odd Semester July to Dec, Even Semester Jan to June </small>
-                        </div>
-                      </div>
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label'>Training Type</label>
+            {% render_field form.course_type class+="form-control course_type" tabindex="1" %}
+            {{ form.course_type.errors }}
+        </div>
+    </div>
 
-                      <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
-                          <label class='control-label' id="training_end_date">Training End Date</label>
-                          {% render_field form.training_end_date class+="form-control training_end_date training_end_date" tabindex="1" readonly='true' style="cursor:pointer"%}
-                          {{ form.training_end_date.errors }}
-                          <small>Odd Semester July to Dec, Even Semester Jan to June </small>
-                        </div>
-                      </div>
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label' id="sem_start_date">Semester Start Date</label>
+            {% render_field form.sem_start_date class+="form-control date sem_start_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+            {{ form.sem_start_date.errors }}
+            <small>Odd Semester July to Aug, Even Semester Jan to Feb</small>
+        </div>
+    </div>
 
-                      <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Foss Category</label>
-                          {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
-                          {{ form.foss_category.errors }}
-                          <small>No certificates will be provided for <b>"Foss available only for Training"</b></small>
-                        </div>
-                      </div>
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label' id="training_start_date">Training Start Date</label>
+            {% render_field form.training_start_date class+="form-control training_start_date training_start_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+            {{ form.training_start_date.errors }}
+            <small>Odd Semester July to Dec, Even Semester Jan to June</small>
+        </div>
+    </div>
 
-                      <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
-                          <label class='control-label' id="course_label">Software Course </label>
-                          {% render_field form.course class+="form-control course" tabindex="1" %}
-                          {{ form.course.errors }}
-                        </div>
-                      </div>
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label' id="training_end_date">Training End Date</label>
+            {% render_field form.training_end_date class+="form-control training_end_date training_end_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+            {{ form.training_end_date.errors }}
+            <small>Odd Semester July to Dec, Even Semester Jan to June</small>
+        </div>
+    </div>
 
-                      <!-- <div class='form-row'>
-                        <div class='col-xs-12 form-group required'>
-                          <label class='control-label'>Language </label>
-                          {% render_field form.language class+="form-control language" tabindex="1" %}
-                          {{ form.language.errors }}
-                        </div>
-                      </div> -->
+<div class='form-row'>
+    <div id="id_training_type" name="training_type" class='col-xs-12 form-group required'>
+        <label class='control-label'>Foss Category</label>
+        {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
+        {{ form.foss_category.errors }}
+        <small>No certificates will be provided for <b>"Foss available only for Training"</b></small>
+    </div>
+</div>
 
-                      <div class="form-group">
-                          <div class="col-xs-12 form-group">
-                              <input class="btn btn-primary" type="submit" value="Submit" />
-                              <a class="btn btn-danger" href="{% url 'eventsv2:training_planner' %}">Cancel</a>
-                          </div>
-                      </div>
-                      {% endwith %}
-                  </form>
+<div class='form-row'>
+    <div class='col-xs-12 form-group required'>
+        <label class='control-label' id="course_label">Software Course</label>
+        {% render_field form.course class+="form-control course" tabindex="1" %}
+        {{ form.course.errors }}
+    </div>
+</div>
+
+<!-- Dynamic Language and Level Fields -->
+<div id="language-level-fields" style="display: none; margin-top: 15px;">
+    <div class="form-row">
+        <div class="col-xs-6 form-group required">
+            <label for="language">Select Language:</label>
+            <select id="language" name="language" class="form-control">
+                <option value="">---------</option>
+            </select>
+        </div>
+        <div class="col-xs-6 form-group required">
+            <label for="level">Select Level:</label>
+            <select id="level" name="level" class="form-control">
+                <option value="">---------</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+    <div class="form-group">
+        <div class="col-xs-12 form-group">
+            <input class="btn btn-primary" type="submit" value="Submit" />
+            <a class="btn btn-danger" href="{% url 'eventsv2:training_planner' %}">Cancel</a>
+        </div>
+    </div>
+
+    {% endwith %}
+</form>
+
               </div>
           </div>
         {% endif %}
@@ -362,4 +380,82 @@
 
     });
   </script>
+
+
+
+<!-- Your custom toggle script -->
+<!-- <script>
+$(document).ready(function() {
+    // Function to toggle language and level fields based on foss category selection
+    function toggleLanguageLevelFields() {
+        const fossCategory = $('.foss_category').val();
+        console.log("Foss category changed to:", fossCategory);
+        
+        if (fossCategory === '0' || fossCategory === '1') {
+            $('#language-level-fields').slideDown();
+            
+            // If course is already selected, load languages and levels
+            const courseId = $('.course').val();
+            if (courseId) {
+                updateLanguagesAndLevelsForCourse(courseId);
+            }
+        } else {
+            $('#language-level-fields').slideUp();
+        }
+    }
+    
+    // Initial check on page load
+    toggleLanguageLevelFields();
+    
+    // Event handler for foss category change
+    $('.foss_category').change(function() {
+        toggleLanguageLevelFields();
+    });
+    
+    // Event handler for course change to update available languages and levels
+    $('.course').change(function() {
+        const courseId = $(this).val();
+        const fossCategory = $('.foss_category').val();
+        
+        if (courseId && (fossCategory === '0' || fossCategory === '1')) {
+            updateLanguagesAndLevelsForCourse(courseId);
+        } else {
+            // Reset language and level fields
+            $('#language').html('<option value="">---------</option>');
+            $('#level').html('<option value="">---------</option>');
+        }
+    });
+    
+    function updateLanguagesAndLevelsForCourse(courseId) {
+        // Show loading state
+        $('#language').html('<option value="">Loading...</option>');
+        $('#level').html('<option value="">Loading...</option>');
+        
+        // AJAX call to get languages and levels for the selected course
+        $.ajax({
+            url: "/software-training/get-languages-levels-for-course/",
+            type: "POST",
+            data: {
+                course_id: courseId,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data) {
+                if (data && data.success) {
+                    $('#language').html(data.language_options);
+                    $('#level').html(data.level_options);
+                } else {
+                    $('#language').html('<option value="">No languages available</option>');
+                    $('#level').html('<option value="">No levels available</option>');
+                }
+            },
+            error: function() {
+                $('#language').html('<option value="">Error loading languages</option>');
+                $('#level').html('<option value="">Error loading levels</option>');
+            }
+        });
+    }
+});
+</script> -->
+
+
 {% endblock %}
