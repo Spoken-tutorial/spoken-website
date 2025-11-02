@@ -139,8 +139,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ST_20Feb2023',
         'USER': 'lisha',
-        'PASSWORD': 'lisha123',
-        'HOST': '172.17.0.1', # must use TCP
+        'PASSWORD': '1947',
+        'HOST': '127.0.0.1 ', # must use TCP
         'PORT': '3306',
     },
     # 'moodle': {	
