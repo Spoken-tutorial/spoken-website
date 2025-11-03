@@ -107,3 +107,6 @@ static/spoken/embedding/
 
 *.sql
 env/
+
+
+.idea/
