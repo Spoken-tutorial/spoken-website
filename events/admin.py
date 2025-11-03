@@ -43,8 +43,9 @@ class CityAdmin(admin.ModelAdmin):
     list_filter = ('state',)
 
 class FossMdlCoursesAdmin(admin.ModelAdmin):
-    fields = ['foss', 'mdlcourse_id', 'mdlquiz_id']
-    list_display = ('foss', 'mdlcourse_id', 'mdlquiz_id')
+    fields = ['foss', 'mdlcourse_id', 'mdlquiz_id', 'language', 'level']
+    list_display = ('foss', 'mdlcourse_id', 'mdlquiz_id', 'language', 'level')
+
     
 class RpRoleAdmin(admin.ModelAdmin):
     form = RpForm

@@ -1,10 +1,11 @@
 # urls.py
 from django.conf.urls import url
+from . import viewsv2
 from events.viewsv2 import *
 from events.decorators import *
 from events.formsv2 import *
 from events.urls import *
-from .viewsv2 import *
+from events.viewsv2 import *
 
 app_name = 'eventsv2'
 urlpatterns = [
@@ -57,6 +58,9 @@ urlpatterns = [
       TrainingRequestCreateView.as_view(template_name="training_request.html"), 
       name="training_request"
     ),
+   url(r'^get-language-level-option/$', viewsv2.get_language_level_option, name='get_language_level_option'),
+
+
     url(
       r'^(?P<tid>\d+)/attendance', 
       TrainingAttendanceListView.as_view(template_name=\
