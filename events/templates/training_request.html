@@ -132,7 +132,7 @@
     </div>
 </div>
 
-<!-- Language and Level Fields -->
+
 <div class='form-row language-level-fields' style="display:none;">
   <div class='col-xs-6 form-group required'>
     <label class='control-label'>Language</label>
@@ -147,6 +147,23 @@
     <small>Default: Advanced</small>
   </div>
 </div>
+
+
+<!-- Language and Level Fields -->
+<!-- <div class='form-row language-level-fields' style="display:none;">
+  <div class='col-xs-6 form-group required'>
+    <label class='control-label'>Language</label>
+    {% render_field form.language class+="form-control language" tabindex="1" %}
+    {{ form.language.errors }}
+    <small>Default: English</small>
+  </div>
+  <div class='col-xs-6 form-group required' style= "margin-left: 20px;">
+    <label class='control-label'>Level</label>
+    {% render_field form.level class+="form-control level" tabindex="1" %}
+    {{ form.level.errors }}
+    <small>Default: Advanced</small>
+  </div>
+</div> -->
 
 
 <div class='form-row'>
@@ -352,8 +369,10 @@
         }
       });
       $('.course').html('<option>---------</option>');
+
      // When FOSS category changes
-$('.foss_category').on('change', function() {
+
+     $('.foss_category').on('change', function() {
   var foss_category = $(this).val();
   // console.log('FOSS Category changed:', foss_category);
   
@@ -470,6 +489,123 @@ $(document).ready(function() {
     loadLanguageLevelOptions(initialFossCategory, initialCourseId);
   }
 });
+// $('.foss_category').on('change', function() {
+//   var foss_category = $(this).val();
+//   // console.log('FOSS Category changed:', foss_category);
+  
+//   $('#course_label').html("Course list loading...");
+//   $('.language-level-fields').hide(); // Hide by default
+  
+//   if (foss_category != '') {
+//     // Fetch course options
+//     $.ajax({
+//       url: "/software-training/get-course-option/",
+//       type: "POST",
+//       data: {
+//         foss_category: foss_category
+//       },
+//       success: function(data) {
+//         $('#course_label').html('Software Course');
+//         if (data && data['course_option']) {
+//           $('.course').html(data['course_option']);
+//         }
+        
+//         // Show language/level only for "Training and Test" (value '1')
+//         if (foss_category == '1') {
+//           // console.log('Showing language/level fields for Training and Test');
+//           // Load language/level options when category is Training and Test
+//           var course_id = $('.course').val();
+//           loadLanguageLevelOptions(foss_category, course_id);
+//         } else {
+//           // console.log('Hiding language/level fields');
+//           $('.language-level-fields').hide();
+//         }
+//       },
+//       error: function() {
+//         $('.language-level-fields').hide();
+//       }
+//     });
+//   } else {
+//     $('.language-level-fields').hide();
+//   }
+// });
+
+// // When course selection changes
+// $('.course').on('change', function() {
+//   var foss_category = $('.foss_category').val();
+//   var course_id = $(this).val();
+//   // console.log('Course changed - FOSS:', foss_category, 'Course ID:', course_id);
+  
+//   // Only load language/level if FOSS category is Training and Test
+//   if (foss_category == '1') {
+//     loadLanguageLevelOptions(foss_category, course_id);
+//   }
+// });
+
+// // Helper function to load language/level options
+// // Helper function to load language/level options
+// function loadLanguageLevelOptions(foss_category, course_id) {
+//   console.log('Loading language/level options...');
+  
+//   $.ajax({
+//     url: "/software-training/get-language-level-option/",
+//     type: "POST",
+//     data: {
+//       foss_category: foss_category,
+//       course_id: course_id || ''
+//     },
+//     beforeSend: function() {
+//       // Show loading state
+//       $('.language').html('<option value="">Loading...</option>');
+//       $('.level').html('<option value="">Loading...</option>');
+//     },
+//     success: function(res) {
+//       console.log('Language/Level response:', res);
+      
+//       if (res.languages && res.levels) {
+//         $('.language').html(res.languages);
+//         $('.level').html(res.levels);
+        
+//         // Force select English and Advanced if they exist
+//         setTimeout(function() {
+//           // Try to select English
+//           var englishOption = $('.language option:contains("English"), .language option:contains("english")').first();
+//           if (englishOption.length) {
+//             $('.language').val(englishOption.val());
+//           }
+          
+//           // Try to select Advanced  
+//           var advancedOption = $('.level option:contains("Advanced"), .level option:contains("advanced")').first();
+//           if (advancedOption.length) {
+//             $('.level').val(advancedOption.val());
+//           }
+//         }, 100);
+        
+//         $('.language-level-fields').show();
+//         console.log('Language/Level fields shown successfully');
+//       } else {
+//         console.log('Empty response for language/level');
+//         $('.language-level-fields').hide();
+//       }
+//     },
+//     error: function(xhr, status, error) {
+//       console.error('Error loading language/level:', error);
+//       // Show fields with fallback options even on error
+//       $('.language').html('<option value="">---------</option><option value="1" selected>English</option>');
+//       $('.level').html('<option value="">---------</option><option value="1" selected>Advanced</option>');
+//       $('.language-level-fields').show();
+//     }
+//   });
+// }
+
+// // On page load, check if we need to show language/level fields
+// $(document).ready(function() {
+//   var initialFossCategory = $('.foss_category').val();
+//   if (initialFossCategory == '1') {
+//     var initialCourseId = $('.course').val();
+//     loadLanguageLevelOptions(initialFossCategory, initialCourseId);
+//   }
+// });
 
     });
   </script>

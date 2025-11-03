@@ -116,6 +116,24 @@ class TrainingRequestForm(forms.ModelForm):
       if first_level:
         self.fields['level'].initial = first_level.id
 
+    # try:
+    #   english = Language.objects.get(code__iexact='english')
+    #   self.fields['language'].initial = english.id
+    # except Language.DoesNotExist:
+    #         # If English doesn't exist, use first available language
+    #   first_lang = Language.objects.first()
+    #   if first_lang:
+    #     self.fields['language'].initial = first_lang.id
+
+    # try:
+    #   advanced = Level.objects.get(code__iexact='advanced')
+    #   self.fields['level'].initial = advanced.id
+    # except Level.DoesNotExist:
+    #         # If Advanced doesn't exist, use first available level
+    #   first_level = Level.objects.first()
+    #   if first_level:
+    #     self.fields['level'].initial = first_level.id
+
     if kwargs and 'data' in kwargs:
       # Generating students batch list based on department
       if kwargs['data']['department'] != '':
