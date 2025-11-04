@@ -188,147 +188,24 @@ def get_language_level_option(request):
 
         # Show language/level only for "Training and Test"
         show_for_tests = (foss_category == '1')
-        data = {'languages': '', 'levels': ''}
+        data = {'fossmdl': ''}
 
         if not show_for_tests:
             return JsonResponse(data)
+       
+        cm = CourseMap.objects.get(id=course_id)
+        fmdl = FossMdlCourses.objects.filter(foss_id=cm.foss_id)
+        fmdl_options = ''
+        for item in fmdl:
+          fmdl_options += f'<option value="{item.id}">{item}</option>'
 
-        # Get all languages and levels
-        languages = Language.objects.all().order_by('code')
-        levels = Level.objects.all().order_by('code')
-
-        # Build language options - Force English as selected
-        lang_options = '<option value="">---------</option>'
-        english_selected = False
-        for lang in languages:
-            selected = ''
-            # Check if this is English
-            if (hasattr(lang, 'code') and lang.code and 'english' in lang.code.lower()) or \
-               (hasattr(lang, 'name') and lang.name and 'english' in lang.name.lower()):
-                selected = ' selected'
-                english_selected = True
-            lang_options += f'<option value="{lang.id}"{selected}>{lang.name if hasattr(lang, "name") else str(lang)}</option>'
-        
-        # If no English was found, select the first one
-        if not english_selected and languages.exists():
-            # Replace the first option with selected
-            first_lang = languages.first()
-            lang_options = lang_options.replace(
-                f'<option value="{first_lang.id}">', 
-                f'<option value="{first_lang.id}" selected>'
-            )
-
-        # Build level options - Force Advanced as selected
-        level_options = '<option value="">---------</option>'
-        advanced_selected = False
-        for level in levels:
-            selected = ''
-            # Check if this is Advanced
-            if (hasattr(level, 'code') and level.code and 'advanced' in level.code.lower()) or \
-               (hasattr(level, 'name') and level.name and 'advanced' in level.name.lower()):
-                selected = ' selected'
-                advanced_selected = True
-            level_options += f'<option value="{level.id}"{selected}>{level.name if hasattr(level, "name") else str(level)}</option>'
-        
-        # If no Advanced was found, select the first one
-        if not advanced_selected and levels.exists():
-            # Replace the first option with selected
-            first_level = levels.first()
-            level_options = level_options.replace(
-                f'<option value="{first_level.id}">', 
-                f'<option value="{first_level.id}" selected>'
-            )
-
-        data['languages'] = lang_options
-        data['levels'] = level_options
-
+        data['fossmdl'] = fmdl_options
         return JsonResponse(data)
-
     except Exception as e:
-        # Fallback with English and Advanced as defaults
-        data = {
-            'languages': '<option value="">---------</option><option value="1" selected>English</option>',
-            'levels': '<option value="">---------</option><option value="1" selected>Advanced</option>'
-        }
+        print(f"\033[91m Exception : {e} \033[0m")
         return JsonResponse(data)
     
 
-# @csrf_exempt
-# def get_language_level_option(request):
-#     """
-#     AJAX endpoint that returns HTML for language and level <option> tags.
-#     """
-#     try:
-#         foss_category = request.POST.get('foss_category', '').strip()
-#         course_id = request.POST.get('course_id', '').strip()
-
-#         # Show language/level only for "Training and Test"
-#         show_for_tests = (foss_category == '1')
-#         data = {'languages': '', 'levels': ''}
-
-#         if not show_for_tests:
-#             return JsonResponse(data)
-
-#         # Get all languages and levels
-#         languages = Language.objects.all().order_by('code')
-#         levels = Level.objects.all().order_by('code')
-
-#         # Build language options - Force English as selected
-#         lang_options = '<option value="">---------</option>'
-#         english_selected = False
-#         for lang in languages:
-#             selected = ''
-#             # Check if this is English
-#             if (hasattr(lang, 'code') and lang.code and 'english' in lang.code.lower()) or \
-#                (hasattr(lang, 'name') and lang.name and 'english' in lang.name.lower()):
-#                 selected = ' selected'
-#                 english_selected = True
-#             lang_options += f'<option value="{lang.id}"{selected}>{lang.name if hasattr(lang, "name") else str(lang)}</option>'
-        
-#         # If no English was found, select the first one
-#         if not english_selected and languages.exists():
-#             # Replace the first option with selected
-#             first_lang = languages.first()
-#             lang_options = lang_options.replace(
-#                 f'<option value="{first_lang.id}">', 
-#                 f'<option value="{first_lang.id}" selected>'
-#             )
-
-#         # Build level options - Force Advanced as selected
-#         level_options = '<option value="">---------</option>'
-#         advanced_selected = False
-#         for level in levels:
-#             selected = ''
-#             # Check if this is Advanced
-#             if (hasattr(level, 'code') and level.code and 'advanced' in level.code.lower()) or \
-#                (hasattr(level, 'name') and level.name and 'advanced' in level.name.lower()):
-#                 selected = ' selected'
-#                 advanced_selected = True
-#             level_options += f'<option value="{level.id}"{selected}>{level.name if hasattr(level, "name") else str(level)}</option>'
-        
-#         # If no Advanced was found, select the first one
-#         if not advanced_selected and levels.exists():
-#             # Replace the first option with selected
-#             first_level = levels.first()
-#             level_options = level_options.replace(
-#                 f'<option value="{first_level.id}">', 
-#                 f'<option value="{first_level.id}" selected>'
-#             )
-
-#         data['languages'] = lang_options
-#         data['levels'] = level_options
-
-#         return JsonResponse(data)
-
-#     except Exception as e:
-#         # Fallback with English and Advanced as defaults
-#         data = {
-#             'languages': '<option value="">---------</option><option value="1" selected>English</option>',
-#             'levels': '<option value="">---------</option><option value="1" selected>Advanced</option>'
-#         }
-#         return JsonResponse(data)
-    
-    
 class StudentBatchCreateView(CreateView):
   form_class = None
   template_name = None

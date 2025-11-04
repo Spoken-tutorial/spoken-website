@@ -57,8 +57,7 @@ class TrainingRequestForm(forms.ModelForm):
   foss_category = forms.ChoiceField(choices=[('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
-  language = forms.ModelChoiceField( label="Language", queryset=Language.objects.all(), required=False, empty_label='---------',)
-  level = forms.ModelChoiceField( label="Level", queryset=Level.objects.all(), required=False, empty_label='---------',)
+  fossmdlmap = forms.ModelChoiceField( label="Test Type", queryset=FossMdlCourses.objects.all(), required=False, empty_label='---------',)
   
   training_planner = forms.CharField()
   class Meta(object):
@@ -98,41 +97,11 @@ class TrainingRequestForm(forms.ModelForm):
     super(TrainingRequestForm, self).__init__(*args, **kwargs)
     self.fields['course_type'].choices = course_type
 
-    try:
-      english = Language.objects.get(code__iexact='english')
-      self.fields['language'].initial = english.id
-    except Language.DoesNotExist:
-            # If English doesn't exist, use first available language
-      first_lang = Language.objects.first()
-      if first_lang:
-        self.fields['language'].initial = first_lang.id
-
-    try:
-      advanced = Level.objects.get(code__iexact='advanced')
-      self.fields['level'].initial = advanced.id
-    except Level.DoesNotExist:
-            # If Advanced doesn't exist, use first available level
-      first_level = Level.objects.first()
-      if first_level:
-        self.fields['level'].initial = first_level.id
-
-    # try:
-    #   english = Language.objects.get(code__iexact='english')
-    #   self.fields['language'].initial = english.id
-    # except Language.DoesNotExist:
-    #         # If English doesn't exist, use first available language
-    #   first_lang = Language.objects.first()
-    #   if first_lang:
-    #     self.fields['language'].initial = first_lang.id
-
-    # try:
-    #   advanced = Level.objects.get(code__iexact='advanced')
-    #   self.fields['level'].initial = advanced.id
-    # except Level.DoesNotExist:
-    #         # If Advanced doesn't exist, use first available level
-    #   first_level = Level.objects.first()
-    #   if first_level:
-    #     self.fields['level'].initial = first_level.id
+    fossmdlmap = kwargs.pop('fossmdlmap', None)
+    if fossmdlmap:
+      self.fields['fossmdlmap'].queryset = (
+                FossMdlCourses.objects.all()
+            )
 
     if kwargs and 'data' in kwargs:
       # Generating students batch list based on department
