@@ -1909,7 +1909,10 @@ def test_request(request, role, rid = None):
                 
             if t and t.training_id:
                 tras = TrainingAttend.objects.filter(training=t.training)
-                fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
+                try:
+                    fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
+                except FossMdlCourses.MultipleObjectsReturned:
+                    fossmdlcourse = FossMdlCourses.objects.get(id = t.training.fossmdlmap_id)
                 for tra in tras:
                     user = tra.student.user
                     mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
@@ -2147,7 +2150,10 @@ def test_attendance(request, tid):
                             if ta.status > 1:
                                 continue
                         except TestAttendance.DoesNotExist:
-                            fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                            try:
+                                fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                            except FossMdlCourses.MultipleObjectsReturned:
+                                fossmdlcourse = FossMdlCourses.objects.get(id = test.training.fossmdlmap_id)
                             ta = TestAttendance()
                             ta.test_id = test.id
                             ta.mdluser_id = users[u]
@@ -2159,7 +2165,10 @@ def test_attendance(request, tid):
                         if ta:
                             #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
                             t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
-                            fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                            try:
+                                fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                            except FossMdlCourses.MultipleObjectsReturned:
+                                fossmdlcourse = FossMdlCourses.objects.get(id = test.training.fossmdlmap_id)
                             t.mdlcourse_id = fossmdlcourse.mdlcourse_id
                             t.mdlquiz_id = fossmdlcourse.mdlquiz_id
                             t.status = 1
@@ -2230,7 +2239,10 @@ def test_attendance(request, tid):
                 instance.mdluser_id = mdluser.id
                 # get course and quiz id
                 foss = test.foss
-                f = FossMdlCourses.objects.get(foss=foss)
+                try:
+                    f = FossMdlCourses.objects.get(foss=foss)
+                except FossMdlCourses.MultipleObjectsReturned:
+                    f = FossMdlCourses.objects.get(foss=test.training.fossmdlmap_id)
                 instance.mdlcourse_id = f.mdlcourse_id
                 instance.mdlquiz_id = f.mdlquiz_id
                 instance.mdlattempt_id = 0

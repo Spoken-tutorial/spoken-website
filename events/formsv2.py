@@ -57,6 +57,8 @@ class TrainingRequestForm(forms.ModelForm):
   foss_category = forms.ChoiceField(choices=[('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
+  fossmdlmap = forms.ModelChoiceField( label="Test Type", queryset=FossMdlCourses.objects.all(), required=False, empty_label='---------',)
+  
   training_planner = forms.CharField()
   class Meta(object):
     model = TrainingRequest
@@ -95,6 +97,11 @@ class TrainingRequestForm(forms.ModelForm):
     super(TrainingRequestForm, self).__init__(*args, **kwargs)
     self.fields['course_type'].choices = course_type
 
+    fossmdlmap = kwargs.pop('fossmdlmap', None)
+    if fossmdlmap:
+      self.fields['fossmdlmap'].queryset = (
+                FossMdlCourses.objects.all()
+            )
 
     if kwargs and 'data' in kwargs:
       # Generating students batch list based on department
@@ -112,6 +119,9 @@ class TrainingRequestEditForm(forms.ModelForm):
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
   foss_category = forms.ChoiceField(choices=[('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')])
   course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
+
+
+
   class Meta(object):
     model = TrainingRequest
     exclude = ['participants', 'status', 'training_planner', 'cert_status']

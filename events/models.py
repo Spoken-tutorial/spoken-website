@@ -8,6 +8,8 @@ from django.dispatch import receiver
 from django.db.models import Q, Count, Sum, Min
 from django.utils.encoding import python_2_unicode_compatible
 
+from creation.models import FossCategory, Language, Level
+
 #import auth user models
 from django.contrib.auth.models import User
 
@@ -21,8 +23,8 @@ from mdldjango.models import *
 from events.signals import revoke_student_permission
 
 #creation app models
-from creation.models import FossCategory, Language, \
-  FossAvailableForWorkshop, FossAvailableForTest
+from creation.models import FossAvailableForWorkshop, FossAvailableForTest
+
 
 PAYMENT_STATUS_CHOICES =(
     ('', '-----'), ('New', 'New'), ('Renewal', 'Renewal')
@@ -482,9 +484,23 @@ class Permission(models.Model):
 
 
 class FossMdlCourses(models.Model):
-  foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
-  mdlcourse_id = models.PositiveIntegerField()
-  mdlquiz_id = models.PositiveIntegerField()
+    foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT)
+    mdlcourse_id = models.PositiveIntegerField()
+    mdlquiz_id = models.PositiveIntegerField()
+    language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True, blank=True)
+    level = models.ForeignKey(Level, on_delete=models.PROTECT, null=True, blank=True)
+
+    def __str__(self):
+      if self.language is None:
+        lang = "English"
+      else: 
+        lang = self.language.name
+      if self.level is None:
+        level = "Advanced"
+      else:
+        level = self.level.level
+      return f"{lang} -- {level}"
+
 
 
 class EventsNotification(models.Model):
@@ -858,6 +874,7 @@ class TrainingRequest(models.Model):
   cert_status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
+  fossmdlmap = models.ForeignKey(FossMdlCourses, on_delete=models.PROTECT, null=True, blank=True)
   #created = models.DateTimeField()
   #updated = models.DateTimeField()
 
@@ -961,8 +978,6 @@ class TrainingAttend(models.Model):
   language = models.ForeignKey(Language, default=None, on_delete=models.PROTECT )
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
-  #created = models.DateTimeField()
-  #updated = models.DateTimeField()
 
   class Meta(object):
     unique_together = ("training", "student")

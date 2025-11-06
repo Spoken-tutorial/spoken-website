@@ -3,7 +3,7 @@ from django import template
 from django.contrib.auth.models import User
 
 # Spoken Tutorial Stuff
-from events.models import TestAttendance, TrainingAttendance
+from events.models import TestAttendance, TrainingAttendance, FossMdlCourses
 from mdldjango.models import *
 
 register = template.Library()
@@ -47,7 +47,12 @@ def get_moodle_courseid(rid, mdluser_id):
     try:
         wa = TestAttendance.objects.get(test_id = rid, mdluser_id = mdluser_id)
         #print wa.mdlcourse_id
+        fossmdlmap_id = wa.test.training.fossmdlmap_id
+        if fossmdlmap_id is not None:
+            return FossMdlCourses.objects.get(id=fossmdlmap_id).mdlcourse_id
         return wa.mdlcourse_id
+        
+
     except Exception as e:
         #print e
         return False

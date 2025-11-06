@@ -176,6 +176,35 @@ class TrainingPlannerListView(ListView):
     except Exception as e:
       print(e)
     return False
+  
+@csrf_exempt
+def get_language_level_option(request):
+    """
+    AJAX endpoint that returns HTML for language and level <option> tags.
+    """
+    try:
+        foss_category = request.POST.get('foss_category', '').strip()
+        course_id = request.POST.get('course_id', '').strip()
+
+        # Show language/level only for "Training and Test"
+        show_for_tests = (foss_category == '1')
+        data = {'fossmdl': ''}
+
+        if not show_for_tests:
+            return JsonResponse(data)
+       
+        cm = CourseMap.objects.get(id=course_id)
+        fmdl = FossMdlCourses.objects.filter(foss_id=cm.foss_id)
+        fmdl_options = ''
+        for item in fmdl:
+          fmdl_options += f'<option value="{item.id}">{item}</option>'
+
+        data['fossmdl'] = fmdl_options
+        return JsonResponse(data)
+    except Exception as e:
+        print(f"\033[91m Exception : {e} \033[0m")
+        return JsonResponse(data)
+    
 
 class StudentBatchCreateView(CreateView):
   form_class = None
