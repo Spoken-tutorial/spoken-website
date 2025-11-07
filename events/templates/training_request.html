@@ -142,6 +142,10 @@
         <label class='control-label' id="test_type">Test Type</label>
         {% render_field form.fossmdlmap class+="form-control fossmdlmap" tabindex="1" %}
         {{ form.fossmdlmap.errors }}
+        <div class="alert alert-info" role="alert" style="margin-top:5px;">Note : The <b>Basic</b> course level is designated only for <b>School, NGO, and Eka Vidyalaya</b> institutions.</div>
+        <!-- <small>
+        The <b>Basic</b> course level is designated only for <b>School, NGO, and Eka Vidyalaya</b> institutions.
+      </small> -->
   </div>
 </div>
     <div class="form-group">
@@ -395,27 +399,24 @@ $('.course').on('change', function() {
 });
 
 // Helper function to load language/level options
-// Helper function to load language/level options
 function loadLanguageLevelOptions(foss_category, course_id) {
-  console.log('Loading language/level options...1');
-  
+  var batch_id = $('.batch').val();
+
   $.ajax({
     url: "/software-training/get-language-level-option/",
     type: "POST",
     data: {
       foss_category: foss_category,
-      course_id: course_id || ''
-    },
-    beforeSend: function() {
+      course_id: course_id || '',
+      batch_id: batch_id || ''
     },
     success: function(res) {
-        console.log('Language/Level response:', res);
-        $('#id_fossmdlmap').html(res.fossmdl);
-        $('.language-level-fields').show();
+      $('#id_fossmdlmap').html(res.fossmdl);
+      $('.language-level-fields').show();
     },
     error: function(xhr, status, error) {
       console.error('Error loading language/level:', error);
-      $('.language-level-fields').show();
+      $('.language-level-fields').hide();
     }
   });
 }

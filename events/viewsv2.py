@@ -76,6 +76,8 @@ from django.db import connection
 from donate.utils import send_transaction_email
 from .certificates import *
 
+from spoken.config import BASIC_LEVEL_INSTITUTIONS
+
 class JSONResponseMixin(object):
   """
   A mixin that can be used to render a JSON response.
@@ -177,33 +179,85 @@ class TrainingPlannerListView(ListView):
       print(e)
     return False
   
+
 @csrf_exempt
 def get_language_level_option(request):
     """
     AJAX endpoint that returns HTML for language and level <option> tags.
+    - For School, NGO, Eka Vidyalaya → include Basic + other levels.
+    - For all others → exclude Basic.
     """
+    data = {'fossmdl': ''}
     try:
         foss_category = request.POST.get('foss_category', '').strip()
         course_id = request.POST.get('course_id', '').strip()
+        batch_id = request.POST.get('batch_id', '').strip()
 
         # Show language/level only for "Training and Test"
-        show_for_tests = (foss_category == '1')
-        data = {'fossmdl': ''}
-
-        if not show_for_tests:
+        if foss_category != '1':
             return JsonResponse(data)
-       
-        cm = CourseMap.objects.get(id=course_id)
-        fmdl = FossMdlCourses.objects.filter(foss_id=cm.foss_id)
+
         fmdl_options = ''
-        for item in fmdl:
-          fmdl_options += f'<option value="{item.id}">{item}</option>'
+
+        # Determine institution type from batch
+        include_basic = False
+        if batch_id:
+            try:
+                batch = StudentBatch.objects.get(id=batch_id)
+                inst_type_id = batch.academic.institution_type.id
+                if inst_type_id in BASIC_LEVEL_INSTITUTIONS:
+                    include_basic = True
+            except StudentBatch.DoesNotExist:
+                pass
+
+        # Fetch FOSS levels for the selected course
+        if course_id:
+            cm = CourseMap.objects.get(id=course_id)
+            fmdl = FossMdlCourses.objects.filter(foss_id=cm.foss_id)
+
+            # ✅ Filter options dynamically based on institution type
+            for item in fmdl:
+                item_name = str(item).strip().lower()
+                # Skip "Basic" for non-school/NGO/Eka institutions
+                if not include_basic and "basic" in item_name:
+                    continue
+                fmdl_options += f'<option value="{item.id}">{item}</option>'
 
         data['fossmdl'] = fmdl_options
         return JsonResponse(data)
+
     except Exception as e:
-        print(f"\033[91m Exception : {e} \033[0m")
+        print(f"\033[91m Exception in get_language_level_option: {e} \033[0m")
         return JsonResponse(data)
+    
+
+# @csrf_exempt
+# def get_language_level_option(request):
+#     """
+#     AJAX endpoint that returns HTML for language and level <option> tags.
+#     """
+#     try:
+#         foss_category = request.POST.get('foss_category', '').strip()
+#         course_id = request.POST.get('course_id', '').strip()
+
+#         # Show language/level only for "Training and Test"
+#         show_for_tests = (foss_category == '1')
+#         data = {'fossmdl': ''}
+
+#         if not show_for_tests:
+#             return JsonResponse(data)
+       
+#         cm = CourseMap.objects.get(id=course_id)
+#         fmdl = FossMdlCourses.objects.filter(foss_id=cm.foss_id)
+#         fmdl_options = ''
+#         for item in fmdl:
+#           fmdl_options += f'<option value="{item.id}">{item}</option>'
+
+#         data['fossmdl'] = fmdl_options
+#         return JsonResponse(data)
+#     except Exception as e:
+#         print(f"\033[91m Exception : {e} \033[0m")
+#         return JsonResponse(data)
     
 
 class StudentBatchCreateView(CreateView):
