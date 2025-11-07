@@ -142,10 +142,7 @@
         <label class='control-label' id="test_type">Test Type</label>
         {% render_field form.fossmdlmap class+="form-control fossmdlmap" tabindex="1" %}
         {{ form.fossmdlmap.errors }}
-        <div class="alert alert-info" role="alert" style="margin-top:5px;">Note : The <b>Basic</b> course level is designated only for <b>School, NGO, and Eka Vidyalaya</b> institutions.</div>
-        <!-- <small>
-        The <b>Basic</b> course level is designated only for <b>School, NGO, and Eka Vidyalaya</b> institutions.
-      </small> -->
+        <div class="alert alert-info" role="alert" style="margin-top:5px;"> <b>Basic</b> level test option is specifically designed for <b>school students</b></div>
   </div>
 </div>
     <div class="form-group">
@@ -195,8 +192,6 @@
       if($('.department').val() == '') {
         $('.course_type').val('');
         $('.course_type').prop('disabled', 'disabled');
-        // $('.course').html('<option>---------</option>');
-        // $('.course').prop('disabled', 'disabled');
       }
 
 
@@ -299,17 +294,14 @@
               training_planner: $('.training-planner').val()
             },
             beforeSend: function() {
-              //$('.ajax-refresh-language').show();
             },
             success: function(data) {
-              // loading languages
               if(data && data['batch_status']) {
                 $('.course_type').prop('disabled', false);
                } else {
                 $('.batch').val('');
                 alert('No. of training requests for selected batch exceeded.');
               }
-              //$('.ajax-refresh-language').hide();
             }
           });
         }
@@ -329,31 +321,24 @@
               department: department,
             },
             beforeSend: function() {
-              //$('.ajax-refresh-language').show();
             },
             success: function(data) {
-              // loading languages
+
               if(data && data['batch_option']) {
                   $('.batch').html(data['batch_option']);
               }
-              //$('.ajax-refresh-language').hide();
             }
           });
         }
       });
       $('.course').html('<option>---------</option>');
 
-     // When FOSS category changes
-
      $('.foss_category').on('change', function() {
-  var foss_category = $(this).val();
-  // console.log('FOSS Category changed:', foss_category);
-  
+  var foss_category = $(this).val();  
   $('#course_label').html("Course list loading...");
-  $('.language-level-fields').hide(); // Hide by default
+  $('.language-level-fields').hide(); 
   
   if (foss_category != '') {
-    // Fetch course options
     $.ajax({
       url: "/software-training/get-course-option/",
       type: "POST",
@@ -365,15 +350,11 @@
         if (data && data['course_option']) {
           $('.course').html(data['course_option']);
         }
-        
-        // Show language/level only for "Training and Test" (value '1')
+
         if (foss_category == '1') {
-          // console.log('Showing language/level fields for Training and Test');
-          // Load language/level options when category is Training and Test
           var course_id = $('.course').val();
           loadLanguageLevelOptions(foss_category, course_id);
         } else {
-          // console.log('Hiding language/level fields');
           $('.language-level-fields').hide();
         }
       },
@@ -386,19 +367,14 @@
   }
 });
 
-// When course selection changes
 $('.course').on('change', function() {
   var foss_category = $('.foss_category').val();
   var course_id = $(this).val();
-  // console.log('Course changed - FOSS:', foss_category, 'Course ID:', course_id);
-  
-  // Only load language/level if FOSS category is Training and Test
   if (foss_category == '1') {
     loadLanguageLevelOptions(foss_category, course_id);
   }
 });
 
-// Helper function to load language/level options
 function loadLanguageLevelOptions(foss_category, course_id) {
   var batch_id = $('.batch').val();
 
@@ -421,7 +397,6 @@ function loadLanguageLevelOptions(foss_category, course_id) {
   });
 }
 
-// On page load, check if we need to show language/level fields
 $(document).ready(function() {
   var initialFossCategory = $('.foss_category').val();
   if (initialFossCategory == '1') {
