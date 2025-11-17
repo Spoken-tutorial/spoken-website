@@ -2216,8 +2216,8 @@ def test_attendance(request, tid):
     ta_status = int(ta_status) if ta_status is not None else None
 
     # Ensure Training Attendance records match with Test Attendance
-    test_mdl_ids = TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True) # Test Mdl Ids
-    test_student_emails = MdlUser.objects.filter(id__in=test_mdl_ids).values_list('email', flat=True)
+    test_mdl_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True)) # Test Mdl Ids
+    test_student_emails = list(MdlUser.objects.filter(id__in=test_mdl_ids).values_list('email', flat=True))
 
     # Find users who have attented training but does not have test attendance records
     tr_users = TrainingAttend.objects.filter(training_id = test.training_id).exclude(student__user__email__in=test_student_emails).select_related(
