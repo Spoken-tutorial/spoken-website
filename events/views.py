@@ -2216,18 +2216,16 @@ def test_attendance(request, tid):
     ta_status = int(ta_status) if ta_status is not None else None
 
     # Ensure Training Attendance records match with Test Attendance
-    test_mdl_ids = list(TestAttendance.objects.filter(test_id = test.id).values_list('mdluser_id', flat=True)) # Test Mdl Ids
-    test_student_emails = list(MdlUser.objects.filter(id__in=test_mdl_ids).values_list('email', flat=True))
-
+    student_emails = [e for e in TestAttendance.objects.filter(test_id = test.id).values_list('student__user__email', flat=True) if e] # get student emails
     # Find users who have attented training but does not have test attendance records
-    tr_users = TrainingAttend.objects.filter(training_id = test.training_id).exclude(student__user__email__in=test_student_emails).select_related(
+    tr_users = TrainingAttend.objects.filter(training_id = test.training_id).exclude(student__user__email__in=student_emails).select_related(
                                                           'student','student__user',
                                                           'training__training_planner__academic')
     # create test attendance records for missing students
     for tra in tr_users:
         user = tra.student.user
         mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, user.email)
-        if mdluser:
+        if mdluser and hasattr(mdluser, 'id') and mdluser.id is not None:
             try:
                 instance = TestAttendance.objects.get(test_id=test.id, mdluser_id=mdluser.id)
             except TestAttendance.DoesNotExist:
@@ -2248,6 +2246,8 @@ def test_attendance(request, tid):
                 instance.mdlattempt_id = 0
                 instance.status = 0
                 instance.save()
+            except IntegrityError:
+                print(f"{test.id} - {mdluser.id} already exists")
 
     if ta_status is not None:
         mdlids = list(TestAttendance.objects.filter(test_id = test.id, status=ta_status).values_list('mdluser_id', flat=True))

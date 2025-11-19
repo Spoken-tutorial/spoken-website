@@ -4,6 +4,8 @@ import hashlib
 
 # Third Party Stuff
 from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
+
 from .models import MdlUser, MdlQuizGrades
 
 # Spoken Tutorial Stuff
@@ -19,15 +21,15 @@ def get_moodle_user(academic_id, firstname, lastname, gender, email):
     username = email
     mdluser = None
     try:
-        mdluser = MdlUser.objects.filter(email = email).first()
+        mdluser = MdlUser.objects.filter(Q(email=email) | Q(username=email)).first()
         if not mdluser.institution == academic_id:
             mdluser.institution = academic_id
         if not mdluser.firstname == firstname:
             mdluser.firstname = firstname
         if not mdluser.lastname == lastname:
             mdluser.lastname = lastname
-        if not mdluser.username == email:
-            mdluser.username = email
+        mdluser.username = email #ensure it matches with student's spoken tutorial email
+        mdluser.email = email #ensure it matches with student's spoken tutorial email
         """password = encript_password(firstname)
         if not mdluser.password == password:
             mdluser.password = password"""
