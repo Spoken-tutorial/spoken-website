@@ -151,3 +151,15 @@ class UserType(models.Model):
     status = models.CharField(choices=STATUS_CHOICES,max_length=25,default=1)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+
+
+class EmailLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.EmailField()
+    sent_time = models.DateTimeField(auto_now_add=True)
+    status = models.BooleanField(default=False)
+    reason = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.email} - {'Success' if self.status else 'Failed'}"
