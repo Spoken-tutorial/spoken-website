@@ -15,7 +15,8 @@ class CreateTrainingEventForm(forms.ModelForm):
     ilw_course = forms.CharField(required=False)
     event_coordinator_email = forms.CharField(required = False)
     event_coordinator_contact_no = forms.CharField(required = False)
-    foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id')))
+    # foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id')))
+    foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(id__in=ILWFossMdlCourses.objects.exclude(foss__isnull=True).values_list('foss_id', flat=True).distinct()),required=False)
     city = forms.ModelChoiceField(queryset=City.objects.none(), required=False)
     host_college = forms.ModelChoiceField(queryset=AcademicCenter.objects.none(), required=False)
     
