@@ -7,6 +7,7 @@ from django import forms
 from events.models import *
 from events.helpers import get_academic_years
 from cms.validators import validate_csv_file
+from spoken.config import SUBSCRIPTION_CHOICES
 
 class StudentBatchForm(forms.ModelForm):
   year = forms.ChoiceField(choices = get_academic_years())
@@ -669,3 +670,4 @@ class AcademicPaymentStatusForm(forms.ModelForm):
     super().__init__(*args, **kwargs)
     self.fields['college_type'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
     self.fields['payment_status'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
+    self.fields['subscription'].choices = SUBSCRIPTION_CHOICES
