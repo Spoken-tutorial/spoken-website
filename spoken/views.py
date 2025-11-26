@@ -44,6 +44,8 @@ from donate.helpers import *
 from donate.subscription import *
 import requests
 
+from .helpers import *
+
 def is_resource_person(user):
     """Check if the user is having resource person  rights"""
     if user.groups.filter(name='Resource Person').count() == 1:
@@ -65,38 +67,15 @@ def site_feedback(request):
 
 
 def home(request):
-    tr_rec = ''
-    random_tutorials = []
-    try:
-        random_tutorials_ids = list(TutorialSummaryCache.objects.all().values_list('id', flat=True))
-        sample_ids = sample(random_tutorials_ids, 9)
-        random_tutorials = TutorialSummaryCache.objects.filter(id__in=sample_ids).select_related('foss', 'first_tutorial', 'first_tutorial__tutorial_detail', 'first_tutorial__language')
-    except:
-        pass
-    try:
-        tr_rec = None
-        queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2))
-        count = queryset.count()
-        if count > 0:
-            random_index = randint(0, count - 1)
-            tr_rec = queryset[random_index]
-    except Exception as e:
-        messages.error(request, str(e))
     context = {
-        'tr_rec': tr_rec,
-        'media_url': settings.MEDIA_URL,
-        'random_tutorials': random_tutorials,
+        "tr_rec": get_home_tr_rec(request),
+        "media_url": settings.MEDIA_URL,
+        "random_tutorials": get_home_random_tutorials(),
+        "testimonials": get_home_testimonials(),
+        "notifications": get_home_notifications(),
+        "events": get_home_events(),
+
     }
-
-    testimonials = Testimonials.objects.all().order_by('?')[:2]
-    context['testimonials'] = testimonials
-
-    notifications = Notification.objects.filter(Q(start_date__lte=dt.datetime.today()) & Q(
-        expiry_date__gte=dt.datetime.today())).order_by('expiry_date')
-    context['notifications'] = notifications
-
-    events = Event.objects.filter(event_date__gte=dt.datetime.today()).order_by('event_date')[:2]
-    context['events'] = events
     return render(request, 'spoken/templates/home.html',context= context)
 
 
