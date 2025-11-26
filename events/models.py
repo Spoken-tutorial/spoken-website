@@ -24,6 +24,7 @@ from events.signals import revoke_student_permission
 
 #creation app models
 from creation.models import FossAvailableForWorkshop, FossAvailableForTest
+from spoken.config import SUBSCRIPTION_CHOICES
 
 
 PAYMENT_STATUS_CHOICES =(
@@ -32,9 +33,7 @@ PAYMENT_STATUS_CHOICES =(
 COLLEGE_TYPE_CHOICES =(
     ('', '-----'), ('Engg', 'Engg'), ('ASC', 'ASC'), ('Polytechnic', 'Polytechnic'), ('University', 'University'), ('School', 'School')
   )
-SUBSCRIPTION_CHOICES = (
-      ('', '-----'), ('365', 'One_Year'), ('182', 'Six_Months')
-    )
+
 
 
 # Create your models here.
