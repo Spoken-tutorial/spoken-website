@@ -30,9 +30,9 @@ def get_home_random_tutorials():
                 id__in=sample_ids).select_related(
                     "foss", "first_tutorial", "first_tutorial__tutorial_detail", "first_tutorial__language")
         )
+        cache.set(cache_key, tutorials, timeout=CACHE_RANDOM_TUTORIALS) # in sec
     except Exception:
         tutorials = []
-    cache.set(cache_key, tutorials, timeout=CACHE_RANDOM_TUTORIALS) # in sec
     return tutorials
 
 
@@ -50,11 +50,11 @@ def get_home_tr_rec(request=None):
             tr_rec = queryset[random_index]
         else:
             tr_rec = None
+        cache.set(cache_key, tr_rec, timeout=CACHE_TR_REC) #seconds
     except Exception as e:
         tr_rec = None
         if request is not None:
             messages.error(request, str(e))
-    cache.set(cache_key, tr_rec, timeout=CACHE_TR_REC) #seconds
     return tr_rec
 
 
