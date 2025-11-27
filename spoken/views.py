@@ -293,8 +293,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         is_authorized_user = is_valid_user(request.user, foss, lang, tr_rec)
-        tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status=1) | Q(status=2), tutorial_detail__foss=tr_rec.tutorial_detail.foss, language=tr_rec.language).order_by(
-            'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+        tr_recs = get_tutorials_list(foss, lang)
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
