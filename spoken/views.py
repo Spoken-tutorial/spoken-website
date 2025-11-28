@@ -139,15 +139,8 @@ def tutorial_search(request):
         if form.is_valid():
             foss_get = request.GET.get('search_foss', '')
             language_get = request.GET.get('search_language', '')
-            if foss_get and language_get:
-                collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
-
-            elif foss_get:
-                collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
-            elif language_get:
-                collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
-            else:
-                collection = queryset.order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+            collection = get_tutorials_list(foss_get, language_get)
+            
     else:
         foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
         collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
@@ -300,8 +293,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         is_authorized_user = is_valid_user(request.user, foss, lang, tr_rec)
-        tr_recs = TutorialResource.objects.select_related('tutorial_detail').filter(Q(status=1) | Q(status=2), tutorial_detail__foss=tr_rec.tutorial_detail.foss, language=tr_rec.language).order_by(
-            'tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+        tr_recs = get_tutorials_list(foss, lang)
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
