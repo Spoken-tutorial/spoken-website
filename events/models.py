@@ -732,16 +732,19 @@ class TrainingPlanner(models.Model):
     return self.semester.name
 
   def training_requests(self):
-    return TrainingRequest.objects.filter(
-      training_planner_id = self.id
-    ).exclude(Q(participants=0)&Q(status=1))
+    # Use related_name so prefetch_related("requests") actually helps.
+    return self.requests.exclude(Q(participants=0) & Q(status=TrainingRequest.STATUS_COMPLETED))
+    # return TrainingRequest.objects.filter(
+    #   training_planner_id = self.id
+    # ).exclude(Q(participants=0)&Q(status=1))
 
   # Select all training which has no attendance
   def training_with_no_attend(self):
-    return TrainingRequest.objects.filter(
-      (Q(participants=0, status=0) | Q(participants=0, status=1)),
-      training_planner_id = self.id
-    )
+    return TrainingRequest.objects.filter(participants=0,training_planner_id = self.id)
+    # return TrainingRequest.objects.filter(
+    #   (Q(participants=0, status=0) | Q(participants=0, status=1)),
+    #   training_planner_id = self.id
+    # )
 
   def get_semester(self):
     if self.semester.even:
@@ -750,9 +753,10 @@ class TrainingPlanner(models.Model):
 
   def is_current_planner(self):
     year, sem = self.get_current_year_and_sem()
-    if int(self.year) == year and self.semester.id == sem.id:
-      return True
-    return False
+    return int(self.year) == year and self.semester.id == sem.id
+    # if int(self.year) == year and self.semester.id == sem.id:
+    #   return True
+    # return False
 
   def is_next_planner(self):
     year, sem = self.get_current_year_and_sem()
@@ -775,6 +779,10 @@ class TrainingPlanner(models.Model):
     return False
 
   def get_current_year_and_sem(self):
+    """
+    Returns (academic_year, Semester instance) for 'now',
+    where Even semester is Jan–Jun of the *next* calendar year.
+    """
     now = datetime.now()
     year = now.year
     month = now.month
@@ -791,27 +799,40 @@ class TrainingPlanner(models.Model):
     return year, sem
 
   def completed_training(self):
-    return self.training_requests().filter(status=1)
+    return [tr for tr in self.training_requests() if tr.status == TrainingRequest.STATUS_COMPLETED]
+    # return self.training_requests().filter(status=1)
 
   def ongoing_training(self):
-    return self.training_requests().filter(status=0)
+    return [tr for tr in self.training_requests() if tr.status == TrainingRequest.STATUS_ONGOING]
+    # return self.training_requests().filter(status=0)
 
   def is_full(self, department_id, batch_id):
-    if self.training_requests().filter(
+    # A department–batch can have max 2 trainings per semester.
+    return self.training_requests().filter(
       department_id=department_id,
       batch_id=batch_id,
       training_planner__semester=self.semester
-    ).count() > 2:
-      return True
-    return False
+    ).count() > 2
+    # if self.training_requests().filter(
+    #   department_id=department_id,
+    #   batch_id=batch_id,
+    #   training_planner__semester=self.semester
+    # ).count() > 2:
+    #   return True
+    # return False
 
   def is_school_full(self, department_id, batch_id):
-    if self.training_requests().filter(
+    # A school batch can have max 4 trainings.
+     return self.training_requests().filter(
       department_id=department_id,
       batch_id=batch_id
-    ).count() > 4:
-      return True
-    return False
+    ).count() > 4
+    # if self.training_requests().filter(
+    #   department_id=department_id,
+    #   batch_id=batch_id
+    # ).count() > 4:
+    #   return True
+    # return False
 
   def get_current_semester_date_duration(self):
     if self.semester.even:
@@ -860,7 +881,10 @@ class TestTrainingManager(models.Manager):
 
 
 class TrainingRequest(models.Model):
-  training_planner = models.ForeignKey(TrainingPlanner, on_delete=models.PROTECT )
+  STATUS_ONGOING = 0
+  STATUS_COMPLETED = 1
+  
+  training_planner = models.ForeignKey(TrainingPlanner, on_delete=models.PROTECT, related_name='requests' )
   department = models.ForeignKey(Department, on_delete=models.PROTECT )
   sem_start_date = models.DateField()
   training_start_date = models.DateField(default=datetime.now)
@@ -870,7 +894,7 @@ class TrainingRequest(models.Model):
   participants = models.PositiveIntegerField(default=0)
   course_type = models.PositiveIntegerField(default=None)
   #status = models.BooleanField(default=False)
-  status = models.PositiveSmallIntegerField(default=0)
+  status = models.PositiveSmallIntegerField(default=0) #Valid values: 0,1 (0=ongoing, 1=completed)
   cert_status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
@@ -941,7 +965,8 @@ class TrainingRequest(models.Model):
     return self.participants
 
   def get_partipants_from_attendance(self):
-    return TrainingAttend.objects.filter(training_id = self.id).count()
+    return self.attendees.count()
+    # return TrainingAttend.objects.filter(training_id = self.id).count()
 
   def get_partipants_from_batch(self):
     if self.batch:
@@ -951,13 +976,19 @@ class TrainingRequest(models.Model):
   def attendance_summery(self):
     if self.status == 1:
       return self.participants
-    training_attend_count = TrainingAttend.objects.filter(
-      training_id = self.id
-    ).count()
-    student_master_count = StudentMaster.objects.filter(
-      batch_id=self.batch_id
-    ).count()
-    return '(%d / %d)' % (training_attend_count, student_master_count)
+    attend_count = len(getattr(self, 'attendees').all())
+    if self.batch:
+      student_count = self.batch.studentmaster_set.count()
+    else:
+      student_count = 0
+    return '(%d / %d)' % (attend_count, student_count) 
+    # training_attend_count = TrainingAttend.objects.filter(
+    #   training_id = self.id
+    # ).count()
+    # student_master_count = StudentMaster.objects.filter(
+    #   batch_id=self.batch_id
+    # ).count()
+    # return '(%d / %d)' % (training_attend_count, student_master_count)
 
   def can_edit(self):
     if self.status == 1 or TrainingAttend.objects.filter(training_id=self.id).exclude(training__department_id=169).exists():
@@ -973,7 +1004,7 @@ class TrainingRequest(models.Model):
 
 
 class TrainingAttend(models.Model):
-  training = models.ForeignKey(TrainingRequest, on_delete=models.PROTECT )
+  training = models.ForeignKey(TrainingRequest, on_delete=models.PROTECT, related_name='attendees' )
   student = models.ForeignKey(Student, on_delete=models.PROTECT )
   language = models.ForeignKey(Language, default=None, on_delete=models.PROTECT )
   created = models.DateTimeField(auto_now_add = True)

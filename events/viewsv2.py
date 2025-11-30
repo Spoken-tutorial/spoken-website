@@ -61,7 +61,7 @@ from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from events.views import get_page
 from io import BytesIO
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from cron import TOPPER_QUEUE, REDIS_CLIENT, DEFAULT_QUEUE
 import uuid 
 from django.core.cache import caches
@@ -107,15 +107,32 @@ class TrainingPlannerListView(ListView):
   paginate_by = 20
   user = None
   template_name = None
+
+
+  def get_queryset(self):
+    base_qs = TrainingPlanner.objects.filter(
+      organiser_id = self.request.user.organiser.id,
+      academic_id = self.request.user.organiser.academic.id
+    ).select_related('academic','organiser','semester').order_by('-year')
+    print(f"\033[92m len **** {base_qs.count()} \033[0m")
+
+    # TrainingRequest subquery
+    tr_qs = (
+      TrainingRequest.objects.exclude(Q(participants=0) & Q(status=TrainingRequest.STATUS_COMPLETED))
+      .select_related('course', 'course__course', 'course__foss','department')
+      .prefetch_related('attendees',  # TrainingAttend
+                        'batch__studentmaster_set') # Students in that batch
+    )
+    return base_qs.prefetch_related(Prefetch('requests', queryset=tr_qs))
   @method_decorator(group_required("Organiser"))
   # following function is only applicable to organiser login
   def dispatch(self, *args, **kwargs):
     self.user = self.request.user
     self.get_current_planner()
-    self.queryset = TrainingPlanner.objects.filter(
-        organiser_id = self.request.user.organiser.id,
-        academic_id = self.request.user.organiser.academic.id,
-      ).order_by('-year')
+    # self.queryset = TrainingPlanner.objects.filter(
+    #     organiser_id = self.request.user.organiser.id,
+    #     academic_id = self.request.user.organiser.academic.id,
+    #   ).order_by('-year')
     return super(TrainingPlannerListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
