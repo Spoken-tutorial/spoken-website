@@ -599,7 +599,8 @@ class StudentBatch(models.Model):
     return '%s, %s, %s Batch' % (self.academic, self.department.name, self.year)
 
   def student_count(self):
-    return StudentMaster.objects.filter(batch_id = self.id).count()
+    return self.student_master.count()
+    # return StudentMaster.objects.filter(batch_id = self.id).count()
 
   def can_add_student(self, organiser_id):
     organiser = Organiser.objects.get(pk=organiser_id)
@@ -643,7 +644,7 @@ class StudentBatch(models.Model):
 
 
 class StudentMaster(models.Model):
-  batch = models.ForeignKey(StudentBatch, on_delete=models.PROTECT )
+  batch = models.ForeignKey(StudentBatch, on_delete=models.PROTECT, related_name='student_master' )
   student = models.ForeignKey(Student, on_delete=models.PROTECT )
   moved = models.BooleanField(default=False)
   created = models.DateTimeField(auto_now_add = True)
@@ -978,7 +979,7 @@ class TrainingRequest(models.Model):
       return self.participants
     attend_count = len(getattr(self, 'attendees').all())
     if self.batch:
-      student_count = self.batch.studentmaster_set.count()
+      student_count = self.batch.student_master.count()
     else:
       student_count = 0
     return '(%d / %d)' % (attend_count, student_count) 

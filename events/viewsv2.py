@@ -121,7 +121,7 @@ class TrainingPlannerListView(ListView):
       TrainingRequest.objects.exclude(Q(participants=0) & Q(status=TrainingRequest.STATUS_COMPLETED))
       .select_related('course', 'course__course', 'course__foss','department')
       .prefetch_related('attendees',  # TrainingAttend
-                        'batch__studentmaster_set') # Students in that batch
+                        'batch__student_master') # Students in that batch
     )
     return base_qs.prefetch_related(Prefetch('requests', queryset=tr_qs))
   @method_decorator(group_required("Organiser"))
@@ -476,7 +476,8 @@ class StudentBatchListView(ListView):
   raw_get_data = None
   @method_decorator(group_required("Organiser"))
   def dispatch(self, *args, **kwargs):
-    self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id)
+    self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id).select_related(
+      'academic', 'department', 'organiser', 'organiser__user').prefetch_related('student_master')
     self.header = {
       1: SortableHeader('#', False),
       2: SortableHeader('batch_name', True, 'Batch Name'),
