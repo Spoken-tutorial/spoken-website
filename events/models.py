@@ -741,7 +741,8 @@ class TrainingPlanner(models.Model):
 
   # Select all training which has no attendance
   def training_with_no_attend(self):
-    return TrainingRequest.objects.filter(participants=0,training_planner_id = self.id)
+    return self.requests.filter(participants=0)
+    # return TrainingRequest.objects.filter(participants=0,training_planner_id = self.id)
     # return TrainingRequest.objects.filter(
     #   (Q(participants=0, status=0) | Q(participants=0, status=1)),
     #   training_planner_id = self.id
