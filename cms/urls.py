@@ -7,6 +7,7 @@ from django.contrib.sitemaps.views import sitemap
 from spoken.sitemaps import SpokenStaticViewSitemap
 from donate.views import *
 
+
 app_name = 'cms'
 
 spoken_sitemaps = {
@@ -32,6 +33,6 @@ urlpatterns = [
     url(r'^sitemap\.xml/$', sitemap, {'sitemaps' : spoken_sitemaps } , name='spoken_sitemap'),
 	
 	url(r'^(?P<permalink>.+)/$',  dispatcher, name="dispatcher"),
-
+    
 
 ]

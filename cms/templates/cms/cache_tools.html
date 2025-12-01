@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width:600px; margin-top:40px;">
+    <h2>Memcache Tools</h2>
+
+    {% for message in messages %}
+      <div class="alert alert-info">{{ message }}</div>
+    {% endfor %}
+
+    <!-- KEY LIST -->
+    <h4>Existing Cache Keys (via Memcached slabs)</h4>
+    <ul class="list-group">
+        {% for k in keys %}
+        <li class="list-group-item">{{ k }}</li>
+        {% empty %}
+        <li class="list-group-item">No keys found or Memcached restricts visibility.</li>
+        {% endfor %}
+    </ul>
+
+    <hr>
+
+    <!-- VIEW VALUE FORM -->
+    <form method="POST">
+        {% csrf_token %}
+        <label>Enter Key to View Value:</label>
+        <input type="text" name="cache_key" class="form-control" placeholder="Enter cache key" required>
+        <button name="view_key" class="btn btn-info" style="margin-top:10px;">View Value</button>
+    </form>
+
+    {% if value_output %}
+        <div class="alert alert-secondary" style="margin-top:15px;">
+            <strong>Key Value:</strong><br>
+            {{ value_output|safe }}
+        </div>
+    {% endif %}
+
+    <hr>
+
+    <!-- DELETE KEY FORM -->
+    <form method="POST">
+        {% csrf_token %}
+        <label>Clear Specific Key:</label>
+        <input type="text" name="cache_key" class="form-control" placeholder="Enter cache key" required>
+        <button name="clear_key" class="btn btn-primary" style="margin-top:10px;">Delete Key</button>
+    </form>
+
+    <hr>
+
+    <!-- CLEAR ALL -->
+    <form method="POST">
+        {% csrf_token %}
+        <button name="clear_all" class="btn btn-danger">Clear ALL Cache</button>
+    </form>
+
+</div>
+{% endblock %}
