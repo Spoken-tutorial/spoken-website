@@ -87,6 +87,15 @@
                         </div>
                       </div>
 
+      <!-- Language / Level (Test Type) field -->
+      <div class='form-row language-level-fields' style="display:none;">
+        <div class='col-xs-12 form-group required'>
+          <label class='control-label' id="test_type">Test Type</label>
+          {% render_field form.fossmdlmap class+="form-control fossmdlmap" tabindex="1" %}
+          {{ form.fossmdlmap.errors }}
+        </div>
+      </div>
+
                       <div class="form-row">
                           <div class="col-xs-12 form-group">
                               <input class="btn btn-primary" type="submit" value="Submit" />
@@ -128,6 +137,7 @@
       $('.foss_category').on('change', function(){
         foss_category = $(this).val();
         document.getElementById('course_label').innerHTML = 'Course list loading ...'
+        $('.language-level-fields').hide();
         if(foss_category != ''){
           $.ajax({
             url: "/software-training/get-course-option/",
@@ -144,12 +154,52 @@
               if(data && data['course_option']) {
                   $('.course').html(data['course_option']);
               }
-              //$('.ajax-refresh-language').hide();
+              if (foss_category == '1') {
+                var course_id = $('.course').val();
+                loadLanguageLevelOptions(foss_category, course_id);
+              } else {
+                $('.language-level-fields').hide();
+              }
             }
           });
+        } else {
+          $('.language-level-fields').hide();
         }
       });
+      
+$('.course').on('change', function() {
+        var foss_category = $('.foss_category').val();
+        var course_id = $(this).val();
+        if (foss_category == '1') {
+          loadLanguageLevelOptions(foss_category, course_id);
+        }
+      });
+      function loadLanguageLevelOptions(foss_category, course_id) {
+        $.ajax({
+          url: "/software-training/get-language-level-option/",
+          type: "POST",
+          data: {
+            foss_category: foss_category,
+            course_id: course_id || ''
+          },
+          success: function(res) {
+            if(res && res.fossmdl) {
+              $('#id_fossmdlmap').html(res.fossmdl);
+            }
+            $('.language-level-fields').show();
+          },
+          error: function() {
+            $('.language-level-fields').show();
+          }
+        });
+      }
 
+      // added: check initial state
+      var initialFossCategory = $('.foss_category').val();
+      if (initialFossCategory == '1') {
+        var initialCourseId = $('.course').val();
+        loadLanguageLevelOptions(initialFossCategory, initialCourseId);
+      }
     });
 
   </script>

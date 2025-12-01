@@ -77,6 +77,8 @@ from donate.utils import send_transaction_email
 from .certificates import *
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
 
+from spoken.config import BASIC_LEVEL_INSTITUTIONS
+
 class JSONResponseMixin(object):
   """
   A mixin that can be used to render a JSON response.
