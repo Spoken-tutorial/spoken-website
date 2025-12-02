@@ -131,8 +131,8 @@ class ProfileForm(forms.ModelForm):
             if ext[1:] not in content_types:
                 raise forms.ValidationError("Wrong format:Profile picture should be in \"png/jpg\" format only!")
 
-    first_name = forms.CharField()
-    last_name = forms.CharField()
+    first_name = forms.CharField(max_length=50)
+    last_name = forms.CharField(max_length=50)
     state = forms.ModelChoiceField(label = 'State',   \
         widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = \
         State.objects.order_by('name'), empty_label = "--- None ---", \
