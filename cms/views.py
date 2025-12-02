@@ -29,6 +29,17 @@ from django.template.context_processors import csrf
 
 from donate.models import Payee
 
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.cache import caches
+from django.shortcuts import render, redirect
+
+from cms.cache_registry import list_cache_keys, unregister_cache_key
+from django.utils.safestring import mark_safe
+
+
+cache = caches['default']
+
 def dispatcher(request, permalink=''):
     if permalink == '':
         return HttpResponseRedirect('/')
@@ -504,3 +515,39 @@ def verify_email(request):
     else:
       messages.error(request, 'Invalid Email ID', extra_tags='error')
   return render(request, "cms/templates/verify_email.html", context)
+
+
+@staff_member_required
+def cache_tools(request):
+
+    keys = list_cache_keys()
+    value_output = None
+
+    if request.method == "POST":
+
+        if "view_key" in request.POST:
+            key = request.POST.get("cache_key").strip()
+            val = cache.get(key)
+            print("dfghjkdfghjk",val)
+
+            if val is None:
+                value_output = f"No value stored for key: '{key}'"
+            else:
+                value_output = mark_safe(f"<pre>{val}</pre>")
+
+        elif "clear_key" in request.POST:
+            key = request.POST.get("cache_key").strip()
+            cache.delete(key)
+            unregister_cache_key(key)
+            messages.success(request, f"Key '{key}' deleted.")
+            return redirect("cache-tools")
+
+        elif "clear_all" in request.POST:
+            cache.clear()
+            messages.success(request, "All cache cleared.")
+            return redirect("cache-tools")
+
+    return render(request, "cms/cache_tools.html", {
+        "keys": keys,
+        "value_output": value_output
+    })

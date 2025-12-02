@@ -23,7 +23,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.utils.decorators import method_decorator
 from events.decorators import group_required
-from events import display
+# from events import display
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
     OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
@@ -75,6 +75,7 @@ from spoken.config import TOPPER_WORKER_STATUS
 from django.db import connection
 from donate.utils import send_transaction_email
 from .certificates import *
+from spoken.config import BASIC_LEVEL_INSTITUTIONS
 
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
 
