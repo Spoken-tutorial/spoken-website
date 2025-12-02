@@ -15,7 +15,7 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="id_first_name">First Name</label>
                     <div class="col-sm-9">
-                        {% render_field form.first_name class+="form-control first_name" tabindex="1" data-placeholder="Choose first_name" %}
+                        {% render_field form.first_name class+="form-control first_name" maxlength="150" tabindex="1" data-placeholder="Choose first_name" %}
                         {{ form.first_name.errors }}
                         <small>Please enter your first name.</small>
                     </div>
@@ -23,7 +23,7 @@
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="id_last_name">Last Name</label>
                     <div class="col-sm-9">
-                        {% render_field form.last_name class+="form-control last_name" tabindex="1" data-placeholder="Choose last_name" %}
+                        {% render_field form.last_name class+="form-control last_name" maxlength="150" tabindex="1" data-placeholder="Choose last_name" %}
                         {{ form.last_name.errors }}
                         <small>Please enter your last name.</small>
                     </div>
