@@ -36,6 +36,8 @@ from django.shortcuts import render, redirect
 
 from cms.cache_registry import list_cache_keys, unregister_cache_key
 from django.utils.safestring import mark_safe
+from django.forms.models import model_to_dict
+from django.utils.html import escape
 
 
 cache = caches['default']
@@ -525,16 +527,42 @@ def cache_tools(request):
 
     if request.method == "POST":
 
+        # ---------- VIEW A CACHE KEY ----------
         if "view_key" in request.POST:
             key = request.POST.get("cache_key").strip()
             val = cache.get(key)
-            print("dfghjkdfghjk",val)
+            print("dfghjkdfghjk", val)
 
             if val is None:
                 value_output = f"No value stored for key: '{key}'"
-            else:
-                value_output = mark_safe(f"<pre>{val}</pre>")
 
+            else:
+                try:
+                    # Convert QuerySet / list / tuple into list
+                    if hasattr(val, "__iter__") and not isinstance(val, (str, bytes, dict)):
+                        iterable = list(val)
+                    else:
+                        iterable = [val]
+
+                    pretty_lines = []
+
+                    for item in iterable:
+                        # If model instance → convert to dict
+                        if hasattr(item, "_meta"):
+                            d = model_to_dict(item)
+                            pretty_lines.append(str(d))
+                        else:
+                            pretty_lines.append(repr(item))
+
+                    pretty = "<br>".join(escape(line) for line in pretty_lines)
+                    value_output = mark_safe(f"<pre>{pretty}</pre>")
+
+                except Exception as e:
+                    # Fallback print
+                    value_output = mark_safe(f"<pre>{escape(repr(val))}</pre>")
+
+
+        # ---------- DELETE ONE KEY ----------
         elif "clear_key" in request.POST:
             key = request.POST.get("cache_key").strip()
             cache.delete(key)
@@ -542,6 +570,7 @@ def cache_tools(request):
             messages.success(request, f"Key '{key}' deleted.")
             return redirect("cache-tools")
 
+        # ---------- CLEAR ALL ----------
         elif "clear_all" in request.POST:
             cache.clear()
             messages.success(request, "All cache cleared.")
