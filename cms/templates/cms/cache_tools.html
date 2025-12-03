@@ -17,13 +17,11 @@
         <li class="list-group-item">No keys found or Memcached restricts visibility.</li>
         {% endfor %}
     </ul>
-
     <hr>
 
-    <!-- VIEW VALUE FORM -->
     <form method="POST">
         {% csrf_token %}
-        <label>Enter Key to View Value:</label>
+        <label>Enter Cache Key to View Value:</label>
         <input type="text" name="cache_key" class="form-control" placeholder="Enter cache key" required>
         <button name="view_key" class="btn btn-info" style="margin-top:10px;">View Value</button>
     </form>
@@ -34,20 +32,18 @@
             {{ value_output|safe }}
         </div>
     {% endif %}
-
     <hr>
 
-    <!-- DELETE KEY FORM -->
+
     <form method="POST">
         {% csrf_token %}
         <label>Clear Specific Key:</label>
         <input type="text" name="cache_key" class="form-control" placeholder="Enter cache key" required>
         <button name="clear_key" class="btn btn-primary" style="margin-top:10px;">Delete Key</button>
     </form>
-
     <hr>
 
-    <!-- CLEAR ALL -->
+
     <form method="POST">
         {% csrf_token %}
         <button name="clear_all" class="btn btn-danger">Clear ALL Cache</button>

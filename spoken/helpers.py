@@ -35,12 +35,11 @@ def get_home_random_tutorials():
                     "foss", "first_tutorial", "first_tutorial__tutorial_detail", "first_tutorial__language")
         )
         cache.set(cache_key, tutorials, timeout=CACHE_RANDOM_TUTORIALS) # in sec
-        # register_cache_key(cache_key)
+        register_cache_key(cache_key)
     except Exception:
         tutorials = []
         print("exceptionnnnn",tutorials)
     return tutorials
-
 
 # ---- 2. Random TutorialResource record ----
 def get_home_tr_rec(request=None):
