@@ -13,10 +13,16 @@ from django.conf.urls.static import static
 from donate.views import ilw_payment_callback
 from donate.payment import check_ilw_payment_status
 
+# import debug_toolbar
+
+from django.conf import settings
+
+
 app_name = 'spoken'
 admin.autodiscover()
 
 urlpatterns = [
+    # url(r'^__debug__/', include(debug_toolbar.urls)),
     url(r'^robots\.txt', robots_txt, name='robots-txt'),
     #url(r'^sitemap\.xml$', TemplateView.as_view(template_name='sitemap.xml', content_type='text/xml')),
     url(r'^sitemap\.html$', sitemap, name='sitemap'),
@@ -142,10 +148,23 @@ urlpatterns = [
     #donation
     url(r'^donate/', include('donate.urls', namespace='donate')),
 
+    #Caches
+    url(r'^system-tools/', include('cms.cacheurls')),
+    
+
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
-    
+
+ 
     #nep book fiar
     url(r'wbf-book-fair-2023', bookfair,name="bookfair"),
     
 ] + static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
+
+
