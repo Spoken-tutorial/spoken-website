@@ -59,10 +59,13 @@ class TutorialSearchForm(forms.Form):
         required=False,
     )
 
+    
     def __init__(self, *args, **kwargs):
+        foss_selected = kwargs.pop('foss', None)
+        lang_selected = kwargs.pop('lang', None)
         super(TutorialSearchForm, self).__init__(*args, **kwargs)
-        self.fields['search_foss'].choices = get_foss_choice()
-        self.fields['search_language'].choices = get_lang_choice()
+        self.fields['search_foss'].choices = get_foss_choice(lang=lang_selected)
+        self.fields['search_language'].choices = get_lang_choice(foss=foss_selected)
 
 
 class SeriesTutorialSearchForm(forms.Form):

@@ -11,6 +11,9 @@ from events.models import Testimonials
 from cms.models import Notification, Event
 from .config import CACHE_RANDOM_TUTORIALS, CACHE_TR_REC, CACHE_TESTIMONIALS, CACHE_NOTIFICATIONS, CACHE_EVENTS, CACHE_TUTORIALS
 
+def get_key(identifier, key_val):
+    return f"{identifier}:{key_val.lower().strip().replace(' ','_')}"
+
 # ---- 1. Random tutorials from TutorialSummaryCache ----
 def get_home_random_tutorials():
     cache_key = "home_random_tutorials"
@@ -92,14 +95,14 @@ def get_home_events():
 
 # ----  Tutorials List ----
 def get_tutorials_list(foss, lang):
-    foss_key = f"tutorials:{foss.lower().strip().replace(' ','_')}"
+    foss_key = get_key("tutorials", foss)
     lang_key = lang.lower().strip()
     cache_key = f"{foss_key}_{lang_key}"
     tutorials = cache.get(cache_key)
     
     if tutorials is not None:
         return tutorials
-    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = 1).select_related('tutorial_detail__level', 'tutorial_detail__foss', 'language')
+    queryset = TutorialResource.objects.filter(status__in=[1,2], tutorial_detail__foss__show_on_homepage = 1).select_related('tutorial_detail__level', 'tutorial_detail__foss', 'language')
     if foss and lang:
         collection = queryset.filter(tutorial_detail__foss__foss=foss, language__name=lang).order_by('tutorial_detail__level', 'tutorial_detail__order')
     elif foss:
@@ -112,16 +115,23 @@ def get_tutorials_list(foss, lang):
     return collection
 
 # ----  Foss Choice For Search Bar ----
-def get_foss_choice():
-    cache_key = "tutorial_search:foss_choices"
+def get_foss_choice(show_on_homepage=1, lang=None):
+    
+    if lang:
+        cache_key = get_key("tutorial_search_foss", f"{show_on_homepage}:{lang}")
+    else:
+        cache_key = f"tutorial_search_foss:{show_on_homepage}:all"
     foss_list_choices = cache.get(cache_key)
     if foss_list_choices is not None:
         return foss_list_choices
     
     foss_list_choices = [('', '-- All Courses --'), ]
-    foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English', tutorial_detail__foss__show_on_homepage=1).values('tutorial_detail__foss__foss').annotate(
+    foss_qs = TutorialResource.objects.filter(status__in=[1,2], tutorial_detail__foss__show_on_homepage=show_on_homepage)
+    if lang:
+        foss_qs = foss_qs.filter(language__name=lang)
+    foss_list = foss_qs.values('tutorial_detail__foss__foss').annotate(
             Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-    
+
     for foss_row in foss_list:
             foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
 
@@ -131,14 +141,21 @@ def get_foss_choice():
 
 
 # ----  Language Choice For Search Bar ----
-def get_lang_choice():
-    cache_key = "tutorial_search:lang_choices"
+def get_lang_choice(show_on_homepage=1, foss=None):
+    if foss:
+        cache_key = get_key("tutorial_search_lang", f"{show_on_homepage}:{foss}")
+    else:
+        cache_key = f"tutorial_search_lang:{show_on_homepage}:all"
     lang_list_choices = cache.get(cache_key)
     if lang_list_choices is not None:
         return lang_list_choices
     
+    lang_qs = TutorialResource.objects.filter(status__in=[1,2], tutorial_detail__foss__show_on_homepage=show_on_homepage)
+    if foss:
+        lang_qs = lang_qs.filter(tutorial_detail__foss__foss=foss)
+
     lang_list_choices = [('', '-- All Languages --'), ]
-    lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage=1).values('language__name').annotate(
+    lang_list = lang_qs.values('language__name').annotate(
             Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
     for lang_row in lang_list:
         lang_list_choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))

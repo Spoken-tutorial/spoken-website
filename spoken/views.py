@@ -135,16 +135,17 @@ def tutorial_search(request):
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
 
     if request.method == 'GET' and request.GET:
-        form = TutorialSearchForm(request.GET)
+        foss_get = request.GET.get('search_foss', '')
+        language_get = request.GET.get('search_language', '')
+        form = TutorialSearchForm(request.GET, foss=foss_get, lang=language_get)
         if form.is_valid():
-            foss_get = request.GET.get('search_foss', '')
-            language_get = request.GET.get('search_language', '')
             collection = get_tutorials_list(foss_get, language_get)
             
     else:
         foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
         collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
         foss_get = foss[0]
+        form = TutorialSearchForm(foss=foss_get)
     if collection is not None:
         page = request.GET.get('page')
         collection = get_page(collection, page)
@@ -152,6 +153,7 @@ def tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
+    context['current_lang'] = language_get
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def list_videos(request):
@@ -383,6 +385,12 @@ def what_is_spoken_tutorial(request):
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
+def build_options(rows, selected=None):
+    parts = []
+    for value, label in rows:
+        selected_attr = ' selected' if value == selected else ''
+        parts.append(f'<option value="{value}"{selected_attr}> {label}</option>')
+    return ''.join(parts)
 
 @csrf_exempt
 def get_language(request, tutorial_type):
@@ -394,40 +402,41 @@ def get_language(request, tutorial_type):
         show_on_homepage = 2
 
     if request.method == "POST":
-        foss = request.POST.get('foss')
-        lang = request.POST.get('lang')
-        if not lang and foss:
-            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage, tutorial_detail__foss__foss=foss).values(
-                'language__name').annotate(Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
-            tmp = '<option value = ""> -- All Languages -- </option>'
-            for lang_row in lang_list:
-                tmp += '<option value="' + str(lang_row[0]) + '">' + \
-                    str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
-            output = ['foss', tmp]
-        elif lang and not foss:
-            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage, language__name=lang).values('tutorial_detail__foss__foss').annotate(
-                Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-            tmp = '<option value = ""> -- All Courses -- </option>'
-            for foss_row in foss_list:
-                tmp += '<option value="' + str(foss_row[0]) + '">' + \
-                    str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
-            output = ['lang', tmp]
-        elif foss and lang:
-            pass
+        foss_selected = request.POST.get('foss', None)
+        lang_selected = request.POST.get('lang', None)
+        action_selected = request.POST.get('action', None)
+
+        # Case 1: only foss selected
+        if not lang_selected and foss_selected: 
+            lang_list = get_lang_choice(show_on_homepage=show_on_homepage, foss=foss_selected)
+            lang_html = build_options(lang_list)
+            output = ['foss', lang_html]
+
+            if action_selected == 'search_language': #reset the language options
+                foss_list = get_foss_choice(show_on_homepage=show_on_homepage, lang=None)
+                foss_html = build_options(foss_list, selected=foss_selected)
+                output = ['foss', lang_html, foss_html]
+
+        # Case 2: only lang selected  
+        elif lang_selected and not foss_selected:
+            foss_list = get_foss_choice(show_on_homepage=show_on_homepage, lang=lang_selected)
+            foss_html = build_options(foss_list)
+            output = ['lang', foss_html]
+            
+            if action_selected == 'search_foss': #reset the language options
+                lang_list = get_lang_choice(show_on_homepage=show_on_homepage, foss=None)
+                lang_html = build_options(lang_list, selected=lang_selected)
+                output = ['lang', foss_html, lang_html]
+        
+        # Case 3: both selected or both empty → reset both lists
         else:
-            lang_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage).values('language__name').annotate(
-                Count('id')).order_by('language__name').values_list('language__name', 'id__count').distinct()
-            tmp1 = '<option value = ""> -- All Languages -- </option>'
-            for lang_row in lang_list:
-                tmp1 += '<option value="' + str(lang_row[0]) + '">' + \
-                    str(lang_row[0]) + ' (' + str(lang_row[1]) + ')</option>'
-            foss_list = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage,language__name='English').values('tutorial_detail__foss__foss').annotate(
-                Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
-            tmp2 = '<option value = ""> -- All Courses -- </option>'
-            for foss_row in foss_list:
-                tmp2 += '<option value="' + str(foss_row[0]) + '">' + \
-                    str(foss_row[0]) + ' (' + str(foss_row[1]) + ')</option>'
-            output = ['reset', tmp1, tmp2]
+            lang_list = get_lang_choice(show_on_homepage=show_on_homepage, foss=foss_selected)
+            lang_html = build_options(lang_list, selected=lang_selected)
+
+            foss_list = get_foss_choice(show_on_homepage=show_on_homepage, lang=lang_selected)
+            foss_html = build_options(foss_list, selected=foss_selected)
+            output = ['reset', lang_html, foss_html]
+    
     return HttpResponse(json.dumps(output), content_type='application/json')
 
 
