@@ -95,9 +95,9 @@ def get_home_events():
 
 # ----  Tutorials List ----
 def get_tutorials_list(foss, lang):
-    foss_key = get_key("tutorials", foss)
-    lang_key = lang.lower().strip()
-    cache_key = f"{foss_key}_{lang_key}"
+    foss = foss.lower().strip()
+    lang = lang.lower().strip()
+    cache_key = get_key("tutorials_list", f"{foss}:{lang}")
     tutorials = cache.get(cache_key)
     
     if tutorials is not None:
