@@ -2,7 +2,7 @@ $("#id_search_foss, #id_search_language").change(
     function() {
         var foss = $('#id_search_foss').val();
         var lang = $('#id_search_language').val();
-        if ((foss == '' || lang == '') && ($(this).val() != '')){
+        var action = this.name; 
             $.ajax(
                 {
                     url: "/get-language/main/", 
@@ -10,6 +10,7 @@ $("#id_search_foss, #id_search_language").change(
                     data: {
                         foss : foss,
                         lang : lang,
+                        action : action
                     },
                     beforeSend: function() {
                         if(foss == '')
@@ -19,9 +20,11 @@ $("#id_search_foss, #id_search_language").change(
                     },
                     success: function(data) {
                         if(data[0] == 'foss'){
-                            $('#id_search_language').html(data[1]);
+                            $('#id_search_language').html(data[1]); 
+                            $('#id_search_foss').html(data[2]);
                         } else if(data[0] == 'lang'){
                             $('#id_search_foss').html(data[1]);
+                            $('#id_search_language').html(data[2]);
                         } else if(data[0] == 'reset') {
                             $('#id_search_language').html(data[1]);
                             $('#id_search_foss').html(data[2]);
@@ -33,7 +36,6 @@ $("#id_search_foss, #id_search_language").change(
                     }
                 }
             );
-        }
     }
 );
 $("#id_search_otherfoss, #id_search_otherlanguage").change(
