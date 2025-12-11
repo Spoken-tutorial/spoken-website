@@ -1856,13 +1856,16 @@ def training_participant_ceritificate(request, wid, participant_id):
 @login_required
 def test_request(request, role, rid = None):
     ''' Test request by organiser '''
-    user = request.user
+    # Prefetch organiser and academic state to avoid repeated lazy loads
+    user = request.user.__class__.objects.select_related(
+        'organiser__academic__state'
+    ).get(pk=request.user.pk)
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
     context = {}
     form = TestForm(user = user)
     if rid:
-        t = Test.objects.get(pk = rid)
+        t = Test.objects.select_related('organiser', 'organiser__user', 'organiser__academic', 'organiser__academic__state', 'test_category', 'academic', 'academic__state').get(pk = rid)
         user = t.organiser.user
         form = TestForm(user = user, instance = t)
         context['instance'] = t
@@ -1872,7 +1875,7 @@ def test_request(request, role, rid = None):
             dateTime = request.POST['tdate'].split(' ')
             t = Test()
             if rid:
-                t = Test.objects.get(pk = rid)
+                t = Test.objects.select_related('organiser', 'organiser__user', 'organiser__academic', 'organiser__academic__state', 'test_category', 'academic', 'academic__state').get(pk = rid)
             else:
                 print("New Test.............")
                 t.organiser_id = user.organiser.id
@@ -1960,6 +1963,7 @@ def test_request(request, role, rid = None):
     context['status'] = 'request'
     context.update(csrf(request))
     context['form'] = form
+    context['user'] = user
     return render(request, 'events/templates/test/form.html', context)
 
 @login_required
