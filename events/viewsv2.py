@@ -61,7 +61,7 @@ from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from events.views import get_page
 from io import BytesIO
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from cron import TOPPER_QUEUE, REDIS_CLIENT, DEFAULT_QUEUE
 import uuid 
 from django.core.cache import caches
@@ -77,6 +77,7 @@ from donate.utils import send_transaction_email
 from .certificates import *
 
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
+
 
 class JSONResponseMixin(object):
   """
@@ -107,15 +108,33 @@ class TrainingPlannerListView(ListView):
   paginate_by = 20
   user = None
   template_name = None
+
+  def get_queryset(self):
+    organiser = self.request.user.organiser
+    training_qs = (
+      TrainingRequest.objects.exclude(Q(participants=0) & Q(status=1)).annotate(
+        attend_count=Count('attendances'),
+        student_master_count=Count('batch__studentmasters', distinct=True)
+      ).select_related('department', 'batch','course__course', 'course__foss')
+    )
+    qs = TrainingPlanner.objects.filter(
+        organiser_id = organiser.id,
+        academic_id = organiser.academic.id,
+      ).order_by('-year').prefetch_related(
+        Prefetch(
+          'requests',
+          queryset=training_qs,
+          to_attr='prefetched_requests'
+        )
+      )
+    return qs
+  
   @method_decorator(group_required("Organiser"))
   # following function is only applicable to organiser login
   def dispatch(self, *args, **kwargs):
     self.user = self.request.user
     self.get_current_planner()
-    self.queryset = TrainingPlanner.objects.filter(
-        organiser_id = self.request.user.organiser.id,
-        academic_id = self.request.user.organiser.academic.id,
-      ).order_by('-year')
+    
     return super(TrainingPlannerListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
