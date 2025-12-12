@@ -643,7 +643,7 @@ class StudentBatch(models.Model):
 
 
 class StudentMaster(models.Model):
-  batch = models.ForeignKey(StudentBatch, on_delete=models.PROTECT )
+  batch = models.ForeignKey(StudentBatch, on_delete=models.PROTECT, related_name='studentmasters' )
   student = models.ForeignKey(Student, on_delete=models.PROTECT )
   moved = models.BooleanField(default=False)
   created = models.DateTimeField(auto_now_add = True)
@@ -732,12 +732,18 @@ class TrainingPlanner(models.Model):
     return self.semester.name
 
   def training_requests(self):
+    # When prefetch_related was used with to_attr='prefetched_requests'
+    if hasattr(self, 'prefetched_requests'):
+      return self.prefetched_requests  # this is a plain Python list
+
     return TrainingRequest.objects.filter(
       training_planner_id = self.id
     ).exclude(Q(participants=0)&Q(status=1))
 
   # Select all training which has no attendance
   def training_with_no_attend(self):
+    if hasattr(self, 'prefetched_requests_no_attend'):
+      return self.prefetched_requests_no_attend
     return TrainingRequest.objects.filter(
       (Q(participants=0, status=0) | Q(participants=0, status=1)),
       training_planner_id = self.id
@@ -791,13 +797,18 @@ class TrainingPlanner(models.Model):
     return year, sem
 
   def completed_training(self):
+    if hasattr(self, 'prefetched_requests'):
+      return [tr for tr in self.prefetched_requests if tr.status == 1]
     return self.training_requests().filter(status=1)
 
   def ongoing_training(self):
+    if hasattr(self, 'prefetched_requests'):
+      return [tr for tr in self.prefetched_requests if tr.status == 0]
     return self.training_requests().filter(status=0)
 
   def is_full(self, department_id, batch_id):
-    if self.training_requests().filter(
+    qs = TrainingRequest.objects.filter(training_planner_id = self.id).exclude(Q(participants=0)&Q(status=1))
+    if qs.filter(
       department_id=department_id,
       batch_id=batch_id,
       training_planner__semester=self.semester
@@ -806,7 +817,8 @@ class TrainingPlanner(models.Model):
     return False
 
   def is_school_full(self, department_id, batch_id):
-    if self.training_requests().filter(
+    qs = TrainingRequest.objects.filter(training_planner_id = self.id).exclude(Q(participants=0)&Q(status=1))
+    if qs.filter(
       department_id=department_id,
       batch_id=batch_id
     ).count() > 4:
@@ -860,7 +872,7 @@ class TestTrainingManager(models.Manager):
 
 
 class TrainingRequest(models.Model):
-  training_planner = models.ForeignKey(TrainingPlanner, on_delete=models.PROTECT )
+  training_planner = models.ForeignKey(TrainingPlanner, on_delete=models.PROTECT, related_name='requests' )
   department = models.ForeignKey(Department, on_delete=models.PROTECT )
   sem_start_date = models.DateField()
   training_start_date = models.DateField(default=datetime.now)
@@ -941,7 +953,10 @@ class TrainingRequest(models.Model):
     return self.participants
 
   def get_partipants_from_attendance(self):
-    return TrainingAttend.objects.filter(training_id = self.id).count()
+    training_attend_count = getattr(self, 'attend_count', None)
+    if training_attend_count is None:
+      training_attend_count = TrainingAttend.objects.filter(training_id = self.id).count()
+    return training_attend_count
 
   def get_partipants_from_batch(self):
     if self.batch:
@@ -949,14 +964,19 @@ class TrainingRequest(models.Model):
     return 0
 
   def attendance_summery(self):
+    # If training completed, just use the stored participants field
     if self.status == 1:
       return self.participants
-    training_attend_count = TrainingAttend.objects.filter(
-      training_id = self.id
-    ).count()
-    student_master_count = StudentMaster.objects.filter(
-      batch_id=self.batch_id
-    ).count()
+    training_attend_count = getattr(self, 'attend_count', None)
+    if training_attend_count is None:
+      training_attend_count = TrainingAttend.objects.filter(
+        training_id = self.id
+      ).count()
+    student_master_count = getattr(self, 'student_master_count', None)
+    if student_master_count is None:
+      student_master_count = StudentMaster.objects.filter(
+        batch_id=self.batch_id
+      ).count()
     return '(%d / %d)' % (training_attend_count, student_master_count)
 
   def can_edit(self):
@@ -973,7 +993,7 @@ class TrainingRequest(models.Model):
 
 
 class TrainingAttend(models.Model):
-  training = models.ForeignKey(TrainingRequest, on_delete=models.PROTECT )
+  training = models.ForeignKey(TrainingRequest, on_delete=models.PROTECT, related_name='attendances' )
   student = models.ForeignKey(Student, on_delete=models.PROTECT )
   language = models.ForeignKey(Language, default=None, on_delete=models.PROTECT )
   created = models.DateTimeField(auto_now_add = True)
