@@ -55,9 +55,9 @@ class TrainingRequestForm(forms.ModelForm):
   department = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.none())
   course_type = forms.ChoiceField(choices=[('', '---------'), (0, 'Software Course outside lab hours'), (1, 'Software Course mapped in lab hours'), (2, ' Software Course unmapped in lab hours')])
   foss_category = forms.ChoiceField(choices=[('', '---------'), (0, 'Foss available only for Training'), (1, 'Foss available for Training and Test')])
-  course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0))
+  course = forms.ModelChoiceField(empty_label='---------', queryset=CourseMap.objects.filter(category=0).select_related('foss', 'course'))
   batch = forms.ModelChoiceField(empty_label='---------', queryset=StudentBatch.objects.none())
-  fossmdlmap = forms.ModelChoiceField( label="Test Type", queryset=FossMdlCourses.objects.all(), required=False, empty_label='---------',)
+  fossmdlmap = forms.ModelChoiceField( label="Test Type", queryset=FossMdlCourses.objects.all().select_related('level', 'language'), required=False, empty_label='---------',)
   
   training_planner = forms.CharField()
   class Meta(object):
