@@ -700,7 +700,62 @@ class TrainingRequestEditView(CreateView):
       return self.form_valid(form)
     else:
       return self.form_invalid(form)
-    return HttpResponseRedirect('/software-training/select-participants/')
+    return HttpResponseRedirect('/')
+
+
+# class TrainingAttendanceListView(ListView):
+#   queryset = StudentMaster.objects.none()
+#   paginate_by = 500
+#   template_name = ""
+#   training_request = None
+
+#   def dispatch(self, *args, **kwargs):
+#     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
+#     if self.training_request.status == 1 and not self.training_request.participants == 0:
+#       self.queryset = self.training_request.trainingattend_set.all()
+#     else:
+#       self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id,student__verified__lte=3,student__error=0, moved=False)
+      
+#     return super(TrainingAttendanceListView, self).dispatch(*args, **kwargs)
+
+#   def get_context_data(self, **kwargs):
+#     context = super(TrainingAttendanceListView, self).get_context_data(**kwargs)
+#     context['training'] = self.training_request
+#     context['department'] = self.training_request.department
+#     languages = Language.objects.filter(
+#         id__in = FossAvailableForWorkshop.objects.filter(
+#           foss_id = self.training_request.course.foss_id
+#         ).values_list('language_id')
+#       )
+#     context['languages'] = languages
+#     return context
+
+#   def post(self, request, *args, **kwargs):
+#     self.object = None
+#     self.user = request.user
+#     training_id = kwargs['tid']
+#     if request.POST and 'user' in request.POST:
+#       # commented out as Django 1.11 + creates new csrf token for every POST request
+#       #if csrf.get_token(request) == request.POST['csrfmiddlewaretoken']:
+#       marked_student = request.POST.getlist('user', None)
+#       # delete un marked record if exits
+#       TrainingAttend.objects.filter(training_id =training_id).exclude(student_id__in = marked_student).delete()
+#       # insert new record if not exits
+#       for record in marked_student:
+#         language_id = request.POST.get(record)
+#         training_attend = TrainingAttend.objects.filter(training_id =training_id, student_id = record)
+#         if not training_attend.exists():
+#           TrainingAttend.objects.create(training_id =training_id, student_id = record, language_id=language_id)
+#         else:
+#           training_attend = training_attend.first()
+#           training_attend.language_id = language_id
+#           training_attend.save()
+#       #print marked_student
+#     else:
+#       TrainingAttend.objects.filter(training_id =training_id).delete()
+#     self.training_request.update_participants_count()
+#     return HttpResponseRedirect('/software-training/training-planner')
+
 
 
 class TrainingAttendanceListView(ListView):
@@ -710,50 +765,94 @@ class TrainingAttendanceListView(ListView):
   training_request = None
 
   def dispatch(self, *args, **kwargs):
-    self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
+    self.training_request = (
+            TrainingRequest.objects
+            .select_related('department', 'course', 'course__foss')
+            .get(pk=kwargs['tid'])
+        )
     if self.training_request.status == 1 and not self.training_request.participants == 0:
-      self.queryset = self.training_request.trainingattend_set.all()
+      self.queryset =  self.queryset = (
+                self.training_request.trainingattend_set
+                .select_related('student', 'language')
+                .all()
+            )
     else:
-      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id,student__verified__lte=3,student__error=0, moved=False)
+      self.queryset =  self.queryset = (
+                StudentMaster.objects
+                .select_related('student')
+                .filter(
+                    batch_id=self.training_request.batch_id,
+                    student__verified__lte=3,
+                    student__error=0,
+                    moved=False
+                )
+      )
     return super(TrainingAttendanceListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
     context = super(TrainingAttendanceListView, self).get_context_data(**kwargs)
     context['training'] = self.training_request
     context['department'] = self.training_request.department
-    languages = Language.objects.filter(
-        id__in = FossAvailableForWorkshop.objects.filter(
-          foss_id = self.training_request.course.foss_id
-        ).values_list('language_id')
-      )
+    language_ids = (
+          FossAvailableForWorkshop.objects
+          .filter(foss_id=self.training_request.course.foss_id)
+          .values_list('language_id', flat=True)
+    )
+    languages = Language.objects.filter(id__in=language_ids)
     context['languages'] = languages
     return context
-
+  
   def post(self, request, *args, **kwargs):
-    self.object = None
-    self.user = request.user
-    training_id = kwargs['tid']
-    if request.POST and 'user' in request.POST:
-      # commented out as Django 1.11 + creates new csrf token for every POST request
-      #if csrf.get_token(request) == request.POST['csrfmiddlewaretoken']:
-      marked_student = request.POST.getlist('user', None)
-      # delete un marked record if exits
-      TrainingAttend.objects.filter(training_id =training_id).exclude(student_id__in = marked_student).delete()
-      # insert new record if not exits
-      for record in marked_student:
-        language_id = request.POST.get(record)
-        training_attend = TrainingAttend.objects.filter(training_id =training_id, student_id = record)
-        if not training_attend.exists():
-          TrainingAttend.objects.create(training_id =training_id, student_id = record, language_id=language_id)
-        else:
-          training_attend = training_attend.first()
-          training_attend.language_id = language_id
-          training_attend.save()
-      #print marked_student
-    else:
-      TrainingAttend.objects.filter(training_id =training_id).delete()
-    self.training_request.update_participants_count()
-    return HttpResponseRedirect('/software-training/training-planner')
+      self.object = None
+      training_id = kwargs['tid']
+      marked_students = request.POST.getlist('user', None)
+
+      # If some selected, update accordingly
+      if marked_students:
+        # Delete unselected entries in ONE query
+        TrainingAttend.objects.filter(training_id=training_id).exclude(
+            student_id__in=marked_students
+        ).delete()
+            # Fetch all existing records for faster lookup (avoid `.exists()` loop)
+        existing_records = {
+          ta.student_id: ta
+          for ta in TrainingAttend.objects.filter(training_id=training_id)
+        }
+        new_objects = []
+        for student_id in marked_students:
+          language_id = request.POST.get(student_id)
+
+          if int(student_id) not in existing_records:
+            # create new object
+            new_objects.append(
+              TrainingAttend(
+                training_id=training_id,
+                student_id=student_id,
+                language_id=language_id
+              )
+            )
+          else:
+          # update only once
+            ta = existing_records[int(student_id)]
+            if ta.language_id != language_id:
+              ta.language_id = language_id
+              ta.save()
+
+            # Bulk create new rows in ONE query
+        if new_objects:
+          TrainingAttend.objects.bulk_create(new_objects)
+
+      else:
+        # No students marked: delete all attendance entries
+        TrainingAttend.objects.filter(training_id=training_id).delete()
+
+      # Update count
+      self.training_request.update_participants_count()
+
+      # Redirect
+      return HttpResponseRedirect('/software-training/training-planner')
+
+
 
 class TrainingCertificateListView(ListView):
   queryset = StudentMaster.objects.none()
