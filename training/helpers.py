@@ -267,6 +267,8 @@ def get_training_certi_text(event, user):
 
             This internship is officially approved and recognized by the receiving institution, 
             ensuring compliance with institutional norms and standards.
+            <img src='{settings.MEDIA_URL}sign_edupyramids.jpg' width='180' height='70'/><br/>
+            <b>Authorized Signatory</b><br/><br/>
         """
     else: # For other events
         line1 = f"""
@@ -320,8 +322,10 @@ def get_test_certi_text(event, user, teststatus):
             self-paced training on <b>{teststatus.fossid.foss}</b> under the supervision of <b>{event.instructor_name}</b>. <br/>
             This internship is officially approved and recognized by the receiving institution, \
             ensuring compliance with institutional norms and standards. <br/>
+            <img src='{settings.MEDIA_URL}sign_edupyramids.jpg' width='180' height='70'/><br/>
+            <b>Authorized Signatory</b><br/><br/>
             <b>Grade</b> : {str('{:.2f}'.format(teststatus.mdlgrade))}%
-            """
+        """
     else:
         credits = "<p><b>Credits:</b> "+str(teststatus.fossid.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(teststatus.mdlgrade))+"%</p>"
         text = f"This is to certify that <b>{participantname}</b> successfully passed a \
