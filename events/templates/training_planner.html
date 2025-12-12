@@ -153,8 +153,8 @@
     <li class="semester active-planner">
       <div class="semdesc">
         <b>{{ current_planner.get_semester }} (Current Semester)</b>
-        <span class="badge">completed : {{ current_planner.completed_training.count }}</span>
-        <span class="badge">Ongoing : {{ current_planner.ongoing_training.count }}</span>
+        <span class="badge">completed : {{ current_planner.completed_training|length }}</span>
+        <span class="badge">Ongoing : {{ current_planner.ongoing_training|length }}</span>
       </div>
       <div class="training-row"><br>
         {% if current_planner.training_requests %}
@@ -190,7 +190,7 @@
     <li class="semester future-planner"><br>
     <div class="semdesc">
       <b>{{ next_planner.get_semester }} (Next Semester)</b>
-      <span class="badge">Planned : {{ next_planner.ongoing_training.count }}</span>
+      <span class="badge">Planned : {{ next_planner.ongoing_training|length }}</span>
     </div>
     <div class="training-row"><br>
       {% if next_planner.training_requests %}
@@ -233,9 +233,9 @@
     <li class="semester">
       <div class="semdesc">
         <b>{{ record.get_semester }}</b>
-        <span class="badge">Total : {{ record.completed_training.count }}</span>
+        <span class="badge">Total : {{ record.completed_training|length }}</span>
       </div>
-      {% if record.training_requests %}
+      {% if record.requests %}
       <div class="training-row">
         <table class="table table-striped table-hover table-bordered">
           <tr>
@@ -246,7 +246,7 @@
             <th>Participant List Status</th>
             <th>Action</th>
           </tr>
-          {% for training in record.training_requests %}
+          {% for training in record.requests.all %}
           <tr  data-id="{{training.id}}" class="{% if training.status %}completed{% else %}ongoing{% endif %}">
             <td>{{ forloop.counter }}</td>
             <td>{{ training.sem_start_date }} </td>
