@@ -287,16 +287,16 @@ class TestForm(forms.ModelForm):
 
     def clean_workshop(self):
         super(TestForm, self).clean()
-        if 'test_category' in self.cleaned_data:
-            if self.cleaned_data['test_category'].id == 1 and self.cleaned_data['workshop'] == '':
-                raise forms.ValidationError("Workshop field is required.")
+        test_category = self.cleaned_data.get('test_category')
+        if test_category and test_category.id == 1 and self.cleaned_data.get('workshop', '') == '':
+            raise forms.ValidationError("Workshop field is required.")
 
     def clean_training(self):
         super(TestForm, self).clean()
-        if 'test_category' in self.cleaned_data:
-            if self.cleaned_data['test_category'].id == 2 and self.cleaned_data['training'] == '':
-                raise forms.ValidationError("Training field is required.")
-    test_category = forms.ModelChoiceField(queryset = TestCategory.objects.filter(status=True), required = False)
+        test_category = self.cleaned_data.get('test_category')
+        if test_category and test_category.id == 2 and self.cleaned_data.get('training', '') == '':
+            raise forms.ValidationError("Training field is required.")
+    test_category = forms.ModelChoiceField(queryset=TestCategory.objects.filter(status=True), required=False)
     tdate = forms.DateTimeField(required = True, error_messages = {'required':'Date field is required.'})
     #workshop = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Workshop field is required.'})
     training = forms.ChoiceField(choices = [('', '-- None --'),], widget=forms.Select(attrs = {}), required = False, error_messages = {'required':'Training field is required.'})
@@ -312,26 +312,50 @@ class TestForm(forms.ModelForm):
             del kwargs["instance"]
         super(TestForm, self).__init__(*args, **kwargs)
         
+        # Limit columns loaded for test category choices
+        self.fields['test_category'].queryset = TestCategory.objects.filter(status=True).only('id', 'name')
+        
         def get_trainings_for_organiser(user) :
-            trainings = TrainingRequest.test_training.filter(training_planner__academic = user.organiser.academic, training_planner__organiser=user.organiser)
+            trainings = TrainingRequest.test_training.filter(
+                training_planner__academic = user.organiser.academic, 
+                training_planner__organiser=user.organiser
+            ).select_related(
+                'course',
+                'course__foss',
+                'course__course',
+                'batch',
+                'batch__department',
+                'training_planner'
+            )
             return trainings
         
         if user:
-            trainings = get_trainings_for_organiser(user)
+            trainings = get_trainings_for_organiser(user).filter(course__test=True)
             trchoices = [('', '-------')]
             for training in trainings:
-                if training.course.test:
-                    trchoices.append((training.id, training.training_name()))
+                trchoices.append((training.id, training.training_name()))
 
             self.fields['training'].choices = trchoices
-            self.fields['invigilator'].queryset = Invigilator.objects.filter(academic = user.organiser.academic, status=1).exclude(user_id = user.id)
+            user_academic = user.organiser.academic
+            exclude_user_id = user.id
+            self.fields['invigilator'].queryset = (
+                Invigilator.objects.filter(academic=user_academic, status=1)
+                .exclude(user_id=exclude_user_id)
+                .select_related('user')
+            )
 
         if instance:
-            self.fields['invigilator'].queryset = Invigilator.objects.filter(academic  = instance.organiser.academic, status=1).exclude(user_id = user.id)
+            instance_academic = instance.organiser.academic
+            exclude_user_id = user.id if user else instance.organiser.user_id
+            self.fields['invigilator'].queryset = (
+                Invigilator.objects.filter(academic=instance_academic, status=1)
+                .exclude(user_id=exclude_user_id)
+                .select_related('user')
+            )
             self.fields['invigilator'].initial = instance.invigilator
             self.fields['test_category'].initial = instance.test_category
             self.fields['tdate'].initial = str(instance.tdate) + " " + str(instance.ttime)[0:5]
-            if instance.test_category.id == 2:
+            if instance.test_category_id == 2:
                 self.fields['training'].initial = instance.training_id
 
 class TrainingScanCopyForm(forms.Form):
