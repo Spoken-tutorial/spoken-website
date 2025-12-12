@@ -72,13 +72,13 @@
           <td>{{ record.academic }}</td>
           <td>{{ record.department }}</td>
           <td>{{ record.year }}</td>          
-          <td>{{ record.student_count }}</td>
+          <td> {{ record.batch_count}}</td>
           <td>
             {% if record.organiser.user == request.user %}
               <a href="{% url 'eventsv2:edit_batch' record.id %}">Edit</a> | 
             {% endif %}
             <a href="{% url 'eventsv2:list_student' record.id %}">Student List</a>
-            {% if record|can_add_student:request.user %}
+            {% if record.organiser.academic_id == user.organiser.academic_id %}
              | <a href="{% url 'eventsv2:add_student' record.id %}">Add Student</a>
             {% endif %} 
           </td>

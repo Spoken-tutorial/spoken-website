@@ -478,7 +478,10 @@ class StudentBatchListView(ListView):
   raw_get_data = None
   @method_decorator(group_required("Organiser"))
   def dispatch(self, *args, **kwargs):
-    self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id)
+    self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id).select_related(
+      'academic', 'department', 'organiser', 'organiser__user').annotate(
+        batch_count = Count('studentmasters')
+      )
     self.header = {
       1: SortableHeader('#', False),
       2: SortableHeader('batch_name', True, 'Batch Name'),
