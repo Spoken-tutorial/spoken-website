@@ -115,7 +115,12 @@ class TrainingPlannerListView(ListView):
       TrainingRequest.objects.exclude(Q(participants=0) & Q(status=1)).annotate(
         attend_count=Count('attendances'),
         student_master_count=Count('batch__studentmasters', distinct=True)
-      ).select_related('department', 'batch','course__course', 'course__foss')
+      ).select_related('department', 'batch','course__course', 'course__foss','course')
+    )
+    training_no_attend_qs = (
+      TrainingRequest.objects.filter(participants=0, status__in=[0,1]).annotate(
+        attend_count=Count('attendances')
+      ).select_related('department', 'batch','course__course', 'course__foss','course')
     )
     qs = TrainingPlanner.objects.filter(
         organiser_id = organiser.id,
@@ -125,8 +130,13 @@ class TrainingPlannerListView(ListView):
           'requests',
           queryset=training_qs,
           to_attr='prefetched_requests'
+        ),
+         Prefetch(
+          'requests',
+          queryset=training_no_attend_qs,
+          to_attr='prefetched_requests_no_attend'
         )
-      )
+      ).select_related('semester')
     return qs
   
   @method_decorator(group_required("Organiser"))
