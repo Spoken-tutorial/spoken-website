@@ -77,6 +77,7 @@ from donate.utils import send_transaction_email
 from .certificates import *
 
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
+import tracemalloc
 
 
 class JSONResponseMixin(object):
@@ -795,15 +796,19 @@ class TrainingCertificateListView(ListView):
 
   def dispatch(self, *args, **kwargs):
     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
-    if self.training_request.status:
-      self.queryset = self.training_request.trainingattend_set.all()
-    else:
-      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id, moved=False)
+    if self.training_request.status: # if status = 1, display students who attended the training
+      self.queryset = self.training_request.attendances.all().select_related('student', 'student__user')
+    else: # if training not completed show batch students
+      self.queryset = StudentMaster.objects.filter(
+        batch_id=self.training_request.batch_id, moved=False).select_related(
+          'student', 'student__user'
+        )
     return super(TrainingCertificateListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
     context = super(TrainingCertificateListView, self).get_context_data(**kwargs)
-    context['training'] = self.training_request
+    training = self.training_request
+    context['training'] = training
     languages = Language.objects.filter(
         id__in = FossAvailableForWorkshop.objects.filter(
           foss_id = self.training_request.course.foss_id
@@ -812,6 +817,7 @@ class TrainingCertificateListView(ListView):
     #language
     #for lang in languages:
     context['languages'] = languages
+    context['allow_download'] = (training.is_learners_allowed) and (training.cert_status == 1) and (training.status == 1)
     return context
 
 
