@@ -544,7 +544,7 @@ class StudentListView(ListView):
       ).values_list(
         'student'
       )
-    )
+    ).select_related('user')
     self.raw_get_data = self.request.GET.get('o', None)
     self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
     return super(StudentListView, self).dispatch(*args, **kwargs)
