@@ -77,7 +77,6 @@ from donate.utils import send_transaction_email
 from .certificates import *
 
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
-import tracemalloc
 
 
 class JSONResponseMixin(object):
