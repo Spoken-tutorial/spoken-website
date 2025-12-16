@@ -280,7 +280,7 @@ class StudentBatchCreateView(CreateView):
         ).values_list(
           'student_id'
         )
-      )
+      ).select_related('user')
       context['batch'] = self.batch
       context['existing_student'] = existing_student
     return context
