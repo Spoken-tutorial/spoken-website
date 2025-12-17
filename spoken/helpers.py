@@ -6,13 +6,20 @@ from django.contrib import messages
 from django.core.cache import cache
 from django.db.models import Q, Count
 
-from creation.models import TutorialSummaryCache, TutorialResource
+from creation.models import TutorialSummaryCache, TutorialResource, FossCategory
 from events.models import Testimonials
 from cms.models import Notification, Event
 from .config import CACHE_RANDOM_TUTORIALS, CACHE_TR_REC, CACHE_TESTIMONIALS, CACHE_NOTIFICATIONS, CACHE_EVENTS, CACHE_TUTORIALS
 
 def get_key(identifier, key_val):
     return f"{identifier}:{key_val.lower().strip().replace(' ','_')}"
+
+def is_valid_foss(foss):
+    if foss is None or foss == '': #for scenerio -- show all foss tutorials
+        is_valid = True
+    else:
+        is_valid = FossCategory.objects.filter(foss=foss).exists()
+    return is_valid
 
 # ---- 1. Random tutorials from TutorialSummaryCache ----
 def get_home_random_tutorials():
@@ -99,7 +106,6 @@ def get_tutorials_list(foss, lang):
     lang = lang.lower().strip()
     cache_key = get_key("tutorials_list", f"{foss}:{lang}")
     tutorials = cache.get(cache_key)
-    
     if tutorials is not None:
         return tutorials
     queryset = TutorialResource.objects.filter(status__in=[1,2], tutorial_detail__foss__show_on_homepage = 1).select_related('tutorial_detail__level', 'tutorial_detail__foss', 'language')
@@ -116,7 +122,6 @@ def get_tutorials_list(foss, lang):
 
 # ----  Foss Choice For Search Bar ----
 def get_foss_choice(show_on_homepage=1, lang=None):
-    
     if lang:
         cache_key = get_key("tutorial_search_foss", f"{show_on_homepage}:{lang}")
     else:
@@ -142,7 +147,7 @@ def get_foss_choice(show_on_homepage=1, lang=None):
 
 # ----  Language Choice For Search Bar ----
 def get_lang_choice(show_on_homepage=1, foss=None):
-    if foss:
+    if is_valid_foss(foss):
         cache_key = get_key("tutorial_search_lang", f"{show_on_homepage}:{foss}")
     else:
         cache_key = f"tutorial_search_lang:{show_on_homepage}:all"
