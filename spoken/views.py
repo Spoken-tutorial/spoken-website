@@ -153,7 +153,6 @@ def tutorial_search(request):
     context['collection'] = collection
     context['SCRIPT_URL'] = settings.SCRIPT_URL
     context['current_foss'] = foss_get
-    context['current_lang'] = language_get
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def list_videos(request):
