@@ -3321,7 +3321,7 @@ def reset_student_pwd(request):
 
         # 2. SECURITY FIX — ensure all batches belong to the selected school
         for b in batches:
-            if b.school_id != school.id:
+            if b.academic_id != school.id:
                 return HttpResponseForbidden("Invalid batch selected.")
 
         batch_ids = batches.values_list("id", flat=True)
