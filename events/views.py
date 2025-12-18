@@ -3299,6 +3299,87 @@ def reset_student_pwd(request):
             redirect_url = reverse('events:reset_student_pwd')
             return HttpResponseRedirect(redirect_url)
     return render(request,template,context)
+#             redirect_url = reverse('events:reset_student_pwd')
+#             return HttpResponseRedirect(redirect_url)
+#     return render(request,template,context)
+
+
+
+def reset_student_pwd(request):
+    
+    # 1. ROLE VALIDATION  -------------------------------
+    if not request.user.groups.filter(name="School Training Manager").exists():
+        return HttpResponseForbidden("You are not allowed to access this page.")
+    
+
+    template = 'events/templates/reset_student_password.html'
+    form = StudentPasswordResetForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+
+        school = form.cleaned_data['school']
+        batches = form.cleaned_data['batches']
+        new_password = form.cleaned_data['new_password']
+
+        # 2. SECURITY FIX — ensure all batches belong to the selected school
+        for b in batches:
+            if b.academic_id != school.id:
+                return HttpResponseForbidden("Invalid batch selected.")
+
+        batch_ids = batches.values_list("id", flat=True)
+
+        # 3. Get student IDs efficiently
+        student_ids = StudentMaster.objects.filter(
+            batch_id__in=batch_ids
+        ).values_list('student_id', flat=True)
+
+        # 4. Update Student table in bulk
+        Student.objects.filter(id__in=student_ids).update(
+            verified=1, 
+            error=0
+        )
+
+        # 5. Get User IDs linked to these students
+        user_ids = Student.objects.filter(
+            id__in=student_ids
+        ).values_list("user_id", flat=True)
+
+        # 6. Update Django User passwords in bulk
+        hashed_pwd = make_password(new_password)
+        User.objects.filter(id__in=user_ids).update(
+            password=hashed_pwd,
+            is_active=1
+        )
+
+        # 7. Fetch emails efficiently
+        emails = User.objects.filter(
+            id__in=user_ids
+        ).values_list("email", flat=True)
+
+        # 8. Update Moodle users password
+        MdlUser.objects.filter(email__in=emails).update(
+            password=encript_password(new_password)
+        )
+
+        # 9. Send email once (not inside loop)
+        send_bulk_student_reset_mail(
+            school=school,
+            batches=batches,
+            total_students=len(student_ids),
+            new_password=new_password,
+            user=request.user
+        )
+
+        messages.success(
+            request,
+            f"Password updated for {len(student_ids)} students."
+        )
+
+        return redirect("events:reset_student_pwd")
+
+    return render(request, template, {"form": form})
+
+
 
 
 def get_schools(request):
