@@ -3262,49 +3262,7 @@ def handover(request):
 
     return render(request, 'handover.html', context)
 
-def reset_student_pwd(request):
-    context = {}
-    template = 'events/templates/reset_student_password.html'
-    form = StudentPasswordResetForm()
-    context['form'] = form
-    
-    if request.method == "POST":
-        form = StudentPasswordResetForm(request.POST)
-        context['form'] = form
-        
-        if form.is_valid():
-            school = form.cleaned_data['school']
-            batches = form.cleaned_data['batches']
-            new_password = form.cleaned_data['new_password']
-            
-            batch_ids = [x.id for x in batches]
-            batches = StudentBatch.objects.filter(id__in=batch_ids)
-            student_ids = StudentMaster.objects.filter(batch__in=batches).values_list('student_id', flat=True)
-            students = Student.objects.filter(id__in=student_ids)
-            students.update(verified=1, error=0)
-            user_ids = [stu.user_id for stu in students]
-            users = User.objects.filter(id__in=user_ids)
-            new_hashed_pwd = make_password(new_password)
-            users.update(password=new_hashed_pwd, is_active=1)
-            emails = [user.email for user in users]
-            mdlUsers = MdlUser.objects.filter(email__in=emails)
-            mdlUsers.update(password=encript_password(new_password))
-            send_bulk_student_reset_mail(school,batches,users.count(), new_password,request.user)  
-            
-            # Add the success message
-            success_msg = "Password updated for {} students.".format(users.count())
-            messages.success(request, success_msg)
-            
-            
-            redirect_url = reverse('events:reset_student_pwd')
-            return HttpResponseRedirect(redirect_url)
-    return render(request,template,context)
-#             redirect_url = reverse('events:reset_student_pwd')
-#             return HttpResponseRedirect(redirect_url)
-#     return render(request,template,context)
-
-
-
+  
 def reset_student_pwd(request):
     
     # 1. ROLE VALIDATION  -------------------------------
