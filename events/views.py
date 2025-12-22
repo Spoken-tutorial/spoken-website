@@ -1853,6 +1853,7 @@ def training_participant_ceritificate(request, wid, participant_id):
 
     return response
 
+
 @login_required
 def test_request(request, role, rid = None):
     ''' Test request by organiser '''
@@ -1900,14 +1901,15 @@ def test_request(request, role, rid = None):
             errmsg = ""
             try:
                 t.save()
-            except IntegrityError:
+            except IntegrityError as e:
+                print(f"Test creation failed for {user.email}: {e}")
                 error = 1
                 errmsg = "Test already created"
                 prev_test = Test.objects.filter(organiser = t.organiser_id, academic = t.academic, foss = t.foss_id, tdate = t.tdate, ttime = t.ttime)
                 if prev_test:
                     messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
                 
-            if t and t.training_id:
+            if not error and t.id and t.training_id:
                 tras = TrainingAttend.objects.filter(training=t.training)
                 fossmdlcourse = get_fossmdlcourse(t.foss_id, fossmdlmap_id=t.training.fossmdlmap_id)
                 # try:
