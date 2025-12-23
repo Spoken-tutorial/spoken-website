@@ -697,27 +697,134 @@ class TrainingRequestCreateView(CreateView):
 #     form_class = self.get_form_class()
 #     form = self.get_form(form_class)
 
-#     if form.is_valid():
-#       return self.form_valid(form)
-#     else:
-#       return self.form_invalid(form)
-#     return HttpResponseRedirect('/')
+#     training = None
+
+#     @method_decorator(group_required("Organiser"))
+#     def dispatch(self, request, *args, **kwargs):
+#         try:
+#             self.training = TrainingRequest.objects.get(pk=kwargs.get('pk'))
+#         except TrainingRequest.DoesNotExist:
+#             messages.error(request, "Training request not found.")
+#             return HttpResponseRedirect('/software-training/training-planner/')
+
+#         if not self.training.can_edit():
+#             messages.error(
+#                 request,
+#                 "Training has attendance, edit is not permitted for training."
+#             )
+#             return HttpResponseRedirect('/software-training/training-planner/')
+
+#         return super(TrainingRequestEditView, self).dispatch(request, *args, **kwargs)
+
+#     def get_object(self, queryset=None):
+#         """
+#         Explicitly return the training instance being edited
+#         """
+#         return self.training
+
+#     def get_form_kwargs(self):
+#         """
+#         Bind the form to the existing instance
+#         """
+#         kwargs = super(TrainingRequestEditView, self).get_form_kwargs()
+#         kwargs['instance'] = self.training
+#         kwargs['training'] = self.training
+#         kwargs['user'] = self.request.user
+#         return kwargs
+
+#     def get_context_data(self, **kwargs):
+#         context = super(TrainingRequestEditView, self).get_context_data(**kwargs)
+#         context['training'] = self.training
+#         return context
+
+#     def form_valid(self, form):
+#         """
+#         Perform all business validations and update the record
+#         """
+#         try:
+#             selected_batch = form.cleaned_data['batch']
+#             selected_dept = form.cleaned_data['department']
+#             selected_course = form.cleaned_data['course']
+#             training_planner = self.training.training_planner
+
+#             # Check if batch has students
+#             if not selected_batch.student_count():
+#                 messages.error(
+#                     self.request,
+#                     'There is no student present in this batch.'
+#                 )
+#                 return self.form_invalid(form)
+
+#             # Check duplicate course in same semester
+#             if not (
+#                 selected_batch == self.training.batch and
+#                 selected_course == self.training.course
+#             ):
+#                 exists = TrainingRequest.objects.filter(
+#                     batch=selected_batch,
+#                     course=selected_course,
+#                     training_planner_id=training_planner.id
+#                 ).exists()
+
+#                 if exists:
+#                     messages.error(
+#                         self.request,
+#                         'This "%s" already taken/requested the selected "%s" course in current semester.'
+#                         % (selected_batch, selected_course)
+#                     )
+#                     return self.form_invalid(form)
+
+#             # Check semester capacity
+#             if not (
+#                 selected_batch == self.training.batch and
+#                 selected_dept == self.training.department
+#             ):
+#                 if training_planner.is_full(selected_dept.id, selected_batch.id):
+#                     messages.error(
+#                         self.request,
+#                         'No. of training requests exceeded for this semester.'
+#                     )
+#                     return self.form_invalid(form)
+
+#             # Batch–course compatibility
+#             if not selected_batch.is_foss_batch_acceptable(selected_course):
+#                 messages.error(
+#                     self.request,
+#                     'This student batch already taken the selected course.'
+#                 )
+#                 return self.form_invalid(form)
+
+#             # ---- Assign updated values ----
+#             training = self.training
+#             training.department = selected_dept
+#             training.batch = selected_batch
+#             training.course_type = form.cleaned_data['course_type']
+#             training.sem_start_date = form.cleaned_data['sem_start_date']
+#             training.training_start_date = form.cleaned_data['training_start_date']
+#             training.training_end_date = form.cleaned_data['training_end_date']
+#             training.course = selected_course
+#             training.fossmdlmap = form.cleaned_data.get('fossmdlmap')
+
+#             training.save()
+
+#         except Exception as e:
+#             # Log or raise during debugging
+#             messages.error(self.request, str(e))
+#             return self.form_invalid(form)
+
+#         return HttpResponseRedirect('/software-training/select-participants/')
 
 
 class TrainingRequestEditView(UpdateView):
     model = TrainingRequest
     form_class = TrainingRequestEditForm
-    template_name = "software_training/training_request_edit.html" 
+    template_name = "software_training/training_request_edit.html"
 
     training = None
 
     @method_decorator(group_required("Organiser"))
     def dispatch(self, request, *args, **kwargs):
-        try:
-            self.training = TrainingRequest.objects.get(pk=kwargs.get('pk'))
-        except TrainingRequest.DoesNotExist:
-            messages.error(request, "Training request not found.")
-            return HttpResponseRedirect('/software-training/training-planner/')
+        self.training = TrainingRequest.objects.get(pk=kwargs.get('pk'))
 
         if not self.training.can_edit():
             messages.error(
@@ -729,15 +836,9 @@ class TrainingRequestEditView(UpdateView):
         return super(TrainingRequestEditView, self).dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
-        """
-        Explicitly return the training instance being edited
-        """
         return self.training
 
     def get_form_kwargs(self):
-        """
-        Bind the form to the existing instance
-        """
         kwargs = super(TrainingRequestEditView, self).get_form_kwargs()
         kwargs['instance'] = self.training
         kwargs['training'] = self.training
@@ -750,81 +851,65 @@ class TrainingRequestEditView(UpdateView):
         return context
 
     def form_valid(self, form):
-        """
-        Perform all business validations and update the record
-        """
-        try:
-            selected_batch = form.cleaned_data['batch']
-            selected_dept = form.cleaned_data['department']
-            selected_course = form.cleaned_data['course']
-            training_planner = self.training.training_planner
+        selected_batch = form.cleaned_data['batch']
+        selected_dept = form.cleaned_data['department']
+        selected_course = form.cleaned_data['course']
+        training_planner = self.training.training_planner
 
-            # Check if batch has students
-            if not selected_batch.student_count():
-                messages.error(
-                    self.request,
-                    'There is no student present in this batch.'
-                )
-                return self.form_invalid(form)
-
-            # Check duplicate course in same semester
-            if not (
-                selected_batch == self.training.batch and
-                selected_course == self.training.course
-            ):
-                exists = TrainingRequest.objects.filter(
-                    batch=selected_batch,
-                    course=selected_course,
-                    training_planner_id=training_planner.id
-                ).exists()
-
-                if exists:
-                    messages.error(
-                        self.request,
-                        'This "%s" already taken/requested the selected "%s" course in current semester.'
-                        % (selected_batch, selected_course)
-                    )
-                    return self.form_invalid(form)
-
-            # Check semester capacity
-            if not (
-                selected_batch == self.training.batch and
-                selected_dept == self.training.department
-            ):
-                if training_planner.is_full(selected_dept.id, selected_batch.id):
-                    messages.error(
-                        self.request,
-                        'No. of training requests exceeded for this semester.'
-                    )
-                    return self.form_invalid(form)
-
-            # Batch–course compatibility
-            if not selected_batch.is_foss_batch_acceptable(selected_course):
-                messages.error(
-                    self.request,
-                    'This student batch already taken the selected course.'
-                )
-                return self.form_invalid(form)
-
-            # ---- Assign updated values ----
-            training = self.training
-            training.department = selected_dept
-            training.batch = selected_batch
-            training.course_type = form.cleaned_data['course_type']
-            training.sem_start_date = form.cleaned_data['sem_start_date']
-            training.training_start_date = form.cleaned_data['training_start_date']
-            training.training_end_date = form.cleaned_data['training_end_date']
-            training.course = selected_course
-            training.fossmdlmap = form.cleaned_data.get('fossmdlmap')
-
-            training.save()
-
-        except Exception as e:
-            # Log or raise during debugging
-            messages.error(self.request, str(e))
+        # --- validations ---
+        if not selected_batch.student_count():
+            messages.error(self.request, 'There is no student present in this batch.')
             return self.form_invalid(form)
 
+        if not (
+            selected_batch == self.training.batch and
+            selected_course == self.training.course
+        ):
+            if TrainingRequest.objects.filter(
+                batch=selected_batch,
+                course=selected_course,
+                training_planner_id=training_planner.id
+            ).exists():
+                messages.error(
+                    self.request,
+                    'This "%s" already taken/requested the selected "%s" course in current semester.'
+                    % (selected_batch, selected_course)
+                )
+                return self.form_invalid(form)
+
+        if not (
+            selected_batch == self.training.batch and
+            selected_dept == self.training.department
+        ):
+            if training_planner.is_full(selected_dept.id, selected_batch.id):
+                messages.error(
+                    self.request,
+                    'No. of training requests exceeded for this semester.'
+                )
+                return self.form_invalid(form)
+
+        if not selected_batch.is_foss_batch_acceptable(selected_course):
+            messages.error(
+                self.request,
+                'This student batch already taken the selected course.'
+            )
+            return self.form_invalid(form)
+
+        # --- update ---
+        training = self.training
+        training.department = selected_dept
+        training.batch = selected_batch
+        training.course_type = form.cleaned_data['course_type']
+        training.sem_start_date = form.cleaned_data['sem_start_date']
+        training.training_start_date = form.cleaned_data['training_start_date']
+        training.training_end_date = form.cleaned_data['training_end_date']
+        training.course = selected_course
+        training.fossmdlmap = form.cleaned_data.get('fossmdlmap')
+
+        training.save()
+
         return HttpResponseRedirect('/software-training/select-participants/')
+
 
 
 class TrainingAttendanceListView(ListView):
