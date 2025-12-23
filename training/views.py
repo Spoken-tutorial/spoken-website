@@ -290,7 +290,7 @@ def reg_success(request, user_type):
 
 			if source == 'deet':
 				form_data.source = source
-			if not event_type in ['PDP', 'CDP', 'HN']:
+			if not event_type in ['PDP', 'CDP']:
 				try:
 					college = request.POST.get('college')
 					form_data.college = AcademicCenter.objects.get(Q(institution_name=college))
