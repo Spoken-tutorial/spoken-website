@@ -107,3 +107,15 @@ static/spoken/embedding/
 
 *.sql
 env/
+
+
+# Local Python builds
+Python-3.6.15/
+Python-3.6.15.tgz
+
+# Static vendor files
+static/ckeditor/
+static/debug_toolbar/
+
+# Local management scripts
+training/management/
