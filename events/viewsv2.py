@@ -744,7 +744,7 @@ class TrainingAttendanceListView(ListView):
   def dispatch(self, *args, **kwargs):
     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
     if self.training_request.status == 1 and not self.training_request.participants == 0:
-      self.queryset = self.training_request.trainingattend_set.all()
+      self.queryset = self.training_request.attendances.all()
     else:
       self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id,student__verified__lte=3,student__error=0, moved=False)
     return super(TrainingAttendanceListView, self).dispatch(*args, **kwargs)

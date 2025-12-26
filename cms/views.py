@@ -63,7 +63,7 @@ def dispatcher(request, permalink=''):
 def get_confirmation_code():
     return ''.join(random.choice(string.ascii_uppercase + string.digits + string.ascii_lowercase) for x in range(7))
 
-def create_profile(user, phone, code=None):
+def create_profile(user, phone='', code=None):
     confirmation_code = code if code else get_confirmation_code()
     profile = Profile(user=user, confirmation_code=confirmation_code, phone=phone)
     profile.save()

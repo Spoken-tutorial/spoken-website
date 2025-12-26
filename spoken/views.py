@@ -722,7 +722,7 @@ def admin_testimonials(request):
 
 
 def news(request, cslug):
-#    try:
+    try:
         newstype = NewsType.objects.get(slug=cslug)
         collection = None
         latest = None
@@ -752,9 +752,9 @@ def news(request, cslug):
         context.update(csrf(request))
         return render(request, 'spoken/templates/news/index.html', context)
 
-    # except Exception as e:
-    #     print(e)
-    #     raise Http404('You are not allowed to view this page')
+    except Exception as e:
+        print(e)
+        return render(request, 'spoken/templates/news/index.html', {})
 
 def news_view(request, cslug, slug):
     try:
