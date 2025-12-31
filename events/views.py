@@ -1,4 +1,5 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
+from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from .models import StudentBatch
 from django.urls import reverse
 
@@ -19,7 +20,7 @@ from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 
 from django.http import Http404
@@ -2946,15 +2947,41 @@ def ajax_district_collage(request):
 
 @csrf_exempt
 def ajax_state_collage(request):
-    """ Ajax: Get the Colleges (Academic) based on District selected """
+
+    if request.method == 'GET':
+        return HttpResponse(
+            json.dumps('<option value="">---------</option>'),
+            content_type='application/json'
+        )
     if request.method == 'POST':
         state = request.POST.get('state')
-        collages = AcademicCenter.objects.filter(state=state).order_by('institution_name')
-        tmp = '<option value = None> --------- </option>'
-        if collages:
-            for i in collages:
-                tmp +='<option value='+str(i.id)+'>'+i.institution_name+', '+i.academic_code+'</option>'
-        return HttpResponse(json.dumps(tmp), content_type='application/json')
+
+        if not state:
+            return HttpResponse(
+                json.dumps('<option value="">---------</option>'),
+                content_type='application/json'
+            )
+
+        collages = (
+            AcademicCenter.objects
+            .filter(state_id=int(state))
+            .order_by('institution_name')
+        )
+
+        options = ['<option value="">---------</option>']
+
+        for clg in collages:
+            options.append(
+                f'<option value="{clg.id}">'
+                f'{clg.institution_name}, {clg.academic_code}'
+                f'</option>'
+            )
+        return HttpResponse(
+            json.dumps(''.join(options)),
+            content_type='application/json'
+        )
+    return HttpResponse(status=405)
+
 
 
 @csrf_exempt
