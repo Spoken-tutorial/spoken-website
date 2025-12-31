@@ -29,6 +29,8 @@ from django.template.context_processors import csrf
 
 from donate.models import Payee
 
+from django.core.cache import cache
+
 def dispatcher(request, permalink=''):
     if permalink == '':
         return HttpResponseRedirect('/')
@@ -504,3 +506,35 @@ def verify_email(request):
     else:
       messages.error(request, 'Invalid Email ID', extra_tags='error')
   return render(request, "cms/templates/verify_email.html", context)
+
+
+@login_required
+def manage_cache(request):
+
+    if not request.user.groups.filter(name='Technical-Team').exists():
+        raise PermissionDenied('You are not allowed to view this page!')
+
+    context = {}
+    status_template = 'cms/templates/manage_cache.html'
+    
+    if request.method == 'POST':
+        key = request.POST.get('cache_key', None)
+        deletion_type = request.POST.get('type', None)
+
+        if deletion_type is not None:
+            if deletion_type == 'single_key' and key is not None: # handle single key deletion
+                val = cache.get(key)
+                if val is not None:
+                    cache.delete(key)
+                    messages.success(request, f"key with name - '{key}' is deleted successfully")
+                else:
+                    messages.warning(request, f"There is no key with name : {key}")
+            elif deletion_type == 'all_keys': # handle all memcache clear
+                try:
+                    cache.clear()
+                    messages.success(request, f"memcache cleared successfully")
+                except Exception as e:
+                    messages.error(request, f"An error occurred while clearing cache: {e}")
+                    print(f"cache error -- {e}")
+        
+    return render(request, status_template, context=context) # return to payment page site

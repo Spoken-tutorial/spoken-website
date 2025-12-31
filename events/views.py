@@ -264,6 +264,9 @@ def is_invigilator(user):
 def is_school_training_manager(user):
     return user.groups.filter(name="School Training Manager").exists()
 
+def is_tech_team(user):
+    return user.groups.filter(name="Technical-Team").exists()
+
 def get_page(resource, page, limit=20):
     paginator = Paginator(resource, limit)
     if page is None:

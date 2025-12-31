@@ -295,6 +295,18 @@
                     </div>
                 {% endif %}
 
+                {% if user|is_tech_team %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Manage Cache</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li><a href="{% url 'cms:manage_cache' %}">Reset Student Password</a></li>
+                            </ul>                            
+                        </div>
+                    </div>
+                {% endif %}
+
+
             </div>
         </div>
     </div>
