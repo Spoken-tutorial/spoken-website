@@ -582,7 +582,7 @@ class ParticipantCreateView(CreateView):
 					try:
 						Participant.objects.create(
 							name = row[0]+" "+row[1], 
-							email = row[2].strip(), 
+							email = user.email, 
 							gender = row[3], 
 							amount = row[4], 
 							event = self.event, 
@@ -610,18 +610,36 @@ class ParticipantCreateView(CreateView):
 
 
 	def get_create_user(self, row):
+		email = (row[2] or "").strip().lower()
+		first = (row[0] or "").strip()
+		last = (row[1] or "").strip()
+		# 1) Try to find existing user by email OR username
+		user = User.objects.filter(Q(email=email) | Q(username=email)).first()
+		if user:
+			if user.username != user.email:
+				user.username = user.email #ILW moodle allows login with only email as valid credential username
+				try:
+					user.save()
+				except IntegrityError as e:
+					print(f"ILW error : {e}")
+					#user with above username already exists -- handle such cases manually, so returning None
+					return None
+			return user
+		
+		# 2) Create new user
+		password = row[0]+'@ST'+str(random.random()).split('.')[1][:5]
 		try:
-			return User.objects.get(email=row[2].strip())
-		except User.DoesNotExist:
-			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
-			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
-			# confirmation_code = get_confirmation_code()
+			user = User(username=email, email=email, first_name=first, last_name=last)
+			user.set_password(password)
 			confirmation_code = send_registration_confirmation(user)
 			if confirmation_code:
 				user.save()
 				create_profile(user, '', confirmation_code)
 				return user
-			return None
+		except IntegrityError:
+			# Someone else created it between our check and insert
+			return User.objects.filter(Q(email=email) | Q(username=email)).first()
+		return None
 
 
 def mark_reg_approval(pid, eventid):
