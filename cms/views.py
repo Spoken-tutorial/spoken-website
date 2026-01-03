@@ -4,6 +4,13 @@ from builtins import range
 import random
 import string
 
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+from django.middleware.csrf import get_token as csrf
+
+from cms.models import Profile
+from cms.forms import ChangePasswordForm
+
 # Third Party Stuff
 from django.conf import settings
 from django.contrib import messages, auth
@@ -271,7 +278,8 @@ def account_logout(request):
 def account_profile(request, username):
     user = request.user
     try:
-      profile = Profile.objects.get(user_id=user.id)
+    #   profile = Profile.objects.get(user_id=user.id)
+        profile = Profile.objects.filter(user_id=user.id).first()
     except:
       profile = create_profile(user)
     old_file_path = settings.MEDIA_ROOT + str(profile.picture)
@@ -319,7 +327,8 @@ def account_profile(request, username):
     else:
         context = {}
         context.update(csrf(request))
-        instance = Profile.objects.get(user_id=user.id)
+        # instance = Profile.objects.get(user_id=user.id)
+        instance = Profile.objects.filter(user_id=user.id).first()
         context['form'] = ProfileForm(user, instance = instance)
         return render(request, 'cms/templates/profile.html', context)
 
@@ -331,7 +340,8 @@ def account_view_profile(request, username):
     user = User.objects.get(username = username)
     profile = None
     try:
-      profile = Profile.objects.get(user = user)
+    #   profile = Profile.objects.get(user = user)
+        profile = Profile.objects.filter(user=user).first()
     except:
       profile = create_profile(user)
 
@@ -425,45 +435,107 @@ IIT Bombay.
     return render(request, 'cms/templates/password_reset.html', context)
 
 
-#@login_required
-def change_password(request):
-    # chacking uselogin
-    pcode = request.GET.get('auto', False)
-    username = request.GET.get('username', False)
-    nextUrl = request.GET.get('next', False)
+# #@login_required
+# def change_password(request):
+#     # chacking uselogin
+#     pcode = request.GET.get('auto', False)
+#     username = request.GET.get('username', False)
+#     nextUrl = request.GET.get('next', False)
 
-    # check pcode in profile page
-    if pcode and username and nextUrl:
-        user = User.objects.get(username=username)
-        profile = Profile.objects.get(user=user)
-        if profile.confirmation_code == pcode:
-            user.backend='django.contrib.auth.backends.ModelBackend'
-            login(request,user)
+#     # check pcode in profile page
+#     if pcode and username and nextUrl:
+#         user = User.objects.get(username=username)
+#         profile = Profile.objects.get(user=user)
+#         print("=====================",profile)
+#         if profile.confirmation_code == pcode:
+#             user.backend='django.contrib.auth.backends.ModelBackend'
+#             login(request,user)
+
+#     if request.user.is_anonymous():
+#         return HttpResponseRedirect('/accounts/login/?next=/accounts/change-password')
+
+#     context = {}
+#     form = ChangePasswordForm()
+#     if request.method == "POST":
+#         form = ChangePasswordForm(request.POST)
+#         if form.is_valid():
+#             profile = Profile.objects.get(user_id = form.cleaned_data['userid'], confirmation_code = form.cleaned_data['code'])
+#             user = profile.user
+#             user.set_password(form.cleaned_data['new_password'])
+#             user.save()
+#             # change if any mdl user pass too
+#             from mdldjango.views import changeMdlUserPass
+#             changeMdlUserPass(user.email, form.cleaned_data['new_password'])
+
+#             if nextUrl:
+#                 return HttpResponseRedirect(nextUrl.split("?", 1)[0])
+
+#             messages.success(request, "Your account password has been updated successfully!")
+#             return HttpResponseRedirect("/accounts/view-profile/" + user.username)
+#     context['form'] = form
+#     context.update(csrf(request))
+#     return render(request, 'cms/templates/change_password.html', context)
+
+
+
+def change_password(request):
+    pcode = request.GET.get('auto')
+    username = request.GET.get('username')
+    nextUrl = request.GET.get('next')
+
+    profile = None
+
+    if pcode and username:
+        try:
+            user = User.objects.get(username=username)
+            profile = Profile.objects.filter(user=user,confirmation_code=pcode).order_by('id').first()
+
+            if profile:
+                user.backend = 'django.contrib.auth.backends.ModelBackend'
+                login(request, user)
+
+        except User.DoesNotExist:
+            pass
 
     if request.user.is_anonymous():
-        return HttpResponseRedirect('/accounts/login/?next=/accounts/change-password')
+        return HttpResponseRedirect('/accounts/login/?next=/accounts/change-password/')
 
-    context = {}
+    if not profile:
+        profile = (Profile.objects.filter(user=request.user).order_by('id').first())
+
+    if not profile:
+        messages.error(request, "Profile not found.")
+        return HttpResponseRedirect('/accounts/login/')
+
     form = ChangePasswordForm()
+
     if request.method == "POST":
         form = ChangePasswordForm(request.POST)
         if form.is_valid():
-            profile = Profile.objects.get(user_id = form.cleaned_data['userid'], confirmation_code = form.cleaned_data['code'])
+            profile = Profile.objects.get(user_id=form.cleaned_data['userid'],confirmation_code=form.cleaned_data['code'])
+
             user = profile.user
             user.set_password(form.cleaned_data['new_password'])
             user.save()
-            # change if any mdl user pass too
+
             from mdldjango.views import changeMdlUserPass
             changeMdlUserPass(user.email, form.cleaned_data['new_password'])
 
             if nextUrl:
                 return HttpResponseRedirect(nextUrl.split("?", 1)[0])
 
-            messages.success(request, "Your account password has been updated successfully!")
+            messages.success(request,"Your account password has been updated successfully!")
             return HttpResponseRedirect("/accounts/view-profile/" + user.username)
-    context['form'] = form
+
+    context = {
+        'form': form,
+        'profile': profile,
+        'nextUrl': nextUrl,
+    }
     context.update(csrf(request))
-    return render(request, 'cms/templates/change_password.html', context)
+
+    return render(request,'cms/templates/change_password.html',context)
+
 
 
 def confirm_student(request, token):
