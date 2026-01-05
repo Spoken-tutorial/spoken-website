@@ -1,0 +1,215 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} {{ model }} Training Manager Dashboard {% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.fancybox.css' %}" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block heading %} <i class="fa fa-list-ul"></i> {{ model }}  Transaction Manager Dashboard  {% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+    <div class= 'filters row well' >
+        <form action=""  method="post" class='form-horizontal'>{% csrf_token %}
+            <div class="col-lg-4 col-md-4 col-sm-4">
+                      <div class="form-group">
+                        <label for="id_state" class="col-sm-3 control-label">State</label>
+                        <div class="col-sm-9">
+                            {% render_field form.state class+="form-control state" tabindex="1" data-placeholder="Choose State" %}
+                            {{ form.state.errors }}
+                        </div>
+                    </div>
+              
+                <div class="form-group">
+                        <label for="id_college" class="col-sm-3 control-label">Institution <span class='ajax-refresh ajax-refresh-institution'> </span></label>
+                        <div class="col-sm-9">
+                            {% render_field form.college class+="form-control college" tabindex="1" data-placeholder="Choose Institution" %}
+                            
+                        </div>
+                    </div>
+              </div>
+
+              <div class="col-lg-4 col-md-3 col-sm-4">
+
+
+                <div class="form-group">
+                    <label for="id_fdate" class="col-sm-3 control-label">Date From</label>
+                    <div class="col-sm-9">
+                        {% render_field form.fdate class+="form-control fdate date" tabindex="1" %}
+                        {{ form.fdate.errors }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="id_tdate" class="col-sm-3 control-label">To</label>
+                    <div class="col-sm-9">
+                        {% render_field form.tdate class+="form-control tdate date" tabindex="1" %}
+                        {{ form.tdate.errors }}
+                    </div>
+                </div>
+
+              
+
+
+
+              <div class="form-group">
+                  <div class="col-sm-offset-1">
+                     <input class="btn btn-success" type="submit" value="Filter" />
+                     <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+                  </div>
+               </div>
+              </div>
+
+                <div class="col-lg-4 col-md-3 col-sm-4">
+                <div class="form-group ">
+                  <label for="id_status" class="col-sm-3 control-label status">Status</label>
+                  <div class="col-sm-9">
+                  {% render_field form.choices class+="form-control choices" tabindex="1" %}
+                    {{ form.choices.errors }}
+                  </div>
+              </div>
+
+                  <div class="form-group" id="total">
+                    <label for="id_tdate" class="col-sm-3 control-label">Total</label>
+                    <div class="col-sm-9" >
+                        <input class="form-control" type="text" disabled value={{total.amount__sum}}>
+                    </div>
+                  </div>
+
+
+              </div>
+              </div>
+
+            </div>
+            </form>
+            </div>
+        
+        <div>
+    <table class="table table-bordered table-hover">
+    <tr class="active">
+      <th>User</th>
+      <th>User Id</th>
+      <th>Academic Year</th>
+      <th>College Name</th>
+      <th>College Id</th>
+      <th>Completion Date &amp; Time</th>
+      <th >Amount</th>
+      <th>Transaction ID</th>
+      <th>Reference No</th>
+      <th>Status</th>
+    </tr>
+
+      
+
+      {%for a_academic in transactiondetails%}
+      <tr>
+                        <td><a href="/accounts/view-profile/{{ a_academic.userId }}" target="_blank">{{ a_academic.userId }}</a></td>
+                        <td>{{ a_academic.userId_id }}</td>
+                        <td>{{ a_academic.paymentdetail.academic_year }}</td>
+                        <td>{{ a_academic.paymentdetail.academic_id.institution_name}}</td>
+                        <td>{{ a_academic.paymentdetail.academic_id.academic_code}}</td>
+                        <td>{{ a_academic.created }}</td>
+                        <td>{{a_academic.amount}}</td>
+                        <td>{{a_academic.transId}}</td>
+                        <td>{{a_academic.refNo}}</td>
+                        <td>{{a_academic.msg}}</td>
+                      </tr>
+      {%endfor%}
+
+      {% for a_academic in ongoing_details %}
+      <tr>
+                        <td><a href="/accounts/view-profile/{{ a_academic.user }}" target="_blank">{{ a_academic.user }}</a></td>
+                        <td>{{ a_academic.user_id }}</td>
+                        <td>{{ a_academic.academic_year }}</td>
+                        <td>{{ a_academic.academic_id.institution_name }}</td>
+                        <td>{{ a_academic.academic_id.academic_code }}</td>
+                        <td>{{ a_academic.created }}</td>
+                        <td>{{ a_academic.amount }}</td>
+                        <td><i>Not Generated</i></td>
+                        <td><i>Not Generated</i></td>
+                        <td>Ongoing</td>
+                      </tr>
+      {%endfor%}
+      
+    </table>
+  </div>
+
+    
+{% endblock %}
+{% block compressjsblock %}
+    
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+    
+    <script type="text/javascript">
+        
+
+        $(document).ready(function(){
+        
+        $status = $(".choices");
+        if ($status.val()!='R') {
+          $("#total").hide();
+        }
+        $status.change(function() {
+          var status = $(this).val();
+          if (status=='R') {
+          $("#spanner1").css("display", "none");
+          $("#spanner2").css("display", "none");
+          $("#spanner3").css("display", "none");
+          $("#total").show();
+          }
+          else{
+           $("#total").hide();
+           $("#spanner1").css("display", "block");
+           $("#spanner2").css("display", "block");
+           $("#spanner3").css("display", "block");
+          }
+          
+        });
+
+            $('.date').datetimepicker({
+            lang:'en',
+            timepicker:false,
+            format:'Y-m-d',
+            formatDate:'Y/m/d',
+            maxDate:'+1970/06/31', // tommorow date with in 6 month
+        });
+
+        $acstate = $('.state');
+        
+        //$ac_district = $(".district");
+        $college = $(".college");
+        
+        $acstate.change(function() {
+            var state = $(this).val();
+            if(state){
+                $.ajax({
+                    url: "/software-training/ajax-state-collage/",
+                    type: "POST",
+                    data: {
+                        state : state
+                    },
+                    beforeSend: function() {
+                        $('.ajax-refresh-institution').show();
+                    },
+                    success: function(data) {
+                        if(data){
+                            $college.html(data);
+                            $college.removeAttr("disabled");
+                            $('.ajax-refresh-institution').hide();
+                        } else{
+                            $college.attr("disabled", "disabled");
+                            $('.ajax-refresh-institution').hide();
+                        }
+                    }
+                });
+            }
+        });
+
+
+
+        });
+        
+    </script>
+{% endblock %}

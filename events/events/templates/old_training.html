@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Old Training{% endblock %}
+{% block heading %}<i class="home-page-title-i">Old Training List</i><a href="/software-training" class='pull-right go-back'>Dashboard</a>{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+{% load cmsdata %}
+{% load student %}
+  <div>
+    <center>
+      <a class="btn btn-primary" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i> Help</a>
+    </center><br><br>
+  </div>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+           <ul>
+              <li>Help Text!</li>
+           </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if object_list %}
+    <table class="paleblue table">
+      {% get_sortable_header header ordering request.GET %}
+      {% for record in object_list %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ record.academic }}</td>
+          <td>{{ record.academic.state }}</td>
+          <td>{{ record.foss }}</td>
+          <td>{{ record.tdate }}</td>
+          <td>WC-{{record.id}}</td>
+          <td>
+              | <a href="{% url 'events:old_list_student' record.id %}">View Participant</a> |
+              <a href="{% url 'events:old_training_close' record.id %}">Mark as completed</a> |
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class='no-record'>No record found!</p>
+  {% endif %}
+  
+{% endblock %}

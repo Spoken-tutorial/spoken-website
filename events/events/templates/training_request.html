@@ -1,0 +1,613 @@
+<!--This page gives interface to raise the training request -->
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Training Planner Form{% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block cssblock %}
+  <style>
+  .alert-success{
+  display:none;
+  }
+  </style>
+{% endblock %}
+{% block heading %}
+  <i class="home-page-title-i">Training Planner Form</i>
+  <a class="btn btn-primary pull-right" data-toggle="modal" data-target="#myModal"><i class="fa fa-2 fa-question"></i>  Instructions for STPF</a>
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+{% for message in messages %}
+{% if message.tags == 'success' %}
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" style="color:green;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+         {{ message|safe }}
+      </div>
+      <div class="modal-footer"><a class="btn btn-primary" href="{% url 'eventsv2:training_planner' %}">OK</a></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endfor %}
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-body">
+                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                 <ul>
+                    <li>For detailed instruction on Step 2 click here : <b> Semester Training Planner Form:</b> <a href ="  http://process.spoken-tutorial.org/images/b/bc/Semester_Training_Planner.pdf" target="_blank">  http://process.spoken-tutorial.org/images/b/bc/Semester_Training_Planner.pdf</a></li>
+                    <li>It is best to select Software courses mapped to relevant courses being taught during this semester in the department.</li>
+                    <li>You can also select Software courses which are unmapped with courses being taught during this semester in the department.</li>
+                    <li>Unmapped Software courses can be planned during designated computer lab hours present in the time table during this semester.</li>
+                    <li><b>Please Note -</b> Not more than 2 courses with assessment test can be requested in one semester.</li>
+                    <li>Test are available for the following FOSS : <br><b>Applications of GeoGebra, Arduino, Avogadro, BASH, Biopython, Blender, C and C++, Advanced C++, CellDesigner, Chemcollective Virtual Labs, Drupal, DWSIM, eSim, Expeyes, GchemPaint, GeoGebra 5.04, gedit Text Editor, GIMP, GIT, Inkscape, Introduction to Computers, Java, Java Business Application, Joomla, Jmol Application, Kturtle, LaTeX, LibreOffice Suite, Linux & Ubuntu, Linux AWK, OpenFOAM, OpenModelica, Perl, PHP & MySQL, Python 3.4.3, QCAD, RDBMS, Ruby, Scilab, Single Board Heater System, UCSF Chimera</b>.</li>
+
+                    <!-- <li>See link for suggestions: ( Wiki  Time Table )</li> -->
+                 </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% if form %}
+          <div class="row well">
+              <div class='col-sm-8'>
+                 <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">
+                  <div id="debug-test" style="background: lightblue; padding: 10px; margin: 10px 0;">
+    JavaScript Test: <span id="test-result">Not loaded</span>
+</div>
+    {% csrf_token %}
+    {% render_field form.training_planner type="hidden" value=training_planner_id class+="training-planner" %}
+    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+
+    {% if form.non_field_errors %}
+        <ul>
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label'>Department</label>
+            {% render_field form.department class+="form-control department" tabindex="1" %}
+            {{ form.department.errors }}
+        </div>
+    </div>
+
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label'>Batch</label>
+            {% render_field form.batch class+="form-control batch" tabindex="1" %}
+            {{ form.batch.errors }}
+        </div>
+    </div>
+
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label'>Training Type</label>
+            {% render_field form.course_type class+="form-control course_type" tabindex="1" %}
+            {{ form.course_type.errors }}
+        </div>
+    </div>
+
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label' id="sem_start_date">Semester Start Date</label>
+            {% render_field form.sem_start_date class+="form-control date sem_start_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+            {{ form.sem_start_date.errors }}
+            <small>Odd Semester July to Aug, Even Semester Jan to Feb</small>
+        </div>
+    </div>
+
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label' id="training_start_date">Training Start Date</label>
+            {% render_field form.training_start_date class+="form-control training_start_date training_start_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+            {{ form.training_start_date.errors }}
+            <small>Odd Semester July to Dec, Even Semester Jan to June</small>
+        </div>
+    </div>
+
+    <div class='form-row'>
+        <div class='col-xs-12 form-group required'>
+            <label class='control-label' id="training_end_date">Training End Date</label>
+            {% render_field form.training_end_date class+="form-control training_end_date training_end_date" tabindex="1" readonly='true' style="cursor:pointer"%}
+            {{ form.training_end_date.errors }}
+            <small>Odd Semester July to Dec, Even Semester Jan to June</small>
+        </div>
+    </div>
+
+<div class='form-row'>
+    <div id="id_training_type" name="training_type" class='col-xs-12 form-group required'>
+        <label class='control-label'>Foss Category</label>
+        {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
+        {{ form.foss_category.errors }}
+        <small>No certificates will be provided for <b>"Foss available only for Training"</b></small>
+    </div>
+</div>
+
+
+<div class='form-row language-level-fields' style="display:none;">
+  <div class='col-xs-6 form-group required'>
+    <label class='control-label'>Language</label>
+    {% render_field form.language class+="form-control language" tabindex="1" %}
+    {{ form.language.errors }}
+    <small>Default: English</small>
+  </div>
+  <div class='col-xs-6 form-group required' style= "margin-left: 20px;">
+    <label class='control-label'>Level</label>
+    {% render_field form.level class+="form-control level" tabindex="1" %}
+    {{ form.level.errors }}
+    <small>Default: Advanced</small>
+  </div>
+</div>
+
+
+<!-- Language and Level Fields -->
+<!-- <div class='form-row language-level-fields' style="display:none;">
+  <div class='col-xs-6 form-group required'>
+    <label class='control-label'>Language</label>
+    {% render_field form.language class+="form-control language" tabindex="1" %}
+    {{ form.language.errors }}
+    <small>Default: English</small>
+  </div>
+  <div class='col-xs-6 form-group required' style= "margin-left: 20px;">
+    <label class='control-label'>Level</label>
+    {% render_field form.level class+="form-control level" tabindex="1" %}
+    {{ form.level.errors }}
+    <small>Default: Advanced</small>
+  </div>
+</div> -->
+
+
+<div class='form-row'>
+    <div class='col-xs-12 form-group required'>
+        <label class='control-label' id="course_label">Software Course</label>
+        {% render_field form.course class+="form-control course" tabindex="1" %}
+        {{ form.course.errors }}
+    </div>
+</div>
+
+
+    <div class="form-group">
+        <div class="col-xs-12 form-group">
+            <input class="btn btn-primary" type="submit" value="Submit" />
+            <a class="btn btn-danger" href="{% url 'eventsv2:training_planner' %}">Cancel</a>
+        </div>
+    </div>
+
+    {% endwith %}
+</form>
+
+              </div>
+          </div>
+        {% endif %}
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+    <script src="{% static 'spoken/js/jquery.cookie.js' %}"></script>
+{% endblock %}
+{% block jsblock %}
+<script>
+  $(window).load(function(){
+   if ($.cookie('modal_status') != '1') {
+    //show popup here
+    $('#myModal').modal('show');
+    $.cookie('modal_status', '1',{ expires: null}); }
+  });
+
+    var td = new Date();
+    var y=td.getFullYear();
+    var sem_type = "{{tp}}";
+    var current_sem = "{{tp.is_current_planner}}";
+    var success="{{messages}}";
+    var mind = 0 ; var maxd = 0;
+    var tr_mind = 0 ; var tr_maxd = 0;
+    $(document).ready(function(){
+      if (success!="")
+      {
+         $('#successModal').modal({
+          backdrop: 'static',
+          keyboard: false,
+       });
+        $('#successModal').modal('show');
+      }
+
+      if($('.department').val() == '') {
+        $('.course_type').val('');
+        $('.course_type').prop('disabled', 'disabled');
+        // $('.course').html('<option>---------</option>');
+        // $('.course').prop('disabled', 'disabled');
+      }
+
+
+      course_type = $(this).val();
+      department = $('.department').val();
+      batch = $('.batch').val(); 
+      $('.sem_start_date').val('');
+
+
+      if(sem_type == "Odd")
+      {
+        if(current_sem == "True")
+        {
+          mind = y+'/07/01';
+          maxd = y+'/09/30';
+        }
+        else if(current_sem == "False")
+        {
+          mind = y+'/07/01';
+          maxd = y+'/09/30';
+        }
+        tr_mind = y+'/07/01';
+        tr_maxd = y+'/12/31';
+      }
+      else if(sem_type == "Even")
+      {
+        if(current_sem == "True")
+        {
+          mind = y+'/01/01';
+          maxd = y+'/03/30';
+          tr_mind = y+'/01/01';
+          tr_maxd = y+'/06/30';
+        }
+        else if(current_sem == "False")
+        {
+          mind = (y+1)+'/01/01';
+          maxd = (y+1)+'/03/30';
+          tr_mind = (y+1)+'/01/01';
+          tr_maxd = (y+1)+'/06/30';
+        }
+      }
+      $('.date').datetimepicker({
+        onGenerate:function( ct ){
+            $(this).find('.xdsoft_day_of_week0')
+                .addClass('xdsoft_disabled');
+        },
+        lang:'en',
+        format:'Y-m-d',
+        formatDate:'Y/m/d',
+        minDate:mind,
+        weekends:[],
+        maxDate:maxd,
+        step:5,
+        timepicker:false,
+      });
+
+      $('.training_start_date').datetimepicker({
+        onGenerate:function( ct ){
+            $(this).find('.xdsoft_day_of_week0')
+                .addClass('xdsoft_disabled');
+        },
+        lang:'en',
+        format:'Y-m-d',
+        formatDate:'Y/m/d',
+        minDate:tr_mind,
+        weekends:[],
+        maxDate:tr_maxd,
+        step:5,
+        timepicker:false,
+      });
+
+      $('.training_end_date').datetimepicker({
+        onGenerate:function( ct ){
+            $(this).find('.xdsoft_day_of_week0')
+                .addClass('xdsoft_disabled');
+        },
+        lang:'en',
+        format:'Y-m-d',
+        formatDate:'Y/m/d',
+        minDate:tr_mind,
+        weekends:[],
+        maxDate:tr_maxd,
+        step:5,
+        timepicker:false,
+      });
+
+
+      $('.batch').on('change', function() {
+        batch = $(this).val();
+        department = $('.department').val();
+        $('.course_type').val('');
+        $('.course_type').prop('disabled', 'disabled');
+        if(department != '' && batch != '') {
+          $.ajax({
+            url: "/software-training/get-batch-course-status/",
+            type: "POST",
+            data: {
+              department: department,
+              batch: batch,
+              training_planner: $('.training-planner').val()
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data && data['batch_status']) {
+                $('.course_type').prop('disabled', false);
+               } else {
+                $('.batch').val('');
+                alert('No. of training requests for selected batch exceeded.');
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+        }
+
+      });
+      $('.department').on('change', function(){
+        department = $(this).val();
+        department_name = $(this).children("option").filter(":selected").text()
+        $('.batch').html('<option>---------</option>');
+        $('.course_type').val('');
+        $('.course_type').prop('disabled', 'disabled');
+        if(department != ''){
+          $.ajax({
+            url: "/software-training/get-batch-option/",
+            type: "POST",
+            data: {
+              department: department,
+            },
+            beforeSend: function() {
+              //$('.ajax-refresh-language').show();
+            },
+            success: function(data) {
+              // loading languages
+              if(data && data['batch_option']) {
+                  $('.batch').html(data['batch_option']);
+              }
+              //$('.ajax-refresh-language').hide();
+            }
+          });
+        }
+      });
+      $('.course').html('<option>---------</option>');
+
+     // When FOSS category changes
+
+     $('.foss_category').on('change', function() {
+  var foss_category = $(this).val();
+  // console.log('FOSS Category changed:', foss_category);
+  
+  $('#course_label').html("Course list loading...");
+  $('.language-level-fields').hide(); // Hide by default
+  
+  if (foss_category != '') {
+    // Fetch course options
+    $.ajax({
+      url: "/software-training/get-course-option/",
+      type: "POST",
+      data: {
+        foss_category: foss_category
+      },
+      success: function(data) {
+        $('#course_label').html('Software Course');
+        if (data && data['course_option']) {
+          $('.course').html(data['course_option']);
+        }
+        
+        // Show language/level only for "Training and Test" (value '1')
+        if (foss_category == '1') {
+          // console.log('Showing language/level fields for Training and Test');
+          // Load language/level options when category is Training and Test
+          var course_id = $('.course').val();
+          loadLanguageLevelOptions(foss_category, course_id);
+        } else {
+          // console.log('Hiding language/level fields');
+          $('.language-level-fields').hide();
+        }
+      },
+      error: function() {
+        $('.language-level-fields').hide();
+      }
+    });
+  } else {
+    $('.language-level-fields').hide();
+  }
+});
+
+// When course selection changes
+$('.course').on('change', function() {
+  var foss_category = $('.foss_category').val();
+  var course_id = $(this).val();
+  // console.log('Course changed - FOSS:', foss_category, 'Course ID:', course_id);
+  
+  // Only load language/level if FOSS category is Training and Test
+  if (foss_category == '1') {
+    loadLanguageLevelOptions(foss_category, course_id);
+  }
+});
+
+// Helper function to load language/level options
+// Helper function to load language/level options
+function loadLanguageLevelOptions(foss_category, course_id) {
+  console.log('Loading language/level options...');
+  
+  $.ajax({
+    url: "/software-training/get-language-level-option/",
+    type: "POST",
+    data: {
+      foss_category: foss_category,
+      course_id: course_id || ''
+    },
+    beforeSend: function() {
+      // Show loading state
+      $('.language').html('<option value="">Loading...</option>');
+      $('.level').html('<option value="">Loading...</option>');
+    },
+    success: function(res) {
+      console.log('Language/Level response:', res);
+      
+      if (res.languages && res.levels) {
+        $('.language').html(res.languages);
+        $('.level').html(res.levels);
+        
+        // Force select English and Advanced if they exist
+        setTimeout(function() {
+          // Try to select English
+          var englishOption = $('.language option:contains("English"), .language option:contains("english")').first();
+          if (englishOption.length) {
+            $('.language').val(englishOption.val());
+          }
+          
+          // Try to select Advanced  
+          var advancedOption = $('.level option:contains("Advanced"), .level option:contains("advanced")').first();
+          if (advancedOption.length) {
+            $('.level').val(advancedOption.val());
+          }
+        }, 100);
+        
+        $('.language-level-fields').show();
+        console.log('Language/Level fields shown successfully');
+      } else {
+        console.log('Empty response for language/level');
+        $('.language-level-fields').hide();
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error('Error loading language/level:', error);
+      // Show fields with fallback options even on error
+      $('.language').html('<option value="">---------</option><option value="1" selected>English</option>');
+      $('.level').html('<option value="">---------</option><option value="1" selected>Advanced</option>');
+      $('.language-level-fields').show();
+    }
+  });
+}
+
+// On page load, check if we need to show language/level fields
+$(document).ready(function() {
+  var initialFossCategory = $('.foss_category').val();
+  if (initialFossCategory == '1') {
+    var initialCourseId = $('.course').val();
+    loadLanguageLevelOptions(initialFossCategory, initialCourseId);
+  }
+});
+// $('.foss_category').on('change', function() {
+//   var foss_category = $(this).val();
+//   // console.log('FOSS Category changed:', foss_category);
+  
+//   $('#course_label').html("Course list loading...");
+//   $('.language-level-fields').hide(); // Hide by default
+  
+//   if (foss_category != '') {
+//     // Fetch course options
+//     $.ajax({
+//       url: "/software-training/get-course-option/",
+//       type: "POST",
+//       data: {
+//         foss_category: foss_category
+//       },
+//       success: function(data) {
+//         $('#course_label').html('Software Course');
+//         if (data && data['course_option']) {
+//           $('.course').html(data['course_option']);
+//         }
+        
+//         // Show language/level only for "Training and Test" (value '1')
+//         if (foss_category == '1') {
+//           // console.log('Showing language/level fields for Training and Test');
+//           // Load language/level options when category is Training and Test
+//           var course_id = $('.course').val();
+//           loadLanguageLevelOptions(foss_category, course_id);
+//         } else {
+//           // console.log('Hiding language/level fields');
+//           $('.language-level-fields').hide();
+//         }
+//       },
+//       error: function() {
+//         $('.language-level-fields').hide();
+//       }
+//     });
+//   } else {
+//     $('.language-level-fields').hide();
+//   }
+// });
+
+// // When course selection changes
+// $('.course').on('change', function() {
+//   var foss_category = $('.foss_category').val();
+//   var course_id = $(this).val();
+//   // console.log('Course changed - FOSS:', foss_category, 'Course ID:', course_id);
+  
+//   // Only load language/level if FOSS category is Training and Test
+//   if (foss_category == '1') {
+//     loadLanguageLevelOptions(foss_category, course_id);
+//   }
+// });
+
+// // Helper function to load language/level options
+// // Helper function to load language/level options
+// function loadLanguageLevelOptions(foss_category, course_id) {
+//   console.log('Loading language/level options...');
+  
+//   $.ajax({
+//     url: "/software-training/get-language-level-option/",
+//     type: "POST",
+//     data: {
+//       foss_category: foss_category,
+//       course_id: course_id || ''
+//     },
+//     beforeSend: function() {
+//       // Show loading state
+//       $('.language').html('<option value="">Loading...</option>');
+//       $('.level').html('<option value="">Loading...</option>');
+//     },
+//     success: function(res) {
+//       console.log('Language/Level response:', res);
+      
+//       if (res.languages && res.levels) {
+//         $('.language').html(res.languages);
+//         $('.level').html(res.levels);
+        
+//         // Force select English and Advanced if they exist
+//         setTimeout(function() {
+//           // Try to select English
+//           var englishOption = $('.language option:contains("English"), .language option:contains("english")').first();
+//           if (englishOption.length) {
+//             $('.language').val(englishOption.val());
+//           }
+          
+//           // Try to select Advanced  
+//           var advancedOption = $('.level option:contains("Advanced"), .level option:contains("advanced")').first();
+//           if (advancedOption.length) {
+//             $('.level').val(advancedOption.val());
+//           }
+//         }, 100);
+        
+//         $('.language-level-fields').show();
+//         console.log('Language/Level fields shown successfully');
+//       } else {
+//         console.log('Empty response for language/level');
+//         $('.language-level-fields').hide();
+//       }
+//     },
+//     error: function(xhr, status, error) {
+//       console.error('Error loading language/level:', error);
+//       // Show fields with fallback options even on error
+//       $('.language').html('<option value="">---------</option><option value="1" selected>English</option>');
+//       $('.level').html('<option value="">---------</option><option value="1" selected>Advanced</option>');
+//       $('.language-level-fields').show();
+//     }
+//   });
+// }
+
+// // On page load, check if we need to show language/level fields
+// $(document).ready(function() {
+//   var initialFossCategory = $('.foss_category').val();
+//   if (initialFossCategory == '1') {
+//     var initialCourseId = $('.course').val();
+//     loadLanguageLevelOptions(initialFossCategory, initialCourseId);
+//   }
+// });
+
+    });
+  </script>
+
+{% endblock %}

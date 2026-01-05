@@ -7,6 +7,7 @@ from donate.models import CdFossLanguages
 from django.core.mail import send_mail
 # Third Party Stuff
 from django.conf import settings
+from .models import FossMdlCourses
 
 def get_academic_years(default=settings.ACADEMIC_DURATION):
     current_year = dt.datetime.now().year
@@ -93,8 +94,21 @@ def send_bulk_student_reset_mail(school, batches, total_students, new_password, 
         Admin Team
         """
 
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = [user.email] + settings.DEVELOPER_EMAIL
-
+    from_email  = settings.ADMINISTRATOR_EMAIL
+    recipient_list = [user.email, settings.DEVELOPER_EMAIL]
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
+
+def get_fossmdlcourse(foss_id, fossmdlmap_id=None):
+    if fossmdlmap_id is not None:
+        return FossMdlCourses.objects.get(id = fossmdlmap_id)
+    try:
+        fossmdlcourse = FossMdlCourses.objects.get(foss_id = foss_id)
+    except FossMdlCourses.MultipleObjectsReturned:
+        advanced=3 #default
+        english=22 #default
+        try:
+            fossmdlcourse = FossMdlCourses.objects.get(foss_id=foss_id, language_id=english, level_id=advanced)
+        except FossMdlCourses.DoesNotExist:
+            fossmdlcourse = FossMdlCourses.objects.get(foss_id=foss_id, language__isnull=True, level__isnull=True)
+    return fossmdlcourse

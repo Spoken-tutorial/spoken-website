@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Training - Request- Attendance{% endblock %}
+{% block heading %}<a href="/software-training" class='pull-right go-back'>Dashboard</a>{% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block compressinlinecssblock %}
+    <style>
+        .radio input[type="radio"]{
+            left: 0px;
+        }
+    </style>
+{% endblock %}
+{% block search %} {% endblock %}
+{% block content %}
+  <br/>
+<h1 class="page-title">
+<i class="fa fa-list-ul"></i>
+   One Day Workshop/Training Participants
+</h1> 
+<br/>
+<div class="bs-callout bs-callout-info">
+<dl class="dl-horizontal">
+<dt>Institute name</dt>
+<dd>{{ single_training.academic.institution_name }}</dd>
+<dt>FOSS</dt>
+<dd>{{ single_training.course.foss.foss }}</dd>
+<dt>Date</dt>
+<dd>{{ single_training.tdate }}</dd>
+<dt>Participant count</dt>
+<dd>{{ single_training.participant_count }}</dd>
+<dt>Organiser</dt>
+<dd>{{ single_training.organiser.user.first_name }}</dd>
+<dt>Training Type</dt>
+<dd>
+    {% if training.training_type == 0 %}
+        School
+    {% elif training.training_type == 1 %}
+        Live workshop
+    {% elif training.training_type == 2 %}
+        Pilot workshop
+    {% else %}
+        Vocational
+    {% endif %}
+</dd>
+</dl>
+</div>
+  <div class="tab-content">
+    <div id="approved" class="tab-pane fade in active">
+     <form action="" method="post">
+        {% csrf_token %}
+        {% if user.id == single_training.organiser.user_id and not training_status == 4 %}
+          <div style="height:70px;" class="pull-left">
+                <div style="width:200px;float:left;text-align:center;">
+                  <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All" onClick="this.value=check()"> 
+                </div> 
+            </div>
+            {% if canComplete %}
+                <div class="pull-right"><a class="btn btn-success" href="{% url 'events:markcomplete-single-training' single_training.id %}">Mark as Complete</a></div>
+            {% endif %}
+        {% endif %}
+        <!-- ResourcePerson close training -->
+        {% if canComplete and user|is_resource_person %}
+            <div class="pull-right"><a class="btn btn-success" href="{% url 'events:markcomplete-single-training' single_training.id %}">Mark as Complete</a></div>
+        {% endif %}
+
+       <div class="training-row">
+                <table class="table table-striped table-hover table-bordered">
+                  <tr>
+                    <th>#</th>
+                    {% if user.id == single_training.organiser.user_id and not training_status == 4 %}
+                        <th>Check</th>
+                    {% endif %}
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>Email</th>
+                    <th>Gender</th>
+                  </tr>
+                  {% for training in object_list %}
+                    <tr >
+                      <td>{{ forloop.counter }}</td>
+                      {% if user.id == single_training.organiser.user_id and not training_status == 4 %}
+                          <td><input type="checkbox" name="user" value="{{ training.id }}" {% if training.status == 1 %} checked {% endif %}/></td>
+                      {% endif %}
+                      <td>{{ training.firstname }} </td>
+                      <td>{{ training.lastname }}</td>
+                      <td>{{ training.email }}</td>
+                      <td>{{ training.gender }}</td>
+                    </tr>
+                  {% endfor %}
+                </table>
+              {% if user.id == single_training.organiser.user_id and not training_status == 4 %}
+                  <input class="btn btn-primary" type="submit" value="Submit Attendance" />
+              {% endif %}
+        </form>
+              </div>
+    </div>
+  </div>
+    
+{% endblock %}
+{% block jsblock %}
+  <script type="text/javascript">
+  var checkflag = "false";
+  function check() {
+  var field=document.getElementsByName('user'); 
+    if (checkflag == "false") {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = true;
+      }
+      checkflag = "true";
+      $("#button-select").text("To deselect all participants");
+      return "Uncheck All";
+    } else {
+      for (i = 0; i < field.length; i++) {
+        field[i].checked = false;
+      }
+      checkflag = "false";
+      return "Check All";
+    }
+  }
+  </script>
+{% endblock %}

@@ -1,0 +1,75 @@
+<!-- This page displays the the list of students of particular master batch and their email verifivation status.-->
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load cmsdata %}
+{% load student %}
+{% load static %}
+{% block title %}Participant List{% endblock %}
+{% block heading %}<i class="home-page-title-i">Participant List</i>{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+{% if object_list %}
+    <div><a class="btn btn-success" href="{% url 'eventsv2:batch_list' %}">Go to Master List</a><br><br></div>
+    <!-- This table shows the list of students whose email id's are invalid or in process of verification -->
+    <h4>Invalid Users or Verification Pending Users List</h4>
+    <table class="paleblue table">
+      {% get_sortable_header header ordering request.GET %}
+      {% for record in object_list %}
+         {% if not record.verified or not record.user.is_active%}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td><a href="{% url 'eventsv2:update_student' batch.id record.user.id %}">Edit</a></td>
+          <td>{{ batch.department}}</td>
+          <td>{{ batch.year}}</td>
+          <td>{{ record.user.first_name }}</td>
+          <td>{{ record.user.last_name }}</td>
+          <td class='email'>{{ record.user.email }}</td>
+          <td>{{ record.gender }}</td>
+          <td>
+            {% if not record.verified %}
+              <span class="review-domain-review">Verification Pending</span>
+            {% else %}
+              <span class="review-pending-upload">Invalid Email</span>
+            {% endif %}
+          </td>
+          <td>
+            {% with student_master=batch.id|get_student_master:record.id %}
+              <a class="btn btn-default" href="{% url 'eventsv2:student_delete' batch.id student_master.id %}" target="_blank">Delete</a>
+            {% endwith %}
+          </td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </table>
+
+     <!-- This table shows the list of students whose email id's are validated and their account is now active in spoken tutorail website -->
+    <h4>Verified Users List</h4>
+    <table class="paleblue table">
+      {% get_sortable_header header ordering request.GET %}
+      {% for record in object_list %}
+        {% if record.user.is_active %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td><a href="{% url 'eventsv2:update_student' batch.id record.user.id %}">Edit</a></td>
+          <td>{{ batch.department}}</td>
+          <td>{{ batch.year}}</td>
+          <td>{{ record.user.first_name }}</td>
+          <td>{{ record.user.last_name }}</td>
+          <td class='email'>{{ record.user.email }}</td>
+          <td>{{ record.gender }}</td>
+          <td>
+            {% if record.user.is_active %}
+              <span class="review-accepted">Verified
+            {% endif %}
+          </td>
+          <td>
+            {% with student_master=batch.id|get_student_master:record.id %}
+              <a class="btn btn-default" href="{% url 'eventsv2:student_delete' batch.id student_master.id %}">Delete</a>
+            {% endwith %}
+          </td>
+        </tr>
+        {% endif %}
+      {% endfor %}
+    </table>
+  {% endif %}
+{% endblock %}

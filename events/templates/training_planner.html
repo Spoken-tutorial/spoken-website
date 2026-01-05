@@ -235,7 +235,7 @@
         <b>{{ record.get_semester }}</b>
         <span class="badge">Total : {{ record.completed_training.count }}</span>
       </div>
-      {% if record.training_requests %}
+      {% if record.prefetched_requests %}
       <div class="training-row">
         <table class="table table-striped table-hover table-bordered">
           <tr>
@@ -246,13 +246,13 @@
             <th>Participant List Status</th>
             <th>Action</th>
           </tr>
-          {% for training in record.training_requests %}
+          {% for training in record.prefetched_requests %}
           <tr  data-id="{{training.id}}" class="{% if training.status %}completed{% else %}ongoing{% endif %}">
             <td>{{ forloop.counter }}</td>
             <td>{{ training.sem_start_date }} </td>
             <td>{{ training.course.course_name }}</td>
-            <td>{{ training.department }}</td>
-            <td>{{ training.attendance_summery }}</td>{% if training.can_edit %}{% endif %}
+            <td>{{ training.department.name }}</td>
+            <td>{{ training.attendance_summery }}</td>
             <td>
               {% if training.status == 0 %}
                   {% if training.get_partipants_from_attendance %}

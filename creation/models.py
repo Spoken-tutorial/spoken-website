@@ -105,6 +105,13 @@ class FossCategory(models.Model):
     credits = models.PositiveSmallIntegerField(default=0)
     is_fossee = models.BooleanField(verbose_name="Added by FOSSEE", default=False)
     icon = models.ImageField(upload_to='foss_icons/', null=True, blank=True)
+    duration_weeks = models.IntegerField(null=True, blank=True)
+    duration_hours = models.IntegerField(null=True, blank=True)
+    ram = models.CharField(max_length=255, null=True, blank=True)
+    disk_space = models.CharField(max_length=255, null=True, blank=True)
+    additional_software = models.CharField(max_length=255, null=True, blank=True)
+    processor = models.CharField(max_length=255, null=True, blank=True)
+    operating_system = models.CharField(max_length=255, null=True, blank=True)
     
     class Meta(object):
         verbose_name = 'FOSS'

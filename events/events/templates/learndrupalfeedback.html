@@ -1,0 +1,259 @@
+﻿{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %} Feedback{% endblock %}
+{% block compressinlinecssblock %}
+<style>
+.links {
+      font-size:30px;
+      text-align :center;
+      color : #FE9A2E
+    }
+    label{
+    color:#FFF;
+    font-family: Comic sans MS !important;
+    }
+    html{
+    font-family: Comic sans MS !important;
+    }
+</style>
+{% endblock %}
+{% block search %}
+{% endblock %}
+{% block content %}
+
+<div style="text-align:center; color:#bf4f66; "><h3><b>Drupal Feedback Form</b></h3>
+<h4>
+Please use this form to send us your feedback or suggestions. For content and technical queries please visit the forum at, 
+<a href="http://forums.spoken-tutorial.org/" target="_blank">http://forums.spoken-tutorial.org/</a>
+</h4>
+</div>
+
+<div class="row well" style="background-color:#41b39c"><!--main div 1-->
+  <div class='col-sm-15'><!--main div 2-->
+    <form action="/software-training/learn-drupal-feedback/" method="post" class='form-horizontal' enctype="multipart/form-data" >{% csrf_token %}
+      {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+      {% if form.non_field_errors %}
+        <ul>
+        {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      
+      <div class='form-horizontal' style="clear:both;"><!-- form horizontal  div -->
+        <div class="col-sm-11"><!-- col 11 div -->
+          <div class="form-group name">
+            <label class="col-sm-5 control-label" for= "id_name">Name </label>
+            <div class="col-sm-7">
+              {% render_field form.name class+="form-control name" tabindex="1" %}
+              {{ form.name.errors }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_phonemob">Mobile no./ Phone no.</label>
+            <div class="col-sm-7">
+              {% render_field form.phonemob class+="form-control phonemob" tabindex="2" %}
+              {{ form.phonemob.errors }}
+            </div>
+          </div>
+          <div class="form-group email">
+            <label class="col-sm-5 control-label" for= "id_email">Email-Id *</label>
+            <div class="col-sm-7">
+              {% render_field form.email class+="form-control email" tabindex="3" %}
+              {{ form.email.errors }}
+            </div>
+          </div>
+          <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_affiliation">Affiliation </label>
+            <div class="col-sm-7">
+              {% render_field form.affiliation class+="form-control affiliation" tabindex="4" %}
+              {{ form.affiliation.errors }}
+            </div>
+          </div>
+          <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_place">Place </label>
+            <div class="col-sm-7">
+              {% render_field form.place class+="form-control place" tabindex="5" %}
+              {{ form.place.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_agegroup " >Age Group </label>
+            <div class="col-sm-7">
+              {% render_field form.agegroup class+="form-control agegroup " tabindex="6" %}
+              {{ form.agegroup.errors }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_currentstatus " >Current Status *</label>
+            <div class="col-sm-7">
+              {% render_field form.currentstatus class+="form-control currentstatus " tabindex="7" %}
+              {{ form.currentstatus.errors }}
+            </div>
+          </div>
+          <div class="form-group" id="status_other">
+            <label class="col-sm-5 control-label" for= "id_currentstatus_other">Other Status: </label>
+            <div class="col-sm-7">
+              {% render_field form.currentstatus_other class+="form-control currentstatus_other" tabindex="8" %}
+              {{ form.currentstatus_other.errors }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_is_drupal_in_curriculum " >Is Drupal a part of  your curriculum?</label>
+            <div class="col-sm-7">
+              {% render_field form.is_drupal_in_curriculum class+="form-control is_drupal_in_curriculum " tabindex="9" %}
+              {{ form.is_drupal_in_curriculum.errors }}
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="col-sm-5 control-label" for= "id_need_help_in_organizing " >Do you need help in organizing workshops? </label>
+            <div class="col-sm-7">
+              {% render_field form.need_help_in_organizing class+="form-control need_help_in_organizing " tabindex="10" %}
+              {{ form.need_help_in_organizing.errors }}
+            </div>
+          </div>
+           <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_when_plan_to_conduct">By when do you plan to conduct Drupal workshop? </label>
+            <div class="col-sm-7">
+              {% render_field form.when_plan_to_conduct class+="form-control when_plan_to_conduct" tabindex="11" %}
+              {{ form.when_plan_to_conduct.errors }}
+            </div>
+          </div>
+          
+           <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_language">Language of instruction * :  </label>
+            <div class="col-sm-7">
+              {% render_field form.language class+="form-control language" tabindex="12" %}
+              {{ form.language.errors }}
+            </div>
+          </div>
+          
+           <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_did_undergo_st_training">Did you undergo the Spoken Tutorial training for Drupal Series </label>
+            <div class="col-sm-7">
+              {% render_field form.did_undergo_st_training class+="form-control did_undergo_st_training" tabindex="13" %}
+              {{ form.did_undergo_st_training.errors }}
+            </div>
+          </div>
+           <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_rate_spoken">On the scale of 1 to 10, rate the Spoken Tutorial Drupal Series: </label>
+            <div class="col-sm-7">
+              {% render_field form.rate_spoken class+="form-control rate_spoken" tabindex="14" %}
+              {{ form.rate_spoken.errors }}
+            </div>
+          </div>
+           <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_useful_for_placement">The knowledge and skill attained during the training will be useful in getting  a placement for myself </label>
+            <div class="col-sm-7">
+              {% render_field form.useful_for_placement class+="form-control useful_for_placement" tabindex="15" %}
+              {{ form.useful_for_placement.errors }}
+            </div>
+          </div>
+           <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_useful_for_placement_for_students">The knowledge and skill attained during the training will be useful in getting placement for my students </label>
+            <div class="col-sm-7">
+              {% render_field form.useful_for_placement_for_students class+="form-control useful_for_placement_for_students" tabindex="16" %}
+              {{ form.useful_for_placement_for_students.errors }}
+            </div>
+          </div>
+           <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_feedback">Feedback/Query/ Comment* </label>
+            <div class="col-sm-7">
+              {% render_field form.feedback class+="form-control feedback" tabindex="17" %}
+              {{ form.feedback.errors }}
+            </div>
+          </div>
+          <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_like_to_learn_other_foss">Would you like to learn any other FOSS using the spoken tutorial methodology </label>
+            <div class="col-sm-7">
+              {% render_field form.like_to_learn_other_foss class+="form-control like_to_learn_other_foss" tabindex="18" %}
+              {{ form.like_to_learn_other_foss.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group " id="mention">
+            <label class="col-sm-5 control-label" for= "id_mention_foss">please mention the foss : </label>
+            <div class="col-sm-7">
+              {% render_field form.mention_foss class+="form-control mention_foss" tabindex="19" %}
+              {{ form.mention_foss.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group ">
+            <label class="col-sm-5 control-label" for= "id_like_to_give_testimonial">Would you like to give a testimonial for publishing on the Spoken Tutorial webpages </label>
+            <div class="col-sm-7">
+              {% render_field form.like_to_give_testimonial class+="form-control like_to_give_testimonial" tabindex="20" %}
+              {{ form.like_to_give_testimonial.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group " id="testimonialtext">
+            <label class="col-sm-5 control-label" for= "id_testimonial">Testimonial </label>
+            <div class="col-sm-7">
+              {% render_field form.testimonial class+="form-control testimonial" tabindex="21" %}
+              {{ form.testimonial.errors }}
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <div class="col-sm-offset-5 col-sm-9">
+              <input class="btn btn-primary" style="background-color:#e74c3c; width:200px;" type="submit" id="submit_button" value="Submit" tabindex="22" />
+            </div>
+          </div>
+        
+        
+        </div><!-- col 11 div -->
+      </div><!-- form horizontal  div -->
+      {% endwith %}
+    </form>
+  </div><!--main div 2-->
+</div><!--main div 1-->
+<div style="text-align:center; color:#bf4f66;"><h3>Thank you for contacting us. We will get back to you soon!</h3></div>
+
+{% endblock %}
+{% block jsblock %}
+<script>
+$(window).load(function(){
+  document.getElementById('mention').style.display = 'none';
+  document.getElementById('testimonialtext').style.display = 'none';
+  document.getElementById('status_other').style.display = 'none';
+});
+
+$('.like_to_learn_other_foss').on('change', function() {
+  like = $('.like_to_learn_other_foss').val();
+  if (like == 'Yes'){
+    document.getElementById('mention').style.display = '';
+  }
+  else{
+  document.getElementById('mention').style.display = 'none';
+  }
+
+});
+
+$('.like_to_give_testimonial').on('change', function() {
+  like = $('.like_to_give_testimonial').val();
+  if (like == 'Yes'){
+    document.getElementById('testimonialtext').style.display = '';
+  }
+  else{
+  document.getElementById('testimonialtext').style.display = 'none';
+  }
+
+});
+
+$('.currentstatus').on('change', function() {
+  status = $('.currentstatus').val();
+  if (status == 'Others'){
+    document.getElementById('status_other').style.display = '';
+  }
+  else{
+  document.getElementById('status_other').style.display = 'none';
+  }
+
+});
+
+</script>
+{% endblock %}

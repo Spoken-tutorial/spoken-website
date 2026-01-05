@@ -1,0 +1,76 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+{% load cmsdata %}
+
+{% block title %}
+	{{ page.title }}
+{% endblock %}
+
+{% block heading %}
+	{{ page.title }}
+{% endblock %}
+
+{% block cssblock %}
+    <style>
+        #content {
+            padding: 60px;
+            padding-top: 20px;
+            background: white;
+            min-height: 400px;
+            text-align: justify;
+            line-height: 1.6em;
+        }
+        #content-wrapper {
+            background: lightgray;
+        }
+        #content-wrapper #content-block, #content-wrapper #content-inner {
+            padding-left: 0px;
+            padding-right: 0px
+        }
+        #page-wrapper #content-wrapper {
+            margin-bottom: 0px;
+        }
+        h4.page-title {
+            margin: 10px 0 40px 0;
+        }
+    </style>
+    
+{% endblock %}
+
+{% block content_head %}
+    <div id="content" class="col-lg-{{ page.cols }} col-lg-offset-{{ col_offset }} col-md-12 col-sm-12 col-lg-shadow">
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+    <h4>This page is used to manage memcache</h4>
+    <hr/>
+    <div>
+        <h5>Option 1: Clear cache for a key</h5>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <label>Enter Cache Key</label>
+            <input name="cache_key" required></input>
+            <input name="type" value="single_key" type="hidden"></input>
+            <button type="submit" id="clear_key">Clear Cache</button>
+        </div>
+    </form>
+        <hr>
+    <form method="post">
+        {% csrf_token %}
+        <div>
+            <h5>Option 2: Clear all memcache data</h5>
+            <p>Note: Clearing all memcache might slow down the site initially</p>
+            <input name="type" value="all_keys" type="hidden"></input>
+            <button type="submit" id="clear_all">Clear All Cache</button>
+        </div>
+        
+    </form>
+{% endblock %}
+
+{% block jsblock %}
+    <script>
+        
+    </script>
+{% endblock %}

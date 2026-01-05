@@ -1,0 +1,72 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} Organiser Work Handover{% endblock %}
+{% block cssblock %}{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> Organiser Work Handover :
+{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+          <form class="col-lg-12" action="{% url 'events:handover' %}" method="post">
+            {% csrf_token %}
+            {{ message }}
+            <hr>
+            <div class='form-row'>
+              <div class='col-xs-12 form-group required'>
+                <label class='control-label'>Old Organiser :</label>
+                <input style="" class="form-control input-lg" placeholder="Enter the email address of old organiser" type="text" id="old_email" name=old_email>
+              </div>
+            </div>
+
+             <div class='form-row'>
+              <div class='col-xs-12 form-group required'>
+                <label class='control-label'>New User</label>
+                <input style="" class="form-control input-lg" placeholder="Enter the email address of new user" type="text" id="new_email" name=new_email>
+              </div>
+            </div>
+
+            <div class='form-row'>
+              <div class='col-xs-12 form-group required'>
+                <button class="btn btn-lg btn-primary" type="submit">Submit</button>
+              </div>
+            </div>
+          </form>
+          
+
+          <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="invalidModalLabel">Problem in work handover</h4>
+                  </div>
+                  <div class="modal-body" id="modal-body">
+                        <p> </p>
+                  </div>
+                </div>
+              </div>
+          </div>
+{% endblock %}
+
+{% block jsblock %}
+<script>
+    $(document).ready(function(){
+        msg = "{{ msg }}"
+        er_status = "{{ error_status}}"
+        if(er_status == "True"){
+          $("#modal-body").html(msg);
+          $("#errorModal").modal();
+        }
+        else if(er_status == "False"){
+          $("#modal-body").html(msg);
+          $("#invalidModalLabel").html("Successful");
+          $("#errorModal").modal();
+        }
+           
+   });
+</script>
+{% endblock %}
+

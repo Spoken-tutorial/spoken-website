@@ -1,0 +1,213 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Training - Request{% endblock %}
+{% block heading %}<a href="/software-training" class='pull-right go-back'>Dashboard</a>{% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block compressinlinecssblock %}
+    <style>
+        .radio input[type="radio"]{
+            left: 0px;
+        }
+    </style>
+{% endblock %}
+{% block search %} {% endblock %}
+{% block content %}
+        {{form.errors}}
+         <div class="bs-callout bs-callout-info">
+            {% if instance %}
+                {{ instance.academic.state }} - {{ instance.academic }}
+            {% else %}
+                {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
+            {% endif %}
+             
+        </div>
+        <div class="row well">
+            <div class='col-sm-8'>
+                <form action="{{ action }}" method="post" class='form-horizontal' enctype="multipart/form-data">{% csrf_token %}
+                    {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+                    {% if form.non_field_errors %}
+                    <div style="height:40px; background-color:#E06666; border-radius: 7px;">
+                    <ul style="fontSize:5">
+                      {% for error in form.non_field_errors %}
+                        <li>{{ error }}</li>
+                      {% endfor %}
+                    </ul></div>
+                    {% endif %}
+                   <br/><div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_training_type">Training Type</label>
+                        <div class="col-sm-9">
+                            {% render_field form.training_type class+="form-control training_type" tabindex="1" %}
+                            {{ form.training_type.errors }}
+                        </div>
+                    </div>
+                     <div>
+                          {% if user.is_superuser %}
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_state">State</label>
+					<div class="col-sm-9">
+						{% render_field form.state class+="form-control state" tabindex="1" %}
+						{{ form.state.errors }}
+					</div>
+                        </div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_institution_type">Institution Type</label>
+					<div class="col-sm-9">
+						{% render_field form.institution_type class+="form-control intitution_type" tabindex="1" %}
+						{{ form.institution_type.errors }}
+					</div>
+                        </div>
+			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_academic">Academic Center</label>
+					<div class="col-sm-9">
+						{% render_field form.academic class+="form-control academic" tabindex="1" %}
+						{{ form.academic.errors }}
+					</div>
+                        </div>
+
+                          {% endif %}
+                      </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for="id_csv_file">Participant List (Upload CSV File)</label>
+                        <div class="col-sm-9">
+                            {% render_field form.csv_file class+=" csv_file"%}
+                            {{ form.csv_file.errors }}
+                            <small>Please upload your CSV file here. If you have used <b>MS-EXCEL</b> to create the CSV file please make sure that you have saved it with <b><big>csv(ms-dos)</big></b> file extention.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_course">Course / Stream</label>
+                        <div class="col-sm-9">
+                            {% render_field form.course class+="form-control course" tabindex="1" %}
+                            {{ form.course.errors }}
+                            <small>Please select the appropriate stream of the participants.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_tdate">Training Date</label>
+                        <div class="col-sm-9">
+                            {% render_field form.tdate class+="form-control datetime" tabindex="1" data-placeholder="Enter date" %}
+                            {{ form.tdate.errors }}
+                            <small>Please select the date on which on which you want to conduct the training/workshop.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label" for= "id_language">Preferred Language <span class='ajax-refresh ajax-refresh-language'><i class="fa fa-2 fa-refresh fa-spin"></i></span></label>
+                        <div class="col-sm-9">
+                            {% render_field form.language class+="form-control language" tabindex="1" data-placeholder="Enter language" %}
+                            {{ form.language.errors }}
+                            <small>Please select your preferred language.</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-3 col-sm-9">
+                            <input class="btn btn-primary" type="submit" value="Submit" />
+                        </div>
+                    </div>
+                    {% endwith %}
+                </form>
+            </div>
+        </div>
+{% endblock %}
+{% block compressjsblock %}
+    <script src="{% static 'spoken/js/jquery.datetimepicker.js' %}"></script>
+{% endblock %}
+{% block compressinlinejsblock %}
+    <script>
+	$(document).ready(function(){
+        $college = $('#id_academic');
+        $('#id_district').change(function() {
+            var district = $(this).val();
+            $.ajax({
+                url: "/software-training/ajax-district-collage/",
+                type: "POST",
+                data: {
+                    district : district
+                },
+                success: function(data) {
+                    if(data){
+                        $college.html(data);
+                        $college.removeAttr("disabled");
+                    } else{
+                        $college.attr("disabled", "disabled");
+                        alert('No college found for this district!!');
+                    }
+                }
+            });
+        });
+        $('.foss').change(function() {
+            var foss = $(this).val();
+            $.ajax({
+                url: "/software-training/ajax-language/",
+                type: "POST",
+                data: {
+                    foss : foss
+                },
+                beforeSend: function() {
+                    $('.ajax-refresh-language').show();
+                },
+                success: function(data) {
+                    if(data){
+                        $('.language').html(data);
+                        $('.language').removeAttr("disabled");
+                        $('.ajax-refresh-language').hide();
+                    } else{
+                        $('.language').attr("disabled", "disabled");
+                        $('.ajax-refresh-language').hide();
+                        alert('No language found!');
+                    }
+                }
+            });
+        });
+        $('.datetime').datetimepicker({
+            onGenerate:function( ct ){
+                $(this).find('.xdsoft_day_of_week0')
+                    .addClass('xdsoft_disabled');
+            },
+            lang:'en',
+            format:'Y-m-d',
+            formatDate:'Y/m/d',
+            minDate:0, // yesterday is minimum date
+            weekends:[],
+            maxDate:'+1970/06/31', // tommorow date with in 6 month
+            step:5,
+            timepicker:false,
+        });
+		$state = $('#id_state')
+		$itype = $('#id_institution_type')
+		$state.change(function(){
+			if ($itype.val() != "" && $state.val() != ""){
+				show_institute();
+			}
+		});
+		$itype.change(function(){
+			if ($itype.val() != "" && $state.val() != ""){
+				show_institute();
+			}
+		});
+		function show_institute(){
+			var state = $state.val();
+			var itype = $itype.val();
+			$.ajax({
+				url: "software-training/ajax-academic-center/",
+				type: "POST",
+				data: {
+					state: state,
+					itype: itype,
+					fields: {'academic_center': 'academic_center'}
+
+				},
+				success: function(html){
+				console.log(html)
+				$college.html(html);
+
+				}
+			});
+		}
+		
+	});
+    </script>
+{% endblock %}

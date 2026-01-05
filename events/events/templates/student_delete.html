@@ -1,0 +1,13 @@
+<!-- this is the confirmation page while deleting particular student -->
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Delete Student{% endblock %}
+{% block heading %}<i class="home-page-title-i">Delete Student</i> {% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+    <form method="POST" action="">{% csrf_token %}
+        Are you sure want to delete {{ object.student_fullname }}?<br><br>
+        <input class="btn btn-default" type="submit" value="DELETE">
+    </form>
+{% endblock %}

@@ -29,7 +29,7 @@
 <div><a class="btn btn-success" href="{% url 'eventsv2:training_planner' %}">Go Back to Training Planner</a><br><br></div>
 {% if object_list %}
 <div style="float: right;">
-  {% if training.is_learners_allowed and training.cert_status == 1 and training.status == 1  %}
+  {% if allow_download  %}
   <a class="btn btn-success" 
   href="{% url 'eventsv2:alltraining_certificate' training.id %}">Download all certificates</a><br><br>
   {% endif %}
@@ -39,24 +39,24 @@
       <th>Name</th>
       <th>Email</th>
       <th>Gender</th>
-      {% if training.is_learners_allowed and training.cert_status == 1 and training.status == 1  %}
+      {% if allow_download  %}
         <th>Certificate</th>
       {% endif %}
     </tr>
     {% for record in object_list %}
       {% if not record.moved %}
-        {% with training_attendance=training|get_attendance:record.student %}
+        
               <tr id="{{record.student.id}}">
-                 {% if not can_mark_attendance and training_attendance and training_attendance.id %}
+                 
                   <td>{{ record.student.student_fullname }}</td>
                   <td>{{ record.student.user.email }}</td>
                   <td>{{ record.student.gender }}</td>
-                  {% if training.is_learners_allowed and training.cert_status == 1 and training.status == 1 %}
-                    <td><a href="{% url 'eventsv2:organiser_training_certificate' training_attendance.id %}">Download Certificate</a></td>
+                  {% if allow_download %}
+                    <td><a href="{% url 'eventsv2:organiser_training_certificate' record.id %}">Download Certificate</a></td>
                   {% endif %}
-                {% endif %}
+                
               </tr>
-        {% endwith %}
+        
       {% endif %}
     {% endfor %}
   </table>

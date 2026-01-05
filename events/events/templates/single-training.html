@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load eventsdata %}
+{% block title %}Training - Request{% endblock %}
+{% block heading %}<a href="/software-training" class='pull-right go-back'>Dashboard</a>{% endblock %}
+{% block compresscssblock %}
+    <link rel="stylesheet" href="{% static 'spoken/css/jquery.datetimepicker.css' %}" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+{% block compressinlinecssblock %}
+    <style>
+        .radio input[type="radio"]{
+            left: 0px;
+        }
+    </style>
+{% endblock %}
+{% block search %} {% endblock %}
+{% block content %}
+  <div class="form-group">
+    <div class="col-sm-offset-0 col-sm-9">
+      <input class="btn btn-primary" type="submit" value="Add Training Workshop Request" onclick="add();"/>
+    </div>
+  </div>
+  <br/><br/><br/><br/>
+  <ul class="nav nav-tabs">
+     <li {% if request.path == "/software-training/single-training/pending/" %}class="active" {% endif %}><a href="/software-training/single-training/pending/">
+
+       {% if user|is_resource_person %}
+         New
+       {% elif user|is_organiser %}
+         Pending approval
+       {% endif %}
+       </a></li> 
+    <li {% if request.path == "/software-training/single-training/approved/" %}class="active" {% endif %}><a href="/software-training/single-training/approved/">Approved</a></li>
+    <li {% if request.path == "/software-training/single-training/rejected/" %}class="active" {% endif %}><a href="/software-training/single-training/rejected/">Rejected</a></li>
+    <li {% if request.path == "/software-training/single-training/ongoing/" %}class="active" {% endif %}><a href="/software-training/single-training/ongoing/">Ongoing</a></li>
+    <li {% if request.path == "/software-training/single-training/pendingattendance/" %}class="active" {% endif %}><a href="/software-training/single-training/pendingattendance/">Attendance Pending</a></li>
+    <li {% if request.path == "/software-training/single-training/completed/" %}class="active" {% endif %}><a href="/software-training/single-training/completed/">Completed</a></li>
+  </ul>
+  <div class="tab-content">
+    <div id="approved" class="tab-pane fade in active">
+      <h3>Section A</h3>
+       <div class="training-row">
+                <table class="table table-striped table-hover table-bordered">
+                  <tr>
+                    <th>#</th>
+                    <th>Training Date</th>
+                    <th>Software Course</th>
+                    <th>Language</th>
+                    <th>Institution name</th>
+                    <th>Participant Count</th>
+                    <th>Training type</th>
+                  </tr>
+                  {% for training in object_list %}
+                    <tr >
+                      <td>{{ forloop.counter }}</td>
+                      <td>{{ training.tdate }} </td>
+                      <td>{{ training.course.course_name }}</td>
+                      <td>{{ training.language }}</td>
+                      <td>{{ training.academic }}</td>
+		                  {% if user|is_administrator %}
+                            {% if request.path == '/software-training/single-training/pendingattendance/' %}
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                           {% elif request.path == '/software-training/single-training/approved/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/rejected/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/ongoing/' %}
+                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                           {% elif request.path == '/software-training/single-training/pending/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/completed/' %}
+                              <td>
+                              {% if training.is_singletraining_certificate_allowed %}
+                                <a href="{% url 'events:single-training-certificate' training.id %}" >{{ training.participant_count }} | {{ training.total_participant_count }} Download Certificate</a>
+                              {% elif not training.is_singletraining_certificate_allowed %}
+                                {{ training.participant_count }} | {{ training.total_participant_count }} Training Completed
+                              {% endif %}
+                              </td>
+                          {% endif %}
+
+			  
+                       {% elif user|is_organiser %}
+                           {% if request.path == '/software-training/single-training/approved/' %}
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                           {% elif request.path == '/software-training/single-training/pending/' %}
+                              <td>
+                                <a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a>
+                                | <a href="{% url 'events:update-single-training' training.id %}">Edit</a>
+                              </td>
+                           {% elif request.path == '/software-training/single-training/rejected/' %}
+                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                           {% elif request.path == '/software-training/single-training/ongoing/' %}
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} / {{ training.total_participant_count }} </a></td>
+                           {% elif request.path == '/software-training/single-training/pendingattendance/' %}
+
+                             {% if 'Administrator' not in group and 'Resource Person' not in group %}
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} </a> |<a href="{% url 'events:single_training_pending' training.id %}"> Request to mark attendance</a></td>
+                             {% else %}
+
+                              <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }} </a></td>
+                             {% endif %}
+                           {% elif request.path == '/software-training/single-training/completed/' %}
+                              <td>
+                              {% if training.is_singletraining_certificate_allowed %}
+                                <a href="{% url 'events:single-training-certificate' training.id %}"> {{ training.participant_count }} | {{ training.total_participant_count }} Download Certificate</a>
+                              {% elif not training.is_singletraining_certificate_allowed %}
+                                {{ training.participant_count }} | {{ training.total_participant_count }} Training Completed
+                              {% endif %}
+                              </td>
+                           {% endif %}
+                       {% elif user|is_resource_person %}
+                          {% if request.path == '/software-training/single-training/pendingattendance/' %}
+                             <td><a href="{% url 'events:single_training_attendance' training.id %}">{{ training.participant_count }}</a></td>
+                           {% elif request.path == '/software-training/single-training/approved/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/rejected/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/ongoing/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/pending/' %}
+                             <td>{{ training.participant_count }}</td>
+                           {% elif request.path == '/software-training/single-training/completed/' %}
+                              <td>
+                              {% if training.is_singletraining_certificate_allowed %}
+                                <a href="{% url 'events:single-training-certificate' training.id %}" > {{ training.participant_count }} | {{ training.total_participant_count }} Download Certificate</a>
+                              {% elif not training.is_singletraining_certificate_allowed %}
+                                {{ training.participant_count }} | {{ training.total_participant_count }} Training Completed
+                              {% endif %}
+                              </td>
+                          {% endif %}
+                       {% else %}
+                      <td>{{ training.participant_count }}</td>
+                       {% endif %}
+                          {% if training.training_type == 0 %}
+                           <td>School</td>
+                          {% elif training.training_type == 1 %}
+                            <td>Live workshop</td>
+                          {% elif training.training_type == 2 %}
+                            <td>Pilot workshop</td>
+                          {% else %}
+                            <td>Vocational </td>
+                          {% endif %}
+                       {% if user|is_resource_person %}
+			{% if request.path == "/software-training/single-training/pending/" %} 
+		      <td><a href="{% url 'events:single-training-approve' training.id %}">Approve</a></td>
+                      <td><a href="{% url 'events:single-training-reject' training.id %}">Reject</a></td>
+                        {% endif %}
+                       {% endif %}
+                    </tr>
+                  {% endfor %}
+                </table>
+              </div>
+    </div>
+  </div>
+    
+{% endblock %}
+{% block compressinlinejsblock %}
+  <script>
+    function add()
+    {
+      location.href = "/software-training/single-training/new/";
+    }
+  </script>
+{% endblock %}

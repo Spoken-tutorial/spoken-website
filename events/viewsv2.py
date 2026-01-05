@@ -61,7 +61,7 @@ from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from events.views import get_page
 from io import BytesIO
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from cron import TOPPER_QUEUE, REDIS_CLIENT, DEFAULT_QUEUE
 import uuid 
 from django.core.cache import caches
@@ -78,6 +78,7 @@ from .certificates import *
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
 
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
+
 
 class JSONResponseMixin(object):
   """
@@ -108,15 +109,43 @@ class TrainingPlannerListView(ListView):
   paginate_by = 20
   user = None
   template_name = None
+
+  def get_queryset(self):
+    organiser = self.request.user.organiser
+    training_qs = (
+      TrainingRequest.objects.exclude(Q(participants=0) & Q(status=1)).annotate(
+        attend_count=Count('attendances'),
+        student_master_count=Count('batch__studentmasters', distinct=True)
+      ).select_related('department', 'batch','course__course', 'course__foss','course')
+    )
+    training_no_attend_qs = (
+      TrainingRequest.objects.filter(participants=0, status__in=[0,1]).annotate(
+        attend_count=Count('attendances')
+      ).select_related('department', 'batch','course__course', 'course__foss','course')
+    )
+    qs = TrainingPlanner.objects.filter(
+        organiser_id = organiser.id,
+        academic_id = organiser.academic.id,
+      ).order_by('-year').prefetch_related(
+        Prefetch(
+          'requests',
+          queryset=training_qs,
+          to_attr='prefetched_requests'
+        ),
+         Prefetch(
+          'requests',
+          queryset=training_no_attend_qs,
+          to_attr='prefetched_requests_no_attend'
+        )
+      ).select_related('semester')
+    return qs
+  
   @method_decorator(group_required("Organiser"))
   # following function is only applicable to organiser login
   def dispatch(self, *args, **kwargs):
     self.user = self.request.user
     self.get_current_planner()
-    self.queryset = TrainingPlanner.objects.filter(
-        organiser_id = self.request.user.organiser.id,
-        academic_id = self.request.user.organiser.academic.id,
-      ).order_by('-year')
+    
     return super(TrainingPlannerListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
@@ -251,7 +280,7 @@ class StudentBatchCreateView(CreateView):
         ).values_list(
           'student_id'
         )
-      )
+      ).select_related('user')
       context['batch'] = self.batch
       context['existing_student'] = existing_student
     return context
@@ -460,7 +489,10 @@ class StudentBatchListView(ListView):
   raw_get_data = None
   @method_decorator(group_required("Organiser"))
   def dispatch(self, *args, **kwargs):
-    self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id)
+    self.queryset = StudentBatch.objects.filter(academic_id=self.request.user.organiser.academic_id).select_related(
+      'academic', 'department', 'organiser', 'organiser__user').annotate(
+        batch_count = Count('studentmasters')
+      )
     self.header = {
       1: SortableHeader('#', False),
       2: SortableHeader('batch_name', True, 'Batch Name'),
@@ -512,7 +544,7 @@ class StudentListView(ListView):
       ).values_list(
         'student'
       )
-    )
+    ).select_related('user')
     self.raw_get_data = self.request.GET.get('o', None)
     self.queryset = get_sorted_list(self.request, self.queryset, self.header, self.raw_get_data)
     return super(StudentListView, self).dispatch(*args, **kwargs)
@@ -818,15 +850,19 @@ class TrainingCertificateListView(ListView):
 
   def dispatch(self, *args, **kwargs):
     self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
-    if self.training_request.status:
-      self.queryset = self.training_request.trainingattend_set.all()
-    else:
-      self.queryset = StudentMaster.objects.filter(batch_id=self.training_request.batch_id, moved=False)
+    if self.training_request.status: # if status = 1, display students who attended the training
+      self.queryset = self.training_request.attendances.all().select_related('student', 'student__user')
+    else: # if training not completed show batch students
+      self.queryset = StudentMaster.objects.filter(
+        batch_id=self.training_request.batch_id, moved=False).select_related(
+          'student', 'student__user'
+        )
     return super(TrainingCertificateListView, self).dispatch(*args, **kwargs)
 
   def get_context_data(self, **kwargs):
     context = super(TrainingCertificateListView, self).get_context_data(**kwargs)
-    context['training'] = self.training_request
+    training = self.training_request
+    context['training'] = training
     languages = Language.objects.filter(
         id__in = FossAvailableForWorkshop.objects.filter(
           foss_id = self.training_request.course.foss_id
@@ -835,6 +871,7 @@ class TrainingCertificateListView(ListView):
     #language
     #for lang in languages:
     context['languages'] = languages
+    context['allow_download'] = (training.is_learners_allowed) and (training.cert_status == 1) and (training.status == 1)
     return context
 
 

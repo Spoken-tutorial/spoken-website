@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load cmsdata %}
+{% load static %}
+{% block title %}Participant List{% endblock %}
+{% block heading %}<i class="home-page-title-i">Participant List</i>{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+  {% if object_list %}
+    <div align="right"><a class="btn btn-success" href="{% url 'events:old_training' %}">Go to Old Training List</a><br><br></div>
+    <table class="paleblue table">
+      {% get_sortable_header header ordering request.GET %}
+      {% for record in object_list %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ record.firstname }}</td>
+          <td>{{ record.lastname }}</td>
+          <td class='email'>{{ record.email }}</td>
+          <td>{{ record.gender }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% endif %}
+  
+{% endblock %}

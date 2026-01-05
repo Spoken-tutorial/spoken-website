@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% block title %}Course Map List{% endblock %}
+{% block heading %}<i class="home-page-title-i">Course Map List</i><a href="/software-training" class='pull-right go-back'>Dashboard</a>{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
+{% load cmsdata %}
+{% load student %}
+  
+  <div class="row">
+  {% if object_list %}
+    <table class="paleblue table">
+      {% get_sortable_header header ordering request.GET %}
+      {% for record in object_list %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ record.course_name }}</td>
+          <td>{{ record.test }}</td>
+          <td>{{ record.category_name }}</td>
+          <td><a href="{% url 'events:coursemapupdate' record.id %}">Edit</a></td>
+          
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p class='no-record'>No record found!</p>
+  {% endif %}
+  </div>
+  
+{% endblock %}
