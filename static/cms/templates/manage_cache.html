@@ -65,7 +65,16 @@
             <input name="type" value="all_keys" type="hidden"></input>
             <button type="submit" id="clear_all">Clear All Cache</button>
         </div>
-        
+        <hr>
+<form method="post">
+    {% csrf_token %}
+    <div>
+        <h5>Option 3: Clear homepage cache</h5>
+        <p>This will clear cache entries related to the homepage only.</p>
+        <input name="type" value="homepage" type="hidden"></input>
+        <button type="submit" id="clear_homepage">Clear Homepage Cache</button>
+    </div>
+        </form> 
     </form>
 {% endblock %}
 
