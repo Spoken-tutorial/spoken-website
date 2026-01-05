@@ -141,6 +141,7 @@ def get_foss_choice(show_on_homepage=1, lang=None):
             foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
 
     cache.set(cache_key, foss_list_choices, timeout=CACHE_TUTORIALS)
+    register_cache_key(cache_key)
     return foss_list_choices
 
 
@@ -166,4 +167,5 @@ def get_lang_choice(show_on_homepage=1, foss=None):
         lang_list_choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
 
     cache.set(cache_key, lang_list_choices, timeout=CACHE_TUTORIALS)
+    register_cache_key(cache_key)
     return lang_list_choices

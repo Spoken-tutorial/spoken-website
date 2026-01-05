@@ -30,6 +30,18 @@ from django.template.context_processors import csrf
 from donate.models import Payee
 
 from django.core.cache import cache
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.cache import caches
+from django.shortcuts import render, redirect
+
+from cms.cache_registry import list_cache_keys, unregister_cache_key
+from django.utils.safestring import mark_safe
+from django.forms.models import model_to_dict
+from django.utils.html import escape
+
+
+cache = caches['default']
+
 
 def dispatcher(request, permalink=''):
     if permalink == '':
@@ -511,7 +523,7 @@ def verify_email(request):
 @login_required
 def manage_cache(request):
 
-    if not request.user.groups.filter(name='Technical-Team').exists():
+    if not request.user.groups.filter(name__in=['Technical-Team', 'Administrator']).exists():
         raise PermissionDenied('You are not allowed to view this page!')
 
     context = {}
@@ -535,6 +547,39 @@ def manage_cache(request):
                     messages.success(request, f"memcache cleared successfully")
                 except Exception as e:
                     messages.error(request, f"An error occurred while clearing cache: {e}")
-                    print(f"cache error -- {e}")
+                    
+            elif deletion_type == 'homepage':
+                try:
+                    from cms.cache_registry import list_cache_keys
+                    all_keys = list_cache_keys()
+                    homepage_keys = [
+                        key for key in all_keys
+                        if key.startswith((
+                            'tutorial_search_foss:',
+                            'tutorial_search_lang:',
+                            'tutorials_list:',
+                        ))
+                    ]
+
+                    if homepage_keys:
+                        for key in homepage_keys:
+                            cache.delete(key)
+                            unregister_cache_key(key)
+                        messages.success(
+                            request,
+                            "Homepage cache cleared successfully. "
+                            "Deleted {} cache entries.".format(len(homepage_keys))
+                        )
+                    else:
+                        messages.warning(
+                            request,
+                            "Homepage cache keys were not found or already expired."
+                        )
+
+                except Exception as e:
+                    messages.error(
+                        request,
+                        "An error occurred while clearing homepage cache: {}".format(e)
+                    )
         
     return render(request, status_template, context=context) # return to payment page site
