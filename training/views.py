@@ -95,57 +95,85 @@ class TrainingEventCreateView(CreateView):
 
 #ILW main page
 class TrainingEventsListView(ListView):
-	model = TrainingEvents
-	raw_get_data = None
-	header = None
-	collection = None
+    model = TrainingEvents
+    raw_get_data = None
+    header = None
+    collection = None
 
-	def dispatch(self, *args, **kwargs):
-		self.status = self.kwargs['status']
-		today = date.today()
-		self.show_myevents = False
-		if self.request.user:
-			myevents = TrainingEvents.objects.filter(id__in=Participant.objects.filter(user_id=self.request.user.id).values('event_id'))
-			if myevents:
-				self.show_myevents = True
+    def dispatch(self, *args, **kwargs):
+        self.status = self.kwargs['status']
+        today = date.today()
+        self.show_myevents = False
+        
+        if self.request.user:
+            myevents = TrainingEvents.objects.filter(id__in=Participant.objects.filter(user_id=self.request.user.id).values('event_id'))
+            if myevents:
+                self.show_myevents = True
 
-		if self.status == 'completed':
-			self.events = TrainingEvents.objects.filter(event_end_date__lt=today).order_by('-event_end_date')
-		if self.status == 'ongoing':
-			self.events = TrainingEvents.objects.filter(event_end_date__gte=today).order_by('registartion_end_date')
-		if self.status == 'myevents':
-			participant = Participant.objects.filter(
-				Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
-				user_id=self.request.user.id)
-			self.events = participant
+        if self.status == 'completed':
+            self.events = TrainingEvents.objects.filter(event_end_date__lt=today).order_by('-event_end_date')
+        if self.status == 'ongoing':
+            self.events = TrainingEvents.objects.filter(event_end_date__gte=today).order_by('registartion_end_date')
+        if self.status == 'myevents':
+            participants = Participant.objects.filter(
+                Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
+                user_id=self.request.user.id)
+            self.participants = participants  # Store participants separately
+            # Get TrainingEvents for filtering
+            event_ids = participants.values_list('event_id', flat=True).distinct()
+            self.events = TrainingEvents.objects.filter(id__in=event_ids)
 
-		self.raw_get_data = self.request.GET.get('o', None)
-		self.queryset = get_sorted_list(
-			self.request,
-			self.events,
-			self.header,
-			self.raw_get_data
-		)
+        self.raw_get_data = self.request.GET.get('o', None)
+        self.queryset = get_sorted_list(
+            self.request,
+            self.events,
+            self.header,
+            self.raw_get_data
+        )
 
-		self.collection= ViewEventFilter(self.request.GET, queryset=self.queryset, user=self.request.user)
-		return super(TrainingEventsListView, self).dispatch(*args, **kwargs)
+        self.collection = ViewEventFilter(self.request.GET, queryset=self.queryset, user=self.request.user)
+        return super(TrainingEventsListView, self).dispatch(*args, **kwargs)
 
-	def get_context_data(self, **kwargs):
-		context = super(TrainingEventsListView, self).get_context_data(**kwargs)
-		context['form'] = self.collection.form
-		page = self.request.GET.get('page')
-		collection = get_page(self.collection.qs, page)
-		context['collection'] =  collection
-		context['ordering'] = get_field_index(self.raw_get_data)
-		context['status'] =  self.status
-		context['events'] =  self.events
-		context['show_myevents'] = self.show_myevents
-		context['ILW_ONLINE_TEST_URL'] = settings.ILW_ONLINE_TEST_URL
-		context['HN_API'] = HN_API
-		
-		if self.request.user:
-			context['user'] = self.request.user
-		return context
+    def get_context_data(self, **kwargs):
+        context = super(TrainingEventsListView, self).get_context_data(**kwargs)
+        context['form'] = self.collection.form
+        
+        if self.status == 'myevents':
+            # Get filtered events from the filter
+            filtered_events = self.collection.qs
+            
+            # Get participant data for the filtered events
+            if self.request.user:
+                participants = Participant.objects.filter(
+                    Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
+                    user_id=self.request.user.id,
+                    event_id__in=filtered_events.values_list('id', flat=True)
+                )
+                
+                # Order participants according to filtered events order
+                event_order = {event.id: idx for idx, event in enumerate(filtered_events)}
+                participants_list = list(participants)
+                participants_list.sort(key=lambda x: event_order.get(x.event_id, 0))
+
+                page = self.request.GET.get('page')
+                collection = get_page(participants_list, page)
+                context['collection'] = collection
+        else:
+            page = self.request.GET.get('page')
+            collection = get_page(self.collection.qs, page)
+            context['collection'] = collection
+        
+        context['ordering'] = get_field_index(self.raw_get_data)
+        context['status'] = self.status
+        context['events'] = self.events
+        context['show_myevents'] = self.show_myevents
+        context['ILW_ONLINE_TEST_URL'] = settings.ILW_ONLINE_TEST_URL
+        context['HN_API'] = HN_API
+        
+        if self.request.user:
+            context['user'] = self.request.user
+            
+        return context
 
 def _validate_parameters(parameter, value):
 	if value is None:
@@ -157,6 +185,7 @@ def _validate_parameters(parameter, value):
 	if parameter == 'event_id':
 		return value.isnumeric()
 	return True
+
 
 @csrf_exempt
 def register_user(request):
