@@ -1217,8 +1217,8 @@ class ILWTestCertificate(object):
     if event.event_type != "INTERN":
         imgDoc.drawCentredString(405, 470, "Certificate for Completion of Training")
         # Draw image on Canvas and save PDF in buffer
-        imgPath = get_signature(training_start)
-        imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+    imgPath = get_signature(training_start)
+    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
 
     #password
     certificate_pass = ''
