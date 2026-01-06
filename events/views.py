@@ -1,4 +1,5 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
+from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from .models import StudentBatch
 from django.urls import reverse
 
@@ -19,7 +20,7 @@ from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 
 from django.http import Http404
@@ -86,7 +87,7 @@ from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
 
 from mdldjango.get_or_create_participant import encript_password
-from .helpers import send_bulk_student_reset_mail
+from .helpers import send_bulk_student_reset_mail, get_fossmdlcourse
 from .certificates import *
 
 def can_clone_training(training):
@@ -262,6 +263,9 @@ def is_invigilator(user):
 
 def is_school_training_manager(user):
     return user.groups.filter(name="School Training Manager").exists()
+
+def is_tech_team(user):
+    return user.groups.filter(name="Technical-Team").exists()
 
 def get_page(resource, page, limit=20):
     paginator = Paginator(resource, limit)
@@ -1853,6 +1857,7 @@ def training_participant_ceritificate(request, wid, participant_id):
 
     return response
 
+
 @login_required
 def test_request(request, role, rid = None):
     ''' Test request by organiser '''
@@ -1900,19 +1905,21 @@ def test_request(request, role, rid = None):
             errmsg = ""
             try:
                 t.save()
-            except IntegrityError:
+            except IntegrityError as e:
+                print(f"Test creation failed for {user.email}: {e}")
                 error = 1
                 errmsg = "Test already created"
                 prev_test = Test.objects.filter(organiser = t.organiser_id, academic = t.academic, foss = t.foss_id, tdate = t.tdate, ttime = t.ttime)
                 if prev_test:
                     messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
                 
-            if t and t.training_id:
+            if not error and t.id and t.training_id:
                 tras = TrainingAttend.objects.filter(training=t.training)
-                try:
-                    fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
-                except FossMdlCourses.MultipleObjectsReturned:
-                    fossmdlcourse = FossMdlCourses.objects.get(id = t.training.fossmdlmap_id)
+                fossmdlcourse = get_fossmdlcourse(t.foss_id, fossmdlmap_id=t.training.fossmdlmap_id)
+                # try:
+                #     fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
+                # except FossMdlCourses.MultipleObjectsReturned:
+                #     fossmdlcourse = FossMdlCourses.objects.get(id = t.training.fossmdlmap_id)
                 for tra in tras:
                     user = tra.student.user
                     mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
@@ -2150,10 +2157,11 @@ def test_attendance(request, tid):
                             if ta.status > 1:
                                 continue
                         except TestAttendance.DoesNotExist:
-                            try:
-                                fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
-                            except FossMdlCourses.MultipleObjectsReturned:
-                                fossmdlcourse = FossMdlCourses.objects.get(id = test.training.fossmdlmap_id)
+                            fossmdlcourse = get_fossmdlcourse(test.foss_id, fossmdlmap_id=test.training.fossmdlmap_id)
+                            # try:
+                            #     fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                            # except FossMdlCourses.MultipleObjectsReturned:
+                            #     fossmdlcourse = FossMdlCourses.objects.get(id = test.training.fossmdlmap_id)
                             ta = TestAttendance()
                             ta.test_id = test.id
                             ta.mdluser_id = users[u]
@@ -2165,10 +2173,11 @@ def test_attendance(request, tid):
                         if ta:
                             #todo: if the status = 2 check in moodle if he completed the test set status = 3 (completed)
                             t = TestAttendance.objects.get(mdluser_id = ta.mdluser_id, test_id = tid)
-                            try:
-                                fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
-                            except FossMdlCourses.MultipleObjectsReturned:
-                                fossmdlcourse = FossMdlCourses.objects.get(id = test.training.fossmdlmap_id)
+                            fossmdlcourse = get_fossmdlcourse(test.foss_id, fossmdlmap_id=test.training.fossmdlmap_id)
+                            # try:
+                            #     fossmdlcourse = FossMdlCourses.objects.get(foss_id = test.foss_id)
+                            # except FossMdlCourses.MultipleObjectsReturned:
+                                # fossmdlcourse = FossMdlCourses.objects.get(id = test.training.fossmdlmap_id)
                             t.mdlcourse_id = fossmdlcourse.mdlcourse_id
                             t.mdlquiz_id = fossmdlcourse.mdlquiz_id
                             t.status = 1
@@ -2237,10 +2246,11 @@ def test_attendance(request, tid):
                 instance.mdluser_id = mdluser.id
                 # get course and quiz id
                 foss = test.foss
-                try:
-                    f = FossMdlCourses.objects.get(foss=foss)
-                except FossMdlCourses.MultipleObjectsReturned:
-                    f = FossMdlCourses.objects.get(foss=test.training.fossmdlmap_id)
+                f = get_fossmdlcourse(foss.id, fossmdlmap_id=test.training.fossmdlmap_id)
+                # try:
+                #     f = FossMdlCourses.objects.get(foss=foss)
+                # except FossMdlCourses.MultipleObjectsReturned:
+                #     f = FossMdlCourses.objects.get(foss=test.training.fossmdlmap_id)
                 instance.mdlcourse_id = f.mdlcourse_id
                 instance.mdlquiz_id = f.mdlquiz_id
                 instance.mdlattempt_id = 0
@@ -2940,15 +2950,41 @@ def ajax_district_collage(request):
 
 @csrf_exempt
 def ajax_state_collage(request):
-    """ Ajax: Get the Colleges (Academic) based on District selected """
+
+    if request.method == 'GET':
+        return HttpResponse(
+            json.dumps('<option value="">---------</option>'),
+            content_type='application/json'
+        )
     if request.method == 'POST':
         state = request.POST.get('state')
-        collages = AcademicCenter.objects.filter(state=state).order_by('institution_name')
-        tmp = '<option value = None> --------- </option>'
-        if collages:
-            for i in collages:
-                tmp +='<option value='+str(i.id)+'>'+i.institution_name+', '+i.academic_code+'</option>'
-        return HttpResponse(json.dumps(tmp), content_type='application/json')
+
+        if not state:
+            return HttpResponse(
+                json.dumps('<option value="">---------</option>'),
+                content_type='application/json'
+            )
+
+        collages = (
+            AcademicCenter.objects
+            .filter(state_id=int(state))
+            .order_by('institution_name')
+        )
+
+        options = ['<option value="">---------</option>']
+
+        for clg in collages:
+            options.append(
+                f'<option value="{clg.id}">'
+                f'{clg.institution_name}, {clg.academic_code}'
+                f'</option>'
+            )
+        return HttpResponse(
+            json.dumps(''.join(options)),
+            content_type='application/json'
+        )
+    return HttpResponse(status=405)
+
 
 
 @csrf_exempt

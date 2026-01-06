@@ -25,6 +25,7 @@ urlpatterns = [
 	url(r'^accounts/verify/$',  verify_email, name='verify_email'),
 	url(r'^accounts/confirm_student/(?P<token>\w+)/$',  confirm_student, name='confirm_student'),
 	url(r'^purchase',  purchase, name='purchase'),
+	url(r'^manage-cache/$',  manage_cache, name='manage_cache'),
 	
 
 	#sitemaps
