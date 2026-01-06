@@ -10,6 +10,7 @@ from creation.models import TutorialSummaryCache, TutorialResource, FossCategory
 from events.models import Testimonials
 from cms.models import Notification, Event
 from .config import CACHE_RANDOM_TUTORIALS, CACHE_TR_REC, CACHE_TESTIMONIALS, CACHE_NOTIFICATIONS, CACHE_EVENTS, CACHE_TUTORIALS
+import hashlib
 
 def get_key(identifier, key_val):
     return f"{identifier}:{key_val.lower().strip().replace(' ','_')}"
@@ -122,23 +123,43 @@ def get_tutorials_list(foss, lang):
 
 # ----  Foss Choice For Search Bar ----
 def get_foss_choice(show_on_homepage=1, lang=None):
+    if lang and len(lang) > 50:
+        lang = lang[:50]
+
     if lang:
-        cache_key = get_key("tutorial_search_foss", f"{show_on_homepage}:{lang}")
+        raw_key = f"{show_on_homepage}:{lang}"
     else:
-        cache_key = f"tutorial_search_foss:{show_on_homepage}:all"
+        raw_key = f"{show_on_homepage}:all"
+
+    hashed_key = hashlib.md5(raw_key.encode("utf-8")).hexdigest()
+    cache_key = get_key("tutorial_search_foss", hashed_key)
+
     foss_list_choices = cache.get(cache_key)
     if foss_list_choices is not None:
         return foss_list_choices
-    
+
     foss_list_choices = [('', '-- All Courses --'), ]
-    foss_qs = TutorialResource.objects.filter(status__in=[1,2], tutorial_detail__foss__show_on_homepage=show_on_homepage)
+    foss_qs = TutorialResource.objects.filter(
+        status__in=[1,2],
+        tutorial_detail__foss__show_on_homepage=show_on_homepage
+    )
     if lang:
         foss_qs = foss_qs.filter(language__name=lang)
-    foss_list = foss_qs.values('tutorial_detail__foss__foss').annotate(
-            Count('id')).order_by('tutorial_detail__foss__foss').values_list('tutorial_detail__foss__foss', 'id__count').distinct()
+
+    foss_list = foss_qs.values(
+        'tutorial_detail__foss__foss'
+    ).annotate(
+        Count('id')
+    ).order_by(
+        'tutorial_detail__foss__foss'
+    ).values_list(
+        'tutorial_detail__foss__foss', 'id__count'
+    ).distinct()
 
     for foss_row in foss_list:
-            foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')'))
+        foss_list_choices.append(
+            (str(foss_row[0]), str(foss_row[0]) + ' (' + str(foss_row[1]) + ')')
+        )
 
     cache.set(cache_key, foss_list_choices, timeout=CACHE_TUTORIALS)
     return foss_list_choices
