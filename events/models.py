@@ -24,6 +24,7 @@ from events.signals import revoke_student_permission
 
 #creation app models
 from creation.models import FossAvailableForWorkshop, FossAvailableForTest
+from spoken.config import SUBSCRIPTION_CHOICES
 
 
 PAYMENT_STATUS_CHOICES =(
@@ -32,9 +33,7 @@ PAYMENT_STATUS_CHOICES =(
 COLLEGE_TYPE_CHOICES =(
     ('', '-----'), ('Engg', 'Engg'), ('ASC', 'ASC'), ('Polytechnic', 'Polytechnic'), ('University', 'University'), ('School', 'School')
   )
-SUBSCRIPTION_CHOICES = (
-      ('', '-----'), ('365', 'One_Year'), ('182', 'Six_Months')
-    )
+
 
 
 # Create your models here.
@@ -882,7 +881,7 @@ class TrainingRequest(models.Model):
   participants = models.PositiveIntegerField(default=0)
   course_type = models.PositiveIntegerField(default=None)
   #status = models.BooleanField(default=False)
-  status = models.PositiveSmallIntegerField(default=0)
+  status = models.PositiveSmallIntegerField(default=0) # values: 0: ongoing, 1: closed
   cert_status = models.PositiveSmallIntegerField(default=0)
   created = models.DateTimeField(auto_now_add = True)
   updated = models.DateTimeField(auto_now = True)
