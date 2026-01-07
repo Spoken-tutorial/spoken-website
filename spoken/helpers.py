@@ -10,7 +10,10 @@ from creation.models import TutorialSummaryCache, TutorialResource, FossCategory
 from events.models import Testimonials
 from cms.models import Notification, Event
 from cms.cache_registry import register_cache_key
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 from .config import CACHE_RANDOM_TUTORIALS, CACHE_TR_REC, CACHE_TESTIMONIALS, CACHE_NOTIFICATIONS, CACHE_EVENTS, CACHE_TUTORIALS
 
 
