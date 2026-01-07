@@ -13,6 +13,7 @@ from cms.cache_registry import register_cache_key
 
 from .config import CACHE_RANDOM_TUTORIALS, CACHE_TR_REC, CACHE_TESTIMONIALS, CACHE_NOTIFICATIONS, CACHE_EVENTS, CACHE_TUTORIALS
 
+
 def get_key(identifier, key_val):
     return f"{identifier}:{key_val.lower().strip().replace(' ','_')}"
 

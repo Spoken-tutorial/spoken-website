@@ -118,8 +118,8 @@ class TrainingEventsListView(ListView):
             participants = Participant.objects.filter(
                 Q(payment_status__status=1)|Q(registartion_type__in=(1,3)),
                 user_id=self.request.user.id)
-            self.participants = participants  # Store participants separately
-            # Get TrainingEvents for filtering
+            self.participants = participants  
+			
             event_ids = participants.values_list('event_id', flat=True).distinct()
             self.events = TrainingEvents.objects.filter(id__in=event_ids)
 

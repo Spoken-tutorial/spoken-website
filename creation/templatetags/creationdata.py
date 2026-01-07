@@ -168,8 +168,24 @@ def brochure(foss, lang):
             return file_path
     return False
 
+# def get_thumb_path(row, append_str):
+#     path = settings.MEDIA_URL + 'videos/' + str(row.foss_id) + '/' + str(row.id) + '/' + row.tutorial.replace(' ', '-') + '-' + append_str + '.png'
+#     return path
+
 def get_thumb_path(row, append_str):
-    path = settings.MEDIA_URL + 'videos/' + str(row.foss_id) + '/' + str(row.id) + '/' + row.tutorial.replace(' ', '-') + '-' + append_str + '.png'
+    # Prevent crash if passed a string or wrong type
+    if not hasattr(row, "foss_id") or not hasattr(row, "tutorial"):
+        return ""
+
+    tutorial_name = row.tutorial.replace(' ', '-') if hasattr(row, "tutorial") else ""
+
+    path = (
+        settings.MEDIA_URL +
+        'videos/' + 
+        str(row.foss_id) + '/' +
+        str(row.id) + '/' +
+        tutorial_name + '-' + append_str + '.png'
+    )
     return path
 
 def get_srt_path(tr):

@@ -350,6 +350,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'user_authorized': is_authorized_user,
         'restriction_date': TUTORIAL_RESTRICTION_DATE.strftime("%-d %b. %Y")
     }
+
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
 # link to watch what is spoken tutorial video in english

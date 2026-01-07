@@ -731,7 +731,7 @@ def koha_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = 'Verify at: https://spoken-tutorial.org/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'college': college}
             certificate = create_koha_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1172,7 +1172,7 @@ def create_koha_main_workshop9march_certificate(certificate_path, name, qrcode, 
 #                     uniqueness = True
 #                 else:
 #                     num += 1
-#             qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+#             qrcode = 'Verify at: http://spoken-tutorial.org/verify/{0} '.format(short_key)
 #             details = {'name': name, 'serial_key': short_key, 'rcid': rcid, 'remote': remote}
 #             certificate = create_koha_12oct_rc_certificate(certificate_path, details,
 #                                                              qrcode, type, paper, workshop, file_name)

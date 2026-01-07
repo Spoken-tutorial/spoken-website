@@ -14,6 +14,7 @@ def is_valid_page_param(request):
         return False
 
 def check_server_status():
+    return True
     try:
         load1, load5, load15 = os.getloadavg() # CPU load average        
         cpu_cores = os.cpu_count()

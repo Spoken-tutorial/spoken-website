@@ -102,6 +102,43 @@ def make_hdfc_session_request(payee_obj_new, headers, payload):
         return None
     return None
 
+# def make_hdfc_session_request(payee_obj_new, headers, payload):
+#     try:
+#         response = requests.post(
+#             settings.HDFC_API_URL,
+#             json=payload,
+#             headers=headers,
+#             timeout=15
+#         )
+#         try:
+#             response_data = response.json()
+#         except ValueError:
+#             return None   # ← prevents JSONDecodeError
+
+#     except requests.exceptions.RequestException:
+#         return None
+
+#     if response.status_code == 200:
+#         payment_links = response_data.get("payment_links", {})
+#         payment_link = payment_links.get("web")
+#         if not payment_link:
+#             return None
+#         transaction = save_ilw_hdfc_session_data(response_data)
+#         payee_obj_new.transaction = transaction
+#         payee_obj_new.save()
+#         return payment_link
+#     else:
+#         transaction = save_ilw_hdfc_session_data(
+#             response_data,
+#             payee_obj_new.amount
+#         )
+#         payee_obj_new.transaction = transaction
+#         payee_obj_new.save()
+#         return None
+
+
+
+
 @csrf_exempt
 def check_ilw_payment_status(request, order_id):
     """
