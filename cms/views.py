@@ -440,7 +440,7 @@ def change_password(request):
     if pcode and username:
         user = User.objects.get(username=username).first()
         if user:
-            profile = Profile.objects.filter(user=user,confirmation_code=pcode).order_by('id').first()
+            profile = Profile.objects.filter(user=user,confirmation_code=pcode).first()
 
             if profile:
                 user.backend = 'django.contrib.auth.backends.ModelBackend'
@@ -475,7 +475,8 @@ def change_password(request):
 
             messages.success(request,"Your account password has been updated successfully!")
             return HttpResponseRedirect("/accounts/view-profile/" + user.username)
-
+    if profile is None:
+        profile = request.user.profile_set.first()
     context = {
         'form': form,
         'profile': profile,
