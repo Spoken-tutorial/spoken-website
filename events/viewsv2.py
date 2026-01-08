@@ -705,6 +705,7 @@ class TrainingRequestEditView(CreateView):
       self.training.department = selectedDept
       self.training.batch = selectedBatch
       self.training.course_type = form.cleaned_data['course_type']
+      self.training.fossmdlmap = form.cleaned_data.get('fossmdlmap')
 
       if self.training.batch.is_foss_batch_acceptable(selectedCourse):
         self.training.sem_start_date = form.cleaned_data['sem_start_date']
