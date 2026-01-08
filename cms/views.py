@@ -26,7 +26,7 @@ from events.models import Student
 from mdldjango.models import MdlUser
 from mdldjango.urls import *
 from django.template.context_processors import csrf
-
+from cms.cache_registry import unregister_cache_key,list_cache_keys
 from donate.models import Payee
 
 from django.core.cache import cache
@@ -511,7 +511,7 @@ def verify_email(request):
 @login_required
 def manage_cache(request):
 
-    if not request.user.groups.filter(name='Technical-Team').exists():
+    if not request.user.groups.filter(name__in=['Technical-Team', 'Administrator']).exists():
         raise PermissionDenied('You are not allowed to view this page!')
 
     context = {}
@@ -535,6 +535,39 @@ def manage_cache(request):
                     messages.success(request, f"memcache cleared successfully")
                 except Exception as e:
                     messages.error(request, f"An error occurred while clearing cache: {e}")
-                    print(f"cache error -- {e}")
+                    
+            elif deletion_type == 'homepage':
+                try:
+                    all_keys = list_cache_keys()
+                    homepage_keys = [
+                        key for key in all_keys
+                        if key.startswith((
+                            'tutorial_search_foss:',
+                            'tutorial_search_lang:',
+                        ))
+                    ]
+
+                    if homepage_keys:
+                        for key in homepage_keys:
+                            cache.delete(key)
+                            unregister_cache_key(key)
+                        messages.success(
+                            request,
+                            "Homepage cache cleared successfully.<br>"
+                            "Deleted keys:<br>"
+                            + "<br>".join(homepage_keys)
+                        )
+
+                    else:
+                        messages.warning(
+                            request,
+                            "Homepage cache keys were not found or already expired."
+                        )
+
+                except Exception as e:
+                    messages.error(
+                        request,
+                        "An error occurred while clearing homepage cache: {}".format(e)
+                    )
         
     return render(request, status_template, context=context) # return to payment page site

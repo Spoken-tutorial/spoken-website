@@ -9,6 +9,7 @@ from django.db.models import Q, Count
 from creation.models import TutorialSummaryCache, TutorialResource, FossCategory
 from events.models import Testimonials
 from cms.models import Notification, Event
+from cms.cache_registry import register_cache_key
 from .config import CACHE_RANDOM_TUTORIALS, CACHE_TR_REC, CACHE_TESTIMONIALS, CACHE_NOTIFICATIONS, CACHE_EVENTS, CACHE_TUTORIALS
 import hashlib
 
@@ -162,8 +163,8 @@ def get_foss_choice(show_on_homepage=1, lang=None):
         )
 
     cache.set(cache_key, foss_list_choices, timeout=CACHE_TUTORIALS)
+    register_cache_key(cache_key)
     return foss_list_choices
-
 
 
 # ----  Language Choice For Search Bar ----
@@ -187,4 +188,5 @@ def get_lang_choice(show_on_homepage=1, foss=None):
         lang_list_choices.append((str(lang_row[0]), str(lang_row[0]) + ' (' + str(lang_row[1]) + ')'))
 
     cache.set(cache_key, lang_list_choices, timeout=CACHE_TUTORIALS)
+    register_cache_key(cache_key)
     return lang_list_choices
