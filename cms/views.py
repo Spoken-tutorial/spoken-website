@@ -4,9 +4,7 @@ from builtins import range
 import random
 import string
 
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
-from django.middleware.csrf import get_token as csrf
 
 from cms.models import Profile
 from cms.forms import ChangePasswordForm
@@ -277,12 +275,13 @@ def account_logout(request):
 @login_required
 def account_profile(request, username):
     user = request.user
-    try:
-    #   profile = Profile.objects.get(user_id=user.id)
-        profile = Profile.objects.filter(user_id=user.id).first()
-    except:
-      profile = create_profile(user)
+
+    profile = Profile.objects.filter(user_id=user.id).order_by('id').first()
+    if not profile:
+        profile = create_profile(user)
+
     old_file_path = settings.MEDIA_ROOT + str(profile.picture)
+
     new_file_path = None
     if request.method == 'POST':
         form = ProfileForm(user, request.POST, request.FILES, instance = profile)
@@ -338,14 +337,10 @@ def account_view_profile(request, username):
         raise PermissionDenied('You are not allowed to view this page!')
 
     user = User.objects.get(username = username)
-    profile = None
-    try:
-    #   profile = Profile.objects.get(user = user)
-        profile = Profile.objects.filter(user=user).first()
-    except:
-      profile = create_profile(user)
+    profile = Profile.objects.filter(user=user).first()
+    if not profile:
+        profile = create_profile(user)
 
-    
     context = {
         'profile' : profile,
         'media_url' : settings.MEDIA_URL,
@@ -443,16 +438,13 @@ def change_password(request):
     profile = None
 
     if pcode and username:
-        try:
-            user = User.objects.get(username=username)
+        user = User.objects.get(username=username).first()
+        if user:
             profile = Profile.objects.filter(user=user,confirmation_code=pcode).order_by('id').first()
 
             if profile:
                 user.backend = 'django.contrib.auth.backends.ModelBackend'
                 login(request, user)
-
-        except User.DoesNotExist:
-            pass
 
     if request.user.is_anonymous():
         return HttpResponseRedirect('/accounts/login/?next=/accounts/change-password/')
@@ -474,7 +466,7 @@ def change_password(request):
             user = profile.user
             user.set_password(form.cleaned_data['new_password'])
             user.save()
-
+            # change if any mdl user pass too            
             from mdldjango.views import changeMdlUserPass
             changeMdlUserPass(user.email, form.cleaned_data['new_password'])
 
