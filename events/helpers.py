@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .models import FossMdlCourses
 
+
 def get_academic_years(default=settings.ACADEMIC_DURATION):
     current_year = dt.datetime.now().year
     year_choice = [('', '-----')]
@@ -70,9 +71,14 @@ def send_bulk_student_reset_mail(ac, batches, count, new_password, user):
         Admin Team
     """
 
-    from_email  = settings.ADMINISTRATOR_EMAIL
+    admin_email = settings.ADMINISTRATOR_EMAIL
+    if isinstance(admin_email, (list, tuple)):
+        from_email = admin_email[0]
+    else:
+        from_email = admin_email
     recipient_list = [user.email, settings.DEVELOPER_EMAIL]
     send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+    
 
 
 def get_fossmdlcourse(foss_id, fossmdlmap_id=None):
