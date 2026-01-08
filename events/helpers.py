@@ -51,73 +51,28 @@ def get_updated_form(transaction, form_type):
         
     return form
 
-
-def send_bulk_student_reset_mail(school, batches, total_students, new_password, user):
+def send_bulk_student_reset_mail(ac, batches, count, new_password, user):
     batch_names = ", ".join([f"{x.id} - {x.batch_name}" for x in batches])
-
     subject = "Password Reset Notification"
     message = f"""
         Dear {user.first_name},
 
-        Please find below the details of the recent student password update:
-        Academic Center: {school.institution_name}
+        Please find below the details of the recent student password update: 
+        Academic Center: {ac.institution_name}
         Batches: {batch_names}
-        Total student count: {total_students}
+        Total student count: {count}
         New password: {new_password}
         Changed by: {user.email}
-
-        For security reasons, please inform students to change their password immediately after login.
+    
+        For security reasons, please inform students to change your password immediately after login.
 
         Regards,
         Admin Team
-        """
+    """
 
-    # Fix: Ensure from_email is properly formatted
-    from_email = settings.ADMINISTRATOR_EMAIL
-    
-    # If ADMINISTRATOR_EMAIL is a tuple/list, get the first email
-    if isinstance(from_email, (list, tuple)):
-        from_email = from_email[0] if from_email else settings.DEFAULT_FROM_EMAIL
-    
-    # Ensure it's a string and not empty
-    if not from_email or not isinstance(from_email, str):
-        from_email = settings.DEFAULT_FROM_EMAIL or 'webmaster@localhost'
-    
-    # Ensure it's properly formatted
-    if '@' in from_email and ' ' not in from_email:
-        # If it's just an email without a name, format it properly
-        from_email = f"Admin Team <{from_email}>"
-    
-    # Handle recipient list similarly
-    recipient_list = []
-    
-    # Add user email
-    if user.email:
-        recipient_list.append(user.email)
-    
-    # Add developer email
-    dev_email = settings.DEVELOPER_EMAIL
-    if isinstance(dev_email, (list, tuple)):
-        if dev_email:  # Check if not empty
-            recipient_list.extend([email for email in dev_email if email])
-    elif dev_email and isinstance(dev_email, str):
-        recipient_list.append(dev_email)
-    
-    print("=== SEND BULK RESET MAIL DEBUG ===")
-    print("From Email Value:", from_email)
-    print("From Email Type :", type(from_email))
-    print("Recipient List :", recipient_list)
-    print("Recipient Types:", [type(x) for x in recipient_list])
-    print("Subject        :", subject)
-    print("=================================")
-    
-    try:
-        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
-    except Exception as e:
-        print(f"Error sending email: {e}")
-        # Fallback to default from_email
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list, fail_silently=True)
-
+    from_email  = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [user.email, settings.DEVELOPER_EMAIL]
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
 def get_fossmdlcourse(foss_id, fossmdlmap_id=None):
     if fossmdlmap_id is not None:
