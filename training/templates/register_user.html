@@ -141,7 +141,7 @@
                           {{ form.state.errors }}
                       </div>
                   </div>
-                  {% if event_obj.event_type == "CDP" or event_obj.event_type == "PDP" or event_obj.event_type == "HN" %}
+                  {% if event_obj.event_type == "CDP" or event_obj.event_type == "PDP"  %}
                     <div class="form-group">
                       <label for="id_city" class="col-lg-4 control-label">City*</label>
                       <div class="col-lg-8">
@@ -150,7 +150,7 @@
                       </div>
                     </div>
                   {% endif %}
-                  {% if event_obj.event_type == "CDP" or event_obj.event_type == "PDP" or event_obj.event_type == "HN" %}
+                  {% if event_obj.event_type == "CDP" or event_obj.event_type == "PDP" %}
                     <input type="hidden" id="id_college" class="form-control"  name="college"  value="621">
                     <input type="hidden" id="id_event_type" class="form-control"  name="event_type"  value="{{event_obj.event_type}}">
                    
@@ -337,21 +337,39 @@
 <script type="text/javascript">
 
 function show_clg_list(){
-  var stateid  = $('#id_state').val();
+    var stateid = $('#id_state').val();
+
+    if (!stateid) return;
+
     $.ajax({
-                type : "POST",
-                url:"/software-training/ajax-state-collage/",
-                dataType : "json",
-                data: {
-                  'state' : stateid,
-                },
-                success: function(data)
-                {
-                    $('#id_college').html(data);
-                    $('#college-info').show();  
-                }
-              });
+        type: "POST",
+        url: "/software-training/ajax-state-collage/",
+        dataType: "json",
+        data: {
+            'state': stateid,
+        },
+        success: function (data) {
+
+            var collegeSelect = $('#id_college');
+            collegeSelect.html(data);
+
+            // Count valid college options (ignore "Select College")
+            var options = collegeSelect.find('option').filter(function () {
+                return $(this).val() && $(this).val() !== 'None';
+            });
+
+            if (options.length === 1) {
+                // AUTO-SELECT if only one college
+                collegeSelect.val(options.first().val()).trigger('change');
+                $('#college-info').hide();
+            } else {
+                // Multiple colleges → user selects
+                $('#college-info').show();
+            }
+        }
+    });
 }
+
 
 function payment_btn_activate(){
 var make_payment_btn = $('#make_payment');
@@ -385,7 +403,7 @@ $('#id_state').change(function(){
   var event_type  = "{{event_obj.event_type}}";
   var stateid  = $('#id_state').val();
    	show_clg_list();
-     if(event_type === "PDP" || event_type === "CDP" || event_type === "HN"){
+     if(event_type === "PDP" || event_type === "CDP" ){
 		    ajaxStrateFillDatas('', 'city', '');
       }else{
         show_clg_list();
