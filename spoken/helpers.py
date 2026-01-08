@@ -10,10 +10,6 @@ from creation.models import TutorialSummaryCache, TutorialResource, FossCategory
 from events.models import Testimonials
 from cms.models import Notification, Event
 from cms.cache_registry import register_cache_key
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 from .config import CACHE_RANDOM_TUTORIALS, CACHE_TR_REC, CACHE_TESTIMONIALS, CACHE_NOTIFICATIONS, CACHE_EVENTS, CACHE_TUTORIALS
 
 
@@ -47,7 +43,6 @@ def get_home_random_tutorials():
                     "foss", "first_tutorial", "first_tutorial__tutorial_detail", "first_tutorial__language")
         )
         cache.set(cache_key, tutorials, timeout=CACHE_RANDOM_TUTORIALS) # in sec
-        register_cache_key(cache_key)
     except Exception:
         tutorials = []
     return tutorials
@@ -67,7 +62,6 @@ def get_home_tr_rec(request=None):
         else:
             tr_rec = None
         cache.set(cache_key, tr_rec, timeout=CACHE_TR_REC) #seconds
-        register_cache_key(cache_key)
     except Exception as e:
         tr_rec = None
         if request is not None:
@@ -83,7 +77,6 @@ def get_home_testimonials():
         return testimonials
     testimonials = Testimonials.objects.all().order_by("?")[:2]
     cache.set(cache_key, testimonials, timeout=CACHE_TESTIMONIALS) # seconds
-    register_cache_key(cache_key)
     return testimonials
 
 # ---- 4. Notifications (shorter cache) ----
@@ -95,7 +88,6 @@ def get_home_notifications():
     today = dt.datetime.today()
     notifications = Notification.objects.filter(Q(start_date__lte=today) & Q(expiry_date__gte=today)).order_by("expiry_date")
     cache.set(cache_key, notifications, timeout=CACHE_NOTIFICATIONS)
-    register_cache_key(cache_key)
     return notifications
 
 # ---- 5. Upcoming events ----
@@ -107,7 +99,6 @@ def get_home_events():
     today = dt.datetime.today()
     events = Event.objects.filter(event_date__gte=today).order_by("event_date")[:2]
     cache.set(cache_key, events, timeout=CACHE_EVENTS)
-    register_cache_key(cache_key)
     return events
 
 # ----  Tutorials List ----
@@ -153,7 +144,6 @@ def get_foss_choice(show_on_homepage=1, lang=None):
     cache.set(cache_key, foss_list_choices, timeout=CACHE_TUTORIALS)
     register_cache_key(cache_key)
     return foss_list_choices
-
 
 
 # ----  Language Choice For Search Bar ----

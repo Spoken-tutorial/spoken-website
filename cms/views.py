@@ -549,67 +549,67 @@ def verify_email(request):
   return render(request, "cms/templates/verify_email.html", context)
 
 
-@staff_member_required
-def cache_tools(request):
+# @staff_member_required
+# def cache_tools(request):
 
-    keys = list_cache_keys()
-    value_output = None
+#     keys = list_cache_keys()
+#     value_output = None
 
-    if request.method == "POST":
+#     if request.method == "POST":
 
-        # ---------- VIEW A CACHE KEY ----------
-        if "view_key" in request.POST:
-            key = request.POST.get("cache_key").strip()
-            val = cache.get(key)
-            print("dfghjkdfghjk", val)
+#         # ---------- VIEW A CACHE KEY ----------
+#         if "view_key" in request.POST:
+#             key = request.POST.get("cache_key").strip()
+#             val = cache.get(key)
+#             print("dfghjkdfghjk", val)
 
-            if val is None:
-                value_output = f"No value stored for key: '{key}'"
+#             if val is None:
+#                 value_output = f"No value stored for key: '{key}'"
 
-            else:
-                try:
-                    # Convert QuerySet / list / tuple into list
-                    if hasattr(val, "__iter__") and not isinstance(val, (str, bytes, dict)):
-                        iterable = list(val)
-                    else:
-                        iterable = [val]
+#             else:
+#                 try:
+#                     # Convert QuerySet / list / tuple into list
+#                     if hasattr(val, "__iter__") and not isinstance(val, (str, bytes, dict)):
+#                         iterable = list(val)
+#                     else:
+#                         iterable = [val]
 
-                    pretty_lines = []
+#                     pretty_lines = []
 
-                    for item in iterable:
-                        # If model instance → convert to dict
-                        if hasattr(item, "_meta"):
-                            d = model_to_dict(item)
-                            pretty_lines.append(str(d))
-                        else:
-                            pretty_lines.append(repr(item))
+#                     for item in iterable:
+#                         # If model instance → convert to dict
+#                         if hasattr(item, "_meta"):
+#                             d = model_to_dict(item)
+#                             pretty_lines.append(str(d))
+#                         else:
+#                             pretty_lines.append(repr(item))
 
-                    pretty = "<br>".join(escape(line) for line in pretty_lines)
-                    value_output = mark_safe(f"<pre>{pretty}</pre>")
+#                     pretty = "<br>".join(escape(line) for line in pretty_lines)
+#                     value_output = mark_safe(f"<pre>{pretty}</pre>")
 
-                except Exception as e:
-                    # Fallback print
-                    value_output = mark_safe(f"<pre>{escape(repr(val))}</pre>")
+#                 except Exception as e:
+#                     # Fallback print
+#                     value_output = mark_safe(f"<pre>{escape(repr(val))}</pre>")
 
 
-        # ---------- DELETE ONE KEY ----------
-        elif "clear_key" in request.POST:
-            key = request.POST.get("cache_key").strip()
-            cache.delete(key)
-            unregister_cache_key(key)
-            messages.success(request, f"Key '{key}' deleted.")
-            return redirect("cache-tools")
+#         # ---------- DELETE ONE KEY ----------
+#         elif "clear_key" in request.POST:
+#             key = request.POST.get("cache_key").strip()
+#             cache.delete(key)
+#             unregister_cache_key(key)
+#             messages.success(request, f"Key '{key}' deleted.")
+#             return redirect("cache-tools")
 
-        # ---------- CLEAR ALL ----------
-        elif "clear_all" in request.POST:
-            cache.clear()
-            messages.success(request, "All cache cleared.")
-            return redirect("cache-tools")
+#         # ---------- CLEAR ALL ----------
+#         elif "clear_all" in request.POST:
+#             cache.clear()
+#             messages.success(request, "All cache cleared.")
+#             return redirect("cache-tools")
 
-    return render(request, "cms/cache_tools.html", {
-        "keys": keys,
-        "value_output": value_output
-    })
+#     return render(request, "cms/cache_tools.html", {
+#         "keys": keys,
+#         "value_output": value_output
+#     })
 
 @login_required
 def manage_cache(request):
@@ -648,7 +648,6 @@ def manage_cache(request):
                         if key.startswith((
                             'tutorial_search_foss:',
                             'tutorial_search_lang:',
-                            'tutorials_list:',
                         ))
                     ]
 
@@ -658,9 +657,11 @@ def manage_cache(request):
                             unregister_cache_key(key)
                         messages.success(
                             request,
-                            "Homepage cache cleared successfully. "
-                            "Deleted {} cache entries.".format(len(homepage_keys))
+                            "Homepage cache cleared successfully.<br>"
+                            "Deleted keys:<br>"
+                            + "<br>".join(homepage_keys)
                         )
+
                     else:
                         messages.warning(
                             request,
