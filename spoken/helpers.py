@@ -10,10 +10,24 @@ from creation.models import TutorialSummaryCache, TutorialResource, FossCategory
 from events.models import Testimonials
 from cms.models import Notification, Event
 from .config import CACHE_RANDOM_TUTORIALS, CACHE_TR_REC, CACHE_TESTIMONIALS, CACHE_NOTIFICATIONS, CACHE_EVENTS, CACHE_TUTORIALS
-import hashlib
+
+def normalize_cache_component(value, max_length=50):
+    """Normalize user-controlled input for cache key components.
+    
+    Applies: convert to string, strip whitespace, lowercase, truncate.
+    Returns empty string if value is None.
+    """
+    if value is None:
+        return ""
+    normalized = str(value).strip().lower()
+    return normalized[:max_length] if max_length > 0 else normalized
 
 def get_key(identifier, key_val):
-    return f"{identifier}:{key_val.lower().strip().replace(' ','_')}"
+    """Build a cache key by combining identifier and normalized value.
+    
+    Does not perform any normalization; expects key_val to be pre-normalized.
+    """
+    return f"{identifier}:{key_val}"
 
 def is_valid_foss(foss):
     if foss is None or foss == '': #for scenerio -- show all foss tutorials
@@ -103,19 +117,19 @@ def get_home_events():
 
 # ----  Tutorials List ----
 def get_tutorials_list(foss, lang):
-    foss = foss.lower().strip()
-    lang = lang.lower().strip()
-    cache_key = get_key("tutorials_list", f"{foss}:{lang}")
+    foss_norm = normalize_cache_component(foss)
+    lang_norm = normalize_cache_component(lang)
+    cache_key = f"tutorials_list:{foss_norm}:{lang_norm}"
     tutorials = cache.get(cache_key)
     if tutorials is not None:
         return tutorials
     queryset = TutorialResource.objects.filter(status__in=[1,2], tutorial_detail__foss__show_on_homepage = 1).select_related('tutorial_detail__level', 'tutorial_detail__foss', 'language')
-    if foss and lang:
-        collection = queryset.filter(tutorial_detail__foss__foss=foss, language__name=lang).order_by('tutorial_detail__level', 'tutorial_detail__order')
-    elif foss:
-        collection = queryset.filter(tutorial_detail__foss__foss=foss).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
-    elif lang:
-        collection = queryset.filter(language__name=lang).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+    if foss_norm and lang_norm:
+        collection = queryset.filter(tutorial_detail__foss__foss=foss_norm, language__name=lang_norm).order_by('tutorial_detail__level', 'tutorial_detail__order')
+    elif foss_norm:
+        collection = queryset.filter(tutorial_detail__foss__foss=foss_norm).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+    elif lang_norm:
+        collection = queryset.filter(language__name=lang_norm).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
         collection = queryset.order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
     cache.set(cache_key, collection, timeout=CACHE_TUTORIALS)
@@ -123,16 +137,12 @@ def get_tutorials_list(foss, lang):
 
 # ----  Foss Choice For Search Bar ----
 def get_foss_choice(show_on_homepage=1, lang=None):
-    if lang and len(lang) > 50:
-        lang = lang[:50]
+    lang_norm = normalize_cache_component(lang)
 
-    if lang:
-        raw_key = f"{show_on_homepage}:{lang}"
+    if lang_norm:
+        cache_key = f"tutorial_search_foss:{show_on_homepage}:{lang_norm}"
     else:
-        raw_key = f"{show_on_homepage}:all"
-
-    hashed_key = hashlib.md5(raw_key.encode("utf-8")).hexdigest()
-    cache_key = get_key("tutorial_search_foss", hashed_key)
+        cache_key = f"tutorial_search_foss:{show_on_homepage}:all"
 
     foss_list_choices = cache.get(cache_key)
     if foss_list_choices is not None:
@@ -143,8 +153,8 @@ def get_foss_choice(show_on_homepage=1, lang=None):
         status__in=[1,2],
         tutorial_detail__foss__show_on_homepage=show_on_homepage
     )
-    if lang:
-        foss_qs = foss_qs.filter(language__name=lang)
+    if lang_norm:
+        foss_qs = foss_qs.filter(language__name=lang_norm)
 
     foss_list = foss_qs.values(
         'tutorial_detail__foss__foss'
@@ -168,17 +178,20 @@ def get_foss_choice(show_on_homepage=1, lang=None):
 
 # ----  Language Choice For Search Bar ----
 def get_lang_choice(show_on_homepage=1, foss=None):
+    foss_norm = normalize_cache_component(foss)
+    
     if is_valid_foss(foss):
-        cache_key = get_key("tutorial_search_lang", f"{show_on_homepage}:{foss}")
+        cache_key = f"tutorial_search_lang:{show_on_homepage}:{foss_norm}"
     else:
         cache_key = f"tutorial_search_lang:{show_on_homepage}:all"
+    
     lang_list_choices = cache.get(cache_key)
     if lang_list_choices is not None:
         return lang_list_choices
     
     lang_qs = TutorialResource.objects.filter(status__in=[1,2], tutorial_detail__foss__show_on_homepage=show_on_homepage)
-    if foss:
-        lang_qs = lang_qs.filter(tutorial_detail__foss__foss=foss)
+    if foss_norm:
+        lang_qs = lang_qs.filter(tutorial_detail__foss__foss=foss_norm)
 
     lang_list_choices = [('', '-- All Languages --'), ]
     lang_list = lang_qs.values('language__name').annotate(
