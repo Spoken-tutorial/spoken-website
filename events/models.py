@@ -592,7 +592,10 @@ class StudentBatch(models.Model):
   batch_name = models.CharField(max_length=200, null=True)
 
   def __str__(self):
-    return '%s, %s Batch' % (self.department.name, self.year)
+    if self.batch_name:
+      return f"{self.batch_name} - [student count: {self.stcount}]" 
+    else:
+      return f"{self.department.name}, {self.year} Batch. [student count: {self.stcount}]"
 
   def get_batch_info(self):
     return '%s, %s, %s Batch' % (self.academic, self.department.name, self.year)
