@@ -334,6 +334,10 @@ def internal_computation(request, user_type):
 def home(request):
     if request.method == 'POST':
         form = CDContentForm(request.POST)
+        context = {
+            'status': False,
+            'path': ''
+        }
 
         if form.is_valid():
             try:
@@ -343,10 +347,10 @@ def home(request):
                 # response['Content-Disposition'] = 'attachment; filename=spoken-tutorial-cdcontent.zip'
                 # response['Content-Length'] = temp.tell()
                 # return response
-                context = {'path': '/media/cdimage/{}'.format(zipfile_name), 'status': True}
+                context['status'] = True
+                context['path'] = '/media/cdimage/{}'.format(zipfile_name)
             except Exception as e:
                 print(e)
-                context = {'path': '', 'status': False}
         return HttpResponse(json.dumps(context), content_type='application/json')
     else:
         form = CDContentForm()
@@ -358,10 +362,9 @@ def home(request):
         'payment_form': PayeeForm(user=request.user),
     }
     if request.user.is_authenticated():
-        payee_list = Payee.objects.prefetch_related(
+        context['payee_list']= Payee.objects.prefetch_related(
             'cdfosslanguages_set__foss','cdfosslanguages_set__lang',
             'payment_transaction').filter(user=request.user)
-        context['payee_list'] = payee_list
     context.update(csrf(request))
     context['organizer_paid'] = is_organizer_paid(request)
     return render(request, "cdcontent/templates/cdcontent_home.html", context)
