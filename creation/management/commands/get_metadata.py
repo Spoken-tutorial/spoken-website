@@ -34,33 +34,23 @@ class Command(BaseCommand):
             if raw: 
                 ids = [int(x.strip()) for x in raw.split(",") if x.strip() != ""]
             else:
-                ids = [x.id for x in FossCategory.objects.using('stats').filter(show_on_homepage=1).only('id')]
-            courses = FossCategory.objects.using('stats').filter(id__in=ids).order_by('foss')
-            # define final data schema
-            data = {}
-            course_details = []
-            total_size = 0.0
-            total_video_size = 0.0
-            total_srt_size = 0.0
-            total_courses = 0
-            total_tutorials = 0
-
+                ids = [x.id for x in FossCategory.objects.using('stats').all().only('id')]
+            courses = FossCategory.objects.using('stats').filter(id__in=ids)
+            data = []
             for course in courses:
-                qs = TutorialResource.objects.using('stats').filter(status=1, tutorial_detail__foss_id=course.id)
-                languages = qs.order_by('language__name').values_list('language__name', flat=True).distinct()
-                
-                # define individual course schema
+                total_size = 0.0
+                total_video_size = 0.0
+                total_srt_size = 0.0
+                tutorials_data = []
+                qs = TutorialResource.objects.using('stats').filter(status=1, tutorial_detail__foss_id=course.id, tutorial_detail__foss__show_on_homepage=1)
+                total_tutorials = qs.count()
+                languages = qs.values_list('language__name', flat=True).distinct()
                 course_data = {
                     'course_id': course.id,
                     'course': course.foss,
-                    'total_tutorials': qs.count(),
-                    'total_languages': languages.count(),
+                    'total_tutorials': total_tutorials,
                     'languages': list(languages)
                 }
-                course_total_size = 0.0
-                course_video_size = 0.0
-                course_srt_size = 0.0
-                lang_based_details = []
                 
                 for lang in languages:
                     tr_recs = qs.filter(language__name=lang)
@@ -71,55 +61,33 @@ class Command(BaseCommand):
                         # calculate video size
                         filepath = 'videos/{}/{}/{}'.format(course.id, rec.tutorial_detail_id, rec.video)
                         if os.path.isfile(settings.MEDIA_ROOT + filepath):
-                            #language based
+                            print(f"\033[92m filepath eexist: {filepath} \033[0m")
                             fsize += os.path.getsize(settings.MEDIA_ROOT + filepath)
                             vsize += os.path.getsize(settings.MEDIA_ROOT + filepath)
-                            #course based
-                            course_video_size += os.path.getsize(settings.MEDIA_ROOT + filepath)
-                            course_total_size += os.path.getsize(settings.MEDIA_ROOT + filepath)
-                            #total
-                            total_video_size += os.path.getsize(settings.MEDIA_ROOT + filepath)
                             total_size += os.path.getsize(settings.MEDIA_ROOT + filepath)
-                            
+                            total_video_size += os.path.getsize(settings.MEDIA_ROOT + filepath)
 
                             
                         # calculate str file size
                         ptr = filepath.rfind(".")
                         filepath = filepath[:ptr] + '.srt'
                         if os.path.isfile(settings.MEDIA_ROOT + filepath):
-                            #language based
                             fsize += os.path.getsize(settings.MEDIA_ROOT + filepath)
                             ssize += os.path.getsize(settings.MEDIA_ROOT + filepath)
-                            #course based
-                            course_srt_size += os.path.getsize(settings.MEDIA_ROOT + filepath)
-                            course_total_size += os.path.getsize(settings.MEDIA_ROOT + filepath)
-                            #total
-                            total_srt_size += os.path.getsize(settings.MEDIA_ROOT + filepath)
                             total_size += os.path.getsize(settings.MEDIA_ROOT + filepath)
-                    
-                    # define individual lang-course schema
+                            total_srt_size += os.path.getsize(settings.MEDIA_ROOT + filepath)
                     lang_data = {
                         "lang": lang,
                         'total_tutorials': tr_recs.count(),
-                        'size': f"{fsize / (1024*1024):.2f} MiB",
-                        'videos_size': f"{vsize / (1024*1024):.2f} MiB",
-                        'srt_size': f"{ssize / (1024*1024):.2f} MiB"
+                        'total_size': f"{fsize / (1024*1024):.2f} MiB",
+                        'total_videos_size': f"{vsize / (1024*1024):.2f} MiB",
+                        'total_srt_size': f"{ssize / (1024*1024):.2f} MiB"
                     }
-                    lang_based_details.append(lang_data)
+                    tutorials_data.append(lang_data)
+                course_data['total_size'] = f"{total_size / (1024*1024):.2f} MiB"
+                course_data['tutorials'] = tutorials_data
                 
-                course_data['course_total_size'] = f"{course_total_size / (1024*1024):.2f} MiB"
-                course_data['course_video_size'] = f"{course_video_size / (1024*1024):.2f} MiB"
-                course_data['course_srt_size'] = f"{course_srt_size / (1024*1024):.2f} MiB"
-                course_data['details'] = lang_based_details
-                course_details.append(course_data)
-
-            
-            data['total_size'] = f"{total_size / (1024*1024*1024):.2f} GB"
-            data['total_video_size'] = f"{total_video_size / (1024*1024*1024):.2f} GB"
-            data['total_srt_size'] = f"{total_srt_size / (1024*1024*1024):.2f} GB"
-            data['courses'] = course_details
-            
-                
+                data.append({"course": course_data})
             # Ensure parent folder exists
             out_path.parent.mkdir(parents=True, exist_ok=True)
 
