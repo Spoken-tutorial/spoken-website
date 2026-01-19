@@ -307,7 +307,7 @@ def watch_tutorial(request, foss, tutorial, lang):
 
     # filter questions based on category & tutorial
     ques = Question.objects.filter(category=td_rec.foss.foss.replace(
-            ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-'))
+            ' ', '-'), tutorial=td_rec.tutorial.replace(' ', '-'), status=1)
     
     # annotate each question with its answers count
     ques = ques.annotate(
