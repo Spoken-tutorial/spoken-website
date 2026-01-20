@@ -50,6 +50,8 @@ from mdldjango.models import MdlUser, MdlQuizGrades
 from django.contrib.auth.mixins import UserPassesTestMixin
 from events.formsv2 import StudentGradeFilterForm, AcademicPaymentStatusForm
 from django.views.generic import FormView
+from django.shortcuts import get_object_or_404
+
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -788,6 +790,7 @@ class TrainingAttendanceListView(ListView):
     self.training_request.update_participants_count()
     return HttpResponseRedirect('/software-training/training-planner')
 
+@method_decorator(login_required(login_url="/accounts/login/"), name="dispatch")
 class TrainingCertificateListView(ListView):
   queryset = StudentMaster.objects.none()
   paginate_by = 500
@@ -795,7 +798,7 @@ class TrainingCertificateListView(ListView):
   training_request = None
 
   def dispatch(self, *args, **kwargs):
-    self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
+    self.training_request = get_object_or_404(TrainingRequest, pk=kwargs['tid'])
     if self.training_request.status: # if status = 1, display students who attended the training
       self.queryset = self.training_request.attendances.all().select_related('student', 'student__user')
     else: # if training not completed show batch students
