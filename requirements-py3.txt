@@ -5,7 +5,7 @@ backports.functools-lru-cache==1.5
 beautifulsoup4==4.6.3
 certifi==2022.12.7
 distlib==0.2.8
-django-debug-toolbar==1.4
+django-debug-toolbar==1.11.1
 django-dynamic-fixture==1.9.0
 flake8==2.5.4
 idna==2.8
