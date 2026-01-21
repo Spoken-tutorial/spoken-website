@@ -217,6 +217,102 @@ def events_test_csv(request):
 
     return response
 
+def api_search_engine(request):
+    # Create the HttpResponse object with the appropriate CSV header.
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="api_search_engine.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+            'repository',
+            'repoType',
+            'institution',
+            'resourceTitle',
+            'resourceThumbnail',
+            'keywords',
+            'author',
+            'subjectArea',
+            'gradeLevel',
+            'contentType',
+            'creditType',
+            'accessibility',
+            'language',
+            'runtime',
+            'publishedOn',
+            'ageCheck',
+            'primaryUser',
+            'educationStandard',
+            'userActivity',
+            'url',
+            'customData'
+        ])
+
+    trs = TutorialResource.objects.filter(Q(status=1) | Q(
+        status=2),tutorial_detail__foss__show_on_homepage=1).order_by(
+    'language','tutorial_detail__foss__foss','tutorial_detail')
+    success_log_file_head = open('reports/api_search_engine.log',"w")
+    accessibility = "Visual, auditory, textual, audio-description, caption, verbatim-captions, long-description, transcript "
+    primaryUser = "student, teacher"
+    educationStandard = "oer, cbse, nios, ugc, aicte, icse, others, etc."
+    content_type = "activity, assignment, mooc, lesson, module"
+    subjectArea = "Applied Science"
+    runtime = ""
+    for tr in trs:
+        keywords = [x.strip() for x in tr.common_content.keyword.split(',')]
+        keyword = ','.join(map(str, keywords))
+        foss_id = int(tr.tutorial_detail.foss.id)
+        if foss_id in (98,104):
+            subjectArea = "Mathematics"
+        if foss_id == 101: 
+            subjectArea = "GeoSpatial science"
+        if foss_id == 70:
+            subjectArea = "Library Science"
+        if foss_id in (80,45,88,73,42,52,93,79):
+            subjectArea = "Science"
+        if foss_id == 128 :
+            subjectArea = "Others"
+        if foss_id in (95 ,1 ,84, 72, 54, 58, 13, 14, 66, 71, 15, 16, 17, 18, 19, 20, 63, 97, 86):
+            subjectArea = "All"
+
+        #if foss_id in (10,25,89,29):
+        #     runtime = "8 weeks"
+        # if foss_id == 39:
+        #     runtime = "6 weeks"
+        # if foss_id in (3,38,85):
+        #     runtime = "5 weeks"
+        # if foss_id in (105 ,98 ,48 ,1 ,64, 43, 78 ,54, 70, 21, 97, 24, 55, 50, 86):
+        #     runtime = "4 weeks"
+        # if foss_id in (15,101):
+        #     runtime = "3 weeks"
+        # if foss_id in (44,45, 94, 128, 103, 58, 14, 66 ,71, 16 ,17 ,18 ,20 ,63 ,102 ,107, 22, 92):
+        #     runtime = "2 weeks"
+        # if foss_id in (95 ,84, 72, 46, 19, 120):
+        #     runtime = "1 week"
+        try:
+            hr,mins,secs = TutorialDuration.objects.get(
+            tutorial_id=tr.tutorial_detail.id).duration.split(":")
+            runtime = mins+" mins "+secs+" secs"
+        except :
+            try:
+                duration, filesize = video_duration_with_filesize(tr)
+                hr,mins,secs = str(duration).split(":")
+                runtime = mins+" mins "+secs+" secs"
+            except :
+                runtime = ""
+        
+        videourl = "https://spoken-tutorial.org/watch/" + tr.tutorial_detail.foss.foss + \
+            "/" + tr.tutorial_detail.tutorial + "/" + tr.language.name
+       
+        writer.writerow(['', '', '',tr.tutorial_detail.foss.foss+' - '+tr.tutorial_detail.tutorial, '',
+         keyword.strip(), 'Prof.Kannan M Moudgalya',
+         subjectArea, 'UG Degree', content_type,
+         '', accessibility, tr.language.name, runtime, '', '',
+         primaryUser, educationStandard, 'A', videourl, ''
+         ])
+       
+        success_log_file_head.write(str(tr.video)+','+str(1)+'\n')
+    return response
+
 
 def elibrary(request):
     # Create the HttpResponse object with the appropriate CSV header.
@@ -237,7 +333,7 @@ def elibrary(request):
     for tr in trs:
         tr.outline = [x for x in tr.outline if x in string.printable]
         keywords = [x for x in tr.common_content.keyword if x in string.printable]
-        tr.common_content.keyword = '"' + keywords.replace(',', ';') + '"'
+        #tr.common_content.keyword = '"' + keywords.replace(',', ';') + '"'
         user_name = find_tutorial_user(tr)
         domain_reviewer = get_domain_reviewer_name(tr)
         publish_date = formated_publish_date(tr)
