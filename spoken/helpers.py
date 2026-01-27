@@ -117,9 +117,22 @@ def get_tutorials_list(foss, lang):
     elif lang:
         collection = queryset.filter(language__name=lang).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
     else:
-        collection = queryset.order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
-    cache.set(cache_key, collection, timeout=CACHE_TUTORIALS)
-    return collection
+        result = qs.order_by(
+            'tutorial_detail__foss__foss', 
+            'language__name', 
+            'tutorial_detail__level', 
+            'tutorial_detail__order'
+        )
+        
+        if limit_unfiltered:
+            p = page if page else 1
+            start = (p - 1) * page_size
+            result = result[start:start + page_size + 1]
+    
+    if has_filters:
+        cache.set(cache_key, result, timeout=CACHE_TUTORIALS)
+    
+    return result
 
 # ----  Foss Choice For Search Bar ----
 def get_foss_choice(show_on_homepage=1, lang=None):

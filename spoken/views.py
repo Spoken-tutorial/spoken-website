@@ -127,32 +127,56 @@ def keyword_search(request):
 
 @csrf_exempt
 def tutorial_search(request):
-    context = {}
-    collection = None
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    
     form = TutorialSearchForm()
+    collection = None
     foss_get = ''
     show_on_homepage = 1
-    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+    page_size = 20
+    current_page = request.GET.get('page', 1)
+    
+    qs = TutorialResource.objects.filter(
+        Q(status=1) | Q(status=2), 
+        tutorial_detail__foss__show_on_homepage=show_on_homepage
+    )
 
     if request.method == 'GET' and request.GET:
         foss_get = request.GET.get('search_foss', '')
-        language_get = request.GET.get('search_language', '')
-        form = TutorialSearchForm(request.GET, foss=foss_get, lang=language_get)
+        lang_get = request.GET.get('search_language', '')
+        form = TutorialSearchForm(request.GET, foss=foss_get, lang=lang_get)
         if form.is_valid():
-            collection = get_tutorials_list(foss_get, language_get)
-            
+            collection = get_tutorials_list(
+                foss_get, lang_get, 
+                page=current_page, 
+                page_size=page_size,
+                show_on_homepage=show_on_homepage,
+                limit_unfiltered=True
+            )
     else:
-        foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
-        collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
-        foss_get = foss[0]
+        foss = qs.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        if foss:
+            collection = qs.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
+            foss_get = foss[0]
         form = TutorialSearchForm(foss=foss_get)
+    
     if collection is not None:
-        page = request.GET.get('page')
-        collection = get_page(collection, page)
-    context['form'] = form
-    context['collection'] = collection
-    context['SCRIPT_URL'] = settings.SCRIPT_URL
-    context['current_foss'] = foss_get
+        has_filters = bool(foss_get or (request.method == 'GET' and request.GET.get('search_language')))
+        if has_filters or request.method != 'GET' or not request.GET:
+            paginator = Paginator(collection, page_size)
+            try:
+                collection = paginator.page(current_page)
+            except PageNotAnInteger:
+                collection = paginator.page(1)
+            except EmptyPage:
+                collection = paginator.page(paginator.num_pages)
+    
+    context = {
+        'form': form,
+        'collection': collection,
+        'SCRIPT_URL': settings.SCRIPT_URL,
+        'current_foss': foss_get,
+    }
     return render(request, 'spoken/templates/tutorial_search.html', context)
 
 def list_videos(request):
@@ -188,38 +212,58 @@ def series_foss(request):
 
 @csrf_exempt
 def series_tutorial_search(request):
-    context = {}
-    collection = None
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    
     form = SeriesTutorialSearchForm()
+    collection = None
     foss_get = ''
     show_on_homepage = 0
-    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+    page_size = 20
+    current_page = request.GET.get('page', 1)
+    
+    qs = TutorialResource.objects.filter(
+        Q(status=1) | Q(status=2), 
+        tutorial_detail__foss__show_on_homepage=show_on_homepage
+    )
     
     if request.method == 'GET' and request.GET:
         form = SeriesTutorialSearchForm(request.GET)
         if form.is_valid():
             foss_get = request.GET.get('search_otherfoss', '')
-            language_get = request.GET.get('search_otherlanguage', '')
-            if foss_get and language_get:
-                collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
-
+            lang_get = request.GET.get('search_otherlanguage', '')
+            if foss_get and lang_get:
+                collection = qs.filter(tutorial_detail__foss__foss=foss_get, language__name=lang_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
             elif foss_get:
-                collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
-            elif language_get:
-                collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = qs.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+            elif lang_get:
+                collection = qs.filter(language__name=lang_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
             else:
-                collection = queryset.order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = qs.order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+                start = (int(current_page) - 1) * page_size if current_page else 0
+                collection = collection[start:start + page_size]
     else:
-        foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
-        collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
-        foss_get = foss[0]
+        foss = qs.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        if foss:
+            collection = qs.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
+            foss_get = foss[0]
+    
     if collection is not None:
-        page = request.GET.get('page')
-        collection = get_page(collection, page)
-    context['form'] = form
-    context['collection'] = collection
-    context['SCRIPT_URL'] = settings.SCRIPT_URL
-    context['current_foss'] = foss_get
+        has_filters = bool(foss_get or (request.method == 'GET' and request.GET.get('search_otherlanguage')))
+        if has_filters or request.method != 'GET' or not request.GET:
+            paginator = Paginator(collection, page_size)
+            try:
+                collection = paginator.page(current_page)
+            except PageNotAnInteger:
+                collection = paginator.page(1)
+            except EmptyPage:
+                collection = paginator.page(paginator.num_pages)
+    
+    context = {
+        'form': form,
+        'collection': collection,
+        'SCRIPT_URL': settings.SCRIPT_URL,
+        'current_foss': foss_get,
+    }
     return render(request, 'spoken/templates/series_tutorial_search.html', context)
 
 def archived_foss(request):
@@ -231,38 +275,58 @@ def archived_foss(request):
 
 @csrf_exempt
 def archived_tutorial_search(request):
-    context = {}
-    collection = None
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    
     form = ArchivedTutorialSearchForm()
+    collection = None
     foss_get = ''
     show_on_homepage = 2
-    queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
+    page_size = 20
+    current_page = request.GET.get('page', 1)
+    
+    qs = TutorialResource.objects.filter(
+        Q(status=1) | Q(status=2), 
+        tutorial_detail__foss__show_on_homepage=show_on_homepage
+    )
     
     if request.method == 'GET' and request.GET:
         form = ArchivedTutorialSearchForm(request.GET)
         if form.is_valid():
             foss_get = request.GET.get('search_archivedfoss', '')
-            language_get = request.GET.get('search_archivedlanguage', '')
-            if foss_get and language_get:
-                collection = queryset.filter(tutorial_detail__foss__foss=foss_get, language__name=language_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
-
+            lang_get = request.GET.get('search_archivedlanguage', '')
+            if foss_get and lang_get:
+                collection = qs.filter(tutorial_detail__foss__foss=foss_get, language__name=lang_get).order_by('tutorial_detail__level', 'tutorial_detail__order')
             elif foss_get:
-                collection = queryset.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
-            elif language_get:
-                collection = queryset.filter(language__name=language_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = qs.filter(tutorial_detail__foss__foss=foss_get).order_by('tutorial_detail__level', 'tutorial_detail__order', 'language__name')
+            elif lang_get:
+                collection = qs.filter(language__name=lang_get).order_by('tutorial_detail__foss__foss', 'tutorial_detail__level', 'tutorial_detail__order')
             else:
-                collection = queryset.order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+                collection = qs.order_by('tutorial_detail__foss__foss', 'language__name', 'tutorial_detail__level', 'tutorial_detail__order')
+                start = (int(current_page) - 1) * page_size if current_page else 0
+                collection = collection[start:start + page_size]
     else:
-        foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
-        collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
-        foss_get = foss[0]
+        foss = qs.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
+        if foss:
+            collection = qs.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
+            foss_get = foss[0]
+    
     if collection is not None:
-        page = request.GET.get('page')
-        collection = get_page(collection, page)
-    context['form'] = form
-    context['collection'] = collection
-    context['SCRIPT_URL'] = settings.SCRIPT_URL
-    context['current_foss'] = foss_get
+        has_filters = bool(foss_get or (request.method == 'GET' and request.GET.get('search_archivedlanguage')))
+        if has_filters or request.method != 'GET' or not request.GET:
+            paginator = Paginator(collection, page_size)
+            try:
+                collection = paginator.page(current_page)
+            except PageNotAnInteger:
+                collection = paginator.page(1)
+            except EmptyPage:
+                collection = paginator.page(paginator.num_pages)
+    
+    context = {
+        'form': form,
+        'collection': collection,
+        'SCRIPT_URL': settings.SCRIPT_URL,
+        'current_foss': foss_get,
+    }
     return render(request, 'spoken/templates/archived_tutorial_search.html', context)
 
 def is_valid_user(user,foss,lang,tr_rec):
@@ -294,7 +358,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
         tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         is_authorized_user = is_valid_user(request.user, foss, lang, tr_rec)
-        tr_recs = get_tutorials_list(foss, lang)
+        tr_recs = get_tutorials_list(foss, lang, page=1, page_size=20, limit_unfiltered=False)
     except Exception as e:
         messages.error(request, str(e))
         return HttpResponseRedirect('/')
