@@ -2,6 +2,7 @@ from django.http import JsonResponse, HttpResponseNotAllowed
 from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from .models import StudentBatch
 from django.urls import reverse
+from django import forms
 
 def get_batches(request):
     school_id = request.GET.get('school_id')
@@ -89,6 +90,7 @@ from django.contrib.auth.hashers import make_password
 from mdldjango.get_or_create_participant import encript_password
 from .helpers import send_bulk_student_reset_mail, get_fossmdlcourse
 from .certificates import *
+from youtube.utils import user_can_upload_to_youtube
 
 def can_clone_training(training):
     if training.tdate > datetime.datetime.strptime('01-02-2015', "%d-%m-%Y").date() and training.organiser.academic.institution_type.name != 'School':
@@ -622,6 +624,7 @@ def events_dashboard(request):
         'rp_workshop_notification': rp_workshop_notification,
         'rp_training_notification': rp_training_notification,
         'invigilator_test_notification': invigilator_test_notification,
+        'can_upload_youtube': user_can_upload_to_youtube(user),
         }
     return render(request, 'events/templates/events_dashboard.html',
                   context)
@@ -3348,4 +3351,52 @@ def get_schools(request):
     return JsonResponse([])
 
 
+class YouTubeUploadForm(forms.Form):
+    """Form for uploading YouTube videos"""
+    video = forms.FileField(
+        label='Video File',
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )
+    title = forms.CharField(
+        label='Title',
+        max_length=200,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter video title'})
+    )
+    description = forms.CharField(
+        label='Description',
+        widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Enter video description'})
+    )
+    privacy_status = forms.ChoiceField(
+        label='Privacy Status',
+        choices=[
+            ('public', 'Public'),
+            ('unlisted', 'Unlisted'),
+            ('private', 'Private'),
+        ],
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
+
+def add_youtube_video(request):
+    """
+    View for uploading YouTube videos with title, description, and privacy settings.
+    """
+    context = {}
+    template = 'youtube/templates/add_youtube_video.html'
+    
+    if request.method == 'GET':
+        # Display empty form
+        form = YouTubeUploadForm()
+        context['form'] = form
+        
+    elif request.method == 'POST':
+        # Handle form submission
+        form = YouTubeUploadForm(request.POST, request.FILES)
+        context['form'] = form
+        
+        if form.is_valid():
+            # Backend processing would happen here (currently placeholder)
+            messages.success(request, 'Video upload initiated successfully!')
+            return HttpResponseRedirect('/software-training/')
+    
+    return render(request, template, context)

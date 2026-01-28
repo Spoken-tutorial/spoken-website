@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 # Spoken Tutorial Stuff
-from creation.models import Language, TutorialDetail, TutorialResource
+from creation.models import Language, TutorialDetail, TutorialResource, FossCategory
 
 
 @csrf_exempt
@@ -46,3 +46,56 @@ def ajax_foss_based_language_tutorial(request):
                 data = '<option value="">Select Language</option>' + data
 
     return HttpResponse(json.dumps(data), content_type='application/json')
+
+
+@csrf_exempt
+def get_uploadable_tutorials(request):
+    """
+    Get tutorials available for YouTube upload.
+    Implements FK traversal: FOSSCategory → TutorialDetail → TutorialResource
+    Filters by is_on_youtube=False
+    
+    GET params:
+        foss_id: FOSSCategory ID
+        language_id: Language ID
+    
+    Returns JSON with list of tutorials:
+    {
+        "tutorials": [
+            {
+                "id": tutorial_resource_id,
+                "name": "Tutorial Name",
+                "outline": "Tutorial outline text"
+            },
+            ...
+        ]
+    }
+    """
+    tutorials = []
+    
+    if request.method == 'GET':
+        foss_id = request.GET.get('foss_id', '')
+        language_id = request.GET.get('language_id', '')
+        
+        if foss_id and language_id:
+            try:
+                foss_id = int(foss_id)
+                language_id = int(language_id)
+                
+                # Filter resources by FOSS, Language, and YouTube status
+                tutorial_resources = TutorialResource.objects.filter(
+                    tutorial_detail__foss_id=foss_id,
+                    language_id=language_id,
+                    is_on_youtube=False
+                ).select_related('tutorial_detail').order_by('tutorial_detail__order')
+                
+                for tr in tutorial_resources:
+                    tutorials.append({
+                        'id': tr.id,
+                        'name': tr.tutorial_detail.tutorial,
+                        'outline': tr.outline
+                    })
+            except (ValueError, Language.DoesNotExist, FossCategory.DoesNotExist):
+                pass
+    
+    return HttpResponse(json.dumps({'tutorials': tutorials}), content_type='application/json')
