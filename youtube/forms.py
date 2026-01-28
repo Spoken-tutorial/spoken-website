@@ -86,3 +86,78 @@ class YoutubeVideoSelectForm(forms.Form):
                     else:
                         self.fields['tutorial_name'].choices = [('', 'Select Tutorial'), ]
                         self.fields['tutorial_name'].widget.attrs = {'disabled': 'disabled'}
+
+
+class YouTubeUploadForm(forms.Form):
+    """Form for uploading YouTube videos with cascading dropdowns"""
+    
+    foss_category = forms.ModelChoiceField(
+        queryset=FossCategory.objects.all().order_by('foss'),
+        empty_label='-- Select FOSS Category --',
+        required=True,
+        error_messages={'required': 'FOSS category field is required.'},
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+    
+    language = forms.ModelChoiceField(
+        queryset=Language.objects.all().order_by('name'),
+        empty_label='-- Select Language --',
+        required=True,
+        error_messages={'required': 'Language field is required.'},
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+    
+    tutorial = forms.ModelChoiceField(
+        queryset=TutorialResource.objects.none(),
+        empty_label='-- Select Tutorial --',
+        required=True,
+        error_messages={'required': 'Tutorial field is required.'},
+        widget=forms.Select(attrs={
+            'class': 'form-control',
+            'disabled': 'disabled'
+        })
+    )
+    
+    title = forms.CharField(
+        max_length=200,
+        required=True,
+        error_messages={'required': 'Title field is required.'},
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Auto-generated title'
+        })
+    )
+    
+    description = forms.CharField(
+        required=True,
+        error_messages={'required': 'Description field is required.'},
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Auto-filled from outline',
+            'rows': 5
+        })
+    )
+    
+    privacy_status = forms.ChoiceField(
+        choices=[
+            ('public', 'Public'),
+            ('unlisted', 'Unlisted'),
+            ('private', 'Private'),
+        ],
+        required=True,
+        error_messages={'required': 'Privacy status field is required.'},
+        widget=forms.Select(attrs={
+            'class': 'form-control'
+        })
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(YouTubeUploadForm, self).__init__(*args, **kwargs)
+        if self.data.get('tutorial'):
+            self.fields['tutorial'].queryset = TutorialResource.objects.all()
+            self.fields['tutorial'].widget.attrs.pop('disabled', None)
+

@@ -16,7 +16,7 @@ from oauth2client.contrib import xsrfutil
 from youtube.models import *
 
 youtube_scope_urls = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube"]
-client_secrets_file = os.path.join(settings.BASE_DIR, 'youtube', '.client_secrets.json')
+client_secrets_file = os.path.join(settings.BASE_DIR, 'youtube', 'client_secret.json')
 credentials_file = os.path.join(settings.BASE_DIR, 'youtube', '.youtube-upload-credentials.json')
 
 
@@ -26,9 +26,9 @@ def to_utf8(s):
     return (s.decode(current).encode("UTF-8") if s and current != "UTF-8" else s)
 
 
-def get_flow():
+def get_flow(redirect_uri=None):
     flow = oauth2client.client.flow_from_clientsecrets(client_secrets_file, scope=youtube_scope_urls)
-    flow.redirect_uri = settings.YOUTUBE_REDIRECT_URL
+    flow.redirect_uri = redirect_uri or settings.YOUTUBE_REDIRECT_URL
     flow.params['state'] = xsrfutil.generate_token(settings.SECRET_KEY, 0)
     return flow
 
@@ -45,39 +45,32 @@ def get_youtube_credential():
         try:
             http = credential.authorize(httplib2.Http())
             return googleapiclient.discovery.build("youtube", "v3", http=http)
-        except Exception as e:
-            print(e)
+        except Exception:
             return None
 
     return None
 
 
-def get_auth_url():
-    flow = get_flow()
+def get_auth_url(redirect_uri=None):
+    flow = get_flow(redirect_uri)
     return flow.step1_get_authorize_url()
 
 
-def store_youtube_credential(code):
-    flow = get_flow()
+def store_youtube_credential(code, redirect_uri=None):
+    flow = get_flow(redirect_uri)
     storage = get_storage()
     credential = flow.step2_exchange(code, http=None)
     storage.put(credential)
-    # credential.set_store(storage)
 
 
 def resumable_upload(insert_request):
     response = None
-    error = None
-    retry = 0
-
     while response is None:
         try:
-            print("Sending video file...")
             status, response = insert_request.next_chunk()
             if response is not None:
                 return response
         except Exception as e:
-            print(e)
             return {'error': str(e)}
 
     return {'error': 'something went wrong'}
@@ -93,7 +86,7 @@ def upload_video(service, options):
                 categoryId=27
             ),
             status=dict(
-                privacyStatus='public'
+                privacyStatus=options.get('privacyStatus', 'public')
             )
         )
         insert_request = service.videos().insert(
@@ -106,14 +99,10 @@ def upload_video(service, options):
             )
         )
         response = resumable_upload(insert_request)
-
-        if 'id' in response:
-            return response['id']
+        return response
 
     except Exception as e:
-        print(e)
-
-    return None
+        return {'error': str(e)}
 
 
 def create_playlist(service, title, description):
@@ -134,8 +123,8 @@ def create_playlist(service, title, description):
 
         if playlist and 'id' in playlist:
             return playlist['id']
-    except Exception as e:
-        print(e)
+    except Exception:
+        pass
 
     return None
 
