@@ -210,6 +210,12 @@ def events_test_csv(request):
             return value.decode('utf-8', errors='ignore')
         return str(value)
     
+    def get_department(record):
+        training = getattr(record, 'training', None)
+        if training and getattr(training, 'department', None):
+            return training.department.name
+        return ''
+    
     # records
     for record in collection.qs:
         writer.writerow([
@@ -218,7 +224,7 @@ def events_test_csv(request):
             to_text(record.academic.institution_name),
             to_text(record.foss.foss),
             to_text(record.organiser.user.first_name),
-            to_text(record.training.department.name),
+            to_text(get_department(record)),
             to_text(record.tdate),
             to_text(record.participant_count)
         ])

@@ -134,7 +134,12 @@
               <td>{{ record.invigilator.user.first_name }}</td>
               <td>{{ record.tdate|date:"d M Y" }} {{ record.wtime }}</td>
               <td>{{ record.participant_count }}</td>
-              <td>{{ record.training.department.name }}</td>
+             <td>
+  {% if record.training and record.training.department %}
+    {{ record.training.department.name }}
+  {% endif %}
+</td>
+
               <!-- actions based on roles -->
               <td>
                 {%if record.get_test_attendance_count %}
