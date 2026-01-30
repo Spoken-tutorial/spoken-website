@@ -18,7 +18,9 @@ EVENT_TYPE_CHOICES =(
 
 
 REGISTRATION_TYPE_CHOICES =(
-    ('', '-----'),  (1, 'Subscribed College'),(2, 'Manual Registration')
+    ('', '-----'),  (1, 'Subscribed College'),(2, 'Manual Registration'), 
+	  (3, 'Self Subscribed'),
+    (4, 'Self Registration'),
     )
 
 class CompanyType(models.Model):
@@ -102,23 +104,29 @@ class Participant(models.Model):
 	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
 	city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True)
 	source = models.CharField(max_length=25, null=True, default=None)
+	added_by = models.ForeignKey(User,on_delete=models.PROTECT,null=True,blank=True,related_name='participants_added')
 
 	@property
 	def payment_status_message(self):
 		ps = self.payment_status
-		if not ps:
+		if self.registartion_type in (1, 2):
 			return "CSV Upload"
-		if ps:
-			payee_status = ps.status # asc method
-			transaction_status = ps.transaction.order_status if ps.transaction else "" #hdfc gateway
+		if self.registartion_type == 3:
+			return "Individual- Subscribed College"
+		if self.registartion_type == 4 and ps:
+			payee_status = ps.status
+			transaction_status = ps.transaction.order_status if ps.transaction else ""
 
 			if payee_status == 1 or transaction_status == "CHARGED":
-				return "Payment successfully completed 1"
-			if payee_status == 2 and transaction_status in ["FAILED", "AUTHENTICATION_FAILED", "AUTHORIZATION_FAILED"]:
-				return "Payment failed 1"
-			if payee_status == 0 :
-				return "Payment Initiated, not paid 1"
-		return "CSV Upload"
+				return "Individual- Non-Subscribed College"
+			if payee_status == 2 and transaction_status in [
+				"FAILED", "AUTHENTICATION_FAILED", "AUTHORIZATION_FAILED"
+			]:
+				return "Payment failed"
+			if payee_status == 0:
+				return "Payment Initiated, not paid"
+		return ""
+
 	
 	class Meta(object):
 		unique_together = ('event', 'user', 'payment_status')
