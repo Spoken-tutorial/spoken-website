@@ -47,13 +47,11 @@ def handle_uploaded_file(request):
 
 
 def is_college_paid(college_id):
-    try:
-        idcase = AcademicKey.objects.filter(academic_id=college_id).order_by('-expiry_date').first()
-        college_paid = True if (idcase.expiry_date >= date.today()) else False
-        return college_paid
-    except Exception as e:
-        college_paid = False
-    return college_paid
+    idcase = AcademicKey.objects.filter(academic_id=college_id).order_by('-expiry_date').first()
+    if not idcase:
+        return False
+    return idcase.expiry_date >= date.today()
+
 
 def create_certificate(eventid,pname):
     response = HttpResponse(content_type='application/pdf')

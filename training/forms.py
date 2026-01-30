@@ -161,6 +161,15 @@ class UploadParticipantsForm(forms.ModelForm):
     class Meta(object):
         model = Participant
         fields = ['registartion_type']
+        
+    def __init__(self, *args, **kwargs):
+        super(UploadParticipantsForm, self).__init__(*args, **kwargs)
+
+        # ✅ Show only these two options in dropdown
+        self.fields['registartion_type'].choices = [
+            (1, 'Subscribed College'),
+            (2, 'Manual Registration'),
+        ]    
     
     def clean_csv_file(self):
         data = self.cleaned_data["csv_file"]

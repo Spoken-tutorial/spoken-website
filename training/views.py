@@ -316,6 +316,8 @@ def reg_success(request, user_type):
 			form_data = form.save(commit=False)
 			form_data.user = request.user
 			form_data.event = event
+			form_data.added_by = request.user
+
 
 			if source == 'deet':
 				form_data.source = source
@@ -340,9 +342,9 @@ def reg_success(request, user_type):
 						pass
 			user_data = is_user_paid(form_data.college.id)
 			if user_data:
-				form_data.registartion_type = 1 #Subscribed College
+				form_data.registartion_type = 3
 			else:
-				form_data.registartion_type = 2 #Manual reg- paid 500
+				form_data.registartion_type = 4 
 
 			part = Participant.objects.filter(
 				Q(payment_status__status = 1)|Q(registartion_type__in  = (1,3)),
@@ -575,10 +577,6 @@ class ParticipantCreateView(CreateView):
 	def form_valid(self, form):
 		count = 0
 		csv_file_data = form.cleaned_data['csv_file']
-		registartion_type = form.cleaned_data['registartion_type']			
-		if registartion_type == 2:
-			# 3 - Manual Registration via CSV(option not visible outside)
-			registartion_type = 3
 		rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
 		csv_error = False
 		user_errors = []
@@ -591,12 +589,10 @@ class ParticipantCreateView(CreateView):
 					csv_error = True
 					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " was not created.")
 					continue
-				
-				if registartion_type == 1:
-					if not(is_college_paid(college.id)):
-						messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution " + row[6] + " is not a Paid college."+" Participant "+ row[2] + " was not created.")
-						continue
-
+				if is_college_paid(college.id):
+					registartion_type = 1   # Subscribed College
+				else:
+					registartion_type = 2 
 				try:
 					foss_language = Language.objects.get(name=row[7].strip())	
 				except :
@@ -620,7 +616,8 @@ class ParticipantCreateView(CreateView):
 							college = college,
 							foss_language = foss_language,
 							registartion_type = registartion_type,
-							reg_approval_status = 1
+							reg_approval_status = 1,
+							added_by = self.request.user
 							)
 						count = count + 1
 					except :
@@ -670,7 +667,6 @@ class ParticipantCreateView(CreateView):
 			return User.objects.filter(Q(email=email) | Q(username=email)).first()
 		return None
 
-
 def mark_reg_approval(pid, eventid):
     participant = Participant.objects.get(event_id =eventid, id=pid)
     participant.reg_approval_status = 1
@@ -686,7 +682,7 @@ class EventAttendanceListView(ListView):
 		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
 		main_query = Participant.objects.filter(event_id=kwargs['eventid'])
 
-		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)) | Q(payment_status__transaction__order_status="CHARGED"))
+		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,2,3)) | Q(payment_status__transaction__order_status="CHARGED"))
 		self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED"))
 		if self.event.training_status == 1:
 			self.queryset = main_query.filter(reg_approval_status=1)

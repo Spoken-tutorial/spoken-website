@@ -72,6 +72,7 @@
 					From Subscribed college
 				{% elif record.participant.registartion_type >= 2 %}
 					Manual registartion
+
 				{% endif %}
 			</td>
 			<td><strong>
@@ -96,8 +97,12 @@
 					From Host college
 				{% elif record.registartion_type == 1 %}
 					From Subscribed college
-				{% elif record.registartion_type >= 2 %}
+				{% elif record.registartion_type == 2 %}
 					Manual registartion
+				{% elif record.registartion_type == 3 %}
+					Self Subscribed
+				{% elif record.registartion_type == 4 %}
+					Self Registration
 				{% endif %}
 			</td>
 			<td>
