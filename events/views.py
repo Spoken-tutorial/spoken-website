@@ -1926,11 +1926,11 @@ def test_request(request, role, rid = None):
                 messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
 
             if not error:
-                # 🔥 async attendance
+                #  async attendance
                 if t.training_id:
                     async_process_test_attendance(t)
 
-                # 🔥 faster M2M update
+                #  faster M2M update
                 if test_training_dept:
                     t.department.set([test_training_dept])
                 else:
@@ -1948,7 +1948,7 @@ def test_request(request, role, rid = None):
                         t.foss.foss + " dated " + t.tdate
                     )
 
-                # 🔥 async logs & notifications
+                #  async logs & notifications
                 async_test_post_save(t, user, message)
 
                 return HttpResponseRedirect(
