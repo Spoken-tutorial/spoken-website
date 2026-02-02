@@ -13,12 +13,12 @@
 {{message.tags}}
 <form action="{{ action }}" id="form-id" method="post">
 	{% csrf_token %}
-{% if eventid|is_tr_completed %}
+{% if is_tr_completed %}
 <div style="width:200px;float:left;text-align:center;">
   <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All Attendance" onClick="this.value=check_attendance()">
 </div>
 {% endif %}
-{% if eventid|is_tr_ongoing%}
+{% if is_tr_ongoing%}
 <div style="width:200px;float:left;text-align:center;">
   <p id="button-select">To select all participants</p> <input type=button class="btn btn-success"  value="Check All registartion" onClick="this.value=check_reg()">
 </div>
@@ -27,7 +27,7 @@
 <table class="paleblue table">
 	<tr>
 		<th>Sr. No.</th>
-		{% if eventid|is_tr_completed or eventid|is_tr_ongoing%}
+		{% if is_tr_completed or is_tr_ongoing%}
 		<th>Check</th>
 		{% endif %}
 		<th>Name</th>
@@ -41,9 +41,9 @@
 	<tr>
 		<td>{{ forloop.counter }}</td>
 
-		{% if eventid|is_tr_ongoing%}
+		{% if is_tr_ongoing%}
 		<input type="hidden" id="event_status" name="event_status" value="reg">
-			{% if eventid|is_reg_confirmed:record.id %}
+			{% if record.reg_approval_status == 1 %}
 				<td><input type='checkbox' name="user_reg" value="{{record.id}}" checked="checked"></td>
 			{% else %}
 				<td><input type='checkbox' name="user_reg" value="{{record.id}}"></td>
@@ -51,16 +51,16 @@
 		{% endif %}
 
 
-		{% if eventid|is_tr_completed %}
+		{% if is_tr_completed %}
 		<input type="hidden" id="event_status" name="event_status" value="attend">
-			{% if eventid|is_attendance_marked:record.id %}
+			{% if record.attendance_marked %}
 				<td><input type='checkbox' name="user" value="{{record.id}}" checked="checked"></td>
 			{% else %}
 				<td><input type='checkbox' name="user" value="{{record.id}}"></td>
 			{% endif %}
 		{% endif %}
 
-		{% if eventid|is_event_closed %}
+		{% if is_event_closed %}
 			<td>{{ record.participant.name}}</td>
 			<td>{{ record.participant.email}}</td>
 			<td>{{ record.participant.college.institution_name}}</td>
@@ -108,12 +108,12 @@
 {% endfor %}
 </table>
 </form>
-{% if eventid|is_tr_ongoing %}
+{% if is_tr_ongoing %}
 	<a  class="btn btn-info" type="Submit" onclick="document.forms['form-id'].submit();">Submit Registration</a>
 	{% if eventid|event_has_registration %}
 	<a href="{% url 'training:approve_event_registration' eventid %}" class="btn btn-info">Approve Registration</a>{% endif %}
 
-{% elif eventid|is_tr_completed %}
+{% elif is_tr_completed %}
 	<a  class="btn btn-info" type="Submit" onclick="document.forms['form-id'].submit();">Submit Attendance</a>
 	{% if eventid|event_has_attendance %}
 	<a href="{% url 'training:close_event' eventid %}" class="btn btn-info">Close Event and Generate Certificates</a>{% endif %}

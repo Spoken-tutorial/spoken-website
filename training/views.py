@@ -13,6 +13,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db import IntegrityError
+from django.db.models import Exists, OuterRef
 # Python imports
 from datetime import datetime,date
 import csv
@@ -41,6 +42,7 @@ from string import Template
 from events.certificates import get_organization, get_signature
 from health_app.models import TopicCategory, HNContributorRole, HNLanguage
 from spoken.config import HN_API
+from training.templatetags.trainingdata import is_tr_ongoing, is_tr_completed, is_event_closed
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -684,10 +686,17 @@ class EventAttendanceListView(ListView):
 
 	def dispatch(self, *args, **kwargs):
 		self.event = TrainingEvents.objects.get(pk=kwargs['eventid'])
-		main_query = Participant.objects.filter(event_id=kwargs['eventid'])
+		main_query = (Participant.objects.filter(event_id=kwargs['eventid'])
+				  .annotate(attendance_marked=Exists(
+					  EventAttendance.objects.filter(
+						  event=self.event,
+						  participant_id=OuterRef("pk"),
+					  )
+				  )).select_related('college', 'state'))
+		
 
 		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)) | Q(payment_status__transaction__order_status="CHARGED"))
-		self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED"))
+		self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED")).select_related('payment_status')
 		if self.event.training_status == 1:
 			self.queryset = main_query.filter(reg_approval_status=1)
 
@@ -698,10 +707,17 @@ class EventAttendanceListView(ListView):
 
 	def get_context_data(self, **kwargs):
 		context = super(EventAttendanceListView, self).get_context_data(**kwargs)
+
 		
 		context['event'] = self.event
 		context['eventid'] = self.event.id
 		context['unsuccessful_payee'] = self.unsuccessful_payee
+		context['is_tr_ongoing'] = is_tr_ongoing(self.event.id)
+		context['is_tr_completed'] = is_tr_completed(self.event.id)
+		context['is_event_closed'] = is_event_closed(self.event.id)
+		
+
+		
 		return context
 
 	def post(self, request, *args, **kwargs):
