@@ -1954,6 +1954,8 @@ def test_request(request, role, rid = None):
                 update_events_log(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0)
                 update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
 
+                messages.success(request, "Test request submitted successfully.")
+
                 return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
         messages.info(request, """
             <ul>
