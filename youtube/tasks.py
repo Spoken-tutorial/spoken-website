@@ -50,7 +50,8 @@ def upload_videos():
 
             # try:
             print(('uploading video', tresource.id, '-', tresource.tutorial_detail.tutorial, '-', tresource.tutorial_detail.foss.foss, '-', tresource.language.name))
-            video_id = upload_video(service, options)
+            response = upload_video(service, options)
+            video_id = response.get('id') if response else None
             # except:
             #     video_id = None
             print(('video id -', video_id))

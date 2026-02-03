@@ -110,6 +110,16 @@
                     </div>
                 {% endif %}
 
+                {% if can_upload_youtube %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">YouTube</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li><a href="/software-training/add-youtube-video/">Upload Video</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
 
                 {% if user|is_invigilator %}
                     <div class="panel panel-primary">
