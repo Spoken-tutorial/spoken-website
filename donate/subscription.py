@@ -223,7 +223,7 @@ def get_display_transaction_details(transaction):
 def get_academic_centers(request):
     stateId = request.GET.get('stateId')
     if stateId:
-        ac = AcademicCenter.objects.filter(state_id=stateId).order_by('institution_name').values('id', 'institution_name', 'academic_code')
+        ac = AcademicCenter.objects.filter(state_id=stateId).order_by('institution_name').values('id', 'institution_name', 'academic_code','institution_type_id' )
         return JsonResponse(list(ac), safe=False)
     return JsonResponse([])
 
