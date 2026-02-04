@@ -36,7 +36,7 @@ from events.models import Test, TestAttendance
 from mdldjango.helper import get_moodle_user
 from events.helpers import get_fossmdlcourse
 from django.db import close_old_connections
-from events.views import update_events_log, update_events_notification
+# from events.views import update_events_log, update_events_notification
 
 
 
@@ -180,7 +180,11 @@ def async_filter_student_grades(key):
 
 
 
-def process_test_attendance(test_id):
+def process_test_attendance(test_id, user_id, message, academic_id):
+    from events.views import (
+        update_events_log,
+        update_events_notification
+    )
     """
     Background task:
     - Create TestAttendance
