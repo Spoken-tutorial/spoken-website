@@ -36,6 +36,7 @@ from events.models import Test, TestAttendance
 from mdldjango.helper import get_moodle_user
 from events.helpers import get_fossmdlcourse
 from django.db import close_old_connections
+from events.views import update_events_log, update_events_notification
 
 
 
@@ -330,6 +331,9 @@ def process_test_attendance(test_id):
         with transaction.atomic():
             TestAttendance.objects.bulk_create(new_rows)
 
+    update_events_log(user_id=user_id, role=0, category=1, category_id=test_id, academic=academic_id,status=0)
+
+    update_events_notification(user_id=user_id, role=0, category=1, category_id=test_id, academic=academic_id, status=0,message=message)
     meta_update(
         status="done",
         finished_at=int(time.time()),
@@ -374,13 +378,19 @@ def process_test_post_save(test_id, user_id, message,academic_id):
     )
 
 
-def async_process_test_attendance(test):
+def async_process_test_attendance(test, user, message):
+    print(f"\033[92m Adding task to process_test_attendance \033[0m")
+    print(f"\033[93m test.pk : {test.pk} \033[0m")
     DEFAULT_QUEUE.enqueue(
         process_test_attendance,
         test.pk,
+        user.pk,
+        message,
+        test.academic_id,
         job_id="test_attendance_%s" % test.pk,
         job_timeout='72h'
     )
+    print(f"\033[92m Added test attendance job successfully \033[0m")
 
 
 def async_test_post_save(test, user, message):
@@ -393,3 +403,4 @@ def async_test_post_save(test, user, message):
         job_id="test_post_save_%s" % test.pk,
         job_timeout='24h'
     )
+    print(f"\033[92m Added async_test_post_save job successfully \033[0m")

@@ -1926,16 +1926,6 @@ def test_request(request, role, rid = None):
                 messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
 
             if not error:
-                #  async attendance
-                if t.training_id:
-                    async_process_test_attendance(t)
-
-                #  faster M2M update
-                if test_training_dept:
-                    t.department.set([test_training_dept])
-                else:
-                    t.department.clear()
-
                 message = (
                     t.academic.institution_name +
                     " has made a test request for " +
@@ -1947,9 +1937,30 @@ def test_request(request, role, rid = None):
                         " has updated test for " +
                         t.foss.foss + " dated " + t.tdate
                     )
+                #  async attendance
+                if t.training_id:
+                    async_process_test_attendance(t,user, message)
+
+                #  faster M2M update
+                if test_training_dept:
+                    t.department.set([test_training_dept])
+                else:
+                    t.department.clear()
+
+                # message = (
+                #     t.academic.institution_name +
+                #     " has made a test request for " +
+                #     t.foss.foss + " on " + t.tdate
+                # )
+                # if rid:
+                #     message = (
+                #         t.academic.institution_name +
+                #         " has updated test for " +
+                #         t.foss.foss + " dated " + t.tdate
+                #     )
 
                 #  async logs & notifications
-                async_test_post_save(t, user, message)
+                # async_test_post_save(t, user, message)
 
                 return HttpResponseRedirect(
                     "/software-training/test/{}/pending/".format(role)
