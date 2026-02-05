@@ -2,6 +2,10 @@ from django.http import JsonResponse, HttpResponseNotAllowed
 from django.http import HttpResponseForbidden, HttpResponseBadRequest
 from .models import StudentBatch
 from django.urls import reverse
+from redis import Redis
+from rq.job import Job
+from rq.exceptions import NoSuchJobError
+from cron import REDIS_CLIENT
 
 def get_batches(request):
     school_id = request.GET.get('school_id')
@@ -12,6 +16,10 @@ def get_batches(request):
 
 from django.core.exceptions import PermissionDenied
 
+from django.core.exceptions import PermissionDenied
+from django.views.decorators.csrf import csrf_protect
+from django.db import connection
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.contrib import messages
@@ -20,9 +28,8 @@ from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-
 from django.http import Http404
 from django.db.models import Q
 from django.db import IntegrityError
@@ -70,6 +77,12 @@ from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from django.template.context_processors import csrf
+
+from cron.tasks import (
+    async_process_test_attendance,
+    async_test_post_save
+)
+
 
 from io import StringIO, BytesIO
 
@@ -1858,41 +1871,49 @@ def training_participant_ceritificate(request, wid, participant_id):
     return response
 
 
+
 @login_required
 def test_request(request, role, rid = None):
     ''' Test request by organiser '''
+
     user = request.user
     if not (user.is_authenticated() and ( is_organiser(user) or is_resource_person(user) or is_event_manager(user))):
         raise PermissionDenied()
     context = {}
     form = TestForm(user = user)
+
     if rid:
         t = Test.objects.get(pk = rid)
         user = t.organiser.user
         form = TestForm(user = user, instance = t)
         context['instance'] = t
+
     if request.method == 'POST':
         form = TestForm(request.POST, user = user)
+
         if form.is_valid():
             dateTime = request.POST['tdate'].split(' ')
-            t = Test()
+            error = 0
+
             if rid:
                 t = Test.objects.get(pk = rid)
             else:
-                print("New Test.............")
+                t = Test()
                 t.organiser_id = user.organiser.id
                 t.academic = user.organiser.academic
+
             t.test_category_id = request.POST['test_category']
 
-            """if int(request.POST['test_category']) == 1:
-                t.training_id = request.POST['workshop']"""
             if int(request.POST['test_category']) == 2:
                 t.training_id = request.POST['training']
-            if int(request.POST['test_category']) == 3:
+            else:
                 t.training_id = None
-            test_trainings = request.POST['training']
-            test_training_dept = t.training.department_id
-            if request.POST['id_foss']:
+
+            test_training_dept = None
+            if t.training_id:
+                test_training_dept = t.training.department_id
+
+            if request.POST.get('id_foss'):
                 test_foss = request.POST['id_foss']
             else:
                 test_foss = t.training.course.foss_id
@@ -1901,73 +1922,72 @@ def test_request(request, role, rid = None):
             t.foss_id = test_foss
             t.tdate = dateTime[0]
             t.ttime = dateTime[1]
-            error = 0
-            errmsg = ""
+
             try:
                 t.save()
-            except IntegrityError as e:
-                print(f"Test creation failed for {user.email}: {e}")
+            except IntegrityError:
                 error = 1
-                errmsg = "Test already created"
-                prev_test = Test.objects.filter(organiser = t.organiser_id, academic = t.academic, foss = t.foss_id, tdate = t.tdate, ttime = t.ttime)
-                if prev_test:
-                    messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
-                
-            if not error and t.id and t.training_id:
-                tras = TrainingAttend.objects.filter(training=t.training)
-                fossmdlcourse = get_fossmdlcourse(t.foss_id, fossmdlmap_id=t.training.fossmdlmap_id)
-                # try:
-                #     fossmdlcourse = FossMdlCourses.objects.get(foss_id = t.foss_id)
-                # except FossMdlCourses.MultipleObjectsReturned:
-                #     fossmdlcourse = FossMdlCourses.objects.get(id = t.training.fossmdlmap_id)
-                for tra in tras:
-                    user = tra.student.user
-                    mdluser = get_moodle_user(tra.training.training_planner.academic_id, user.first_name, user.last_name, tra.student.gender, tra.student.user.email)# if it create user rest password for django user too
-                    
-                    if mdluser:
-                        print("mdluser present", mdluser.id)                       
-                        try:
-                            instance = TestAttendance.objects.get(test_id=t.id, mdluser_id=mdluser.id)
-                        except Exception as e:
-                            print(e)
-                            instance = TestAttendance()
-                            instance.student_id = tra.student.id
-                            instance.test_id = t.id
-                            instance.mdluser_id = mdluser.id
-                            instance.mdlcourse_id = fossmdlcourse.mdlcourse_id
-                            instance.mdlquiz_id = fossmdlcourse.mdlquiz_id
-                            instance.mdlattempt_id = 0
-                            instance.status = 0
-                            instance.save()
+                messages.error(request, "You have already scheduled <b>"+ t.foss.foss + "</b> Test on <b>"+t.tdate + " "+ t.ttime + "</b>. Please select some other time.")
 
-                        print("test_attendance created for ",tra.student.id)
-                    else:
-                        print("mdluser not found for", user.email)
-                        error = 1
             if not error:
-                t.department.clear()
-                t.department.add(test_training_dept)
-                #update logs
-                message = t.academic.institution_name+" has made a test request for "+t.foss.foss+" on "+t.tdate
+                message = (
+                    t.academic.institution_name +
+                    " has made a test request for " +
+                    t.foss.foss + " on " + t.tdate
+                )
                 if rid:
-                    message = t.academic.institution_name+" has updated test for "+t.foss.foss+" on  dated "+t.tdate
-                update_events_log(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0)
-                update_events_notification(user_id = user.id, role = 0, category = 1, category_id = t.id, academic = t.academic_id, status = 0, message = message)
+                    message = (
+                        t.academic.institution_name +
+                        " has updated test for " +
+                        t.foss.foss + " dated " + t.tdate
+                    )
+                #  async attendance
+                if t.training_id:
+                    async_process_test_attendance(t,user, message)
 
-                return HttpResponseRedirect("/software-training/test/"+role+"/pending/")
+                #  faster M2M update
+                if test_training_dept:
+                    t.department.set([test_training_dept])
+                else:
+                    t.department.clear()
+
+                # message = (
+                #     t.academic.institution_name +
+                #     " has made a test request for " +
+                #     t.foss.foss + " on " + t.tdate
+                # )
+                # if rid:
+                #     message = (
+                #         t.academic.institution_name +
+                #         " has updated test for " +
+                #         t.foss.foss + " dated " + t.tdate
+                #     )
+
+                #  async logs & notifications
+                # async_test_post_save(t, user, message)
+                messages.success(request, "Test request submitted successfully. Moodle records are currently being processed for students. Please check back shortly. The process may take up to 30 minutes.")
+                return HttpResponseRedirect(
+                    "/software-training/test/{}/pending/".format(role)
+                )
+
         messages.info(request, """
             <ul>
                 <li>Please make sure that before making the test request a faculty/trainer should have registered as invigilator.</li>
                 <li>Same person cannot be an organiser and the invigilator for the same test.</li>
-                <li>Please confirm the Invigilator's availability and acceptance to invigilate before selecting his name in this form.</li>
-                <li>Upgrade the browser with version of Mozilla Firefox 30 or higher on all the systems before the test.</li>
+-               <li>Please confirm the Invigilator's availability and acceptance to invigilate before selecting his name in this form.</li>
+-               <li>Upgrade the browser with version of Mozilla Firefox 30 or higher on all the systems before the test.</li>
             </ul>
         """)
+
     context['role'] = role
     context['status'] = 'request'
     context.update(csrf(request))
     context['form'] = form
     return render(request, 'events/templates/test/form.html', context)
+
+
+
+
 
 @login_required
 def test_list(request, role, status):
@@ -2283,6 +2303,17 @@ def test_attendance(request, tid):
     messages.info(request, "Instruct the students to Register and Login on the Online Test link of Spoken Tutorial. Click on the checkbox so that usernames of all the students who are present for the test are marked, then click the submit button. Students can now proceed for the Test.")
     return render(request, 'events/templates/test/attendance.html', context)
 
+def is_worker_queued(test_id):
+    job_id = f"test_attendance_{test_id}"
+    try:
+        job = Job.fetch(job_id, connection=REDIS_CLIENT)
+        return True
+    except NoSuchJobError as e:
+        print("********** NoSuchJobError **********")
+        return False
+
+
+
 @login_required
 def test_participant(request, tid=None):
     user = request.user
@@ -2297,6 +2328,13 @@ def test_participant(request, tid=None):
             test_mdlusers = TestAttendance.objects.filter(test_id=tid, status__gte=2)
         else:
             test_mdlusers = TestAttendance.objects.filter(test_id=tid)
+
+        context = {'collection' : test_mdlusers, 'test' : t, 'can_download_certificate':can_download_certificate}
+        # if training has participants and testattendance has no participants, check if it is in queue
+        if test_mdlusers.count() == 0 and TrainingAttend.objects.filter(training=t.training).count() != 0:
+            if is_worker_queued(t.id):
+                print(f"********** Job is in queue: {t.id} **********")
+                context["message"] = "Moodle records are currently being processed for students. Please check back shortly. The process may take up to 30 minutes."
         #ids = []
         #print test_mdlusers
         #for tp in test_mdlusers:
@@ -2305,7 +2343,7 @@ def test_participant(request, tid=None):
         #tp = MdlUser.objects.using('moodle').filter(id__in=ids)
         #if t.status == 4 and (user == t.organiser or user == t.invigilator):
         #    can_download_certificate = 1
-        context = {'collection' : test_mdlusers, 'test' : t, 'can_download_certificate':can_download_certificate}
+        
         return render(request, 'events/templates/test/test_participant.html', context)
 
 def test_participant_ceritificate(request, wid, participant_id):

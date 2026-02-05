@@ -36,6 +36,11 @@
 
         </dl>
     </div>
+    {% if message %}
+    <div>
+        <div class="alert alert-warning">{{message}}</div>
+    </div>
+    {% endif %}
 	<div class="" id="pending">
 		{% if collection %}
 		<a style="float: right; padding-right: 9%;" href="{% url 'events:test_participant_ceritificate_all' test.id %}">Download all certificates</a>
