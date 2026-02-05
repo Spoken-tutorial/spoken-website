@@ -2345,6 +2345,40 @@ def test_participant(request, tid=None):
         #    can_download_certificate = 1
         
         return render(request, 'events/templates/test/test_participant.html', context)
+    
+@login_required
+def download_test_participants_csv(request, test_id):
+    user = request.user
+    try:
+        test = Test.objects.get(id=test_id)
+    except Test.DoesNotExist:
+        raise PermissionDenied()
+    if not (user == test.organiser.user or user == test.invigilator.user or user.groups.filter( name__in=["Event Manager", "Resource Person"] ).exists()):
+        raise PermissionDenied()
+
+    if test.status == 4:
+        participants = TestAttendance.objects.filter(test_id=test.id,status__gte=2)
+    else:
+        participants = TestAttendance.objects.filter(test_id=test.id)
+    participants = participants.order_by('id')
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = ('attachment; filename="{}_participants.csv"'.format(test.foss.foss))
+
+    writer = csv.writer(response)
+    writer.writerow(['First Name','Last Name','Email ID','Score (%)'])
+
+    for ta in participants:
+        firstname = ta.mdluser_firstname or ''
+        lastname = ta.mdluser_lastname or ''
+        mdluser = MdlUser.objects.filter(id=ta.mdluser_id).first()
+        email = mdluser.email if mdluser and mdluser.email else ''
+        grade = MdlQuizGrades.objects.filter(quiz=ta.mdlquiz_id,userid=ta.mdluser_id).first()
+        score = round(grade.grade, 2) if grade else 'NA'
+        writer.writerow([firstname,lastname,email,score])
+
+    return response
+
+
 
 def test_participant_ceritificate(request, wid, participant_id):
     #response = HttpResponse(content_type='application/pdf')
