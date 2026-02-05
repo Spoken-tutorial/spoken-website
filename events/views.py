@@ -1965,7 +1965,7 @@ def test_request(request, role, rid = None):
 
                 #  async logs & notifications
                 # async_test_post_save(t, user, message)
-                messages.success(request, "Test request submitted successfully.")
+                messages.success(request, "Test request submitted successfully. Moodle records are currently being processed for students. Please check back shortly. The process may take up to 30 minutes.")
                 return HttpResponseRedirect(
                     "/software-training/test/{}/pending/".format(role)
                 )
