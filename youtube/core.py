@@ -208,3 +208,65 @@ def delete_playlistitem(service, playlist_item_id):
     except Exception as e:
         print(e)
     return None
+
+
+def fetch_playlists(service):
+    """Fetch all playlists from authenticated user's channel."""
+    try:
+        playlists = []
+        request = service.playlists().list(
+            part='snippet',
+            mine=True,
+            maxResults=50
+        )
+        
+        while request:
+            response = request.execute()
+            
+            if 'items' in response:
+                for item in response['items']:
+                    playlists.append({
+                        'id': item['id'],
+                        'title': item['snippet']['title']
+                    })
+            
+            if 'nextPageToken' in response:
+                request = service.playlists().list(
+                    part='snippet',
+                    mine=True,
+                    maxResults=50,
+                    pageToken=response['nextPageToken']
+                )
+            else:
+                break
+        
+        return playlists
+    except Exception as e:
+        print(f"Error fetching playlists: {e}")
+        return []
+
+
+def set_video_thumbnail(service, video_id, thumbnail_path):
+    # Set custom thumbnail for the video
+    try:
+        if not os.path.isfile(thumbnail_path):
+            raise FileNotFoundError(f"Thumbnail not found: {thumbnail_path}")
+        
+        media = MediaFileUpload(thumbnail_path, mimetype='image/jpeg')
+        
+        service.thumbnails().set(
+            videoId=video_id,
+            media_body=media
+        ).execute()
+        
+        return True
+    except Exception as e:
+        print(f"Error setting thumbnail: {e}")
+        return False
+
+
+def add_video_to_playlist(service, video_id, playlist_id, position=None):
+    # Add video to playlist at specified position 
+    if position is not None:
+        return add_to_playlist(service, video_id, playlist_id, int(position))
+    return add_to_playlist(service, video_id, playlist_id)

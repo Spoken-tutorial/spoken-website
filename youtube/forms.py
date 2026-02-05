@@ -1,6 +1,7 @@
 # Third Party Stuff
 from django import forms
 from django.db.models import Q
+from django.core.validators import FileExtensionValidator
 
 # Spoken Tutorial Stuff
 from creation.models import *
@@ -152,6 +153,33 @@ class YouTubeUploadForm(forms.Form):
         error_messages={'required': 'Privacy status field is required.'},
         widget=forms.Select(attrs={
             'class': 'form-control'
+        })
+    )
+    
+    thumbnail = forms.FileField(
+        required=False,
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])],
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': 'image/jpeg,image/png'
+        })
+    )
+    
+    playlist = forms.CharField(
+        required=False,
+        max_length=255,
+        widget=forms.HiddenInput(attrs={
+            'id': 'id_playlist_hidden'
+        })
+    )
+    
+    playlist_position = forms.IntegerField(
+        required=False,
+        min_value=0,
+        help_text="0 = top. Leave empty to append.",
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': '0'
         })
     )
 

@@ -2,6 +2,7 @@
 # Standard Library
 from builtins import str
 import os
+import tempfile
 
 # Third Party Stuff
 from django.conf import settings
@@ -36,10 +37,11 @@ def add_youtube_video(request):
     template = 'youtube/templates/add_youtube_video.html'
     
     if request.method == 'GET':
-        context['form'] = YouTubeUploadForm()
+        form = YouTubeUploadForm()
+        context['form'] = form
         
     elif request.method == 'POST':
-        form = YouTubeUploadForm(request.POST)
+        form = YouTubeUploadForm(request.POST, request.FILES)
         context['form'] = form
         
         if form.is_valid():
@@ -48,6 +50,9 @@ def add_youtube_video(request):
                 title = form.cleaned_data['title']
                 description = form.cleaned_data['description']
                 privacy = form.cleaned_data['privacy_status']
+                thumbnail = form.cleaned_data.get('thumbnail')
+                playlist_id = form.cleaned_data.get('playlist')
+                playlist_position = form.cleaned_data.get('playlist_position')
 
                 # Get Resource and File Path
                 resource = TutorialResource.objects.select_related('tutorial_detail__foss').get(id=tutorial_resource_id)
@@ -95,17 +100,56 @@ def add_youtube_video(request):
 
                 if 'id' not in result:
                     if isinstance(result, str):
-                         resource.video_id = result
+                         video_id = result
                     else:
                          raise Exception(f"Unexpected API response: {result}")
                 else:
-                    resource.video_id = result['id']
+                    video_id = result['id']
+
+                # Handle thumbnail upload if provided
+                if thumbnail:
+                    thumbnail_path = None
+                    try:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp:
+                            for chunk in thumbnail.chunks():
+                                tmp.write(chunk)
+                            thumbnail_path = tmp.name
+                        
+                        if set_video_thumbnail(service, video_id, thumbnail_path):
+                            messages.info(request, "Thumbnail uploaded successfully.")
+                        else:
+                            messages.warning(request, "Failed to upload thumbnail.")
+                    except Exception as e:
+                        messages.warning(request, f"Thumbnail upload skipped: {str(e)}")
+                    finally:
+                        if thumbnail_path and os.path.exists(thumbnail_path):
+                            os.remove(thumbnail_path)
+
+                # Add video to playlist if selected
+                if playlist_id:
+                    try:
+                        playlists = fetch_playlists(service)
+                        playlist_ids = [p['id'] for p in playlists]
+                        
+                        if playlist_id in playlist_ids:
+                            playlist_item_id = add_video_to_playlist(service, video_id, playlist_id, playlist_position)
+                            if playlist_item_id:
+                                resource.playlist_item_id = playlist_item_id
+                                position_msg = f" at position {playlist_position}" if playlist_position is not None else " at the end"
+                                messages.info(request, f"Video added to playlist{position_msg}.")
+                            else:
+                                messages.warning(request, "Failed to add video to playlist.")
+                        else:
+                            messages.warning(request, "Selected playlist not found.")
+                    except Exception as e:
+                        messages.warning(request, f"Playlist addition failed: {str(e)}")
 
                 # Success
+                resource.video_id = video_id
                 resource.is_on_youtube = True
                 resource.save()
 
-                messages.success(request, f"Successfully uploaded '{title}' to YouTube! (Video ID: {resource.video_id})")
+                messages.success(request, f"Successfully uploaded '{title}' to YouTube! (Video ID: {video_id})")
                 return HttpResponseRedirect('/software-training/')
 
             except Exception as e:

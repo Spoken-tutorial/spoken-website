@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 # Spoken Tutorial Stuff
 from creation.models import Language, TutorialDetail, TutorialResource, FossCategory
+from youtube.core import get_youtube_credential, fetch_playlists
 
 
 @csrf_exempt
@@ -99,3 +100,16 @@ def get_uploadable_tutorials(request):
                 pass
     
     return HttpResponse(json.dumps({'tutorials': tutorials}), content_type='application/json')
+
+
+@csrf_exempt
+def get_playlists(request):
+    # Fetch playlists from authenticated YouTube channel
+    playlists = []
+    
+    if request.method == 'GET':
+        service = get_youtube_credential()
+        if service:
+            playlists = fetch_playlists(service)
+    
+    return HttpResponse(json.dumps({'playlists': playlists}), content_type='application/json')

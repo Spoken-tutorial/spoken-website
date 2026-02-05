@@ -12,5 +12,6 @@ urlpatterns = [ # noqa
     url(r'^ajax-foss-based-language-tutorial/$',  ajax_foss_based_language_tutorial,
         name="ajax_foss_based_language_tutorial"),
     url(r'^ajax/get-uploadable-tutorials/$',  get_uploadable_tutorials, name="get_uploadable_tutorials"),
+    url(r'^ajax/get-playlists/$',  get_playlists, name="get_playlists"),
     url(r'^oauth2callback/$',  auth_return, name="auth_return"),
 ]

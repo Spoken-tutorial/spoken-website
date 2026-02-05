@@ -1,0 +1,426 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+{% load announcements %}
+{% block title %}Upload YouTube Video{% endblock %}
+{% block announcement %}
+<div id="slideshow">
+    {% get_notifications as notifications %}
+    {% if notifications %}
+    {% for notification in notifications %}
+    <div class="announcement alert"
+        style="background:#{% if notification.bg_color %}{{ notification.bg_color }}{% else %}1B83BC{% endif %};">
+        <div class="inner">
+            <div class="text-container">
+                {{ notification.body|safe }}
+                <!--<button type="button" class="close" data-dismiss="alert">&times;</button>-->
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}
+{% block heading %}
+<i class="fa fa-video-camera"></i> Upload YouTube Video
+{% endblock %}
+{% block search %}{% endblock %}
+{% block compressinlinecssblock %}
+<style>
+    .video-upload-form {
+        margin-top: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .field-required {
+        color: red;
+    }
+
+    .field-error {
+        border-color: #a94442;
+        color: #a94442;
+    }
+
+    .form-error-list {
+        color: #a94442;
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .form-error-list li {
+        margin-bottom: 5px;
+    }
+
+    .btn-submit {
+        margin-top: 20px;
+    }
+
+    .video-file-input {
+        display: block;
+        margin: 10px 0;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="well video-upload-form col-lg-offset-1 col-md-offset-1 col-lg-10 col-md-10 col-sm-12 col-xs-12">
+    <div class="col-sm-12">
+        <form action="" method="POST" enctype="multipart/form-data" class='form-horizontal' id="youtube-upload-form">
+            {% csrf_token %}
+            {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                <ul class="form-error-list">
+                    {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- FOSS Category -->
+            <div class="form-group">
+                <label for="id_foss_category" class="col-sm-3 control-label">
+                    FOSS Category
+                    <span class="field-required">*</span>
+                </label>
+                <div class="col-sm-9">
+                    {{ form.foss_category }}
+                    {% if form.foss_category.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="form-error-list">
+                            {% for error in form.foss_category.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Language -->
+            <div class="form-group">
+                <label for="id_language" class="col-sm-3 control-label">
+                    Language
+                    <span class="field-required">*</span>
+                </label>
+                <div class="col-sm-9">
+                    {{ form.language }}
+                    {% if form.language.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="form-error-list">
+                            {% for error in form.language.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tutorial -->
+            <div class="form-group">
+                <label for="id_tutorial" class="col-sm-3 control-label">
+                    Tutorial
+                    <span class="field-required">*</span>
+                </label>
+                <div class="col-sm-9">
+                    {{ form.tutorial }}
+                    {% if form.tutorial.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="form-error-list">
+                            {% for error in form.tutorial.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Only shows tutorials not yet on YouTube.</small>
+                </div>
+            </div>
+
+            <!-- Title Input -->
+            <div class="form-group">
+                <label for="id_title" class="col-sm-3 control-label">
+                    Title
+                    <span class="field-required">*</span>
+                </label>
+                <div class="col-sm-9">
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="form-error-list">
+                            {% for error in form.title.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Auto-generated as: FOSS Name - Language Name - Tutorial Name</small>
+                </div>
+            </div>
+
+            <!-- Description Textarea -->
+            <div class="form-group">
+                <label for="id_description" class="col-sm-3 control-label">
+                    Description
+                    <span class="field-required">*</span>
+                </label>
+                <div class="col-sm-9">
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="form-error-list">
+                            {% for error in form.description.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Auto-filled from tutorial outline</small>
+                </div>
+            </div>
+
+            <!-- Privacy Status Select -->
+            <div class="form-group">
+                <label for="id_privacy_status" class="col-sm-3 control-label">
+                    Privacy Status
+                    <span class="field-required">*</span>
+                </label>
+                <div class="col-sm-9">
+                    {{ form.privacy_status }}
+                    {% if form.privacy_status.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="form-error-list">
+                            {% for error in form.privacy_status.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Select who can view this video</small>
+                </div>
+            </div>
+
+            <!-- Thumbnail Upload -->
+            <div class="form-group">
+                <label for="id_thumbnail" class="col-sm-3 control-label">
+                    Thumbnail
+                </label>
+                <div class="col-sm-9">
+                    {{ form.thumbnail }}
+                    {% if form.thumbnail.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="form-error-list">
+                            {% for error in form.thumbnail.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Optional - JPG or PNG image (custom video thumbnail)</small>
+                </div>
+            </div>
+
+            <!-- Playlist Selection -->
+            <div class="form-group">
+                <label for="playlist_dropdown" class="col-sm-3 control-label">
+                    Playlist
+                </label>
+                <div class="col-sm-9">
+                    <select id="playlist_dropdown" class="form-control">
+                        <option value="">-- Select Playlist (Optional) --</option>
+                    </select>
+                    {{ form.playlist }}
+                    {% if form.playlist.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="form-error-list">
+                            {% for error in form.playlist.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">Optional - Add video to a playlist after upload</small>
+                </div>
+            </div>
+
+            <!-- Playlist Position -->
+            <div class="form-group" id="playlist_position_group" style="display: none;">
+                <label for="id_playlist_position" class="col-sm-3 control-label">
+                    Position in Playlist
+                </label>
+                <div class="col-sm-9">
+                    {{ form.playlist_position }}
+                    {% if form.playlist_position.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="form-error-list">
+                            {% for error in form.playlist_position.errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">0 = top. Leave empty to append to end.</small>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="form-group btn-submit">
+                <div class="col-sm-offset-3 col-sm-9">
+                    <input class="btn btn-primary" type="submit" value="Upload Video" />
+                    <a href="/software-training/" class="btn btn-default">Cancel</a>
+                </div>
+            </div>
+            {% endwith %}
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block jsblock %}
+<script>
+    /* Slideshow */
+    var stop = 1
+    $('#slideshow').hover(function () {
+        stop = 0
+    }, function () {
+        stop = 1
+    });
+    if ($(".announcement").length > 1) {
+        $("#slideshow > div:gt(0)").hide();
+        setInterval(function () {
+            if (stop) {
+                $('#slideshow > div:first')
+                    .fadeOut(0)
+                    .next()
+                    .fadeIn(0)
+                    .end()
+                    .appendTo('#slideshow');
+            }
+        }, 5000);
+    }
+    $('.close').click(function () {
+        $(".navbar-fixed-top").css({ 'top': '0px', 'position': 'fixed' });
+        $("#header-wrapper").css({ 'height': '0px' });
+    });
+
+    /* YouTube Upload Form Logic */
+    $(document).ready(function () {
+        var $foss = $('#id_foss_category');
+        var $lang = $('#id_language');
+        var $tutorial = $('#id_tutorial');
+        var $title = $('#id_title');
+        var $desc = $('#id_description');
+        var $playlistDropdown = $('#playlist_dropdown');
+        var $playlistHidden = $('#id_playlist_hidden');
+        var $playlistPositionGroup = $('#playlist_position_group');
+        var $playlistPosition = $('#id_playlist_position');
+        var $thumbnail = $('#id_thumbnail');
+
+        function fetchAndPopulatePlaylists() {
+            $.ajax({
+                url: '/youtube/ajax/get-playlists/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    $playlistDropdown.empty().append('<option value="">-- Select Playlist (Optional) --</option>');
+                    if (data.playlists && data.playlists.length > 0) {
+                        $.each(data.playlists, function (index, item) {
+                            $playlistDropdown.append($('<option></option>').attr('value', item.id).text(item.title));
+                        });
+                    }
+                },
+                error: function () {
+                    console.error('Error fetching playlists');
+                }
+            });
+        }
+
+        function updateTutorials() {
+            var fossId = $foss.val();
+            var langId = $lang.val();
+
+            $tutorial.empty().append('<option value="">-- Select Tutorial --</option>').attr('disabled', 'disabled');
+            $title.val('');
+            $desc.val('');
+
+            if (fossId && langId) {
+                $.ajax({
+                    url: '/youtube/ajax/get-uploadable-tutorials/',
+                    data: {
+                        'foss_id': fossId,
+                        'language_id': langId
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        if (data.tutorials && data.tutorials.length > 0) {
+                            $.each(data.tutorials, function (index, item) {
+                                var option = $('<option></option>')
+                                    .attr('value', item.id)
+                                    .text(item.name)
+                                    .data('outline', item.outline)
+                                    .data('tutorial-name', item.name);
+                                $tutorial.append(option);
+                            });
+                            $tutorial.removeAttr('disabled');
+                        }
+                    },
+                    error: function () {
+                        console.error('Error fetching tutorials');
+                    }
+                });
+            }
+        }
+
+        $foss.change(updateTutorials);
+        $lang.change(updateTutorials);
+
+        $tutorial.change(function () {
+            var selectedOption = $(this).find('option:selected');
+            var tutorialId = $(this).val();
+
+            if (tutorialId) {
+                var outline = selectedOption.data('outline') || '';
+                var tutorialName = selectedOption.data('tutorial-name') || '';
+                var fossName = $foss.find('option:selected').text();
+                var langName = $lang.find('option:selected').text();
+
+                $desc.val(outline);
+                var generatedTitle = fossName + ' - ' + langName + ' - ' + tutorialName;
+                $title.val(generatedTitle);
+            } else {
+                $desc.val('');
+                $title.val('');
+            }
+        });
+
+        $playlistDropdown.change(function () {
+            var playlistId = $(this).val();
+            $playlistHidden.val(playlistId);
+            
+            if (playlistId) {
+                $playlistPositionGroup.show();
+            } else {
+                $playlistPositionGroup.hide();
+                $playlistPosition.val('');
+            }
+        });
+
+        $thumbnail.change(function () {
+            var file = this.files[0];
+            if (file && file.size > 2097152) {
+                alert('Thumbnail file size must be less than 2MB');
+                $(this).val('');
+            }
+        });
+
+        fetchAndPopulatePlaylists();
+    });
+</script>
+{% endblock %}
