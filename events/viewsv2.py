@@ -72,7 +72,8 @@ from rq import Worker
 # import helpers
 from events.views import is_organiser, is_invigilator, is_resource_person, is_administrator, is_accountexecutive
 from events.helpers import get_prev_semester_duration, get_updated_form
-from cron.tasks import async_filter_student_grades, filter_student_grades
+from cron.tasks import async_filter_student_grades, filter_student_grades, async_generate_certificate_batch
+from cron.models import CertificateBatch
 from spoken.config import TOPPER_WORKER_STATUS
 from django.db import connection
 from donate.utils import send_transaction_email
@@ -822,6 +823,25 @@ class TrainingCertificateListView(ListView):
     context['languages'] = languages
     context['allow_download'] = (training.is_learners_allowed) and (training.cert_status == 1) and (training.status == 1)
     return context
+
+
+@group_required("Organiser")
+def async_training_certificate_all(request, trid):
+  training = get_object_or_404(TrainingRequest, pk=trid)
+  total_participants = TrainingAttend.objects.filter(training_id=training.id).count()
+  estimated_minutes = max(1, total_participants // 50)
+  batch = CertificateBatch.objects.create(
+    batch_type=2,
+    training_id=training.id,
+    created_by=request.user
+  )
+  async_generate_certificate_batch(batch)
+  messages.success(
+    request,
+    "Certificate generation has started. Estimated time: ~%s minutes." % estimated_minutes
+  )
+  redirect_url = request.META.get("HTTP_REFERER") or request.path
+  return HttpResponseRedirect(redirect_url)
 
 
 """
