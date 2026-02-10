@@ -114,6 +114,12 @@
     <script src="{% static 'spoken/js/events.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+ <script>
+    window.SUBSCRIPTION_AMOUNT = {{ subscription_amount }};
+    window.SUBSCRIPTION_AMOUNT_COLLEGE = {{ SUBSCRIPTION_AMOUNT_COLLEGE }};
+    window.SUBSCRIPTION_INSTITUTE_TYPES = {{ SUBSCRIPTION_INSTITUTE_TYPES|safe }};
+</script>
+
 
     <script>
        $(document).ready(function() {
@@ -134,8 +140,13 @@
                 .then(data => {
                     academicSelect.html('<option value="">-- Select Academic Center --</option>'); // reset
                     data.forEach(item => {
-                        academicSelect.append(new Option(`${item.academic_code} - ${item.institution_name}`, item.id))
-                    });
+        const option = new Option(
+            `${item.academic_code} - ${item.institution_name}`,
+            item.id
+        );
+        option.dataset.type = item.institution_type_id; // ✅ THIS IS THE LINE YOU ASKED ABOUT
+        academicSelect.append(option);
+    });
                     academicSelect.prop('disabled', false); // enable after loading
                     document.getElementById("ac_info").style.display = "none";
                 })
@@ -143,11 +154,27 @@
             }
         });
 
-        $('#id_academic').on('select2:select select2:unselect', function (e) {
-            var selectedCount = $(this).val() ? $(this).val().length : 0;
-            let total_amount = {{subscription_amount}} * selectedCount;
-            $("#id_amount").val(total_amount);
-        });
+        // $('#id_academic').on('select2:select select2:unselect', function (e) {
+        //     var selectedCount = $(this).val() ? $(this).val().length : 0;
+        //     let total_amount = {{subscription_amount}} * selectedCount;
+        //     $("#id_amount").val(total_amount);
+        // });
+       $('#id_academic').on('change', function () {
+    let total_amount = 0;
+
+    $('#id_academic option:selected').each(function () {
+        const typeId = parseInt($(this).data('type'), 10);
+
+        if (SUBSCRIPTION_INSTITUTE_TYPES.includes(typeId)) {
+            total_amount += SUBSCRIPTION_AMOUNT_COLLEGE;
+        } else {
+            total_amount += SUBSCRIPTION_AMOUNT;
+        }
+    });
+
+    $('#id_amount').val(total_amount);
+});
+
 
         //GST fields 
         // Trigger on page load and on selection change
