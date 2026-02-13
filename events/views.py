@@ -762,9 +762,9 @@ def ac(request):
 
     collection = AcademicCenterFilter(request.GET, user = user, queryset=collection)
     context['form'] = collection.form
-
+    collection_qs = collection.qs.order_by('id')
     page = request.GET.get('page')
-    collection = get_page(collection.qs, page)
+    collection = get_page(collection_qs, page)
 
     context['collection'] = collection
     context['header'] = header
