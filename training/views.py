@@ -270,7 +270,7 @@ def register_user(request):
 			context['email'] = email
 			context['callbackurl'] = callbackurl
 	if request.method == 'POST':
-		event_id = request.POST.get("event_id_info")
+		event_id = request.POST.get("event_id_info", None) or request.GET.get("event_id", None)
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
 			fosses = event_register.course.foss.all()
@@ -318,6 +318,7 @@ def reg_success(request, user_type):
 			form_data = form.save(commit=False)
 			form_data.user = request.user
 			form_data.event = event
+			form_data.added_by = request.user
 
 			if source == 'deet':
 				form_data.source = source
@@ -372,6 +373,8 @@ def reg_success(request, user_type):
 				# if user has made payment from ILW interface -> return Participant form
 				return form_data
 		else:
+			print(f"*** Form Errors ****")
+			print(f"------------- {form.errors} -------------")
 			messages.warning(request, 'Invalid form payment request 1.')
 			return redirect('training:list_events', status='ongoing' )
 
