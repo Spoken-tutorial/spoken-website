@@ -168,7 +168,8 @@
 <div class="tab-content">
     <div class="tab-pane active" id="pending">        
 {% for event in collection %}
-<form method="post" action = "{% url 'training:register_user' %}">
+  <form method="post" action="{% url 'training:register_user' %}?event_id={{event.id}}">
+
 {% csrf_token %}
 
 {% if status == 'myevents'%}

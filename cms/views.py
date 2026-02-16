@@ -170,7 +170,7 @@ IIT Bombay.
     except Exception as e:
         return None
 
-def email_otp(user):
+def email_otp(user, password):
     p = Profile.objects.get(user=user)
     subject = 'Spoken Tutorial'
     message = """Hello {0},
@@ -182,6 +182,11 @@ Your OTP is
 
 If you enter the OTP correctly, this email address will get activated on Spoken Tutorial({2}).
 
+Please find below your login credentials for future reference:
+
+Username: {3}
+Password: {4}
+
 Regards,
 Admin
 Spoken Tutorials
@@ -190,6 +195,8 @@ IIT Bombay.
         user.username,
         str(p.confirmation_code),
         "https://spoken-tutorial.org",
+        user.email,
+        password
     )
 
     email = EmailMultiAlternatives(
