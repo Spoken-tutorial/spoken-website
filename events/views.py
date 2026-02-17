@@ -80,8 +80,10 @@ from django.template.context_processors import csrf
 
 from cron.tasks import (
     async_process_test_attendance,
-    async_test_post_save
+    async_test_post_save,
+    async_generate_certificate_batch
 )
+from cron.models import CertificateBatch
 
 
 from io import StringIO, BytesIO
@@ -2556,6 +2558,26 @@ def test_participant_ceritificate_all(request, testid):
     outputStream.close()
 
     return response
+
+
+def async_test_participant_certificate_all(request, testid):
+    w = Test.objects.get(id=testid)
+    if not (w.organiser.user == request.user or w.invigilator.user == request.user):
+        raise PermissionDenied()
+    total_participants = TestAttendance.objects.filter(test_id=testid).count()
+    estimated_minutes = max(1, total_participants // 50)
+    batch = CertificateBatch.objects.create(
+        batch_type=1,
+        test_id=testid,
+        created_by=request.user
+    )
+    async_generate_certificate_batch(batch)
+    messages.success(
+        request,
+        "Certificate generation has started. Estimated time: ~%s minutes." % estimated_minutes
+    )
+    redirect_url = request.META.get("HTTP_REFERER") or request.path
+    return HttpResponseRedirect(redirect_url)
 
 
 @csrf_exempt

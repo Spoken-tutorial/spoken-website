@@ -2,6 +2,7 @@ from django.conf.urls import url, include
 from events.views import *
 from events.notification import nemail
 from .views import get_schools, get_batches
+from youtube.views import add_youtube_video as youtube_add_video
 
 app_name = 'events'
 urlpatterns = [
@@ -80,7 +81,7 @@ urlpatterns = [
     #url(r'^test/subscribe/(\d+)/(\d+)/$',  test_student_subscribe', name='test_student_subscribe'),
     url(r'^test/(\d+)/participant/$',  test_participant, name='test_participant'),
     url(r'^test/participant/certificate/(\d+)/(\d+)/$',  test_participant_ceritificate, name='test_participant_ceritificate'),
-    url(r'^test/participant/certificate/all/(\d+)/$',  test_participant_ceritificate_all, name='test_participant_ceritificate_all'),
+    url(r'^test/participant/certificate/all/(\d+)/$',  async_test_participant_certificate_all, name='test_participant_ceritificate_all'),
     url(r'^test/(\d+)/attendance/$',  test_attendance, name='test_attendance'),
     url(r'^test/(?P<role>\w+)/request/$',  test_request, name='test_request'),
     url(r'^test/(?P<role>\w+)/(?P<rid>\d+)/approvel/$',  test_approvel, name='test_approvel'),
@@ -93,6 +94,8 @@ urlpatterns = [
     
     url(r'^resource-center/$',  resource_center, name="resource_center"),
     url(r'^resource-center/(?P<slug>[\w-]+)/$',  resource_center, name="resource_center"),
+    
+    url(r'^add-youtube-video/$',  youtube_add_video, name="add_youtube_video"),
     
     url(r'^academic-center/(?P<academic_id>\d+)/$',  academic_center, name="academic_center"),
     url(r'^academic-center/(?P<academic_id>\d+)/(?P<slug>[\w-]+)/$',  academic_center, name="academic_center"),
