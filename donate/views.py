@@ -1,6 +1,6 @@
 from config import TARGET, CHANNEL_ID, CHANNEL_KEY, EXPIRY_DAYS
 from .helpers import PURPOSE
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.conf import settings
 from creation.models import FossCategory, Language
 from cms.models import Profile
@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.template.context_processors import csrf
 from donate.forms import PayeeForm, TransactionForm
 from donate.models import *
@@ -40,6 +40,8 @@ from .subscription import get_request_headers, get_display_transaction_details, 
 from donate.payment import save_ilw_hdfc_success_data, save_ilw_hdfc_error_data, get_ilw_session_payload, make_hdfc_session_request
 from training.models import TrainingEvents
 from decimal import Decimal, InvalidOperation
+
+
 # @csrf_exempt
 # def donatehome(request):
 #     form = PayeeForm(initial={'country': 'India'})
@@ -140,7 +142,6 @@ def form_valid(request, form, purpose):
         fosses = form.cleaned_data.get('foss_id').split(',')
         foss_languages = form.cleaned_data.get('language_id').split(',|')
         levels = form.cleaned_data.get('level_id').split(',')
-
         foss_level = 0
         
         for i in range(len(fosses)):
@@ -192,45 +193,68 @@ def form_invalid(request, form):
 
 @csrf_exempt
 def controller(request, purpose):
+
+    if request.method == 'GET':
+        if purpose == 'cdcontent':
+            return render(request, 'payment_status.html', {}, status=200)
+        return HttpResponse("OK", status=200)
+
     form = PayeeForm(request.POST)
-    
-    if request.method == 'POST':
-        if form.is_valid():
-            # form_valid function creates Payee & CdFossLanguages records.
-            # & returns Payee record
-            payee_obj_new = form_valid(request, form, purpose)
-        else:
-            form_invalid(request, form)
-    
-    if purpose != 'cdcontent': # purpose = event_id in case of ILW
-        participant_form = reg_success(request, 'general') 
+
+    if not form.is_valid():
+        return JsonResponse({
+            "status": "error",
+            "errors": form.errors
+        }, status=200)
+
+    payee_obj_new = form_valid(request, form, purpose)
+
+    if purpose != 'cdcontent':
+        participant_form = reg_success(request, 'general')
         participant_form.payment_status = payee_obj_new
-        try :
+        try:
             participant_form.save()
-        except :
+        except Exception:
             return redirect('training:list_events', status='myevents')
+
     data = get_final_data(request, payee_obj_new, purpose)
+
     if payee_obj_new.source == 'deet':
         callbackurl = request.POST.get('callbackurl')
-        json = {'id': f'p{payee_obj_new.id}', 'name': payee_obj_new.name,
-                 'email':payee_obj_new.email, 'paid college': False,
-                 'amount': payee_obj_new.amount, 'status': 0}
-        requests.post(callbackurl, json)
+        if callbackurl:
+            payload = {
+                'id': 'p{}'.format(payee_obj_new.id),
+                'name': payee_obj_new.name,
+                'email': payee_obj_new.email,
+                'paid_college': False,
+                'amount': payee_obj_new.amount,
+                'status': 0
+            }
+            requests.post(callbackurl, json=payload)
 
     if purpose == 'cdcontent':
-        return render(request, 'payment_status.html', data)
-    else:
-    #instead of redirecting to payment_status and starting the payment process, start hdfc transaction steps
-    #hdfc session request
-        payee_email = payee_obj_new.email
-        headers = get_request_headers(payee_email)
-        payload = get_ilw_session_payload(request,payee_obj_new, participant_form)
-        payment_link = make_hdfc_session_request(payee_obj_new, headers, payload)
-        if payment_link is not None:
-            return redirect(payment_link)
-        else:
-            return redirect('training:list_events', status='myevents')
-    # return render(request, 'payment_status.html', data)
+        return render(request, 'payment_status.html', data, status=200)
+
+    payee_email = payee_obj_new.email
+    headers = get_request_headers(payee_email)
+    payload = get_ilw_session_payload(
+        request,
+        payee_obj_new,
+        participant_form
+    )
+
+    payment_link = make_hdfc_session_request(
+        payee_obj_new,
+        headers,
+        payload
+    )
+
+    if payment_link:
+        return redirect(payment_link)
+
+    return redirect('training:list_events', status='myevents')
+
+
 
 
 @csrf_exempt
