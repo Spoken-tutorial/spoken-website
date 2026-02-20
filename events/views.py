@@ -47,7 +47,7 @@ except ImportError:
 import xml.etree.cElementTree as etree
 from django.conf import settings
 import json
-import os,time, csv, random, string
+import os,time, csv, random, string, io
 from validate_email import validate_email
 
 import os.path
@@ -85,7 +85,7 @@ from cron.tasks import (
 
 
 from io import StringIO, BytesIO
-
+from config import MAX_ROWS, ACADEMIC_CSV_TEMPLATE, MAX_ERROR_COUNT
 
 #randon string
 import string
@@ -703,7 +703,242 @@ def new_ac(request):
         context = {}
         context.update(csrf(request))
         context['form'] = AcademicForm(user=request.user)
+        context['form_csv'] = AcademicCenterCSVUploadForm()
+        context['academic_csv_template'] = ACADEMIC_CSV_TEMPLATE
         return render(request, 'events/templates/ac/form.html', context)
+    
+@login_required
+def upload_ac_csv(request):
+    if request.method == "POST":
+        EXPECTED_COLUMNS = [
+                    'institution_name', 'state', 'district', 'city', 'address', 'pincode',
+                    'institution_type', 'institute_category', 'university', 'contact_person',
+                    'resource_center', 'ratings', 'remarks'
+                ]
+        RATING_CHOICES = {1, 2, 3, 4, 5}
+        INSTITUTE_CATEGORIES = [x.name for x in InstituteCategory.objects.all()]
+
+        form = AcademicCenterCSVUploadForm(request.POST, request.FILES)
+        if not form.is_valid():
+            messages.error(request, f"Form is not valid: {form.errors}")
+            return redirect('events:new_ac')
+
+        csv_file = form.cleaned_data['csv_file']
+        
+        try:
+            decoded_file = csv_file.read().decode('utf-8')
+            reader = csv.DictReader(io.StringIO(decoded_file))
+            row_count = sum(1 for _ in reader)
+            if row_count > MAX_ROWS:
+                messages.error(request, f"CSV has too many rows ({row_count}). Limit is {MAX_ROWS}.")
+                return redirect('events:new_ac')
+        except UnicodeDecodeError:
+            messages.error(request, f"File is not UTF-8 encoded. Please upload a valid CSV.")
+            return redirect('events:new_ac')
+        except Exception:
+            messages.error(request, f"CSV parsing error: An unknown error occurred")
+            return redirect('events:new_ac')
+        
+        if not reader:
+            messages.error(request, f"CSV is empty.")
+            return redirect('events:new_ac')
+
+        header = reader.fieldnames
+        if set(header) != set(EXPECTED_COLUMNS):
+            messages.error(request, f"CSV columns do not match the expected format. Expected columns: {', '.join(EXPECTED_COLUMNS)}")
+            return redirect('events:new_ac')
+        
+        reader = csv.DictReader(io.StringIO(decoded_file))
+        # Prepare data
+        _states = set()
+        _universities = set()
+        _institution_types = set()
+        _districts = set()
+        _cities = set()
+        for idx, row in enumerate(reader, start=2): # Start from 2nd row    
+            _states.add(row.get('state').strip())
+            _universities.add(row.get('university').strip())
+            _institution_types.add(row.get('institution_type').strip())
+            _districts.add(row.get('district').strip())
+            _cities.add(row.get('city').strip())
+
+        # Bulk query
+        states = { s.name.lower(): s for s in State.objects.filter(name__in=_states)}
+        universities = { (u.name.lower(), u.state.name.lower()): u for u in University.objects.filter(name__in=_universities).select_related('state')}
+        districts = { (d.name.lower(), d.state.name.lower()): d for d in District.objects.filter(name__in=_districts).select_related('state')}
+        cities = { (c.name.lower(), c.state.name.lower()): c for c in City.objects.filter(name__in=_cities).select_related('state')}
+        institution_types = { i.name.lower(): i for i in InstituteType.objects.filter(name__in=_institution_types)}
+        
+        success_count, failure_count = 0, 0
+        success_institutes, error_rows, validation_errors, duplicate_val = [], [], [], []
+        
+        # Inner function
+        def get_cleaned_value(row, key, default='', to_lower=True, to_int=False):
+            value = row.get(key)
+            if value is None or value.strip() == '':
+                return default
+            value = value.strip()
+            if to_lower:
+                value = value.lower()
+            if to_int:
+                try:
+                    return int(value)
+                except:
+                    return default
+            return value
+
+        def get_resource_center(val):
+            if val is not None:
+                return 1 if val == 'yes' else 0
+            else:
+                return 0
+        reader = csv.DictReader(io.StringIO(decoded_file))
+        for idx, row in enumerate(reader, start=2): # Start from 2nd row  
+            if failure_count >= MAX_ERROR_COUNT:
+                messages.error(request, "Too many errors. Stopping CSV processing.")
+                break
+
+            csv_row_error = False
+            # Extract fields
+            institution_name = get_cleaned_value(row, 'institution_name', to_lower=False)
+            state_val = get_cleaned_value(row, 'state')
+            city_val = get_cleaned_value(row, 'city')
+            district_val = get_cleaned_value(row, 'district')
+            university_val = get_cleaned_value(row, 'university')
+            institution_type_val = get_cleaned_value(row, 'institution_type')
+            institute_category = get_cleaned_value(row, 'institute_category', default='Uncategorised')
+            rating = get_cleaned_value(row, 'ratings', default=1, to_int=True)
+            is_resource_center = get_resource_center(row.get('resource_center'))
+            pincode = get_cleaned_value(row, 'pincode', to_lower=False, default=None)
+            address = get_cleaned_value(row, 'address', to_lower=False)
+            # field validations
+            if institution_name == "":
+                csv_row_error = True
+                validation_errors.append(f"Error in row: {idx} : Please add institute name.")
+            
+            if state_val != "":
+                state = states.get(state_val) # State object
+            else:
+                validation_errors.append(f"Error in row: {idx} : {institution_name} --> Please select state.")
+                continue
+
+            # validate city
+            if city_val != "":
+                city = cities.get((city_val, state_val))
+                if not city:
+                    csv_row_error = True
+                    validation_errors.append(f"Error in row: {idx} : {institution_name} --> Unknown city - {city_val} for state {state_val}")
+            else:
+                csv_row_error = True
+                validation_errors.append(f"Error in row: {idx} : {institution_name} --> Please select city.")
+
+            # validate district
+            if district_val != "":
+                district = districts.get((district_val, state_val))
+                if not district:
+                    csv_row_error = True
+                    validation_errors.append(f"Error in row: {idx} : {institution_name} --> Unknown district - {district_val} for state {state_val}")
+            else:
+                csv_row_error = True
+                validation_errors.append(f"Error in row: {idx} : {institution_name} --> Please select district.")
+
+            # validate university
+            if university_val != "":
+                university = universities.get((university_val, state_val))
+                if not university:
+                    try:
+                        university = University.objects.create(state=state, name=university_val, user=request.user)
+                    except: 
+                        pass
+            else:
+                csv_row_error = True
+                validation_errors.append(f"Error in row: {idx} : {institution_name} --> Please select university.")
+            
+            # validate institution_type
+            if institution_type_val != "":
+                institution_type = institution_types.get(institution_type_val)
+                if not institution_type:
+                    validation_errors.append(f"Error in row: {idx} : {institution_name} --> Unknown institute type.")
+            else:
+                csv_row_error = True
+                validation_errors.append(f"Error in row: {idx} : {institution_name} --> Please select institute type.")
+
+            # validate rating
+            if rating not in RATING_CHOICES:
+                csv_row_error = True
+                validation_errors.append(f"Error in row: {idx} : {institution_name} --> Ratings should be between 1 & 5")
+            
+            # validate institute_category
+            if institute_category not in INSTITUTE_CATEGORIES:
+                csv_row_error = True
+                validation_errors.append(f"Error in row: {idx} : {institute_category} --> invalid. Options are: Govt, Private, NGO, Uncategorised")
+            
+            # validate pincode
+            if pincode is None:
+                csv_row_error = True
+                validation_errors.append(f"Error in row: {idx} : {institution_name} --> Please enter pincode. ")
+            # try to save only if there is no field error in a row
+            if csv_row_error:
+                failure_count +=1
+                continue
+            try:
+                academic_code = get_academic_code(state)
+                institute_category_obj = InstituteCategory.objects.get(name=institute_category)
+                data = {
+                    'user': request.user,
+                    'state_id': state.id,
+                    'institution_type_id': institution_type.id,
+                    'university_id': university.id,
+                    'academic_code': academic_code,
+                    'institution_name': institution_name,
+                    'district_id': district.id,
+                    'city_id': city.id,
+                    'address' : address,
+                    'pincode' : pincode,
+                    'resource_center': is_resource_center,
+                    'rating': rating,
+                    'contact_person' : get_cleaned_value(row, 'contact_person', to_lower=False),
+                    'remarks' : get_cleaned_value(row, 'remarks', to_lower=False),
+                    'status': 1,
+                    'institute_category': institute_category_obj
+                }
+                filters = {
+                    'institution_name': institution_name,
+                    'state_id': state.id,
+                    'district_id': district.id,
+                    'city_id': city.id,
+                }
+                if AcademicCenter.objects.filter(**filters).exists():
+                    duplicate_val.append((idx, institution_name))
+                    continue
+                academic_center = AcademicCenter.objects.create(**data)
+                success_count += 1
+                success_institutes.append(institution_name)
+            except Exception as e:
+                failure_count += 1
+                error_rows.append((idx, str(e)))
+
+        # Display messages
+        if success_count > 0: # display institutes saved successfully
+            messages.success(request, f"{success_count} entries uploaded successfully.\n{' | '.join(success_institutes)}")
+        else:
+            messages.error(request, f"Academic centers not added.") # display if none of the institutes is added
+
+        # Added Errors
+        if len(duplicate_val) > 0:
+            messages.error(request, f"{len(duplicate_val)} Duplicate enteries detected as listed below. These academic centers already exist for given state, district & city. ")
+            for entry in duplicate_val:
+                messages.warning(request, f"Duplicate entry : Row {entry[0]} - {entry[1]}")
+        if failure_count > 0:
+            messages.error(request, f"{failure_count} rows failed to upload.")
+            for row, err in error_rows:
+                messages.error(request, f"Row {row} : {institution_name} : {err}")
+        if len(validation_errors) > 0:
+            for error in validation_errors:
+                messages.warning(request, error)
+        
+    return redirect('events:new_ac')
+
 
 @login_required
 def edit_ac(request, rid = None):
