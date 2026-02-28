@@ -2,7 +2,7 @@ from django.conf import settings
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from .models import ConsentVersion, UserConsent
+from .models import Consent, UserConsent
 from .utils import is_student_user
 
 CONSENT_SESSION_KEY = 'consent_version_id'
@@ -30,7 +30,7 @@ class ConsentMiddleware(object):
         ):
             return self.get_response(request)
 
-        active = ConsentVersion.objects.filter(is_active=True).first()
+        active = Consent.objects.filter(is_active=True).first()
         if not active:
             return self.get_response(request)
 

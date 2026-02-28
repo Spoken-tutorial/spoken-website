@@ -1,7 +1,4 @@
 import hashlib
-import os
-
-from django.conf import settings
 
 
 def compute_file_hash(file_path):
@@ -10,10 +7,6 @@ def compute_file_hash(file_path):
         for chunk in iter(lambda: fh.read(8192), b''):
             digest.update(chunk)
     return digest.hexdigest()
-
-
-def get_consent_file_path(file_name):
-    return os.path.join(settings.MEDIA_ROOT, 'consent', file_name)
 
 
 def is_student_user(user):
