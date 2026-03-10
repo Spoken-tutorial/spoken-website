@@ -305,17 +305,16 @@ def send_onetime(request):
     except MultipleObjectsReturned as e:
         pass
     except ObjectDoesNotExist:
-        user = User.objects.create_user(email, email, password)
+        user = User.objects.create_user(username=email, email=email, password=password)
         user.first_name = fname
         user.last_name = lname
         user.is_active = False
         user.save()
         create_profile(user, '')
-        email_otp(user)
+        email_otp(user, password)
         context['message'] = "new"
 
     return HttpResponse(json.dumps(context), content_type='application/json')
-
 
 
 @csrf_exempt
