@@ -57,6 +57,21 @@ from donate.models import *
 import csv
 import requests
 
+
+def ensure_username_equals_email(user):
+    """
+    Ensure Django username always matches email.
+    This is required for ILW Moodle authentication.
+    """
+    email = (user.email or "").strip().lower()
+
+    if email and user.username != email:
+        # Prevent duplicate username conflicts
+        if not User.objects.filter(username=email).exclude(id=user.id).exists():
+            user.username = email
+            user.save(update_fields=["username"])
+
+
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
 	model = TrainingEvents
@@ -199,7 +214,8 @@ def register_user(request):
 	
 	if request.user.is_authenticated():
 		user = request.user
-		profile = Profile.objects.get(user=user)
+		# profile = Profile.objects.get(user=user)
+		profile, created = Profile.objects.get_or_create(user=user)
 		form.fields["name"].initial = user.get_full_name()
 		form.fields["email"].initial = getattr(user, 'email')
 		form.fields["phone"].initial = profile.phone
@@ -640,18 +656,24 @@ class ParticipantCreateView(CreateView):
 		email = (row[2] or "").strip().lower()
 		first = (row[0] or "").strip()
 		last = (row[1] or "").strip()
-		# 1) Try to find existing user by email OR username
 		user = User.objects.filter(Q(email=email) | Q(username=email)).first()
+
 		if user:
-			if user.username != user.email:
-				user.username = user.email #ILW moodle allows login with only email as valid credential username
-				try:
-					user.save()
-				except IntegrityError as e:
-					print(f"ILW error : {e}")
-					#user with above username already exists -- handle such cases manually, so returning None
-					return None
+			ensure_username_equals_email(user)
 			return user
+		# 1) Try to find existing user by email OR username
+		# user = User.objects.filter(Q(email=email) | Q(username=email)).first()
+		# if user:
+		# 	if user.username != user.email:
+		# 		user.username = user.email #ILW moodle allows login with only email as valid credential username
+		# 		try:
+		# 			user.save()
+		# 		except IntegrityError as e:
+		# 			print(f"ILW error : {e}")
+		# 			#user with above username already exists -- handle such cases manually, so returning None
+		# 			return None
+		# 	return user
+
 		
 		# 2) Create new user
 		password = row[0]+'@ST'+str(random.random()).split('.')[1][:5]
@@ -661,6 +683,7 @@ class ParticipantCreateView(CreateView):
 			confirmation_code = send_registration_confirmation(user)
 			if confirmation_code:
 				user.save()
+				ensure_username_equals_email(user)
 				create_profile(user, '', confirmation_code)
 				return user
 		except IntegrityError:
@@ -751,16 +774,41 @@ def ajax_check_college(request):
 	return HttpResponse(json.dumps(check), content_type='application/json')
 
 
+# def get_create_user(row):
+# 		try:
+# 			return User.objects.get(email=row[2].strip())
+# 		except User.DoesNotExist:
+# 			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
+# 			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
+# 			user.save()
+# 			create_profile(user, '')
+# 			send_registration_confirmation(user)
+# 			return user
+
 def get_create_user(row):
-		try:
-			return User.objects.get(email=row[2].strip())
-		except User.DoesNotExist:
-			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
-			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
-			user.save()
-			create_profile(user, '')
-			send_registration_confirmation(user)
-			return user
+    email = row[2].strip().lower()
+
+    try:
+        user = User.objects.get(email=email)
+        ensure_username_equals_email(user)
+        return user
+
+    except User.DoesNotExist:
+        user = User(
+            username=email,
+            email=email,
+            first_name=row[0],
+            last_name=row[1]
+        )
+        user.set_password(row[0] + '@ST' + str(random.random()).split('.')[1][:5])
+        user.save()
+
+        ensure_username_equals_email(user)
+
+        create_profile(user, '')
+        send_registration_confirmation(user)
+
+        return user
 
 from io import TextIOWrapper
 from django.contrib.auth.decorators import login_required
