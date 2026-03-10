@@ -668,19 +668,6 @@ class ParticipantCreateView(CreateView):
 		if user:
 			ensure_username_equals_email(user)
 			return user
-		# 1) Try to find existing user by email OR username
-		# user = User.objects.filter(Q(email=email) | Q(username=email)).first()
-		# if user:
-		# 	if user.username != user.email:
-		# 		user.username = user.email #ILW moodle allows login with only email as valid credential username
-		# 		try:
-		# 			user.save()
-		# 		except IntegrityError as e:
-		# 			print(f"ILW error : {e}")
-		# 			#user with above username already exists -- handle such cases manually, so returning None
-		# 			return None
-		# 	return user
-
 		
 		# 2) Create new user
 		password = row[0]+'@ST'+str(random.random()).split('.')[1][:5]
@@ -796,17 +783,6 @@ def ajax_check_college(request):
 	return HttpResponse(json.dumps(check), content_type='application/json')
 
 
-# def get_create_user(row):
-# 		try:
-# 			return User.objects.get(email=row[2].strip())
-# 		except User.DoesNotExist:
-# 			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
-# 			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
-# 			user.save()
-# 			create_profile(user, '')
-# 			send_registration_confirmation(user)
-# 			return user
-
 def get_create_user(row):
     email = row[2].strip().lower()
 
@@ -816,20 +792,13 @@ def get_create_user(row):
         return user
 
     except User.DoesNotExist:
-        user = User(
-            username=email,
-            email=email,
-            first_name=row[0],
-            last_name=row[1]
+        user = User(username=email,email=email,first_name=row[0],last_name=row[1]
         )
         user.set_password(row[0] + '@ST' + str(random.random()).split('.')[1][:5])
         user.save()
-
         ensure_username_equals_email(user)
-
         create_profile(user, '')
         send_registration_confirmation(user)
-
         return user
 
 from io import TextIOWrapper
