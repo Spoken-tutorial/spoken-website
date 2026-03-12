@@ -441,7 +441,7 @@ def verify_spoken_social_user(request):
             'college', 'event__foss'
         ).filter(
             user=user,
-            event__foss__foss__icontains='linux new'
+            event__course__foss__foss__icontains='linux new'
         ).first()
         if participant:
             role = 'student'
