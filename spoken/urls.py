@@ -12,7 +12,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from donate.views import ilw_payment_callback
 from donate.payment import check_ilw_payment_status
-from youtube.views import add_youtube_video
 
 app_name = 'spoken'
 admin.autodiscover()
@@ -90,7 +89,6 @@ urlpatterns = [
     # url(r'^statistics/training/$',  statistics_training', name='statistics_training'),
 
     # events urls
-    url(r'^software-training/add-youtube-video/$', add_youtube_video, name='add_youtube_video_alias'),
     url(r'^software-training/', include('events.urls', namespace='events')),
     url(r'^software-training/', include('events.urlsv2', namespace='eventsv2')),
 
