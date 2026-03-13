@@ -21,9 +21,11 @@ credentials_file = os.path.join(settings.BASE_DIR, 'youtube', '.youtube-upload-c
 
 
 def to_utf8(s):
-    """Re-encode string from the default system encoding to UTF-8."""
-    current = locale.getpreferredencoding()
-    return (s.decode(current).encode("UTF-8") if s and current != "UTF-8" else s)
+    # Return a Unicode string, decoding bytes if necessary (Python 3 compatible)
+    if isinstance(s, bytes):
+        current = locale.getpreferredencoding()
+        return s.decode(current if current else "utf-8")
+    return s
 
 
 def get_flow(redirect_uri=None):
