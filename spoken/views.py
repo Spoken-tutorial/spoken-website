@@ -940,6 +940,9 @@ def subscription(request):
     user = request.user
     context = {}
     context["subscription_amount"] = settings.SUBSCRIPTION_AMOUNT
+    context["SUBSCRIPTION_AMOUNT_COLLEGE"] = settings.SUBSCRIPTION_AMOUNT_COLLEGE
+    context["SUBSCRIPTION_INSTITUTE_TYPES"] = settings.SUBSCRIPTION_INSTITUTE_TYPES
+
     template = 'spoken/templates/subscription.html'
     if request.method == 'GET':
         form = AcademicSubscriptionForm(user=user)
@@ -952,8 +955,13 @@ def subscription(request):
             academic = form.cleaned_data.get('institute')
             expiry_date = date.today() + timedelta(days=365)
             state = form.cleaned_data.get('state')
-            total_academic_centers = len(academic)
-            subscription_amount = settings.SUBSCRIPTION_AMOUNT * total_academic_centers
+            subscription_amount = 0
+
+            for ac in academic:
+                if ac.institute_type_id in settings.SUBSCRIPTION_INSTITUTE_TYPES:
+                    subscription_amount += settings.SUBSCRIPTION_AMOUNT_COLLEGE
+                else:
+                    subscription_amount += settings.SUBSCRIPTION_AMOUNT
             email = form.cleaned_data.get('email')
             data = {
                 'name': form.cleaned_data.get('name'),
@@ -971,13 +979,20 @@ def subscription(request):
             for ac in academic:
                 gst_no = request.POST.get(f"gst_no_{ac.id}")
                 gst_name = request.POST.get(f"gst_name_{ac.id}")
+                if ac.institute_type_id in settings.SUBSCRIPTION_INSTITUTE_TYPES:
+                    amount = settings.SUBSCRIPTION_AMOUNT_COLLEGE
+                else:
+                    amount = settings.SUBSCRIPTION_AMOUNT
+
                 AcademicSubscriptionDetail.objects.create(
-                    subscription = subscription,
-                    academic = ac,
-                    subscription_end_date = expiry_date, # Default to expiry_date,
-                    gst_number = gst_no.strip(),
-                    gst_name = gst_name.strip()
+                    subscription=subscription,
+                    academic=ac,
+                    subscription_end_date=expiry_date,
+                    gst_number=gst_no.strip() if gst_no else None,
+                    gst_name=gst_name.strip() if gst_name else None,
+                    amount=amount
                 )
+
         else:
             messages.add_message(request, messages.ERROR, "Please see below errors.")
             return render(request, template, context=context)
@@ -1007,6 +1022,7 @@ def subscription(request):
             subscription.save()
             messages.add_message(request, messages.ERROR, "An error occurred. Please try later") 
         return render(request, template, context=context)
+    
 
 @csrf_exempt
 def payment_callback(request):
