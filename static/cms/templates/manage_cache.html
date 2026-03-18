@@ -64,10 +64,8 @@
             <p>Note: Clearing all memcache might slow down the site initially</p>
             <input name="type" value="all_keys" type="hidden"></input>
             <button type="submit" id="clear_all">Clear All Cache</button>
-        </div>
-        <hr>
-   </form>
-
+        </div>       
+    </form>
 <form method="post">
     {% csrf_token %}
     <div>
@@ -77,7 +75,6 @@
         <button type="submit" id="clear_homepage">Clear Homepage Cache</button>
     </div>
         </form> 
- 
 {% endblock %}
 
 {% block jsblock %}

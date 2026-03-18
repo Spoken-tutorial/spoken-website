@@ -31,7 +31,7 @@ from events.models import Student
 from mdldjango.models import MdlUser
 from mdldjango.urls import *
 from django.template.context_processors import csrf
-
+from cms.cache_registry import unregister_cache_key,list_cache_keys
 from donate.models import Payee
 
 from django.contrib.admin.views.decorators import staff_member_required
@@ -494,7 +494,8 @@ def change_password(request):
 
             messages.success(request,"Your account password has been updated successfully!")
             return HttpResponseRedirect("/accounts/view-profile/" + user.username)
-
+    if profile is None:
+        profile = request.user.profile_set.first()
     context = {
         'form': form,
         'profile': profile,
@@ -640,7 +641,6 @@ def manage_cache(request):
                     
             elif deletion_type == 'homepage':
                 try:
-                    from cms.cache_registry import list_cache_keys
                     all_keys = list_cache_keys()
                     homepage_keys = [
                         key for key in all_keys
