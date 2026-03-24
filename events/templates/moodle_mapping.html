@@ -1,0 +1,128 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0"><i class="fas fa-link mr-2"></i> Moodle Admin - FOSS to Moodle Mapping</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" id="mappingForm">
+                        {% csrf_token %}
+                        <div class="row mb-4">
+                            <div class="col-md-6 form-group">
+                                <label for="{{ form.foss.id_for_label }}" class="font-weight-bold"><i
+                                        class="fas fa-tags mr-1"></i> FOSS Category</label>
+                                {{ form.foss }}
+                                <div class="text-center my-2 text-muted small">--- OR ---</div>
+                                {{ form.new_foss }}
+                            </div>
+                            <!-- <div class="col-md-6 form-group">
+                                <label for="{{ form.lab_course.id_for_label }}" class="font-weight-bold"><i
+                                        class="fas fa-graduation-cap mr-1"></i> Academic Department / Course</label>
+                                {{ form.lab_course }}
+                                <div class="text-center my-2 text-muted small">--- OR ---</div>
+                                {{ form.new_lab_course }}
+                            </div> -->
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 form-group">
+                                <label for="{{ form.language.id_for_label }}" class="font-weight-bold"><i
+                                        class="fas fa-language mr-1"></i> Language</label>
+                                {{ form.language }}
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="{{ form.level.id_for_label }}" class="font-weight-bold"><i
+                                        class="fas fa-layer-group mr-1"></i> Level</label>
+                                {{ form.level }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6 form-group">
+                                <label for="{{ form.category.id_for_label }}" class="font-weight-bold"><i
+                                        class="fas fa-list-ol mr-1"></i> Category ID</label>
+                                {{ form.category }}
+                            </div>
+                            <div class="col-md-6 form-group d-flex align-items-center pt-4">
+                                <div class="d-flex align-items-center">
+                                    {{ form.test }}
+                                    <label class="font-weight-bold ml-2 mb-0"
+                                        for="{{ form.test.id_for_label }}">Test</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <div class="row mb-4">
+                            <div class="col-md-12 form-group">
+                                <label for="{{ form.moodle_course.id_for_label }}" class="font-weight-bold"><i
+                                        class="fas fa-book mr-1"></i> Moodle Course</label>
+                                {{ form.moodle_course }}
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-12 form-group">
+                                <label for="{{ form.moodle_quiz.id_for_label }}" class="font-weight-bold"><i
+                                        class="fas fa-question-circle mr-1"></i> Moodle Quiz</label>
+                                {{ form.moodle_quiz }}
+                                <div class="mt-1">
+                                    <small class="text-info" id="quiz-loading-msg" style="display:none;">
+                                        <i class="fas fa-spinner fa-spin mr-1"></i> Loading quizzes...
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 text-right">
+                            <a href="{% url 'events:events_dashboard' %}"
+                                class="btn btn-outline-secondary btn-lg mr-2 px-4 shadow-sm">Cancel</a>
+                            <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">Save Mapping</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block jsblock %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#id_moodle_course').change(function () {
+            var course_id = $(this).val();
+            var quizSelect = $('#id_moodle_quiz');
+            var loadingMsg = $('#quiz-loading-msg');
+
+            quizSelect.empty().append('<option value="">---------</option>');
+
+            if (course_id) {
+                loadingMsg.show();
+                $.ajax({
+                    url: "{% url 'eventsv2:get_moodle_quizzes' %}",
+                    data: {
+                        'course_id': course_id
+                    },
+                    dataType: 'json',
+                    success: function (data) {
+                        loadingMsg.hide();
+                        $.each(data, function (index, item) {
+                            quizSelect.append('<option value="' + item.id + '">' + item.name + '</option>');
+                        });
+                    },
+                    error: function () {
+                        loadingMsg.hide();
+                        alert("Error fetching quizzes. Please try again.");
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

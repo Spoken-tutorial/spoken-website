@@ -671,3 +671,70 @@ class AcademicPaymentStatusForm(forms.ModelForm):
     self.fields['college_type'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
     self.fields['payment_status'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
     self.fields['subscription'].choices = SUBSCRIPTION_CHOICES
+class MoodleMappingForm(forms.Form):
+  foss = forms.ModelChoiceField(
+    queryset=FossCategory.objects.filter(status=True).order_by('-id'),
+    empty_label='---------',
+    required=False
+  )
+  new_foss = forms.CharField(
+    max_length=255,
+    required=False,
+    widget=forms.TextInput(attrs={'placeholder': 'Enter new FOSS name if not in list'})
+  )
+  lab_course = forms.ModelChoiceField(
+    queryset=LabCourse.objects.all().order_by('name'),
+    label="Course",
+    empty_label='---------',
+    required=False
+  )
+  new_lab_course = forms.CharField(
+    max_length=255,
+    required=False,
+    label="Course",
+    widget=forms.TextInput(attrs={'placeholder': 'Enter new name if not in list'})
+  )
+  language = forms.ModelChoiceField(
+    queryset=Language.objects.all().order_by('name'),
+    empty_label='---------'
+  )
+  level = forms.ModelChoiceField(
+    queryset=Level.objects.all(),
+    empty_label='---------'
+  )
+  moodle_course = forms.ChoiceField(
+    choices=[('', '---------')],
+    required=True,
+    widget=forms.Select(attrs={'class': 'form-control'})
+  )
+  moodle_quiz = forms.ChoiceField(
+    choices=[('', '---------')],
+    required=True,
+    widget=forms.Select(attrs={'class': 'form-control'})
+  )
+  test = forms.BooleanField(initial=True, required=False, label="Test Mode")
+  category = forms.IntegerField(initial=1, required=True, label="Category")
+
+  def __init__(self, *args, **kwargs):
+    moodle_courses = kwargs.pop('moodle_courses', [])
+    moodle_quizzes = kwargs.pop('moodle_quizzes', [])
+    super(MoodleMappingForm, self).__init__(*args, **kwargs)
+    
+    # Set default values
+    if not self.is_bound:
+      self.initial['language'] = 22  # English
+      self.initial['level'] = 3     # Advanced
+      self.initial['test'] = True
+      self.initial['category'] = 0
+
+    if moodle_courses:
+      self.fields['moodle_course'].choices = [('', '---------')] + moodle_courses
+    if moodle_quizzes:
+      self.fields['moodle_quiz'].choices = [('', '---------')] + moodle_quizzes
+    
+    for name, field in self.fields.items():
+      if not field.widget.attrs.get('class'):
+        if isinstance(field.widget, forms.CheckboxInput):
+          field.widget.attrs.update({'class': ''})
+        else:
+          field.widget.attrs.update({'class': 'form-control'})
