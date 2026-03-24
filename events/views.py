@@ -624,7 +624,7 @@ def events_dashboard(request):
                 academic_id=user.invigilator.academic_id,
                 categoryid__in=user.invigilator.academic.test_set.filter(invigilator_id=user.id).values_list('id'
                 )).order_by('-created')[:30]
-    is_moodle_admin = user.groups.filter(id__in=getattr(settings, 'MOODLE_ADMIN_ROLES', [9, 14])).exists()
+    is_moodle_admin = user.groups.filter(id__in=getattr(settings, 'MOODLE_ADMIN_ROLES', [])).exists()
 
     context = {
         'roles': roles,
