@@ -673,7 +673,7 @@ class AcademicPaymentStatusForm(forms.ModelForm):
     self.fields['subscription'].choices = SUBSCRIPTION_CHOICES
 class MoodleMappingForm(forms.Form):
   foss = forms.ModelChoiceField(
-    queryset=FossCategory.objects.filter(status=True).order_by('-id'),
+    queryset=FossCategory.objects.filter(status=True).order_by('foss'),
     empty_label='---------',
     required=False
   )

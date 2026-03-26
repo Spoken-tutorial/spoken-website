@@ -18,8 +18,8 @@
                                 <label for="{{ form.foss.id_for_label }}" class="font-weight-bold"><i
                                         class="fas fa-tags mr-1"></i> FOSS Category</label>
                                 {{ form.foss }}
-                                <div class="text-center my-2 text-muted small">--- OR ---</div>
-                                {{ form.new_foss }}
+                                <!-- <div class="text-center my-2 text-muted small">--- OR ---</div>
+                                {{ form.new_foss }} -->
                             </div>
                             <!-- <div class="col-md-6 form-group">
                                 <label for="{{ form.lab_course.id_for_label }}" class="font-weight-bold"><i
@@ -54,6 +54,18 @@
                                     {{ form.test }}
                                     <label class="font-weight-bold ml-2 mb-0"
                                         for="{{ form.test.id_for_label }}">Test</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="alert alert-info small mb-0">
+                                    <strong>Note:</strong><br>
+                                    <ul class="mb-0 mt-1 pl-3">
+                                        <li>To make it available in STP Step 2 for <strong>both training and test</strong>, keep Test checked and set Category ID to 0.</li>
+                                        <li>To make it available in STP Step 2 for <strong>training only</strong>, keep Test unchecked and set Category ID to 0.</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
