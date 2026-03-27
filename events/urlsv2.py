@@ -59,6 +59,8 @@ urlpatterns = [
       name="training_request"
     ),
    url(r'^get-language-level-option/$', viewsv2.get_language_level_option, name='get_language_level_option'),
+   url(r'^moodle-mapping/$', MoodleMappingView.as_view(), name='moodle_mapping'),
+   url(r'^get-moodle-quizzes/$', GetMoodleQuizzesView.as_view(), name='get_moodle_quizzes'),
 
 
     url(
