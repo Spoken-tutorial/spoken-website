@@ -74,6 +74,7 @@ class TrainingEvents(models.Model):
 	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
 	city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True)
 	payment_required = models.BooleanField(default=False)
+	is_swayam = models.BooleanField(default=False)
 	instructor_name = models.CharField(max_length=255, blank=True, null=True, default='') # For internship
 	# False => Payment only from non-subscribed college organisers and students.
 	# True  => Payment from ALL users, regardless of group or college payment status.

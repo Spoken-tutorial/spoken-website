@@ -241,17 +241,21 @@ def get_ilw_certificate(event, cert_type):
 
 
 def get_training_certi_text(event, user):
+    participantname = f"{user.first_name} {user.last_name}"
+    if event.is_swayam:
+        # SWAYAM certificate text (placeholder)
+        return f"This is to certify that <b>{participantname}</b> has successfully completed the SWAYAM training program."
+
     training_start = event.event_start_date
     training_end = event.event_end_date
     formatted_start_date = training_start.strftime("%d-%m-%Y")
     formatted_end_date = training_end.strftime("%d-%m-%Y")
     organization = get_organization(training_start)
-    
+    participantname = f"{user.first_name} {user.last_name}"
     participant = Participant.objects.filter(
         user=user, event=event, reg_approval_status=1
         ).order_by('-created').first()
     
-    participantname = f"{user.first_name} {user.last_name}"
     text = ""
     if event.event_type == "INTERN": # For internship
         course_name_text = ""
@@ -297,6 +301,10 @@ def get_training_certi_text(event, user):
 
 def get_test_certi_text(event, user, teststatus):
     participantname = f"{user.first_name} {user.last_name}"
+    if event.is_swayam:
+        # SWAYAM certificate text (placeholder)
+        return f"This is to certify that <b>{participantname}</b> has successfully completed the SWAYAM test program."
+
     training_start = event.event_start_date
     training_end = event.event_end_date
     formatted_start_date = training_start.strftime("%d-%m-%Y")
