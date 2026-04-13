@@ -4644,12 +4644,10 @@ def add_creation_notification(request, notif_type, user_id , language):
 
 @csrf_exempt
 def update_tutorials(request):
-    print("Reached here")
     action = request.POST['action']
     foss_name = request.POST['foss_name']
     data = ''
 
-    #tutorials = TutorialDetail.objects.filter(foss__foss=foss_name)
     published_tutorials = TutorialResource.objects.filter(tutorial_detail__foss__foss=foss_name,
         status= PUBLISHED, language_id=22)
     all_langs = Language.objects.all().exclude(id=22)
