@@ -258,9 +258,10 @@ def get_training_certi_text(event, user):
         
         return f"""This is to certify that <b>{participantname}</b> has participated in Student Training Programme
 from <b>{formatted_start_date}</b> to <b>{formatted_end_date}</b> on the course <b>{course_name}</b>, which includes the following FOSS: <b>{foss_list}</b>,
-organized by <b>{college_name}</b> with course material provided by EduPyramids, SINE, IIT Bombay.
+organized by <b>{college_name}</b> with course material provided by EduPyramids, SINE, IIT Bombay.<br />
 
-This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay."""
+This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay.
+"""
 
     training_start = event.event_start_date
     training_end = event.event_end_date
@@ -326,11 +327,11 @@ def get_test_certi_text(event, user, teststatus):
 by EduPyramids, SINE, IIT Bombay, under an honour invigilation system.
 
 Self learning through EduPyramids, SINE, IIT Bombay and passing an online test completes
-the training programme.
+the training programme.<br />
 
+This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay.<br />
 Credits: <b>{credits}</b> Score: <b>{score}%</b>
-
-This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay."""
+"""
 
     training_start = event.event_start_date
     training_end = event.event_end_date
