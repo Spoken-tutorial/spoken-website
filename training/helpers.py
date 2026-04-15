@@ -229,6 +229,8 @@ def get_all_events_detail(queryset, status, event_type=None):
 
 
 def get_ilw_certificate(event, cert_type):
+    if event.is_swayam:
+        return os.path.join(settings.MEDIA_ROOT, "swayam_ilw.pdf")
     if event.event_type == "INTERN":
         return os.path.join(settings.MEDIA_ROOT, "internship-certificate.pdf")
     if event.event_start_date < EDUPYRAMIDS_CERTIFICATE_DATE:
@@ -241,17 +243,35 @@ def get_ilw_certificate(event, cert_type):
 
 
 def get_training_certi_text(event, user):
+    participantname = f"{user.first_name} {user.last_name}"
+    if event.is_swayam:
+        participant = Participant.objects.filter(
+            user=user, event=event, reg_approval_status=1
+            ).order_by('-created').first()
+        training_start = event.event_start_date
+        training_end = event.event_end_date
+        formatted_start_date = training_start.strftime("%d-%m-%Y")
+        formatted_end_date = training_end.strftime("%d-%m-%Y")
+        course_name = event.course.name if event.is_course else ""
+        foss_list = format_foss_list([foss.foss for foss in event.course.foss.all()])
+        college_name = participant.college.institution_name
+        
+        return f"""This is to certify that <b>{participantname}</b> has participated in Student Training Programme
+from <b>{formatted_start_date}</b> to <b>{formatted_end_date}</b> on the course <b>{course_name}</b>, which includes the following FOSS: <b>{foss_list}</b>,
+organized by <b>{college_name}</b> with course material provided by EduPyramids, SINE, IIT Bombay.
+
+This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay."""
+
     training_start = event.event_start_date
     training_end = event.event_end_date
     formatted_start_date = training_start.strftime("%d-%m-%Y")
     formatted_end_date = training_end.strftime("%d-%m-%Y")
     organization = get_organization(training_start)
-    
+    participantname = f"{user.first_name} {user.last_name}"
     participant = Participant.objects.filter(
         user=user, event=event, reg_approval_status=1
         ).order_by('-created').first()
     
-    participantname = f"{user.first_name} {user.last_name}"
     text = ""
     if event.event_type == "INTERN": # For internship
         course_name_text = ""
@@ -297,6 +317,21 @@ def get_training_certi_text(event, user):
 
 def get_test_certi_text(event, user, teststatus):
     participantname = f"{user.first_name} {user.last_name}"
+    if event.is_swayam:
+        foss_name = teststatus.fossid.foss
+        credits = teststatus.fossid.credits
+        score = '{:.2f}'.format(teststatus.mdlgrade)
+        
+        return f"""This is to certify that <b>{participantname}</b> successfully passed a <b>{foss_name}</b> test, remotely conducted
+by EduPyramids, SINE, IIT Bombay, under an honour invigilation system.
+
+Self learning through EduPyramids, SINE, IIT Bombay and passing an online test completes
+the training programme.
+
+Credits: <b>{credits}</b> Score: <b>{score}%</b>
+
+This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay."""
+
     training_start = event.event_start_date
     training_end = event.event_end_date
     formatted_start_date = training_start.strftime("%d-%m-%Y")
