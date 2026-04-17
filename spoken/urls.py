@@ -132,6 +132,9 @@ urlpatterns = [
     # Youtube API V3
     url(r'^youtube/', include('youtube.urls', namespace='youtube')),
 
+    # consent
+    url(r'^consent/', include('consent.urls', namespace='consent')),
+
     # reports
     url(r'^reports/', include('reports.urls', namespace='reports')),
 
