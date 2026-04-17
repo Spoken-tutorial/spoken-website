@@ -252,12 +252,12 @@ def get_training_certi_text(event, user):
         training_end = event.event_end_date
         formatted_start_date = training_start.strftime("%d-%m-%Y")
         formatted_end_date = training_end.strftime("%d-%m-%Y")
-        course_name = event.course.name if event.is_course else ""
+        course_name = f" {event.course.name}" if event.is_course else ""
         foss_list = format_foss_list([foss.foss for foss in event.course.foss.all()])
         college_name = participant.college.institution_name
         
         return f"""This is to certify that <b>{participantname}</b> has participated in Student Training Programme
-from <b>{formatted_start_date}</b> to <b>{formatted_end_date}</b> on the course <b>{course_name}</b>, which includes the following FOSS: <b>{foss_list}</b>,
+from <b>{formatted_start_date}</b> to <b>{formatted_end_date}</b> on the course<b>{course_name}</b>, which includes the following FOSS: <b>{foss_list}</b>,
 organized by <b>{college_name}</b> with course material provided by EduPyramids, SINE, IIT Bombay.<br />
 
 This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay.
