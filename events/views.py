@@ -3338,6 +3338,7 @@ def handover(request):
 
     return render(request, 'handover.html', context)
 
+
 def reset_student_pwd(request):
     context = {}
     template = 'events/templates/reset_student_password.html'
@@ -3352,6 +3353,7 @@ def reset_student_pwd(request):
             school = form.cleaned_data['school']
             batches = form.cleaned_data['batches']
             new_password = form.cleaned_data['new_password']
+            status = 0
             
             batch_ids = [x.id for x in batches]
             batches = StudentBatch.objects.filter(id__in=batch_ids)
@@ -3366,7 +3368,9 @@ def reset_student_pwd(request):
             mdlUsers = MdlUser.objects.filter(email__in=emails)
             mdlUsers.update(password=encript_password(new_password))
             send_bulk_student_reset_mail(school,batches,users.count(), new_password,request.user)  
-            
+            status = 1
+
+            for batch in batches:StudentPasswordResetHistory.objects.create(batch=batch,changed_by=request.user,status=status)
             # Add the success message
             success_msg = "Password updated for {} students.".format(users.count())
             messages.success(request, success_msg)
@@ -3375,6 +3379,8 @@ def reset_student_pwd(request):
             redirect_url = reverse('events:reset_student_pwd')
             return HttpResponseRedirect(redirect_url)
     return render(request,template,context)
+
+
 
 
 def get_schools(request):
