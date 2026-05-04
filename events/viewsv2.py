@@ -104,6 +104,56 @@ class JSONResponseMixin(object):
     # -- can be serialized as JSON.
     return context
 
+
+class MoodleDataListView(ListView):
+  paginate_by = 50
+  context_object_name = 'collection'
+  template_name = None
+  page_title = None
+  page_heading = None
+
+  @method_decorator(group_required("Resource Person", "Event Manager"))
+  def dispatch(self, *args, **kwargs):
+    return super(MoodleDataListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(MoodleDataListView, self).get_context_data(**kwargs)
+    context['page_title'] = self.page_title
+    context['page_heading'] = self.page_heading
+    return context
+
+
+class ILWMoodleDataListView(MoodleDataListView):
+  model = ILWFossMdlCourses
+  template_name = 'moodle_data_list.html'
+  page_title = 'ILW Moodle Data'
+  page_heading = 'ILW Moodle Data'
+
+  def get_queryset(self):
+    return ILWFossMdlCourses.objects.select_related('foss', 'testfoss').order_by('-id')
+
+  def get_context_data(self, **kwargs):
+    context = super(ILWMoodleDataListView, self).get_context_data(**kwargs)
+    context['show_testfoss'] = True
+    context['show_language_level'] = False
+    return context
+
+
+class EventMoodleDataListView(MoodleDataListView):
+  model = FossMdlCourses
+  template_name = 'moodle_data_list.html'
+  page_title = 'STP Moodle Data'
+  page_heading = 'STP Moodle Data'
+
+  def get_queryset(self):
+    return FossMdlCourses.objects.select_related('foss', 'language', 'level').order_by('-id')
+
+  def get_context_data(self, **kwargs):
+    context = super(EventMoodleDataListView, self).get_context_data(**kwargs)
+    context['show_testfoss'] = False
+    context['show_language_level'] = True
+    return context
+
 # This class is to display the taining planner details of that organiser on main page of STP.
 class TrainingPlannerListView(ListView):
   queryset = None
