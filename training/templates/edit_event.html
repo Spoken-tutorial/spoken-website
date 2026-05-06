@@ -56,6 +56,14 @@
 			</div>
 
 			<div class="form-group">
+				<label class="col-sm-3 control-label" for= "id_download_access">Email (For Download Access)</label>
+				<div class="col-sm-9">
+				{% render_field form.download_access class+="form-control download_access" %}
+				{{ form.download_access.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
 				<label class="col-sm-3 control-label" for= "id_state">State <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
 				{% render_field form.state class+="form-control state" %}
