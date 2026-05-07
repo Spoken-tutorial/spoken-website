@@ -3,6 +3,16 @@
 import os
 import subprocess
 
+# Third Party Stuff
+from django.conf import settings
+from spoken import config
+
+
+def user_can_upload_to_youtube(user):
+    if not user.is_authenticated:
+        return False
+    return user.groups.filter(name__in=config.YOUTUBE_UPLOAD_ROLES).exists()
+
 
 def convert_tmp_video(src_path, dst_path):
     stdout = None
