@@ -15,6 +15,16 @@ urlpatterns = [
       name="training_planner"
     ),
     url(
+      r'^training/ilw-moodle-data/$',
+      ILWMoodleDataListView.as_view(),
+      name='ilw_moodle_data'
+    ),
+    url(
+      r'^training/stp-moodle-data/$',
+      EventMoodleDataListView.as_view(),
+      name='stp_moodle_data'
+    ),
+    url(
       r'^select-participants/', 
       TrainingPlannerListView.as_view(template_name="select_participants.html"), 
       name="select_participants"
