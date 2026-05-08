@@ -112,7 +112,6 @@ class MoodleDataListView(ListView):
   page_title = None
   page_heading = None
 
-  @method_decorator(group_required("Resource Person", "Event Manager"))
   def dispatch(self, *args, **kwargs):
     return super(MoodleDataListView, self).dispatch(*args, **kwargs)
 
@@ -130,7 +129,7 @@ class ILWMoodleDataListView(MoodleDataListView):
   page_heading = 'ILW Moodle Data'
 
   def get_queryset(self):
-    return ILWFossMdlCourses.objects.select_related('foss', 'testfoss').order_by('-id')
+    return ILWFossMdlCourses.objects.select_related('foss', 'testfoss').order_by('foss__foss')
 
   def get_context_data(self, **kwargs):
     context = super(ILWMoodleDataListView, self).get_context_data(**kwargs)
@@ -146,7 +145,7 @@ class EventMoodleDataListView(MoodleDataListView):
   page_heading = 'STP Moodle Data'
 
   def get_queryset(self):
-    return FossMdlCourses.objects.select_related('foss', 'language', 'level').order_by('-id')
+    return FossMdlCourses.objects.select_related('foss', 'language', 'level').order_by('foss__foss')
 
   def get_context_data(self, **kwargs):
     context = super(EventMoodleDataListView, self).get_context_data(**kwargs)
