@@ -21,7 +21,8 @@ from events.models import *
 from training.models import *
 from creation.models import TutorialResource
 from creation.filters import CreationStatisticsFilter
-from events.views import get_page
+import csv
+from events.views import get_page, is_invigilator
 from .forms import LearnerForm
 from django.core.cache import cache
 from spoken.decorators import rate_limited_view
@@ -401,15 +402,57 @@ def test_participant(request, rid):
     try:
         context['model_label'] = 'Online-Test'
         context['model'] = Test.objects.using('stats').get(id=rid)
-        test_mdlusers = TestAttendance.objects.using('stats').filter(
-            test_id=rid, status__gte=2).values_list('mdluser_id')
-        ids = []
-        for wp in test_mdlusers:
-            ids.append(wp[0])
-        context['collection'] = MdlUser.objects.using('moodle').filter(id__in=ids)
+        test_attendances = TestAttendance.objects.using('stats').filter(
+            test_id=rid, status__gte=2)
+        ids = [ta.mdluser_id for ta in test_attendances]
+        score_dict = {ta.mdluser_id: ta.mdlgrade for ta in test_attendances}
+        collection = MdlUser.objects.using('moodle').filter(id__in=ids)
+        usernames = [u.username for u in collection]
+        students = Student.objects.using('stats').filter(user__username__in=usernames).select_related('user')
+        student_dict = {s.user.username: s.gender for s in students}
+        for u in collection:
+            u.gender = student_dict.get(u.username, '-')
+            u.score = score_dict.get(u.id, '-')
+        context['collection'] = collection
     except Exception:
         raise PermissionDenied()
     return render(request, 'statistics/templates/participant.html', context)
+
+@rate_limited_view
+def test_participant_csv(request, rid):
+    if not rid:
+        raise PermissionDenied()
+    try:
+        if not (request.user.is_authenticated and is_invigilator(request.user)):
+            raise PermissionDenied()
+
+        test = Test.objects.using('stats').get(id=rid)
+        test_attendances = TestAttendance.objects.using('stats').filter(
+            test_id=rid, status__gte=2)
+        ids = [ta.mdluser_id for ta in test_attendances]
+        score_dict = {ta.mdluser_id: ta.mdlgrade for ta in test_attendances}
+        collection = MdlUser.objects.using('moodle').filter(id__in=ids)
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="participants_{}.csv"'.format(rid)
+
+        writer = csv.writer(response)
+        writer.writerow(['#', 'First Name', 'Last Name', 'Email ID', 'Score'])
+
+        for index, record in enumerate(collection, start=1):
+            score = score_dict.get(record.id, '-')
+            writer.writerow([
+                index,
+                record.firstname.title(),
+                record.lastname.title(),
+                record.email,
+                score
+            ])
+
+        return response
+
+    except Exception:
+        raise PermissionDenied()
 
 @rate_limited_view
 def academic_center(request, slug=None):

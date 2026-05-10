@@ -27,17 +27,29 @@
     </div>
 	<div class="" id="pending">
 		{% if collection %}
+		{% if user|is_invigilator %}
+            <div style="margin-bottom: 15px; display: flex; justify-content: flex-end; gap: 15px;">
+                <a class="btn btn-default" href="{% url 'events:test_participant_ceritificate_all' model.id %}">Download all certificates</a>
+                <a class="btn btn-default" href="{% url 'statistics:statistics_test_participants_csv' model.id %}">Download Participant Data</a>
+            </div>
+		{% endif %}
 		<table class="table table-bordered table-hover table-striped">
 			<tr>
 			    <th>#</th>
 				<th>First Name</th>
 				<th>Last Name</th>
+				<th>Email ID</th>
+				<th>Gender</th>
+				<th>Score</th>
 			</tr>
 			{% for record in collection %}
 				<tr>
-				    <td>{{ forloop.counter }}
+				    <td>{{ forloop.counter }}</td>
 					<td>{{ record.firstname|lower|title }}</td>
 					<td>{{ record.lastname|lower|title }}</td>
+					<td>{{ record.email }}</td>
+					<td>{{ record.gender|title }}</td>
+					<td>{{ record.score }}</td>
 				</tr>
 			{% endfor %}
 		</table>

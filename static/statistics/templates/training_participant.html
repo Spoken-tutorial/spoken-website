@@ -30,12 +30,14 @@
 			    <th>#</th>
 				<th>First Name</th>
 				<th>Last Name</th>
+				<th>Gender</th>
 			</tr>
 			{% for record in collection %}
 				<tr>
-				    <td>{{ forloop.counter }}
+				    <td>{{ forloop.counter }}</td>
 					<td>{{ record.student.user.first_name }}</td>
 					<td>{{ record.student.user.last_name }}</td>
+					<td>{{ record.student.gender|default:"-"|title }}</td>
 				</tr>
 			{% endfor %}
 		</table>
