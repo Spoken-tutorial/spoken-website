@@ -2351,6 +2351,49 @@ def test_participant(request, tid=None):
         
         return render(request, 'events/templates/test/test_participant.html', context)
 
+@login_required
+def test_participant_csv(request, tid=None):
+    if not tid:
+        raise PermissionDenied()
+    try:
+        t = Test.objects.get(id=tid)
+    except Exception:
+        raise PermissionDenied()
+
+    if not (t.organiser.user == request.user or (t.invigilator and t.invigilator.user == request.user)):
+        raise PermissionDenied()
+
+    if t.status == 4:
+        test_attendances = TestAttendance.objects.filter(test_id=tid, status__gte=2)
+    else:
+        test_attendances = TestAttendance.objects.filter(test_id=tid)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="participants_{}.csv"'.format(tid)
+    writer = csv.writer(response)
+    writer.writerow(['#', 'First Name', 'Last Name', 'Email ID', 'Score'])
+
+    from mdldjango.models import MdlUser
+    from events.templatetags.eventsdata import get_participant_mark
+
+    for index, record in enumerate(test_attendances, start=1):
+        mdluser = MdlUser.objects.using('moodle').get(id=record.mdluser_id)
+        first_name = record.mdluser_firstname if record.mdluser_firstname else mdluser.firstname
+        last_name = record.mdluser_lastname if record.mdluser_lastname else mdluser.lastname
+        score = get_participant_mark(tid, record.mdluser_id)
+        if not score:
+            score = '-'
+
+        writer.writerow([
+            index,
+            first_name.title(),
+            last_name.title(),
+            mdluser.email,
+            score
+        ])
+
+    return response
+
 def test_participant_ceritificate(request, wid, participant_id):
     #response = HttpResponse(content_type='application/pdf')
     #response['Content-Disposition'] = 'attachment; filename="somefilename.pdf"'
