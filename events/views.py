@@ -2374,7 +2374,7 @@ def test_participant_csv(request, tid=None):
     writer.writerow(['#', 'First Name', 'Last Name', 'Email ID', 'Score'])
 
     from mdldjango.models import MdlUser
-    from events.templatetags.eventsdata import get_participant_mark
+    from mdldjango.templatetags.mdldata import get_participant_mark
 
     for index, record in enumerate(test_attendances, start=1):
         mdluser = MdlUser.objects.using('moodle').get(id=record.mdluser_id)
