@@ -55,6 +55,7 @@ class TrainingEvents(models.Model):
 	event_type = models.CharField(max_length = 50, choices = EVENT_TYPE_CHOICES)
 	event_fee = models.PositiveIntegerField(default=500)
 	event_name = models.CharField(max_length=200)
+	download_access = models.EmailField(max_length=255, null=True, blank=True)
 	state = models.ForeignKey(State, on_delete=models.PROTECT )
 	host_college = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
 	foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT , null=True, blank=True )

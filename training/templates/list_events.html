@@ -162,11 +162,55 @@
     {% if show_myevents %}
     <li {% if status == 'myevents' %}{{ 'class="active"'}}{% endif %}><a href="/training/list_events/myevents/">My Events</a></li>
     {% endif %}
+    {% if user.is_authenticated %}
+    <li {% if status == 'download_data' %}{{ 'class="active"'}}{% endif %}><a href="/training/list_events/download_data/">Download Data</a></li>
+    {% endif %}
 </ul>
 
 <!-- Tab panes -->
 <div class="tab-content">
     <div class="tab-pane active" id="pending">        
+{% if status == 'download_data' %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped" style="margin-top: 20px;">
+            <thead>
+                <tr>
+                    <th>Event ID</th>
+                    <th>Event Name</th>
+                    <th>Event Type</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in collection %}
+                <tr>
+                    <td>{{ event.id }}</td>
+                    <td>{{ event.event_name }}</td>
+                    <td>{{ event.event_type }}</td>
+                    <td>{{ event.event_start_date }}</td>
+                    <td>{{ event.event_end_date }}</td>
+                    <td>
+                        <form method="post" style="display:inline-block;">
+                            {% csrf_token %}
+                            <input type="hidden" name="eventid" value="{{ event.id }}">
+                            <button type="submit" class="btn btn-warning btn-sm" formaction="{% url 'training:batch_training_certificate' %}">Download Training</button>
+                        </form>
+                        <form method="post" style="display:inline-block;">
+                            {% csrf_token %}
+                            <input type="hidden" name="eventid" value="{{ event.id }}">
+                            <button type="submit" class="btn btn-success btn-sm" formaction="{% url 'training:batch_test_certificate' %}">Download Test</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center">No events found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
 {% for event in collection %}
   <form method="post" action="{% url 'training:register_user' %}?event_id={{event.id}}">
 
@@ -349,6 +393,7 @@
 
 
 {% endfor %}
+{% endif %}
     </div>
 </div>
 {% endblock %}
