@@ -1362,7 +1362,7 @@ class ILWTestCertificate(object):
     # Fetch actual test completion date from Moodle
     certificate_date = training_end
 
-    quiz_grade = ILWMdlQuizGrades.objects.filter(userid=user.id).order_by('-timemodified').first()
+    quiz_grade = ILWMdlQuizGrades.objects.filter(userid=user.id, quiz=teststatus.mdlquiz_id).order_by('-timemodified').first()
 
     if quiz_grade and quiz_grade.timemodified:
         certificate_date = datetime.fromtimestamp(quiz_grade.timemodified)
