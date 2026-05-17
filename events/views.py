@@ -2381,8 +2381,14 @@ def test_participant_csv(request, tid=None):
         first_name = record.mdluser_firstname if record.mdluser_firstname else mdluser.firstname
         last_name = record.mdluser_lastname if record.mdluser_lastname else mdluser.lastname
         score = get_participant_mark(tid, record.mdluser_id)
-        if not score:
+        if score is None:
             score = '-'
+        else:
+            try:
+                if float(score) < 40:
+                    score = "{} (Fail)".format(score)
+            except (ValueError, TypeError):
+                pass
 
         writer.writerow([
             index,
