@@ -3,7 +3,7 @@ from django import template
 from django.contrib.auth.models import User
 
 # Spoken Tutorial Stuff
-from events.models import TestAttendance, TrainingAttendance, FossMdlCourses
+from events.models import TestAttendance, TrainingAttendance, FossMdlCourses, Test
 from mdldjango.models import *
 
 register = template.Library()
@@ -44,6 +44,15 @@ def get_participant_mark(rid, mdluser_id):
 def get_moodle_courseid(rid, mdluser_id):
     #print "rid =>", rid
     #print "mdluser =>", mdluser_id
+    #ensure the training.fossmdlmap_id.foss == training.courseMap.foss
+    training = Test.objects.get(id=rid).training
+    fmap_foss = training.fossmdlmap.foss_id
+    cmap_foss = training.course.foss_id
+    if fmap_foss != cmap_foss:
+        # fossmdlmap = FossMdlCourses.objects.filter(foss_id = cmap_foss, level="Advanced", language="English")
+        fossmdlmap = FossMdlCourses.objects.filter(foss_id = cmap_foss).first()
+        training.fossmdlmap_id = fossmdlmap.id
+        training.save()
     try:
         wa = TestAttendance.objects.get(test_id = rid, mdluser_id = mdluser_id)
         #print wa.mdlcourse_id
