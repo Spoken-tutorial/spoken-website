@@ -294,9 +294,12 @@ def register_user(request):
 						language=event_register.Language_of_workshop).values('language').distinct())
 				context["langs"] = langs
 			form.fields["foss_language"].queryset = langs
-			gst = float(event_register.event_fee)* 0.18
+			event_fee = Decimal(event_register.event_fee)
+			gst = (event_fee * Decimal("0.18")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+			final_amount = (event_fee + gst).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+			# gst = float(event_register.event_fee)* 0.18
 			context["gst"] = gst
-			form.fields["amount"].initial = float(event_register.event_fee) + gst
+			form.fields["amount"].initial = final_amount
 			form.fields["amount"].widget.attrs['readonly'] = True
 			context["fossess"] = [foss.id for foss in event_register.course.foss.all()]
 			context['event_obj']= event_register
