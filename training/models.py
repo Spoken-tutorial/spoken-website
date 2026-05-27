@@ -144,6 +144,21 @@ class EventAttendance(models.Model):
 	updated = models.DateTimeField(auto_now = True)
 
 
+class ILWAttendance(models.Model):
+	event = models.ForeignKey(TrainingEvents, on_delete=models.CASCADE, related_name='ilw_attendance_records')
+	participant = models.ForeignKey(Participant, on_delete=models.CASCADE, related_name='ilw_attendance_records')
+	marked_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='marked_ilw_attendance_records')
+	status = models.BooleanField(default=False)
+	created = models.DateTimeField(auto_now_add = True)
+	updated = models.DateTimeField(auto_now = True)
+
+	class Meta(object):
+		unique_together = ('event', 'participant')
+
+	def __str__(self):
+		return "%s - %s" % (self.participant, self.event)
+
+
 class TrainingCertificate(models.Model):
     participant = models.ForeignKey(Participant, on_delete=models.PROTECT)
     serial_no = models.CharField(max_length=50)  # purpose+uin+1stletter
