@@ -46,15 +46,24 @@ def get_moodle_courseid(rid, mdluser_id):
     #print "mdluser =>", mdluser_id
     #ensure the training.fossmdlmap_id.foss == training.courseMap.foss
     training = Test.objects.get(id=rid).training
+    test = Test.objects.get(id=rid)
     if training.fossmdlmap is not None:
-        fmap_foss = training.fossmdlmap.foss_id
-        cmap_foss = training.course.foss_id
-        if fmap_foss != cmap_foss:
-            print(f"\033[91m NOT EQUAL : {fmap_foss}  {cmap_foss}\033[0m")
-            # fossmdlmap = FossMdlCourses.objects.filter(foss_id = cmap_foss, level="Advanced", language="English")
-            fossmdlmap = FossMdlCourses.objects.filter(foss_id = cmap_foss).first()
-            training.fossmdlmap_id = fossmdlmap.id
-            training.save()
+        try:
+            fmap_foss = training.fossmdlmap.foss_id
+            cmap_foss = training.course.foss_id
+            if fmap_foss != cmap_foss:
+                print(f"\033[91m NOT EQUAL : {fmap_foss}  {cmap_foss}\033[0m")
+                # fossmdlmap = FossMdlCourses.objects.filter(foss_id = cmap_foss, level="Advanced", language="English")
+                # check if it is C & CPP(43), Moodle (97)
+                foss_id = cmap_foss
+                if cmap_foss in (43, 97):
+                    
+                    foss_id = test.foss_id
+                fossmdlmap = FossMdlCourses.objects.filter(foss_id = foss_id).first()
+                training.fossmdlmap_id = fossmdlmap.id
+                training.save()
+        except:
+            pass
     try:
         wa = TestAttendance.objects.get(test_id = rid, mdluser_id = mdluser_id)
         #print wa.mdlcourse_id
