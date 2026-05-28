@@ -19,6 +19,7 @@ class CreateTrainingEventForm(forms.ModelForm):
     foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(id__in=ILWFossMdlCourses.objects.exclude(foss__isnull=True).values_list('foss_id', flat=True).distinct()),required=False)
     city = forms.ModelChoiceField(queryset=City.objects.none(), required=False)
     host_college = forms.ModelChoiceField(queryset=AcademicCenter.objects.none(), required=False)
+    tdate = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
     
     class Meta(object):
         model = TrainingEvents

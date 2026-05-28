@@ -15,6 +15,11 @@ urlpatterns = [
       name="list_events"
     ),
     url(
+      r'^ilw-events/$',
+      ILWEventListView.as_view(),
+      name='ilw_events'
+    ),
+    url(
       r'^register_user/$', register_user, name="register_user"),
     url(
       r'^reg_success/(?P<user_type>\w+)/$', reg_success, name="reg_success"),

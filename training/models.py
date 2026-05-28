@@ -65,6 +65,7 @@ class TrainingEvents(models.Model):
 	Language_of_workshop = models.ForeignKey(Language, on_delete=models.PROTECT )
 	event_start_date = models.DateField(default=datetime.now)
 	event_end_date = models.DateField(default=datetime.now)
+	tdate = models.DateField(null=True, blank=True)  # Test date for ILW events
 	event_coordinator_name =  models.CharField(max_length=200)
 	event_coordinator_email = models.EmailField(null=True)
 	event_coordinator_contact_no = models.CharField(max_length = 100, null=True)

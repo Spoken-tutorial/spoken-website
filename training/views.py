@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.serializers import serialize
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db import IntegrityError
@@ -29,7 +29,7 @@ from .templatetags.trainingdata import registartion_successful, get_event_detail
 from creation.models import TutorialResource, Language, FossCategory
 from events.decorators import group_required
 from events.models import *
-from events.views import is_resource_person, is_administrator, get_page, id_generator, is_event_manager
+from events.views import is_resource_person, is_administrator, get_page, id_generator, is_event_manager, is_organiser, is_invigilator
 from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation, get_confirmation_code
@@ -182,6 +182,48 @@ class TrainingEventsListView(ListView):
             context['user'] = self.request.user
             
         return context
+
+
+class ILWEventListView(ListView):
+	model = TrainingEvents
+	template_name = "ilw_event_list.html"
+	context_object_name = "events"
+	paginate_by = 50
+
+	def dispatch(self, *args, **kwargs):
+		user = self.request.user
+		if not user.is_authenticated():
+			raise PermissionDenied()
+
+		if is_organiser(user):
+			academic = user.organiser.academic
+		elif is_invigilator(user):
+			academic = user.invigilator.academic
+		else:
+			raise PermissionDenied()
+
+		self.today = date.today()
+		self.academic = academic
+		
+		# get the related swayam ilw events
+		self.queryset = TrainingEvents.objects.filter(
+			is_swayam=True,
+			state_id=academic.state_id,
+		).select_related(
+			'state',
+			'host_college',
+		).annotate(
+			student_count=Count('participant', distinct=True)
+		).order_by('-event_start_date')
+		
+		return super(ILWEventListView, self).dispatch(*args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(ILWEventListView, self).get_context_data(**kwargs)
+		context['today'] = self.today
+		context['academic'] = self.academic
+		return context
+
 
 def _validate_parameters(parameter, value):
 	if value is None:
