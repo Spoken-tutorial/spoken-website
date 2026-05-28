@@ -19,4 +19,5 @@ urlpatterns = [
     url(r'^script/tutorial_detail/(?P<fid>[0-9]+)/(?P<lid>[0-9]+)/(?P<tid>[0-9]+)/$', get_tutorial_detail, name='script_tutorial_detail'),
     url(r'^get_users_progress/$', get_users_progress, name='get_users_progress'),
     url(r'^get_top_tuts_foss/$', get_top_tuts_foss, name='get_top_tuts_foss'),
+    url(r'^spoken-social/verify-user/$', verify_spoken_social_user, name='verify_spoken_social_user'),
 ]

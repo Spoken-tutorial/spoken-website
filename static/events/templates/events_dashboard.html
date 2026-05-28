@@ -37,6 +37,7 @@
                                 <li><a href="/software-training/training-request/rp/pending/">Pending / Ongoing Training Request</a></li>
                                 <li><a href="/software-training/training-request/rp/completed/">Completed Training Request</a></li>
                                 <li><a href="/software-training/certificate-request/rp/training/">Participation Certificate Request</a></li>                                
+                                <li><a href="{% url 'eventsv2:ilw_moodle_data' %}">View ILW moodle data</a></li>
                                <!--  <li><a href="/software-training/single-training/pending/">School / Vocational Training request summary</a></li> -->
 			   </ul>
                             <h5>Online Assessment Test</h5>
@@ -87,6 +88,7 @@
                                 <li><a href="/software-training/training-request/rp/pending/">Pending / Ongoing Training Request</a></li>
                                 <li><a href="/software-training/training-request/rp/completed/">Completed Training Request</a></li>
                                 <li><a href="/software-training/activate-academics/">Activate Academics</a></li>
+                                <li><a href="{% url 'eventsv2:stp_moodle_data' %}">View STP moodle data</a></li>
 
                             </ul>
                             <h5>Online Assessment Test</h5>
@@ -110,6 +112,16 @@
                     </div>
                 {% endif %}
 
+                {% if can_upload_youtube %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">YouTube</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li><a href="/youtube/add-video/">Upload Video</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
 
                 {% if user|is_invigilator %}
                     <div class="panel panel-primary">
@@ -164,6 +176,17 @@
                             </ul>
                         </div>
                     </div>
+                {% endif %}
+
+                {% if is_moodle_admin %}
+                <div class="panel panel-primary">
+                    <div class="panel-heading panel-heading-notif">Moodle Admin</div>
+                    <div class="panel-body">
+                        <ul>
+                            <li><a href="{% url 'eventsv2:moodle_mapping' %}">Map Moodle to FOSS</a></li>
+                        </ul>
+                    </div>
+                </div>
                 {% endif %}
             </div>
 

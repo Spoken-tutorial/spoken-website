@@ -3,7 +3,7 @@ from django import template
 from django.contrib.auth.models import User
 
 # Spoken Tutorial Stuff
-from events.models import TestAttendance, TrainingAttendance, FossMdlCourses
+from events.models import Test, TestAttendance, TrainingAttendance, FossMdlCourses
 from mdldjango.models import *
 
 register = template.Library()
@@ -44,17 +44,37 @@ def get_participant_mark(rid, mdluser_id):
 def get_moodle_courseid(rid, mdluser_id):
     #print "rid =>", rid
     #print "mdluser =>", mdluser_id
+    #ensure the training.fossmdlmap_id.foss == training.courseMap.foss
+    training = Test.objects.get(id=rid).training
+    test = Test.objects.get(id=rid)
+    if training.fossmdlmap is not None:
+        try:
+            fmap_foss = training.fossmdlmap.foss_id
+            cmap_foss = training.course.foss_id
+            if fmap_foss != cmap_foss:
+                print(f"\033[91m NOT EQUAL : {fmap_foss}  {cmap_foss}\033[0m")
+                # fossmdlmap = FossMdlCourses.objects.filter(foss_id = cmap_foss, level="Advanced", language="English")
+                # check if it is C & CPP(43), Moodle (97)
+                foss_id = cmap_foss
+                if cmap_foss in (43, 97):
+                    
+                    foss_id = test.foss_id
+                fossmdlmap = FossMdlCourses.objects.filter(foss_id = foss_id).first()
+                training.fossmdlmap_id = fossmdlmap.id
+                training.save()
+        except:
+            pass
     try:
         wa = TestAttendance.objects.get(test_id = rid, mdluser_id = mdluser_id)
         #print wa.mdlcourse_id
         fossmdlmap_id = wa.test.training.fossmdlmap_id
         if fossmdlmap_id is not None:
+            print(f"\033[92m RETURNING \033[0m")
             return FossMdlCourses.objects.get(id=fossmdlmap_id).mdlcourse_id
+        print(f"\033[93m Return from try \033[0m")
         return wa.mdlcourse_id
-        
-
     except Exception as e:
-        #print e
+        print(f"\033[91m Exception : {e} \033[0m")
         return False
 
 def get_mdluser_details(mdluser_id):

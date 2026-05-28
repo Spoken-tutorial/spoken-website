@@ -60,6 +60,11 @@ urlpatterns = [
       EventTrainingCertificateView.as_view(), \
         name="generate_training_certificate"
         ),
+    url(
+      r'^batch_training_certificate/$', 
+      BatchTrainingCertificateView.as_view(), \
+        name="batch_training_certificate"
+        ),
     # url(r'^participant-transactions/$', participant_transactions,name="participant_transactions"),
     # url(
     #   r'^participant-transactions/$', 
@@ -84,6 +89,11 @@ urlpatterns = [
       r'^generate_test_certificate/(?P<testfossid>\d+)/$', 
       EventTestCertificateView.as_view(), \
         name="generate_test_certificate"
+        ),
+    url(
+      r'^batch_test_certificate/$', 
+      BatchTestCertificateView.as_view(), \
+        name="batch_test_certificate"
         ),
     url(r'^verify-ilwtest-certificate/$', verify_ilwtest_certificate, name='verify_ilwtest_certificate'),
     url(r'^companies/new/$', add_company, name='add_company'),

@@ -79,7 +79,7 @@ IIT Bombay.
         
 Your {1} test on {2} {3} has been approved. The test code is {4}. This code is very important, please preserve it for your future reference and also share it with the students and invigilator on the test day.
 
-Inform all the participants to get the scan copy of their photographs on the test day. Get well versed with the online test before the test, see the link below for the instructions of online test for the participants {0}
+Get well versed with the online test before the test, see the link below for the instructions of online test for the participants {0}
 
 All the Best to you and all the participants.
 

@@ -114,6 +114,12 @@
     <script src="{% static 'spoken/js/events.js' %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+ <script>
+    window.SUBSCRIPTION_AMOUNT = {{ subscription_amount }};
+    window.SUBSCRIPTION_AMOUNT_COLLEGE = {{ SUBSCRIPTION_AMOUNT_COLLEGE }};
+    window.SUBSCRIPTION_INSTITUTE_TYPES = {{ SUBSCRIPTION_INSTITUTE_TYPES|safe }};
+</script>
+
 
     <script>
        $(document).ready(function() {
@@ -123,7 +129,6 @@
             var stateId = $(this).val();
             let academicSelect = $("#id_academic");
 
-            // Reset and disable academic dropdown
             academicSelect.prop('disabled', true);
             document.getElementById("ac_info").style.display = "inline";
             academicSelect.html('<option value="">Loading...Please wait</option>');
@@ -132,25 +137,37 @@
                 fetch(`{% url 'donate:get_academic_centers' %}?stateId=${stateId}`)
                 .then(response => response.json())
                 .then(data => {
-                    academicSelect.html('<option value="">-- Select Academic Center --</option>'); // reset
+                    academicSelect.html('<option value="">-- Select Academic Center --</option>'); 
                     data.forEach(item => {
-                        academicSelect.append(new Option(`${item.academic_code} - ${item.institution_name}`, item.id))
-                    });
-                    academicSelect.prop('disabled', false); // enable after loading
+        const option = new Option(
+            `${item.academic_code} - ${item.institution_name}`,
+            item.id
+        );
+        option.dataset.type = item.institution_type_id; 
+        academicSelect.append(option);
+    });
+                    academicSelect.prop('disabled', false); 
                     document.getElementById("ac_info").style.display = "none";
                 })
                 .catch(error =>alert('An error occurred. Please try later.'))
             }
         });
+       $('#id_academic').on('change', function () {
+    let total_amount = 0;
 
-        $('#id_academic').on('select2:select select2:unselect', function (e) {
-            var selectedCount = $(this).val() ? $(this).val().length : 0;
-            let total_amount = {{subscription_amount}} * selectedCount;
-            $("#id_amount").val(total_amount);
-        });
+    $('#id_academic option:selected').each(function () {
+        const typeId = parseInt($(this).data('type'), 10);
 
-        //GST fields 
-        // Trigger on page load and on selection change
+        if (SUBSCRIPTION_INSTITUTE_TYPES.includes(typeId)) {
+            total_amount += SUBSCRIPTION_AMOUNT_COLLEGE;
+        } else {
+            total_amount += SUBSCRIPTION_AMOUNT;
+        }
+    });
+
+    $('#id_amount').val(total_amount);
+});
+
         const academicSelect = $('select[name="institute"]');
         generateGstFields(academicSelect.find('option:selected'));
     
@@ -159,20 +176,19 @@
         });
 
         document.getElementById('payment_form').addEventListener('submit', function (e) {
-        e.preventDefault(); // Stop form submission
+        e.preventDefault();
         validateGstFields().then(valid => {
                 if (valid) {
-                    this.submit(); // Manually submit after all checks pass
+                    this.submit(); 
                 }
             });
         });
-
 
     });
 
     function generateGstFields(selectedOptions) {
     const container = $('#gst-fields-container');
-    container.empty(); // Clear previous inputs
+    container.empty(); 
 
     selectedOptions.each(function () {
         const val = $(this).val();
@@ -212,7 +228,6 @@
 
         container.append(block);
 
-        // Attach change listener after appending
         container.find(`input[name="want_gst_${idSafe}"]`).change(function () {
             if (this.value === 'yes') {
                 $(`#gst-fields-${idSafe}`).slideDown();
@@ -266,7 +281,6 @@ function validateGstFields() {
             return;
         }
 
-        // validate gst fields via server
         if (gstValues.length > 0) {
             fetch("{% url 'donate:validate_gst' %}", {
                 method: 'POST',

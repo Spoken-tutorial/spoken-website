@@ -27,7 +27,7 @@ from events import display
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
     OrganiserFeedbackForm,STWorkshopFeedbackForm,STWorkshopFeedbackFormPre,STWorkshopFeedbackFormPost,LearnDrupalFeedbackForm, LatexWorkshopFileUploadForm, UserForm, \
-    SingleTrainingEditForm,TrainingManagerForm
+    SingleTrainingEditForm,TrainingManagerForm, MoodleMappingForm
 
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
@@ -50,6 +50,8 @@ from mdldjango.models import MdlUser, MdlQuizGrades
 from django.contrib.auth.mixins import UserPassesTestMixin
 from events.formsv2 import StudentGradeFilterForm, AcademicPaymentStatusForm
 from django.views.generic import FormView
+from django.shortcuts import get_object_or_404
+
 
 #pdf generate
 from reportlab.pdfgen import canvas
@@ -72,7 +74,7 @@ from events.views import is_organiser, is_invigilator, is_resource_person, is_ad
 from events.helpers import get_prev_semester_duration, get_updated_form
 from cron.tasks import async_filter_student_grades, filter_student_grades
 from spoken.config import TOPPER_WORKER_STATUS
-from django.db import connection
+from django.db import connection, connections
 from donate.utils import send_transaction_email
 from .certificates import *
 
@@ -100,6 +102,55 @@ class JSONResponseMixin(object):
     # to do much more complex handling to ensure that arbitrary
     # objects -- such as Django model instances or querysets
     # -- can be serialized as JSON.
+    return context
+
+
+class MoodleDataListView(ListView):
+  paginate_by = 50
+  context_object_name = 'collection'
+  template_name = None
+  page_title = None
+  page_heading = None
+
+  def dispatch(self, *args, **kwargs):
+    return super(MoodleDataListView, self).dispatch(*args, **kwargs)
+
+  def get_context_data(self, **kwargs):
+    context = super(MoodleDataListView, self).get_context_data(**kwargs)
+    context['page_title'] = self.page_title
+    context['page_heading'] = self.page_heading
+    return context
+
+
+class ILWMoodleDataListView(MoodleDataListView):
+  model = ILWFossMdlCourses
+  template_name = 'moodle_data_list.html'
+  page_title = 'ILW Moodle Data'
+  page_heading = 'ILW Moodle Data'
+
+  def get_queryset(self):
+    return ILWFossMdlCourses.objects.select_related('foss', 'testfoss').order_by('foss__foss')
+
+  def get_context_data(self, **kwargs):
+    context = super(ILWMoodleDataListView, self).get_context_data(**kwargs)
+    context['show_testfoss'] = True
+    context['show_language_level'] = False
+    return context
+
+
+class EventMoodleDataListView(MoodleDataListView):
+  model = FossMdlCourses
+  template_name = 'moodle_data_list.html'
+  page_title = 'STP Moodle Data'
+  page_heading = 'STP Moodle Data'
+
+  def get_queryset(self):
+    return FossMdlCourses.objects.select_related('foss', 'language', 'level').order_by('foss__foss')
+
+  def get_context_data(self, **kwargs):
+    context = super(EventMoodleDataListView, self).get_context_data(**kwargs)
+    context['show_testfoss'] = False
+    context['show_language_level'] = True
     return context
 
 # This class is to display the taining planner details of that organiser on main page of STP.
@@ -788,6 +839,7 @@ class TrainingAttendanceListView(ListView):
     self.training_request.update_participants_count()
     return HttpResponseRedirect('/software-training/training-planner')
 
+@method_decorator(login_required(login_url="/accounts/login/"), name="dispatch")
 class TrainingCertificateListView(ListView):
   queryset = StudentMaster.objects.none()
   paginate_by = 500
@@ -795,7 +847,7 @@ class TrainingCertificateListView(ListView):
   training_request = None
 
   def dispatch(self, *args, **kwargs):
-    self.training_request = TrainingRequest.objects.get(pk=kwargs['tid'])
+    self.training_request = get_object_or_404(TrainingRequest, pk=kwargs['tid'])
     if self.training_request.status: # if status = 1, display students who attended the training
       self.queryset = self.training_request.attendances.all().select_related('student', 'student__user')
     else: # if training not completed show batch students
@@ -3502,3 +3554,96 @@ class FetchAcademicDetailsView(View):
       data['success'] = False
       data['payment_status'] = "New"
     return JsonResponse(data)
+
+class MoodleMappingView(View):
+  template_name = 'moodle_mapping.html'
+
+  def get_moodle_courses(self):
+    with connections['moodle'].cursor() as cursor:
+      cursor.execute("SELECT id, fullname FROM mdl_course ORDER BY fullname")
+      return cursor.fetchall()
+
+  def get(self, request, *args, **kwargs):
+    courses = self.get_moodle_courses()
+    form = MoodleMappingForm(moodle_courses=[(c[0], "{} [ID: {}]".format(c[1], c[0])) for c in courses])
+    return render(request, self.template_name, {'form': form})
+
+  def post(self, request, *args, **kwargs):
+    courses = self.get_moodle_courses()
+    mdl_course_id = request.POST.get('moodle_course')
+    quizzes = []
+    if mdl_course_id:
+      with connections['moodle'].cursor() as cursor:
+        cursor.execute("SELECT id, name FROM mdl_quiz WHERE course = %s", [mdl_course_id])
+        quizzes = [(str(q[0]), "{} [ID: {}]".format(q[1], q[0])) for q in cursor.fetchall()]
+
+    form = MoodleMappingForm(
+      request.POST,
+      moodle_courses=[(c[0], "{} [ID: {}]".format(c[1], c[0])) for c in courses],
+      moodle_quizzes=quizzes
+    )
+    if form.is_valid():
+      foss = form.cleaned_data.get('foss')
+      new_foss_name = form.cleaned_data.get('new_foss')
+      lab_course = form.cleaned_data.get('lab_course')
+      new_lab_course_name = form.cleaned_data.get('new_lab_course')
+      language = form.cleaned_data['language']
+      level = form.cleaned_data['level']
+      mdl_course_id = form.cleaned_data['moodle_course']
+      mdl_quiz_id = form.cleaned_data['moodle_quiz']
+      test = form.cleaned_data.get('test', True)
+      category = form.cleaned_data.get('category', 1)
+
+      # Handle New FOSS
+      if not foss and new_foss_name:
+        foss, created = FossCategory.objects.get_or_create(
+          foss=new_foss_name,
+          defaults={
+            'description': 'Auto-created via Moodle Mapping Form',
+            'status': True,
+            'user': request.user
+          }
+        )
+
+      # Handle new course
+      if not lab_course and new_lab_course_name:
+        lab_course, created = LabCourse.objects.get_or_create(name=new_lab_course_name)
+
+      if not foss:
+        messages.error(request, "Please select an existing FOSS or provide a new FOSS name.")
+        return render(request, self.template_name, {'form': form})
+
+      # FossAvailableForWorkshop
+      FossAvailableForWorkshop.objects.get_or_create(foss=foss, language=language, defaults={'status': True})
+
+      # CourseMap
+      CourseMap.objects.update_or_create(
+        foss=foss, 
+        category=category, 
+        defaults={'course': lab_course, 'test': test}
+      )
+
+      # FossMdlCourses
+      mapping, created = FossMdlCourses.objects.update_or_create(
+        foss=foss,
+        language=language,
+        level=level,
+        defaults={'mdlcourse_id': mdl_course_id, 'mdlquiz_id': mdl_quiz_id}
+      )
+
+      messages.success(request, "Moodle Mapping saved successfully!")
+      return HttpResponseRedirect('/software-training/')
+    
+    return render(request, self.template_name, {'form': form})
+
+class GetMoodleQuizzesView(View):
+  def get(self, request, *args, **kwargs):
+    course_id = request.GET.get('course_id')
+    quizzes = []
+    if course_id:
+      with connections['moodle'].cursor() as cursor:
+        cursor.execute("SELECT id, name FROM mdl_quiz WHERE course = %s", [course_id])
+        quizzes = cursor.fetchall()
+    
+    data = [{'id': q[0], 'name': "{} [ID: {}]".format(q[1], q[0])} for q in quizzes]
+    return JsonResponse(data, safe=False)

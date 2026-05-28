@@ -1,6 +1,7 @@
 from django.db import models
 from builtins import str
 from builtins import object
+from decimal import Decimal, ROUND_HALF_UP
 
 #import auth user models
 from django.contrib.auth.models import User
@@ -53,8 +54,9 @@ class ILWCourse(models.Model):
 
 class TrainingEvents(models.Model):
 	event_type = models.CharField(max_length = 50, choices = EVENT_TYPE_CHOICES)
-	event_fee = models.PositiveIntegerField(default=500)
+	event_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("500.00"))
 	event_name = models.CharField(max_length=200)
+	download_access = models.EmailField(max_length=255, null=True, blank=True)
 	state = models.ForeignKey(State, on_delete=models.PROTECT )
 	host_college = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT )
 	foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT , null=True, blank=True )
@@ -74,6 +76,7 @@ class TrainingEvents(models.Model):
 	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
 	city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True)
 	payment_required = models.BooleanField(default=False)
+	is_swayam = models.BooleanField(default=False)
 	instructor_name = models.CharField(max_length=255, blank=True, null=True, default='') # For internship
 	# False => Payment only from non-subscribed college organisers and students.
 	# True  => Payment from ALL users, regardless of group or college payment status.

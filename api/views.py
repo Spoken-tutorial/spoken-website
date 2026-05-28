@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
@@ -32,6 +33,8 @@ from django.contrib.auth.models import User
 from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
  MONGO_HOST, MONGO_DB
 from .additional_learning import *
+from events.models import Organiser
+from training.models import Participant
 
 @csrf_exempt
 def video_list(request):
@@ -397,3 +400,74 @@ def get_top_tuts_foss(request):
         'tutorial_detail__foss__foss','tutorial_detail__tutorial','hit_count')
     context['top_tutorials'] = list(top_tutorials)
     return JsonResponse(json.dumps(context),safe=False)
+
+@api_view(['POST'])
+def verify_spoken_social_user(request):
+    """
+    Verify a user's credentials and return their role for Spoken Social.
+    Accepts: { "email": "...", "password": "..." }
+    Returns: user info + role (coordinator/student/admin) + college name
+
+    """
+    email = request.data.get('email')
+    password = request.data.get('password')
+
+    user = authenticate(username=email,password=password)
+    if user is None:
+        return Response(
+            {'status': 'error', 'message': 'Invalid credentials'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    if not user.is_active:
+        return Response(
+            {'status': 'error', 'message': 'Account is disabled'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    role = None
+    college_name = None
+
+    try:
+        organiser = Organiser.objects.select_related('academic').get(
+            user=user, status=1
+        )
+        role = 'coordinator'
+        if organiser.academic:
+            college_name = organiser.academic.institution_name
+    except Organiser.DoesNotExist:
+        pass
+
+    if role is None:
+        participant = Participant.objects.select_related(
+            'college', 'event__foss'
+        ).filter(
+            user=user,
+            event__course__foss__foss__icontains='linux new'
+        ).first()
+        if participant:
+            role = 'student'
+            if participant.college:
+                college_name = participant.college.institution_name
+    
+    if role is None:
+        if user.is_staff or user.is_superuser:
+            role = 'admin'
+
+
+    if role is None:
+        return Response(
+            {'status': 'error', 'message': 'User is not registered for Spoken Social'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    return Response({
+        'status': 'success',
+        'user': {
+            'spoken_user_id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'role': role,
+            'college_name': college_name,
+        }
+    }, status=status.HTTP_200_OK)
