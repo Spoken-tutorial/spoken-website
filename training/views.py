@@ -210,8 +210,9 @@ def register_user(request):
 		profile = Profile.objects.get(user=user)
 		form.fields["name"].initial = user.get_full_name()
 		form.fields["email"].initial = getattr(user, 'email')
-		form.fields["phone"].initial = profile.phone
 		form.fields['email'].widget.attrs['readonly'] = True
+		form.fields["phone"].initial = profile.phone
+		form.fields['phone'].widget.attrs['readonly'] = True
 		if user.profile_set.all():
 			try:
 				form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
@@ -229,52 +230,101 @@ def register_user(request):
 		phone = request.GET.get('phone', None)
 		callbackurl = request.GET.get('callbackurl', None)
 		event_id = request.GET.get('event_id')
-		if not _validate_parameters('source', source):
-			return render(request, 'error.html', {'error': 'Invalid Source'})
-		if not _validate_parameters('foss', foss):
-			return render(request, 'error.html', {'error': 'No foss mentioned'})
-		if not _validate_parameters('email', email):
-			return render(request, 'error.html', {'error': 'No email mentioned'})
-		if not _validate_parameters('name', name):
-			return render(request, 'error.html', {'error': 'No name mentioned'})
-		if not _validate_parameters('gender', gender):
-			return render(request, 'error.html', {'error': 'No gender mentioned'})
-		if not _validate_parameters('phone', phone):
-			return render(request, 'error.html', {'error': 'Invalid Phone number'})
-		if not _validate_parameters('event_id', event_id):
-			return render(request, 'error.html', {'error': 'Invalid Event'})
-		if not _validate_parameters('callbackurl', callbackurl):
-			return render(request, 'error.html', {'error': 'Callback url not mentioned'})
+		event_register = None
 		if event_id:
-			event_register = TrainingEvents.objects.get(id=event_id)
-			if event_register.event_type == 'HN':
-				ExternalCourseMap.objects.filter(foss=foss)
-			else:
-				langs = Language.objects.filter(id__in =
-					TutorialResource.objects.filter(
-					tutorial_detail__foss = event_register.foss, status=1).exclude(
-						language=event_register.Language_of_workshop).values('language').distinct())
-			context["langs"] = langs
-			form.fields["foss_language"].queryset = langs
-			gst = float(event_register.event_fee)* 0.18
-			context["gst"] = gst
-			form.fields["amount"].initial = float(event_register.event_fee) + gst
-			form.fields["amount"].widget.attrs['readonly'] = True
-			context['event_obj']= event_register
-			form.fields['name'].initial = name
-			form.fields['phone'].initial = phone
-			if gender.lower() == 'female':
-				form.fields['gender'].initial = 'F'
-			elif gender.lower() == 'male':
-				form.fields['gender'].initial = 'M'
-			else:
-				form.fields['gender'].initial = 'O'
-			form.fields['name'].widget.attrs['readonly'] = True
-			form.fields['phone'].widget.attrs['readonly'] = True
-			form.fields['gender'].widget.attrs['readonly'] = True
-			context['source'] = source
-			context['email'] = email
-			context['callbackurl'] = callbackurl
+			event_register = TrainingEvents.objects.filter(id=event_id).first()
+		if event_register and 'DEET' in event_register.event_name.upper() and source != 'deet':
+			return render(request, 'error.html', {'error': 'Invalid Source'})
+		if source == 'deet':
+			if not _validate_parameters('source', source):
+				return render(request, 'error.html', {'error': 'Invalid Source'})
+			if not _validate_parameters('foss', foss):
+				return render(request, 'error.html', {'error': 'No foss mentioned'})
+			if not _validate_parameters('email', email):
+				return render(request, 'error.html', {'error': 'No email mentioned'})
+			if not _validate_parameters('name', name):
+				return render(request, 'error.html', {'error': 'No name mentioned'})
+			if not _validate_parameters('gender', gender):
+				return render(request, 'error.html', {'error': 'No gender mentioned'})
+			if not _validate_parameters('phone', phone):
+				return render(request, 'error.html', {'error': 'Invalid Phone number'})
+			if not _validate_parameters('event_id', event_id):
+				return render(request, 'error.html', {'error': 'Invalid Event'})
+			if not _validate_parameters('callbackurl', callbackurl):
+				return render(request, 'error.html', {'error': 'Callback url not mentioned'})
+			if event_id:
+				event_register = TrainingEvents.objects.get(id=event_id)
+				if event_register.event_type == 'HN':
+					ExternalCourseMap.objects.filter(foss=foss)
+				else:
+					langs = Language.objects.filter(id__in =
+						TutorialResource.objects.filter(
+							tutorial_detail__foss = event_register.foss, status=1).exclude(
+								language=event_register.Language_of_workshop).values('language').distinct())
+				context["langs"] = langs
+				form.fields["foss_language"].queryset = langs
+				gst = float(event_register.event_fee) * 0.18
+				context["gst"] = gst
+				form.fields["amount"].initial = float(event_register.event_fee) + gst
+				form.fields["amount"].widget.attrs['readonly'] = True
+				context['event_obj'] = event_register
+				form.fields['name'].initial = name
+				form.fields['phone'].initial = phone
+				if gender.lower() == 'female':
+					form.fields['gender'].initial = 'F'
+				elif gender.lower() == 'male':
+					form.fields['gender'].initial = 'M'
+				else:
+					form.fields['gender'].initial = 'O'
+				form.fields['name'].widget.attrs['readonly'] = True
+				form.fields['phone'].widget.attrs['readonly'] = True
+				form.fields['gender'].widget.attrs['readonly'] = True
+				context['source'] = source
+				context['email'] = email
+				context['callbackurl'] = callbackurl
+		else:
+			if event_id and event_register and 'DEET' not in event_register.event_name.upper():
+				if request.user.is_authenticated():
+					profile = Profile.objects.filter(user=request.user).first()
+					student = Student.objects.filter(user=request.user).first()
+					form.fields["name"].initial = request.user.get_full_name()
+					form.fields["email"].initial = request.user.email
+					if profile:
+						form.fields["phone"].initial = profile.phone
+						form.fields['phone'].widget.attrs['readonly'] = True
+					if student and student.gender:
+						gender_value = student.gender.lower()
+						if gender_value.startswith('f'):
+							form.fields["gender"].initial = 'F'
+						elif gender_value.startswith('m'):
+							form.fields["gender"].initial = 'M'
+						else:
+							form.fields["gender"].initial = 'O'
+						form.fields['gender'].widget.attrs['readonly'] = True
+					form.fields['name'].widget.attrs['readonly'] = True
+					form.fields['email'].widget.attrs['readonly'] = True
+
+				fosses = event_register.course.foss.all()
+				if event_register.event_type == 'HN':
+					hn_categories = [x.external_course for x in ExternalCourseMap.objects.filter(foss__in=fosses)]
+					topic_categories = TopicCategory.objects.filter(category_id__in=hn_categories).values_list('topic_category_id', flat=True)
+					languages = HNContributorRole.objects.filter(topic_cat_id__in=topic_categories).values_list('language_id', flat=True)
+					langs = HNLanguage.objects.filter(lan_id__in=languages).distinct()
+					context["language_hn"] = langs
+					form.fields["language_hn"].queryset = langs
+				else:
+					langs = Language.objects.filter(id__in =
+						TutorialResource.objects.filter(
+							tutorial_detail__foss__in = fosses, status=1).exclude(
+								language=event_register.Language_of_workshop).values('language').distinct())
+					context["langs"] = langs
+					form.fields["foss_language"].queryset = langs
+
+				gst = float(event_register.event_fee) * 0.18
+				context["gst"] = gst
+				form.fields["amount"].initial = float(event_register.event_fee) + gst
+				form.fields["amount"].widget.attrs['readonly'] = True
+				context['event_obj'] = event_register
 	if request.method == 'POST':
 		event_id = request.POST.get("event_id_info", None) or request.GET.get("event_id", None)
 		if event_id:
