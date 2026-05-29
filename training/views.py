@@ -206,7 +206,7 @@ def register_user(request):
 	
 	if request.user.is_authenticated():
 		user = request.user
-		profile = Profile.objects.get(user=user)
+		profile, created = Profile.objects.get_or_create(user=user)
 		form.fields["name"].initial = user.get_full_name()
 		form.fields["email"].initial = getattr(user, 'email')
 		form.fields["phone"].initial = profile.phone
