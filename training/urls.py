@@ -1,6 +1,7 @@
 #training urls
 from django.conf.urls import url
 from training.views import *
+from training.swayam_participant_data import DownloadSwayamParticipantDataView
 
 app_name = 'training'
 urlpatterns = [
@@ -55,6 +56,7 @@ urlpatterns = [
     ),
     url(r'^ajax_check_college/', ajax_check_college, name="ajax_check_college"),
     url(r'^upload_college_details/', upload_college_details, name="upload_college_details"),
+    url(r'^swayam-participant-data/$', DownloadSwayamParticipantDataView.as_view(), name='download_swayam_participant_data'),
     url(
       r'^generate_training_certificate/$', 
       EventTrainingCertificateView.as_view(), \
