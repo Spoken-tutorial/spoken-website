@@ -145,6 +145,9 @@ class TrainingEventsListView(ListView):
     def get_context_data(self, **kwargs):
         context = super(TrainingEventsListView, self).get_context_data(**kwargs)
         context['form'] = self.collection.form
+        context['swayam_attendance_map'] = {}
+        context['completed_event_ids'] = set()
+        context['current_date'] = date.today()
         
         if self.status == 'myevents':
             # Get filtered events from the filter
@@ -166,6 +169,20 @@ class TrainingEventsListView(ListView):
                 page = self.request.GET.get('page')
                 collection = get_page(participants_list, page)
                 context['collection'] = collection
+
+                # swayam context mapping
+                swayam_attendances = ILWAttendance.objects.filter(participant__in=participants_list)
+                swayam_attendance_map = {att.event_id: att for att in swayam_attendances}
+                context['swayam_attendance_map'] = swayam_attendance_map
+
+                completed_event_ids = set(
+                    EventTestStatus.objects.filter(
+                        participant__in=participants_list,
+                        part_status__gte=2,
+                        mdlgrade__gte=40.00
+                    ).values_list('event_id', flat=True)
+                )
+                context['completed_event_ids'] = completed_event_ids
         else:
             page = self.request.GET.get('page')
             collection = get_page(self.collection.qs, page)
