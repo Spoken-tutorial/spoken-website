@@ -225,7 +225,7 @@
                       <div class="panel-body">You are a part of a paid college.</div>
                     </div>
                   </div>
-    <div class="form-group" style="display:none" id=""amount_back">
+    <div class="form-group" style="display:none" id="amount_back">
                       <label for="id_example_suggestion" class="col-lg-4 control-label">Amount</label>
                       <div class="col-lg-8">
                           {% render_field form.amount class+="form-control amount"  %}
@@ -411,6 +411,14 @@ $('#id_state').change(function(){
 });
 
 
+function checkRegisterButton() {
+    var college = $('#id_college').val();
+    var saved_college = $('#college_user_details').val();
+    var hasCollege = (college && college !== 'None') || saved_college;
+    var hasEmptyMandatory = !$('#id_name').val() || !$('#id_email').val() || !$('#id_phone').val() || !$('#id_gender').val() || !$('#id_state').val() || !hasCollege;
+    $('#register_paid').prop('disabled', hasEmptyMandatory);
+}
+
 $('#id_gender').change(function(){
     var college = $('#id_college').val();
     var saved_college = $('#college_user_details').val();
@@ -419,10 +427,7 @@ $('#id_gender').change(function(){
       $('#amount_back').show();
       payment_btn_activate();
     }
-    try{
-      document.getElementById('register_paid').disabled = false;
-    }
-    catch{}
+    checkRegisterButton();
 });
 
 $('#id_email').on('focusout',function(){
@@ -606,6 +611,9 @@ $('#id_college').change(function(){
           }
       });
   });
+
+  $('#id_name, #id_email, #id_phone, #id_gender, #id_state, #id_college').on('change input', checkRegisterButton);
+  checkRegisterButton();
 });
 </script>
 
