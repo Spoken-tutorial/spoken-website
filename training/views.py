@@ -1287,11 +1287,28 @@ class EventParticipantsListView(ListView):
 	unsuccessful_payee = ""
 	paginate_by = 500
 
+	def dispatch(self, *args, **kwargs):
+		event_id = self.kwargs.get('eventid')
+		self.event = get_object_or_404(TrainingEvents, pk=event_id)
+		
+		if self.event.is_swayam:
+			user = self.request.user
+			if not user.is_authenticated():
+				raise PermissionDenied()
+			
+			if not (is_organiser(user) or is_invigilator(user)):
+				raise PermissionDenied()
+		
+		return super(EventParticipantsListView, self).dispatch(*args, **kwargs)
+
 	def get_queryset(self):
 		event_id = self.kwargs['eventid']
 		self.event = get_object_or_404(TrainingEvents, pk=event_id)
 		main_query = Participant.objects.filter(event_id=event_id)
 
+		if self.event.is_swayam:
+			return main_query.select_related('college', 'state')
+		
 		if self.event.training_status == 2:
 			return EventAttendance.objects.filter(event_id=event_id).select_related(
 				'participant', 'participant__college', 'participant__state'
@@ -1306,7 +1323,68 @@ class EventParticipantsListView(ListView):
 		context['event'] = self.event
 		context['eventid'] = self.event.id
 		context['is_event_closed'] = self.event.training_status == 2
+		
+
+		if self.event.is_swayam:
+			today = date.today()
+			test_date = self.event.tdate or self.event.event_end_date
+			can_mark_attendance = today >= test_date
+			
+			context['is_swayam_ilw'] = True
+			context['can_mark_attendance'] = can_mark_attendance
+			context['test_date'] = test_date
+			
+
+			participant_ids = [p.id for p in context.get('object_list', [])]
+			if participant_ids:
+				attendance_map = {}
+				attendance_records = ILWAttendance.objects.filter(
+					event_id=self.event.id,
+					participant_id__in=participant_ids
+				)
+				for record in attendance_records:
+					attendance_map[record.participant_id] = record
+				context['attendance_map'] = attendance_map
+		
 		return context
+	
+	def post(self, request, *args, **kwargs):
+		event_id = self.kwargs.get('eventid')
+		event = get_object_or_404(TrainingEvents, pk=event_id)
+		
+		if not (is_organiser(request.user) or is_invigilator(request.user)):
+			raise PermissionDenied()
+		
+		# Check if attendance marking is allowed 
+		today = date.today()
+		test_date = event.tdate or event.event_end_date
+		if today < test_date:
+			raise PermissionDenied()
+		
+		try:
+			# get all participant ids for this event
+			participants = Participant.objects.filter(event_id=event_id).values_list('id', flat=True)
+			
+			for participant_id in participants:
+				# Check if attendance was submitted
+				checkbox_key = f'attendance_{participant_id}'
+				is_marked = checkbox_key in request.POST
+				
+				#attendance record update
+				attendance_record, created = ILWAttendance.objects.update_or_create(
+					event_id=event_id,
+					participant_id=participant_id,
+					defaults={
+						'status': is_marked,
+						'marked_by': request.user,
+					}
+				)
+			
+			messages.success(request, 'Attendance updated successfully.')
+		except Exception as e:
+			messages.error(request, f'Error updating attendance: {str(e)}')
+		
+		return redirect('training:event_participants', eventid=event_id)
 
 
 @csrf_exempt

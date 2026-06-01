@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load trainingdata %}
+{% load eventsdata %}
+{% block title %}List Event Participants{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> List of Event Participants :
+{% endblock %}
+{% block search %}{% endblock %}
+
+{% block content %}
+{% if is_swayam_ilw %}
+	{% if messages %}
+		<div class="alert alert-info">
+			{% for message in messages %}
+				<div class="alert alert-{{ message.tags }}">{{ message }}</div>
+			{% endfor %}
+		</div>
+	{% endif %}
+	
+	<div class="attendance-info" style="margin-bottom: 20px; padding: 10px; background-color: #f9f9f9; border-left: 4px solid #0275d8;">
+		<p><strong>Event:</strong> {{ event.event_name }}</p>
+		<p><strong>Test Date:</strong> {{ test_date|date:"d M Y" }}</p>
+		{% if can_mark_attendance %}
+			<p style="color: green; margin-bottom: 0;"><strong>✓ Attendance marking is enabled.</strong></p>
+		{% else %}
+			<p style="color: red; margin-bottom: 0;"><strong>✗ Attendance marking will be available on or after the test date.</strong></p>
+		{% endif %}
+	</div>
+	
+	{% if object_list %}
+		<p style="margin-bottom: 15px;">
+			<a href="#" id="check-all-link" style="cursor: pointer; color: #0275d8; text-decoration: underline;">Check All Attendance</a>
+		</p>
+		
+		<form method="post" class="attendance-form">
+			{% csrf_token %}
+			<table class="paleblue table table-striped">
+				<thead>
+					<tr>
+						<th>Sr. No.</th>
+						<th style="text-align: center;">Check</th>
+						<th>Name</th>
+						<th>College Name</th>
+						<th>State</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for record in object_list %}
+					<tr>
+						<td>{{ forloop.counter }}</td>
+						<td style="text-align: center;">
+							{% if can_mark_attendance %}
+								<input type="checkbox" name="attendance_{{ record.id }}" 
+									class="attendance-checkbox"
+									{% if attendance_map|get_item:record.id %}checked="checked"{% endif %} />
+							{% else %}
+								<input type="checkbox" disabled="disabled" 
+									class="attendance-checkbox"
+									{% if attendance_map|get_item:record.id %}checked="checked"{% endif %} />
+							{% endif %}
+						</td>
+						<td>{{ record.name }}</td>
+						<td>{{ record.college.institution_name }}</td>
+						<td>{{ record.state.name }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			
+			{% if can_mark_attendance %}
+				<div style="margin-top: 20px;">
+					<button type="submit" class="btn btn-primary">Submit Attendance</button>
+				</div>
+			{% endif %}
+		</form>
+	{% else %}
+		<div style="text-align: center; padding: 20px; color: #666;">
+			<p>No participants found for this event.</p>
+		</div>
+	{% endif %}
+	
+{% else %}
+	<table class="paleblue table">
+		<tr>
+			<th>Sr. No.</th>
+			<th>Name</th>
+			<th>College Name</th>
+			<th>State</th>
+		</tr>
+		
+	{% if is_event_closed %}
+		{% for record in object_list %}
+		<tr>
+			<td>{{ forloop.counter }}</td>
+			<td>{{ record.participant.name}}</td>
+			<td>{{ record.participant.college.institution_name}}</td>
+			<td>{{ record.participant.state.name}}</td>
+		</tr>
+		{% endfor %}
+	{% else %}
+		{% for record in object_list %}
+		<tr>
+			<td>{{ forloop.counter }}</td>
+			<td>{{ record.name}}</td>
+			<td>{{ record.college.institution_name}}</td>
+			<td>{{ record.state.name}}</td>
+		</tr>
+		{% endfor %}
+	{% endif %}
+
+	</table>
+{% endif %}
+
+<script>
+document.getElementById('check-all-link')?.addEventListener('click', function(e) {
+	e.preventDefault();
+	const checkboxes = document.querySelectorAll('.attendance-checkbox:not(:disabled)');
+	const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+	checkboxes.forEach(cb => cb.checked = !allChecked);
+});
+</script>
+
+{% endblock %}

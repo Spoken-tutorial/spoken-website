@@ -269,6 +269,17 @@ def get_hn_test(event):
     return None
 
 
+@register.filter
+def get_item(dictionary, key):
+    if dictionary is None:
+        return None
+    try:
+        item = dictionary.get(key)
+        return item.status if item else False
+    except (KeyError, AttributeError):
+        return False
+
+
 register.filter('is_user_paid', is_user_paid)
 register.filter('is_reg_valid', is_reg_valid)
 register.filter('is_user_registered', is_user_registered)

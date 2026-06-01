@@ -86,7 +86,7 @@ urlpatterns = [
     url(r'reopen-event/(?P<eventid>\w+)/$', reopen_event, name='reopen_event'),
     url(
       r'^(?P<eventid>\d+)/eventparticipants$', 
-      EventParticipantsListView.as_view(template_name="stat_event_participants.html"), 
+      EventParticipantsListView.as_view(template_name="event_participants.html"), 
       name="event_participants"
     ),
     url(r'^ajax_add_teststatus/', ajax_add_teststatus, name="ajax_add_teststatus"),
