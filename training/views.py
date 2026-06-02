@@ -221,10 +221,10 @@ def register_user(request):
 			except Exception as e:
 				raise e
 	if request.method == 'GET':
-		request.session['utm_source'] = request.GET.get('utm_source', '')
-		request.session['utm_medium'] = request.GET.get('utm_medium', '')
-		request.session['utm_campaign'] = request.GET.get('utm_campaign', '')
-		request.session['httpreferrer'] = request.META.get('HTTP_REFERER', '')
+		request.session['utm_source'] = request.GET.get('utm_source')
+		request.session['utm_medium'] = request.GET.get('utm_medium')
+		request.session['utm_campaign'] = request.GET.get('utm_campaign')
+		request.session['httpreferrer'] = request.META.get('HTTP_REFERER')
 		source = request.GET.get('source', None)
 		foss = request.GET.get('foss', None)
 		event_id = request.GET.get('event_id', None)
@@ -384,15 +384,10 @@ def reg_success(request, user_type):
 			form_data.added_by = request.user
 
 			# capture utm parameters and http referrer
-			utm_source = request.session.get('utm_source') or request.GET.get('utm_source') or request.POST.get('utm_source')
-			utm_medium = request.session.get('utm_medium') or request.GET.get('utm_medium') or request.POST.get('utm_medium')
-			utm_campaign = request.session.get('utm_campaign') or request.GET.get('utm_campaign') or request.POST.get('utm_campaign')
-			httpreferrer = request.session.get('httpreferrer') or request.META.get('HTTP_REFERER')
-
-			form_data.utm_source = utm_source if utm_source else None
-			form_data.utm_medium = utm_medium if utm_medium else None
-			form_data.utm_campaign = utm_campaign if utm_campaign else None
-			form_data.httpreferrer = httpreferrer if httpreferrer else None
+			form_data.utm_source = request.session.get('utm_source') or request.GET.get('utm_source') or request.POST.get('utm_source')
+			form_data.utm_medium = request.session.get('utm_medium') or request.GET.get('utm_medium') or request.POST.get('utm_medium')
+			form_data.utm_campaign = request.session.get('utm_campaign') or request.GET.get('utm_campaign') or request.POST.get('utm_campaign')
+			form_data.httpreferrer = request.session.get('httpreferrer') or request.META.get('HTTP_REFERER')
 
 			if source == 'deet':
 				form_data.source = source
