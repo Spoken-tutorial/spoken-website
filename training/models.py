@@ -105,6 +105,10 @@ class Participant(models.Model):
 	company = models.ForeignKey(Company, on_delete=models.PROTECT, null=True, blank=True)
 	city = models.ForeignKey(City, on_delete=models.PROTECT, null=True, blank=True)
 	source = models.CharField(max_length=25, null=True, default=None)
+	utm_source = models.CharField(max_length=255, null=True, blank=True)
+	utm_medium = models.CharField(max_length=255, null=True, blank=True)
+	utm_campaign = models.CharField(max_length=255, null=True, blank=True)
+	httpreferrer = models.TextField(null=True, blank=True)
 
 	@property
 	def payment_status_message(self):
