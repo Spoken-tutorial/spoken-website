@@ -280,8 +280,8 @@ This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay.
             label = "topic" if event.event_type == "HN" else "FOSS"
             course_name_text = f" the course <b>{event.course.name}</b> which includes the following {label}:"
         text = f"""
-            This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b>, has successfully 
-            completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay from
+            This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b> has successfully 
+            completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay, from
             <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed
             self-paced training on{course_name_text} <b>{format_foss_list([foss.foss for foss in event.course.foss.all()])}</b>
             under the supervision of <b>{event.instructor_name}</b>.<br />
@@ -350,10 +350,10 @@ Credits: <b>{credits}</b> Score: <b>{score}%</b>
     elif event.event_type == "INTERN":
 
         text = f"""
-            This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b>, has successfully \
-            completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay \
+            This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b> has successfully \
+            completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay, \
             from <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed \
-            self-paced training on <b>{teststatus.fossid.foss}</b> under the supervision of <b>{event.instructor_name}</b>. <br/>
+            self-paced training on <b>{teststatus.fossid.foss}</b> under the supervision of <b>{event.instructor_name}</b> of the <b>{event.host_college.institution_name}</b>. <br/>
             This internship is officially approved and recognized by the receiving institution, \
             ensuring compliance with institutional norms and standards. <br/>
             <b>Grade</b> : {str('{:.2f}'.format(teststatus.mdlgrade))}%
