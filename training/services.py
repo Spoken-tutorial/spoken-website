@@ -8,6 +8,8 @@ from django.http import HttpResponse
 from django.template.defaultfilters import slugify
 
 from mdldjango.models import MdlQuizGrades, MdlUser
+from events.models import Student, StudentMaster
+from donate.subscription import has_active_subscription
 
 from .models import ILWFossMdlCourses, Participant
 
@@ -73,20 +75,32 @@ def resolve_moodle_quiz_id(event):
     return None
 
 
-def get_moodle_user_map(user_ids):
-    normalized_user_ids = sorted({user_id for user_id in user_ids if user_id})
-    if not normalized_user_ids:
+def get_moodle_user_map(participants):
+    emails = []
+    for p in participants:
+        if p.email:
+            emails.append(p.email.strip())
+        elif p.user and p.user.email:
+            emails.append(p.user.email.strip())
+
+    normalized_emails = sorted({email.lower() for email in emails if email})
+    if not normalized_emails:
         return {}
 
-    users = (
+    moodle_users = (
         MdlUser.objects.using('moodle')
-        .filter(id__in=normalized_user_ids)
+        .filter(email__in=normalized_emails)
         .only('id', 'email', 'username')
     )
 
+    email_to_moodle = {mu.email.lower(): mu for mu in moodle_users}
+
     user_map = {}
-    for user in users:
-        user_map[user.id] = user
+    for p in participants:
+        p_email = (p.email or (p.user.email if p.user_id else '')).strip().lower()
+        if p.user_id and p_email in email_to_moodle:
+            user_map[p.user_id] = email_to_moodle[p_email]
+
     return user_map
 
 
@@ -108,17 +122,35 @@ def get_moodle_grade_map(user_ids, quiz_id):
     return grade_map
 
 
-def get_payment_status_label(participant, course_type):
-    if course_type == 'Free':
-        return 'NA'
+def get_payment_status_label(participant, course_type=None):
+    # Step 1: Check active subscription
+    is_subscribed = False
+    if participant.user_id:
+        try:
+            student = Student.objects.get(user_id=participant.user_id)
+            academic_ids = StudentMaster.objects.filter(student=student).values_list('batch__academic_id', flat=True)
+            for academic_id in academic_ids:
+                if academic_id and has_active_subscription(academic_id):
+                    is_subscribed = True
+                    break
+        except Student.DoesNotExist:
+            pass
 
-    if participant.registartion_type in (1, 3):
+    if is_subscribed:
         return 'Free for subscribed colleges'
 
-    payment_status = participant.payment_status
-    if payment_status and (payment_status.status == 1 or (payment_status.transaction and payment_status.transaction.order_status == 'CHARGED')):
-        return 'Paid'
+    # Step 2: Check sibling payment records
+    siblings = Participant.objects.filter(
+        event=participant.event,
+        user=participant.user
+    ).select_related('payment_status', 'payment_status__transaction')
 
+    for sibling in siblings:
+        ps = sibling.payment_status
+        if ps and (ps.status == 1 or (ps.transaction and ps.transaction.order_status == 'CHARGED')):
+            return 'Paid'
+
+    # Step 3: Default
     return 'Not Paid'
 
 
@@ -126,7 +158,7 @@ def build_swayam_export_rows(event, metadata):
     participants = list(get_swayam_participants(event))
     quiz_id = resolve_moodle_quiz_id(event)
 
-    moodle_user_map = get_moodle_user_map([participant.user_id for participant in participants])
+    moodle_user_map = get_moodle_user_map(participants)
     moodle_grade_map = get_moodle_grade_map(
         [user.id for user in moodle_user_map.values()],
         quiz_id,
