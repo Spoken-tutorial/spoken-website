@@ -123,7 +123,6 @@ def get_moodle_grade_map(user_ids, quiz_id):
 
 
 def get_payment_status_label(participant, course_type=None):
-    # Step 1: Check active subscription
     is_subscribed = False
     if participant.user_id:
         try:
@@ -139,11 +138,15 @@ def get_payment_status_label(participant, course_type=None):
     if is_subscribed:
         return 'Free for subscribed colleges'
 
-    # Step 2: Check sibling payment records
     siblings = Participant.objects.filter(
         event=participant.event,
         user=participant.user
     ).select_related('payment_status', 'payment_status__transaction')
+
+    for sibling in siblings:
+        ps = sibling.payment_status
+        if ps and (ps.status == 1 or (ps.transaction and ps.transaction.order_status == 'CHARGED')):
+            return 'Paid'
 
     for sibling in siblings:
         ps = sibling.payment_status
@@ -156,6 +159,7 @@ def get_payment_status_label(participant, course_type=None):
 
 def build_swayam_export_rows(event, metadata):
     participants = list(get_swayam_participants(event))
+    participants.sort(key=lambda p: (p.email or (p.user.email if p.user_id else '')).strip().lower())
     quiz_id = resolve_moodle_quiz_id(event)
 
     moodle_user_map = get_moodle_user_map(participants)
