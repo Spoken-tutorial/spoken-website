@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.serializers import serialize
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db import IntegrityError
@@ -29,7 +29,7 @@ from .templatetags.trainingdata import registartion_successful, get_event_detail
 from creation.models import TutorialResource, Language, FossCategory
 from events.decorators import group_required
 from events.models import *
-from events.views import is_resource_person, is_administrator, get_page, id_generator, is_event_manager
+from events.views import is_resource_person, is_administrator, get_page, id_generator, is_event_manager, is_organiser, is_invigilator
 from events.filters import ViewEventFilter, PaymentTransFilter, TrEventFilter
 from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation, get_confirmation_code
@@ -145,6 +145,9 @@ class TrainingEventsListView(ListView):
     def get_context_data(self, **kwargs):
         context = super(TrainingEventsListView, self).get_context_data(**kwargs)
         context['form'] = self.collection.form
+        context['swayam_attendance_map'] = {}
+        context['completed_event_ids'] = set()
+        context['current_date'] = date.today()
         
         if self.status == 'myevents':
             # Get filtered events from the filter
@@ -166,6 +169,20 @@ class TrainingEventsListView(ListView):
                 page = self.request.GET.get('page')
                 collection = get_page(participants_list, page)
                 context['collection'] = collection
+
+                # swayam context mapping
+                swayam_attendances = ILWAttendance.objects.filter(participant__in=participants_list)
+                swayam_attendance_map = {att.event_id: att for att in swayam_attendances}
+                context['swayam_attendance_map'] = swayam_attendance_map
+
+                completed_event_ids = set(
+                    EventTestStatus.objects.filter(
+                        participant__in=participants_list,
+                        part_status__gte=2,
+                        mdlgrade__gte=40.00
+                    ).values_list('event_id', flat=True)
+                )
+                context['completed_event_ids'] = completed_event_ids
         else:
             page = self.request.GET.get('page')
             collection = get_page(self.collection.qs, page)
@@ -182,6 +199,48 @@ class TrainingEventsListView(ListView):
             context['user'] = self.request.user
             
         return context
+
+
+class ILWEventListView(ListView):
+	model = TrainingEvents
+	template_name = "ilw_event_list.html"
+	context_object_name = "events"
+	paginate_by = 50
+
+	def dispatch(self, *args, **kwargs):
+		user = self.request.user
+		if not user.is_authenticated():
+			raise PermissionDenied()
+
+		if is_organiser(user):
+			academic = user.organiser.academic
+		elif is_invigilator(user):
+			academic = user.invigilator.academic
+		else:
+			raise PermissionDenied()
+
+		self.today = date.today()
+		self.academic = academic
+		
+		# get the related swayam ilw events
+		self.queryset = TrainingEvents.objects.filter(
+			is_swayam=True,
+			state_id=academic.state_id,
+		).select_related(
+			'state',
+			'host_college',
+		).annotate(
+			student_count=Count('participant', distinct=True)
+		).order_by('-event_start_date')
+		
+		return super(ILWEventListView, self).dispatch(*args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(ILWEventListView, self).get_context_data(**kwargs)
+		context['today'] = self.today
+		context['academic'] = self.academic
+		return context
+
 
 def _validate_parameters(parameter, value):
 	if value is None:
@@ -1295,11 +1354,28 @@ class EventParticipantsListView(ListView):
 	unsuccessful_payee = ""
 	paginate_by = 500
 
+	def dispatch(self, *args, **kwargs):
+		event_id = self.kwargs.get('eventid')
+		self.event = get_object_or_404(TrainingEvents, pk=event_id)
+		
+		if self.event.is_swayam:
+			user = self.request.user
+			if not user.is_authenticated():
+				raise PermissionDenied()
+			
+			if not (is_organiser(user) or is_invigilator(user)):
+				raise PermissionDenied()
+		
+		return super(EventParticipantsListView, self).dispatch(*args, **kwargs)
+
 	def get_queryset(self):
 		event_id = self.kwargs['eventid']
 		self.event = get_object_or_404(TrainingEvents, pk=event_id)
 		main_query = Participant.objects.filter(event_id=event_id)
 
+		if self.event.is_swayam:
+			return main_query.select_related('college', 'state')
+		
 		if self.event.training_status == 2:
 			return EventAttendance.objects.filter(event_id=event_id).select_related(
 				'participant', 'participant__college', 'participant__state'
@@ -1314,7 +1390,68 @@ class EventParticipantsListView(ListView):
 		context['event'] = self.event
 		context['eventid'] = self.event.id
 		context['is_event_closed'] = self.event.training_status == 2
+		
+
+		if self.event.is_swayam:
+			today = date.today()
+			test_date = self.event.tdate or self.event.event_end_date
+			can_mark_attendance = today >= test_date
+			
+			context['is_swayam_ilw'] = True
+			context['can_mark_attendance'] = can_mark_attendance
+			context['test_date'] = test_date
+			
+
+			participant_ids = [p.id for p in context.get('object_list', [])]
+			if participant_ids:
+				attendance_map = {}
+				attendance_records = ILWAttendance.objects.filter(
+					event_id=self.event.id,
+					participant_id__in=participant_ids
+				)
+				for record in attendance_records:
+					attendance_map[record.participant_id] = record
+				context['attendance_map'] = attendance_map
+		
 		return context
+	
+	def post(self, request, *args, **kwargs):
+		event_id = self.kwargs.get('eventid')
+		event = get_object_or_404(TrainingEvents, pk=event_id)
+		
+		if not (is_organiser(request.user) or is_invigilator(request.user)):
+			raise PermissionDenied()
+		
+		# Check if attendance marking is allowed 
+		today = date.today()
+		test_date = event.tdate or event.event_end_date
+		if today < test_date:
+			raise PermissionDenied()
+		
+		try:
+			# get all participant ids for this event
+			participants = Participant.objects.filter(event_id=event_id).values_list('id', flat=True)
+			
+			for participant_id in participants:
+				# Check if attendance was submitted
+				checkbox_key = f'attendance_{participant_id}'
+				is_marked = checkbox_key in request.POST
+				
+				#attendance record update
+				attendance_record, created = ILWAttendance.objects.update_or_create(
+					event_id=event_id,
+					participant_id=participant_id,
+					defaults={
+						'status': is_marked,
+						'marked_by': request.user,
+					}
+				)
+			
+			messages.success(request, 'Attendance updated successfully.')
+		except Exception as e:
+			messages.error(request, f'Error updating attendance: {str(e)}')
+		
+		return redirect('training:event_participants', eventid=event_id)
 
 
 @csrf_exempt

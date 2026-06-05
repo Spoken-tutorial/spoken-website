@@ -322,31 +322,73 @@
                      {% endif %}
                     {% endif %}
               {% else %}
-                  {% if event.event.id|is_event_closed and event.event.id|is_attendance_marked:event.id and user|registartion_successful:event.event %}    
-                        <input type="hidden" name="eventid" value="{{event.event.id}}">
-                        <button class="btn btn-warning" type="submit" 
-                        formaction="{% url 'training:generate_training_certificate'%}">Download Training certificate</button>
-                        {% for item in event.event.course.foss.all %}
-                          {% with fossmdlcourse=item|get_ilw_mdlcourseid %}
-                            {% for course in fossmdlcourse %}
-                              {% if not event|check_passgrade_exists:course.testfoss_id%}
-                                <input type="hidden" id="testurl{{course.mdlcourse_id}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}">
-                                <button class="btn btn-info" type="button" style="margin-top: 12px;"
-                                onclick="take_to_test({{event.id}}, {{course.mdlcourse_id}}, {{course.mdlquiz_id}}, {{course.testfoss_id}}, {{event.event_id}});">
-                                Attempt {{course.testfoss.foss}} test
-                                </button>
-                              {% else %}                    
-                                  {% with grade=event|get_grade:course.testfoss_id %}
-                                  
-                                  <button style="margin-top: 12px;" type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate' course.testfoss_id%}"><span><i class="fa fa-download" aria-hidden="true"></i></span> Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
-                                  {% endwith %}
-                              {% endif %}
+                  {% if event.event.is_swayam %}
+                      {% if user|registartion_successful:event.event %}
+                          {% if event.event.id in completed_event_ids %}
+                              <input type="hidden" name="eventid" value="{{event.event.id}}">
+                              <button class="btn btn-warning" type="submit" 
+                              formaction="{% url 'training:generate_training_certificate'%}">Download Training certificate</button>
+                          {% endif %}
+                          {% for item in event.event.course.foss.all %}
+                            {% with fossmdlcourse=item|get_ilw_mdlcourseid %}
+                              {% for course in fossmdlcourse %}
+                                {% if not event|check_passgrade_exists:course.testfoss_id %}
+                                  <input type="hidden" id="testurl{{course.mdlcourse_id}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}">
+                                  {% if not event.event.tdate %}
+                                      <div class="alert alert-info" style="margin-top: 12px; margin-bottom: 0;">
+                                          Test is not scheduled yet. You will be able to attempt the test once attendance is marked by your college.
+                                      </div>
+                                  {% elif current_date < event.event.tdate %}
+                                      <div class="alert alert-info" style="margin-top: 12px; margin-bottom: 0;">
+                                          Test is scheduled on {{ event.event.tdate }}. You will be able to attempt the test once attendance is marked by your college.
+                                      </div>
+                                  {% else %}
+                                      {% if event.event.id in swayam_attendance_map and swayam_attendance_map|get_item:event.event.id %}
+                                          <button class="btn btn-info" type="button" style="margin-top: 12px;"
+                                          onclick="take_to_test({{event.id}}, {{course.mdlcourse_id}}, {{course.mdlquiz_id}}, {{course.testfoss_id}}, {{event.event_id}});">
+                                          Attempt {{course.testfoss.foss}} test
+                                          </button>
+                                      {% else %}
+                                          <div class="alert alert-warning" style="margin-top: 12px; margin-bottom: 0;">
+                                              Attendance not marked. You will be able to attempt the test once attendance is marked by your college.
+                                          </div>
+                                      {% endif %}
+                                  {% endif %}
+                                {% else %}
+                                    {% with grade=event|get_grade:course.testfoss_id %}
+                                    <button style="margin-top: 12px;" type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate' course.testfoss_id%}"><span><i class="fa fa-download" aria-hidden="true"></i></span> Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
+                                    {% endwith %}
+                                {% endif %}
+                              {% endfor %}
+                            {% endwith %}
+                          {% endfor %}
+                      {% endif %}
+                  {% else %}
+                      {% if event.event.id|is_event_closed and event.event.id|is_attendance_marked:event.id and user|registartion_successful:event.event %}    
+                            <input type="hidden" name="eventid" value="{{event.event.id}}">
+                            <button class="btn btn-warning" type="submit" 
+                            formaction="{% url 'training:generate_training_certificate'%}">Download Training certificate</button>
+                            {% for item in event.event.course.foss.all %}
+                              {% with fossmdlcourse=item|get_ilw_mdlcourseid %}
+                                {% for course in fossmdlcourse %}
+                                  {% if not event|check_passgrade_exists:course.testfoss_id%}
+                                    <input type="hidden" id="testurl{{course.mdlcourse_id}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}">
+                                    <button class="btn btn-info" type="button" style="margin-top: 12px;"
+                                    onclick="take_to_test({{event.id}}, {{course.mdlcourse_id}}, {{course.mdlquiz_id}}, {{course.testfoss_id}}, {{event.event_id}});">
+                                    Attempt {{course.testfoss.foss}} test
+                                    </button>
+                                  {% else %}                    
+                                      {% with grade=event|get_grade:course.testfoss_id %}
+                                      
+                                      <button style="margin-top: 12px;" type="submit" class="btn btn-success" formaction="{% url 'training:generate_test_certificate' course.testfoss_id%}"><span><i class="fa fa-download" aria-hidden="true"></i></span> Download {{course.testfoss.foss}} Test Certificate &nbsp;<span class="badge">Grade: {{grade}} </span></button>
+                                      {% endwith %}
+                                  {% endif %}
+                                {% endfor %}
+                              {% endwith %}
                             {% endfor %}
-                          {% endwith %}
-                        {% endfor %}
-                    {% endif %} 
+                      {% endif %}
+                  {% endif %}
               {% endif %}
-              
           </div>
    </div>
   </div>

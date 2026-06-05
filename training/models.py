@@ -65,6 +65,7 @@ class TrainingEvents(models.Model):
 	Language_of_workshop = models.ForeignKey(Language, on_delete=models.PROTECT )
 	event_start_date = models.DateField(default=datetime.now)
 	event_end_date = models.DateField(default=datetime.now)
+	tdate = models.DateField(null=True, blank=True)  # Test date for ILW events
 	event_coordinator_name =  models.CharField(max_length=200)
 	event_coordinator_email = models.EmailField(null=True)
 	event_coordinator_contact_no = models.CharField(max_length = 100, null=True)
@@ -142,6 +143,21 @@ class EventAttendance(models.Model):
 	event = models.ForeignKey(TrainingEvents, on_delete=models.PROTECT)
 	created = models.DateTimeField(auto_now_add = True)
 	updated = models.DateTimeField(auto_now = True)
+
+
+class ILWAttendance(models.Model):
+	event = models.ForeignKey(TrainingEvents, on_delete=models.CASCADE, related_name='ilw_attendance_records')
+	participant = models.ForeignKey(Participant, on_delete=models.CASCADE, related_name='ilw_attendance_records')
+	marked_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='marked_ilw_attendance_records')
+	status = models.BooleanField(default=False)
+	created = models.DateTimeField(auto_now_add = True)
+	updated = models.DateTimeField(auto_now = True)
+
+	class Meta(object):
+		unique_together = ('event', 'participant')
+
+	def __str__(self):
+		return "%s - %s" % (self.participant, self.event)
 
 
 class TrainingCertificate(models.Model):

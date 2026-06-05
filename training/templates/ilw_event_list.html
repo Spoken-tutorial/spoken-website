@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+{% load trainingdata %}
+
+{% block title %}ILW Events{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>ILW Events - SWAYAM</h2>
+            {% if events %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Registration Start Date</th>
+                            <th>Registration End Date</th>
+                            <th>Event Start Date</th>
+                            <th>Event End Date</th>
+                            <th>Test Date</th>
+                            <th>Students Registered</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr>
+                            <td>{{ event.event_name }}</td>
+                            <td>{{ event.registartion_start_date|date:"d M Y" }}</td>
+                            <td>{{ event.registartion_end_date|date:"d M Y" }}</td>
+                            <td>{{ event.event_start_date|date:"d M Y" }}</td>
+                            <td>{{ event.event_end_date|date:"d M Y" }}</td>
+                            <td>
+                                {% if event.tdate %}
+                                    {{ event.tdate|date:"d M Y" }}
+                                {% else %}
+                                    {{ event.event_end_date|date:"d M Y" }}
+                                {% endif %}
+                            </td>
+                            <td>{{ event.student_count }}</td>
+                            <td>
+                                <a href="{% url 'training:event_participants' event.id %}" title="View Participants">View Participants</a>
+                                <br>
+                                {% if today >= event.tdate|default:event.event_end_date %}
+                                    <a href="#" title="Mark Attendance">Mark Attendance</a>
+                                {% else %}
+                                    <span title="Available after test date">Mark Attendance</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                        <li><a href="?page=1">&laquo; First</a></li>
+                        <li><a href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="active"><a href="#">{{ num }}</a></li>
+                        {% else %}
+                            <li><a href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li><a href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                        <li><a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            
+            {% else %}
+            <div class="alert alert-info">
+                <p>No SWAYAM ILW events found.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
