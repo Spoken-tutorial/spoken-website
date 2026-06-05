@@ -109,7 +109,7 @@ class RegisterUser(forms.ModelForm):
         error_messages = {'required': 'Enter valid phone number.'},)
     city = forms.ModelChoiceField(queryset=City.objects.none(), required=False)
     language_hn = forms.ModelChoiceField(queryset=HNLanguage.objects.all(), required=False)
-    apaar_id = forms.CharField(required=False, max_length=20)
+    apaar_id = forms.CharField(required=False, max_length=12)
     class Meta(object):
         model = Participant
         fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language', 'company', 'city', 'language_hn', 'apaar_id']
