@@ -109,9 +109,10 @@ class RegisterUser(forms.ModelForm):
         error_messages = {'required': 'Enter valid phone number.'},)
     city = forms.ModelChoiceField(queryset=City.objects.none(), required=False)
     language_hn = forms.ModelChoiceField(queryset=HNLanguage.objects.all(), required=False)
+    apaar_id = forms.CharField(required=False, max_length=12)
     class Meta(object):
         model = Participant
-        fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language', 'company', 'city', 'language_hn']
+        fields = ['name', 'email', 'state', 'gender', 'amount', 'foss_language', 'company', 'city', 'language_hn', 'apaar_id']
 
     def __init__(self, *args, **kwargs):
         super(RegisterUser, self).__init__(*args, **kwargs)
@@ -155,6 +156,18 @@ class RegisterUser(forms.ModelForm):
                 raise ValidationError("Invalid phone number. Please check the number and try again.")
         formatted_number =  phonenumbers.format_number(parsed_number, phonenumbers.PhoneNumberFormat.E164)
         return formatted_number
+
+    def clean_apaar_id(self):
+        apaar_id = self.cleaned_data.get('apaar_id')
+        if not apaar_id:
+            return None
+        apaar_id = apaar_id.strip()
+        cleaned_id = apaar_id.replace(" ", "").replace("-", "")
+        if not cleaned_id.isdigit():
+            raise forms.ValidationError("APAAR ID must contain only digits.")
+        if len(cleaned_id) != 12:
+            raise forms.ValidationError("APAAR ID must be exactly 12 digits.")
+        return cleaned_id
 
 class UploadParticipantsForm(forms.ModelForm):
     csv_file = forms.FileField(required=True)

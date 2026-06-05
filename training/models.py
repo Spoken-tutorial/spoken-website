@@ -110,6 +110,7 @@ class Participant(models.Model):
 	utm_medium = models.CharField(max_length=255, null=True, blank=True)
 	utm_campaign = models.CharField(max_length=255, null=True, blank=True)
 	httpreferrer = models.TextField(null=True, blank=True)
+	apaar_id = models.CharField(max_length=12, null=True, blank=True)
 
 	@property
 	def payment_status_message(self):
