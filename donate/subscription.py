@@ -316,7 +316,7 @@ def has_active_subscription(academic_id):
       try:
         sub = AcademicSubscriptionDetail.objects.filter(academic_id=academic_id).order_by('-subscription_end_date').first()
         transaction = sub.subscription.transaction.order_status
-        is_active = (transaction == "CHARGED" and sub.subscription.expiry_date >= date.today())
+        is_active = (transaction == "CHARGED" and sub.subscription_end_date >= date.today())
         return is_active
       except:
           return False
