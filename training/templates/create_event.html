@@ -8,7 +8,7 @@
 {% block cssblock %}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
     <style>
-		#id_is_course, #id_payment_required{
+		#id_is_course, #id_payment_required, #id_is_swayam{
 			height: 50%;
 		}
     </style>
@@ -121,6 +121,13 @@
 				</div>
 				<p>If checked, the course name will appear in the participation certificate</p>
 			</div>
+			<div class="form-group" id="checkbox_swayam">
+				<label class="col-sm-3 control-label" for="id_is_swayam">Is Swayam?</label>
+				<div class="col-sm-1">
+				{% render_field form.is_swayam class+="form-control is_swayam" %}
+				{{ form.is_swayam.errors }}
+				</div>
+			</div>
 			
 			<div class="form-group">
 				<label class="col-sm-3 control-label" for= "id_foss">FOSS <sup style="color:red";>*</sup></label>
@@ -210,7 +217,6 @@
 
 {% block jsblock %}
 <script src="{% static 'spoken/js/events.js' %}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script type="text/javascript">
  $( document ).ready(function() {
