@@ -23,6 +23,22 @@
   </div>
 </div>
 <!-- Event name ends -->
+{% if registration_ended %}
+<div class="alert alert-danger" id="registration-ended-msg" style="display: none; margin-bottom: 20px;">
+  <strong>Event registration has ended.</strong>
+  {% if event_obj.is_swayam %}
+    <br><br>
+    Please try registering in one of the following events:
+    <ol style="margin-top: 10px; padding-left: 20px;">
+      {% for event in active_swayam_events %}
+        <li><a href="{% url 'training:register_user' %}?event_id={{ event.id }}" style="font-weight: bold;">{{ event.event_name }}</a></li>
+      {% empty %}
+        <li>No active Swayam events found.</li>
+      {% endfor %}
+    </ol>
+  {% endif %}
+</div>
+{% endif %}
 <!-- Event info starts -->
 <div class="panel panel-primary">
     <div class="panel-body" style="background-color: #F5F5F5;">
@@ -254,17 +270,17 @@
                   </fieldset>
                       <div class="row">
                         <div class=" col-md-offset-4 col-md-4">
-                          {% if  user|is_user_paid  and not event_obj.payment_required %}
-                          <!-- if user belongs to a paid college -->
-                          <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" disabled>Register
-                          </button>
-      <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled  style="display:none;">Make Payment</button>
-                          {% else %}
-                          <!-- all other -->
-                          <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" style="display:none;">Register
-                          </button>
-                          <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled >Make Payment</button>
-                          {% endif %}
+                            {% if  user|is_user_paid  and not event_obj.payment_required %}
+                            <!-- if user belongs to a paid college -->
+                            <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" disabled>Register
+                            </button>
+                            <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled  style="display:none;">Make Payment</button>
+                            {% else %}
+                            <!-- all other -->
+                            <button type="submit"  value="Submit" class="btn btn-success"  id="register_paid" style="display:none;">Register
+                            </button>
+                            <button  type= "submit" formaction="{% url 'donate:initiate_payment' event_obj.id %}" class="btn btn-primary mb-2 make-payment-btn" id="make_payment" disabled >Make Payment</button>
+                            {% endif %}
                         </div>
                       </div>
                   
@@ -336,7 +352,6 @@
     </form>
                 </div>
               </div>
-
   
 {%endblock%}
 {% block jsblock %}
@@ -492,6 +507,7 @@ $('#id_email').on('focusout',function(){
 });
 
  $( document ).ready(function() {
+  var registrationEnded = {% if registration_ended %}true{% else %}false{% endif %};
 
   var state = $("#id_state").val();
   $('#id_state').val(state).trigger('change');
@@ -621,6 +637,28 @@ $('#id_college').change(function(){
 
   $('#id_name, #id_email, #id_phone, #id_gender, #id_state, #id_college').on('change input', checkRegisterButton);
   checkRegisterButton();
+
+  $('#register_form').submit(function(event) {
+    if (registrationEnded) {
+      event.preventDefault();
+      $('#registration-ended-msg').show();
+      $('html, body').animate({
+          scrollTop: $("#registration-ended-msg").offset().top - 20
+      }, 300);
+      return false;
+    }
+  });
+
+  $('#register_paid, #make_payment').click(function(event) {
+    if (registrationEnded) {
+      event.preventDefault();
+      $('#registration-ended-msg').show();
+      $('html, body').animate({
+          scrollTop: $("#registration-ended-msg").offset().top - 20
+      }, 300);
+      return false;
+    }
+  });
 });
 </script>
 

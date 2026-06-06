@@ -416,6 +416,21 @@ def register_user(request):
 			form.fields["amount"].widget.attrs['readonly'] = True
 			context["fossess"] = [foss.id for foss in event_register.course.foss.all()]
 			context['event_obj']= event_register
+	
+	event_register = context.get('event_obj')
+	if event_register:
+		if event_register.registartion_end_date < date.today():
+			context['registration_ended'] = True
+			if event_register.is_swayam:
+				context['active_swayam_events'] = TrainingEvents.objects.filter(
+					is_swayam=True,
+					registartion_end_date__gte=date.today()
+				).exclude(id=event_register.id)
+		else:
+			context['registration_ended'] = False
+	else:
+		context['registration_ended'] = False
+
 	return render(request, template_name,context)
 
 @csrf_exempt
