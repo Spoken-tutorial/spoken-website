@@ -14,7 +14,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.template.context_processors import csrf
-
+from django.contrib.auth.decorators import login_required
 # Spoken Tutorial Stuff
 from cdcontent.forms import *
 from creation.models import *
@@ -230,7 +230,7 @@ def add_srt_file(archive, tr_rec, filepath, eng_flag, srt_files):
             srt_files.add(filepath)
             archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
 
-
+@login_required
 def internal_computation(request, user_type):
     zipfile_name = '{}.zip'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
     file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
