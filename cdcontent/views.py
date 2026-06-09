@@ -11,7 +11,7 @@ from django.conf import settings
  
 from django.db.models import Q
 from django.http import HttpResponse, FileResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.template.context_processors import csrf
 from django.contrib.auth.decorators import login_required
@@ -239,10 +239,10 @@ def download_ilw_course(request, event_id):
     file_path = os.path.join(settings.MEDIA_ROOT, "cdimage", zipfile_name)
 
     if os.path.isfile(file_path):
-        print(f"ZIP file exists : {file_path}")
-        response = FileResponse(open(file_path, 'rb'), content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename="{}"'.format(zipfile_name)
-        return response
+        return redirect('/media/cdimage/{}'.format(zipfile_name))
+        # response = FileResponse(open(file_path, 'rb'), content_type='application/zip')
+        # response['Content-Disposition'] = 'attachment; filename="{}"'.format(zipfile_name)
+        # return response
     else:
         print(f"ZIP file do not exist : {file_path}")
         response = internal_computation(request, 'general', event_id)
@@ -346,15 +346,16 @@ def internal_computation(request, user_type, event_id=''):
     archive.close()
 
     file_obj.close()
-    file_path= os.path.dirname(os.path.realpath(__file__))+'/../media/cdimage/{}'.format(zipfile_name)
+    
     # response = HttpResponse(open(file_path, 'rb'), content_type='application/zip')
     if user_type == 'paid':
         return zipfile_name
     elif user_type == 'general':
-        response = FileResponse(open(file_path, 'rb'), content_type='application/zip')
-        response['Content-Disposition'] = 'attachment; filename="{}"'.format(zipfile_name)
-        # os.remove(file_path)
-        return response
+        return redirect('/media/cdimage/{}'.format(zipfile_name))
+        # file_path= os.path.dirname(os.path.realpath(__file__))+'/../media/cdimage/{}'.format(zipfile_name)
+        # response = FileResponse(open(file_path, 'rb'), content_type='application/zip')
+        # response['Content-Disposition'] = 'attachment; filename="{}"'.format(zipfile_name)
+        # return response
 
 @csrf_exempt
 def home(request):
