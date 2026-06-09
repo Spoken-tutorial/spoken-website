@@ -283,8 +283,8 @@
                 {% endwith %}
               {% else %}
                 {% if event.reg_approval_status == 1 and user|registartion_successful:event.event %}
-                        <button class="btn btn-primary" type="submit" 
-                  formaction="{% url 'cdcontent:create_cd_download' 'general' %}">Download CD Content</button>
+                   <button class="btn btn-primary" type="submit" 
+                  formaction="{% url 'cdcontent:download_ilw_course' event.event.id %}">Download CD Content</button>
                   
                 {% endif %}
               {% endif %}
