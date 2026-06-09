@@ -422,3 +422,32 @@ HDFC_POLL_MAX_RETRIES=HDFC_POLL_MAX_RETRIES
 HDFC_POLL_INTERVAL=HDFC_POLL_INTERVAL
 RESPONSE_KEY=RESPONSE_KEY
 DEVELOPER_EMAIL=DEVELOPER_EMAIL
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        "simple": {
+            "format": "[{asctime}] {levelname} {name}: {message}",
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "cd_download_file": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": "/var/log/spoken-cdcontent-ilw.log",
+            "formatter": "simple",
+        }
+    },
+
+    "loggers": {
+        "cdcontent": { #catch logs where name starts with cdcontent
+            "handlers": ["cd_download_file"],
+            "level": "WARNING",
+            "propagate": False,
+        }
+    },
+}

@@ -24,6 +24,9 @@ from events.models import AcademicCenter, State, AcademicKey, Student, StudentMa
 from donate.forms import PayeeForm
 from donate.models import Payee
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Create your views here.
 def zipdir(src_path, dst_path, archive):
     for root, dirs, dir_files in os.walk(src_path):
@@ -237,7 +240,13 @@ def download_ilw_course(request, event_id):
     #check if the event zip already exists : event_<event_id>.zip
     zipfile_name = f"event_{event_id}.zip"
     file_path = os.path.join(settings.MEDIA_ROOT, "cdimage", zipfile_name)
-
+    logger.warning(
+        "CD download accessed | user=%s | user_id=%s | ip=%s | path=%s",
+        getattr(request.user, "username", None),
+        getattr(request.user, "id", None),
+        request.META.get("REMOTE_ADDR"),
+        request.path,
+    )
     if os.path.isfile(file_path):
         print(f"ZIP file exists : {file_path}")
         return redirect('/media/cdimage/{}'.format(zipfile_name))
