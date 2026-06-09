@@ -453,6 +453,12 @@ LOGGING = {
             "class": "logging.FileHandler",
             "filename": "/var/log/spoken-cdcontent-ilw.log",
             "formatter": "simple",
+        },
+        "training_file": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": "/var/log/spoken-temp.log",
+            "formatter": "simple",
         }
     },
 
@@ -462,6 +468,11 @@ LOGGING = {
             "level": "WARNING",
             "propagate": False,
         },
+        "training": {
+            "handlers": ["training_file"],
+            "level": "WARNING",
+            "propagate": False,
+        }
          'django.request': {
             'handlers': ['django_error_file'],
             'level': 'ERROR',
