@@ -472,7 +472,7 @@ LOGGING = {
             "handlers": ["training_file"],
             "level": "WARNING",
             "propagate": False,
-        }
+        },
          'django.request': {
             'handlers': ['django_error_file'],
             'level': 'ERROR',
