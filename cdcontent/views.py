@@ -324,10 +324,14 @@ def internal_computation(request, user_type):
 
     file_obj.close()
     file_path= os.path.dirname(os.path.realpath(__file__))+'/../media/cdimage/{}'.format(zipfile_name)
-    response = HttpResponse(open(file_path, 'rb'), content_type='application/zip')
+    # response = HttpResponse(open(file_path, 'rb'), content_type='application/zip')
     if user_type == 'paid':
         return zipfile_name
     elif user_type == 'general':
+        with open(file_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(zipfile_name)
+        os.remove(file_path)
         return response
 
 @csrf_exempt
