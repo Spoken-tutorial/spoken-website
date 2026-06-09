@@ -2,6 +2,9 @@ from __future__ import unicode_literals
 
 import csv
 import datetime as dt
+import logging
+
+logger = logging.getLogger(__name__)
 
 from django.db.models import Q
 from django.http import HttpResponse
@@ -61,6 +64,13 @@ def resolve_moodle_quiz_id(event):
                 .first()
             )
             if quiz_id:
+                logger.warning(
+                    "SWAYAM quiz resolved | event_id=%s | event_foss_id=%s | course_id=%s | quiz_id=%s",
+                    event.id,
+                    event.foss_id,
+                    course.id if course else None,
+                    quiz_id,
+                )
                 return quiz_id
 
     if event.foss_id:
@@ -70,8 +80,21 @@ def resolve_moodle_quiz_id(event):
             .first()
         )
         if quiz_id:
+            logger.warning(
+                "SWAYAM quiz resolved | event_id=%s | event_foss_id=%s | course_id=%s | quiz_id=%s",
+                event.id,
+                event.foss_id,
+                course.id if course else None,
+                quiz_id,
+            )
             return quiz_id
 
+    logger.warning(
+        "SWAYAM quiz resolve failed | event_id=%s | event_foss_id=%s | course_id=%s",
+        event.id,
+        event.foss_id,
+        course.id if course else None,
+    )
     return None
 
 
@@ -85,6 +108,10 @@ def get_moodle_user_map(participants):
 
     normalized_emails = sorted({email.lower() for email in emails if email})
     if not normalized_emails:
+        logger.warning(
+            "SWAYAM moodle user mapping skipped | participant_count=%s | normalized_email_count=0",
+            len(participants),
+        )
         return {}
 
     moodle_users = (
@@ -101,11 +128,23 @@ def get_moodle_user_map(participants):
         if p.user_id and p_email in email_to_moodle:
             user_map[p.user_id] = email_to_moodle[p_email]
 
+    logger.warning(
+        "SWAYAM moodle user mapping | participant_count=%s | normalized_email_count=%s | moodle_users_found=%s | mappings_created=%s",
+        len(participants),
+        len(normalized_emails),
+        len(moodle_users),
+        len(user_map),
+    )
     return user_map
 
 
 def get_moodle_grade_map(user_ids, quiz_id):
     if not user_ids or not quiz_id:
+        logger.warning(
+            "SWAYAM moodle grade mapping skipped | quiz_id=%s | user_ids_count=%s",
+            quiz_id,
+            len(user_ids) if user_ids else 0,
+        )
         return {}
 
     grade_map = {}
@@ -119,6 +158,13 @@ def get_moodle_grade_map(user_ids, quiz_id):
     for grade in grades:
         if grade.userid not in grade_map:
             grade_map[grade.userid] = grade
+
+    logger.warning(
+        "SWAYAM moodle grade mapping | quiz_id=%s | user_ids_count=%s | grades_found=%s",
+        quiz_id,
+        len(user_ids),
+        len(grade_map),
+    )
     return grade_map
 
 
@@ -173,6 +219,19 @@ def build_swayam_export_rows(event, metadata):
         email = (participant.email or '').strip()
         moodle_user = moodle_user_map.get(participant.user_id)
         moodle_grade = moodle_grade_map.get(moodle_user.id) if moodle_user else None
+        final_val = format_ddmmyyyy(dt.datetime.utcfromtimestamp(moodle_grade.timemodified)) if moodle_grade and moodle_grade.timemodified else ''
+
+        logger.warning(
+            "SWAYAM participant export row | participant_id=%s | participant_email=%s | user_id=%s | moodle_user_found=%s | moodle_user_id=%s | moodle_grade_found=%s | timemodified=%s | final_val=%s",
+            participant.id,
+            email,
+            participant.user_id,
+            moodle_user is not None,
+            moodle_user.id if moodle_user else None,
+            moodle_grade is not None,
+            moodle_grade.timemodified if moodle_grade else None,
+            final_val,
+        )
 
         rows.append([
             index,
@@ -189,7 +248,7 @@ def build_swayam_export_rows(event, metadata):
             format_ddmmyyyy(metadata['course_completion_date']),
             metadata['participation_certificate_status'],
             metadata['assessment_certificate_status'],
-            format_ddmmyyyy(dt.datetime.utcfromtimestamp(moodle_grade.timemodified)) if moodle_grade and moodle_grade.timemodified else '',
+            final_val,
         ])
 
     return rows, quiz_id

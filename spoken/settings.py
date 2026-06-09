@@ -440,12 +440,23 @@ LOGGING = {
             "class": "logging.FileHandler",
             "filename": "/var/log/spoken-cdcontent-ilw.log",
             "formatter": "simple",
+        },
+        "training_file": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": "/var/log/spoken-temp.log",
+            "formatter": "simple",
         }
     },
 
     "loggers": {
         "cdcontent": { #catch logs where name starts with cdcontent
             "handlers": ["cd_download_file"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "training": {
+            "handlers": ["training_file"],
             "level": "WARNING",
             "propagate": False,
         }
