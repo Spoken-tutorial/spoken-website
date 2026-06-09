@@ -10,11 +10,12 @@ from datetime import datetime,date
 from django.conf import settings
  
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from django.template.context_processors import csrf
 from django.contrib.auth.decorators import login_required
+
 # Spoken Tutorial Stuff
 from cdcontent.forms import *
 from creation.models import *
@@ -231,8 +232,30 @@ def add_srt_file(archive, tr_rec, filepath, eng_flag, srt_files):
             archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
 
 @login_required
-def internal_computation(request, user_type):
-    zipfile_name = '{}.zip'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
+def download_ilw_course(request, event_id):
+    print("inside download_ilw_course")
+    #check if the event zip already exists : event_<event_id>.zip
+    zipfile_name = f"event_{event_id}.zip"
+    file_path = os.path.join(settings.MEDIA_ROOT, "cdimage", zipfile_name)
+
+    if os.path.isfile(file_path):
+        print(f"ZIP file exists : {file_path}")
+        response = FileResponse(open(file_path, 'rb'), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename="{}"'.format(zipfile_name)
+        return response
+    else:
+        print(f"ZIP file do not exist : {file_path}")
+        response = internal_computation(request, 'general', event_id)
+        return response
+        
+
+
+@login_required
+def internal_computation(request, user_type, event_id=''):
+    if user_type == 'general':
+        zipfile_name = f"event_{event_id}.zip"
+    else:
+        zipfile_name = '{}.zip'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
     file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
     archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
     try:
@@ -328,10 +351,9 @@ def internal_computation(request, user_type):
     if user_type == 'paid':
         return zipfile_name
     elif user_type == 'general':
-        with open(file_path, 'rb') as f:
-            response = HttpResponse(f.read(), content_type='application/zip')
+        response = FileResponse(open(file_path, 'rb'), content_type='application/zip')
         response['Content-Disposition'] = 'attachment; filename="{}"'.format(zipfile_name)
-        os.remove(file_path)
+        # os.remove(file_path)
         return response
 
 @csrf_exempt
