@@ -459,7 +459,13 @@ LOGGING = {
             "class": "logging.FileHandler",
             "filename": ALLOWED_LOGS['training'],
             "formatter": "simple",
-        }
+        },
+        "mail_file": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": ALLOWED_LOGS['spoken-mails.log'],
+            "formatter": "simple",
+        },
     },
 
     "loggers": {
@@ -477,6 +483,11 @@ LOGGING = {
             'handlers': ['django_error_file'],
             'level': 'ERROR',
             'propagate': False,
+        },
+        "mail_logs": {
+            "handlers": ["mail_file"],
+            "level": "WARNING",
+            "propagate": False,
         },
     },
 }
