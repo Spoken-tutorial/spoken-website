@@ -333,6 +333,19 @@
                         <div class="panel-body">
                             <ul>
                                 <li><a href="{% url 'cms:manage_cache' %}">Manage Cache</a></li>
+                            </ul> 
+                            <h5>Logs</h5>
+                            <ul>
+                                <li><a href="{% url 'download_log' 'django-error' %}">Django Error Logs</a></li>
+                            </ul> 
+                            <ul>
+                                <li><a href="{% url 'download_log' 'training' %}">Training Logs</a></li>
+                            </ul> 
+                            <ul>
+                                <li><a href="{% url 'download_log' 'cdcontent-ilw' %}">CD Content Logs</a></li>
+                            </ul> 
+                            <ul>
+                                <li><a href="{% url 'download_log' 'ilw-mails' %}">ILW Mails Logs</a></li>
                             </ul>                            
                         </div>
                     </div>

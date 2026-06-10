@@ -169,3 +169,7 @@ def get_lang_choice(show_on_homepage=1, foss=None):
     cache.set(cache_key, lang_list_choices, timeout=CACHE_TUTORIALS)
     register_cache_key(cache_key)
     return lang_list_choices
+
+def can_view_logs(user):
+    TECHNICAL_TEAM = 12
+    return user.groups.filter(id=TECHNICAL_TEAM).exists()

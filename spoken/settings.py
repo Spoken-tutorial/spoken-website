@@ -443,7 +443,7 @@ LOGGING = {
         "django_error_file": {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': '/var/log/django/django-error.log',
+            'filename': ALLOWED_LOGS["django-error"],
             'maxBytes': 1024 * 1024 * 50,  # 50 MB
             'backupCount': 10,
             'formatter': 'verbose',
@@ -451,13 +451,13 @@ LOGGING = {
         "cd_download_file": {
             "level": "WARNING",
             "class": "logging.FileHandler",
-            "filename": "/var/log/spoken-cdcontent-ilw.log",
+            "filename": ALLOWED_LOGS["cdcontent-ilw"],
             "formatter": "simple",
         },
         "training_file": {
             "level": "WARNING",
             "class": "logging.FileHandler",
-            "filename": "/var/log/spoken-temp.log",
+            "filename": ALLOWED_LOGS['training'],
             "formatter": "simple",
         }
     },
