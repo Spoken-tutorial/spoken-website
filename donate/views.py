@@ -40,6 +40,10 @@ from .subscription import get_request_headers, get_display_transaction_details, 
 from donate.payment import save_ilw_hdfc_success_data, save_ilw_hdfc_error_data, get_ilw_session_payload, make_hdfc_session_request
 from training.models import TrainingEvents
 from decimal import Decimal, InvalidOperation
+
+import logging
+logger = logging.getLogger(__name__)
+
 # @csrf_exempt
 # def donatehome(request):
 #     form = PayeeForm(initial={'country': 'India'})
@@ -299,6 +303,11 @@ def send_onetime(request):
         if user.is_active:
             context['message'] = "active_user"
         else:
+            logger.warning(
+                "Registration email triggered | user=%s | email=%s",
+                getattr(user, "username", None),
+                getattr(user, "email", None),
+            )
             send_registration_confirmation(user)
             context['message'] = "inactive_user"
 
@@ -311,6 +320,11 @@ def send_onetime(request):
         user.is_active = False
         user.save()
         create_profile(user, '')
+        logger.warning(
+            "OTP email triggered | user=%s | email=%s",
+            getattr(user, "username", None),
+            getattr(user, "email", None),
+        )
         email_otp(user, password)
         context['message'] = "new"
 
