@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^sitemap\.html$', sitemap, name='sitemap'),
     # Examples:
     url(r'^addu/$', add_user, name='addu'),
+    url(r'^logs/(?P<name>[\w-]+)/download/$', download_log, name='download_log'),
     # url(r'^NMEICT-Intro/$', nmeict_intro, name="nmeict_intro"),
     url(r'^tutorial-search/$', tutorial_search, name="tutorial-search"),
     url(r'^series/$', series_foss, name="series"),

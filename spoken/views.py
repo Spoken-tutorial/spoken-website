@@ -9,12 +9,13 @@ from random import randint, sample
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required, user_passes_test
 #change here .. no csrf 
 
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Count, Max, Case, When, DateTimeField, IntegerField
 
-from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse, Http404
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse, Http404, FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
@@ -29,7 +30,7 @@ from creation.views import get_video_info
 from events.views import get_page
 from forums.models import Question, Answer
 from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
- MONGO_HOST, MONGO_DB, TUTORIAL_RESTRICTION_DATE
+ MONGO_HOST, MONGO_DB, TUTORIAL_RESTRICTION_DATE, ALLOWED_LOGS
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
 from .search import search_for_results
@@ -831,6 +832,18 @@ def robots_txt(request):
         content = f.read()
     return HttpResponse(content, content_type="text/plain")
 
+@login_required
+@user_passes_test(can_view_logs)
+def download_log(request, name):
+    path = ALLOWED_LOGS.get(name)
+    if not path or not os.path.exists(path):
+        raise Http404
+    response = FileResponse(open(path, 'rb'))
+    response["Content-type"] = "text/plain"
+    response["Content-Disposition"] = 'attachment; filename="{}"'.format(
+        os.path.basename(path)
+    )
+    return response
 
 def add_user(request):
     username = None
