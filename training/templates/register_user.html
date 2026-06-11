@@ -24,11 +24,9 @@
 </div>
 <!-- Event name ends -->
 {% if registration_ended %}
-<div class="alert alert-danger" id="registration-ended-msg" style="display: none; margin-bottom: 20px;">
-  <strong>Event registration has ended.</strong>
+<div class="alert alert-danger" id="registration-ended-msg" style="margin-bottom: 20px;">
   {% if event_obj.is_swayam %}
-    <br><br>
-    Please try registering in one of the following events:
+    Please check the active Swayam events below:
     <ol style="margin-top: 10px; padding-left: 20px;">
       {% for event in active_swayam_events %}
         <li><a href="{% url 'training:register_user' %}?event_id={{ event.id }}" style="font-weight: bold;">{{ event.event_name }}</a></li>
@@ -36,6 +34,8 @@
         <li>No active Swayam events found.</li>
       {% endfor %}
     </ol>
+  {% else %}
+    <strong>Event registration has ended.</strong>
   {% endif %}
 </div>
 {% endif %}
@@ -46,6 +46,7 @@
      <form method="post"  class="form-horizontal" action="{% url 'training:reg_success' 'paid' %}" id="register_form">
       <div class="row well bs-component">
         {% csrf_token %}
+        {% if not registration_ended %}
           <div class="col-md-7">
             <fieldset>
               <input type="text"  id="source" name="source" value="{{source}}" style="display:none">
@@ -285,7 +286,8 @@
                       </div>
                   
                   </div>
-                  <div class="col-md-4">
+        {% endif %}
+                  <div class="{% if registration_ended %}col-md-8 col-md-offset-2{% else %}col-md-4{% endif %}">
                     <div class="panel panel-info">
                       <div class="panel-heading"><i class="fa fa-calendar" aria-hidden="true" style="margin-right: 10px;"></i>Important Dates</div>
                         <table class="table table-bordered">
@@ -329,6 +331,7 @@
                           </tbody>
                         </table>
                       </div>
+                      {% if not registration_ended %}
                       <div class="panel panel-info">
                         <div class="panel-heading" style="font-weight: bold;">NEFT Payment Information</div>
                         <div class="panel-body">
@@ -337,6 +340,7 @@
                           
                         </div>
                       </div>
+                      {% endif %}
 
                       <div class="panel panel-info">
                         <div class="panel-heading" style="font-weight: bold;">For any queries kindly contact our State Training Managers</div>
