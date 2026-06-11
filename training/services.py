@@ -218,7 +218,14 @@ def build_swayam_export_rows(event, metadata):
     for index, participant in enumerate(participants, start=1):
         email = (participant.email or '').strip()
         moodle_user = moodle_user_map.get(participant.user_id)
-        moodle_grade = moodle_grade_map.get(moodle_user.id) if moodle_user else None
+        moodle_grade = (
+            MdlQuizGrades.objects.using('moodle')
+            .filter(userid=moodle_user.id, quiz=quiz_id)
+            .order_by('-timemodified')
+            .first()
+            if moodle_user and quiz_id
+            else None
+        )
         final_val = format_ddmmyyyy(dt.datetime.utcfromtimestamp(moodle_grade.timemodified)) if moodle_grade and moodle_grade.timemodified else ''
 
         logger.warning(

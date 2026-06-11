@@ -44,7 +44,7 @@
                                 <a href="{% url 'training:event_participants' event.id %}" title="View Participants">View Participants</a>
                                 <br>
                                 {% if today >= event.tdate|default:event.event_end_date %}
-                                    <a href="#" title="Mark Attendance">Mark Attendance</a>
+                                    <a href="{% url 'training:event_attendance' event.id %}" title="Mark Attendance">Mark Attendance</a>
                                 {% else %}
                                     <span title="Available after test date">Mark Attendance</span>
                                 {% endif %}
