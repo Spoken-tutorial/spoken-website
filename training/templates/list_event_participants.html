@@ -43,6 +43,7 @@
 
 		{% if is_tr_ongoing%}
 		<input type="hidden" id="event_status" name="event_status" value="reg">
+		<input type="hidden" name="displayed_users" value="{{record.id}}">
 			{% if record.reg_approval_status == 1 %}
 				<td><input type='checkbox' name="user_reg" value="{{record.id}}" checked="checked"></td>
 			{% else %}
@@ -53,6 +54,7 @@
 
 		{% if is_tr_completed %}
 		<input type="hidden" id="event_status" name="event_status" value="attend">
+		<input type="hidden" name="displayed_users" value="{{record.id}}">
 			{% if record.attendance_marked %}
 				<td><input type='checkbox' name="user" value="{{record.id}}" checked="checked"></td>
 			{% else %}
