@@ -42,7 +42,7 @@ from training.models import TrainingEvents
 from decimal import Decimal, InvalidOperation
 
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("mail_logs.donate")
 
 # @csrf_exempt
 # def donatehome(request):
@@ -303,7 +303,7 @@ def send_onetime(request):
         if user.is_active:
             context['message'] = "active_user"
         else:
-            logger.warning(
+            logger.info(
                 "Registration email triggered | user=%s | email=%s",
                 getattr(user, "username", None),
                 getattr(user, "email", None),
@@ -320,7 +320,7 @@ def send_onetime(request):
         user.is_active = False
         user.save()
         create_profile(user, '')
-        logger.warning(
+        logger.info(
             "OTP email triggered | user=%s | email=%s",
             getattr(user, "username", None),
             getattr(user, "email", None),

@@ -38,7 +38,7 @@ from django.core.cache import cache
 
 import logging
 
-logger = logging.getLogger("mail_logs")
+logger = logging.getLogger("mail_logs.cms")
 
 cache = caches['default']
 
@@ -161,7 +161,7 @@ IIT Bombay.
     #email.attach_alternative(message, "text/html")
     try:
         result = email.send(fail_silently=False)
-        logger.warning(
+        logger.info(
             "Registration email sent | username=%s | user_id=%s | email=%s | subject=%s",
             user.username,
             user.id,
@@ -170,7 +170,7 @@ IIT Bombay.
         )
         return code
     except Exception as e:
-        logger.warning(
+        logger.error(
             "Registration email failed | username=%s | user_id=%s | email=%s | error=%s",
             user.username,
             user.id,
@@ -217,14 +217,14 @@ IIT Bombay.
     #email.attach_alternative(message, "text/html")
     try:
         result = email.send(fail_silently=False)
-        logger.warning(
+        logger.info(
             "OTP email sent | username=%s | user_id=%s | email=%s",
             user.username,
             user.id,
             user.email,
         )
     except Exception as e:
-        logger.warning(
+        logger.error(
             "OTP email failed | username=%s | user_id=%s | email=%s | error=%s",
             user.username,
             user.id,
@@ -455,7 +455,7 @@ IIT Bombay.
             )
             try:
                 result = email.send(fail_silently=False)
-                logger.warning(
+                logger.info(
                     "Password reset email sent | user=%s | user_id=%s | email=%s | ip=%s | path=%s",
                     getattr(user, "username", None),
                     getattr(user, "id", None),
@@ -471,7 +471,7 @@ IIT Bombay.
                 messages.success(request, "New password sent to your email "+user.email)
                 return HttpResponseRedirect('/accounts/change-password/')
             except Exception as e:
-                logger.warning(
+                logger.error(
                     "Password reset email failed | user=%s | user_id=%s | email=%s | ip=%s | path=%s | error=%s",
                     getattr(user, "username", None),
                     getattr(user, "id", None),

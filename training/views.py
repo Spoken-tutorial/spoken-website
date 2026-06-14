@@ -61,7 +61,7 @@ import csv
 import requests
 import logging
 
-logger = logging.getLogger("mail_logs")
+logger = logging.getLogger("mail_logs.training")
 
 def ensure_username_equals_email(user):
     """
@@ -825,7 +825,7 @@ class ParticipantCreateView(CreateView):
 		try:
 			user = User(username=email, email=email, first_name=first, last_name=last)
 			user.set_password(password)
-			logger.warning(
+			logger.info(
 				"Registration email triggered | user=%s | email=%s",
 				email,
 				email,
@@ -961,7 +961,7 @@ def get_create_user(row):
 
         create_profile(user, '')
 
-        logger.warning(
+        logger.info(
             "Registration email triggered | user=%s | user_id=%s | email=%s",
             getattr(user, "username", None),
             getattr(user, "id", None),
