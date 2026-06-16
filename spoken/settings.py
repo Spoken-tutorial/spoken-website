@@ -459,6 +459,12 @@ LOGGING = {
             "class": "logging.FileHandler",
             "filename": ALLOWED_LOGS['training'],
             "formatter": "simple",
+        },
+        "creation_file": {
+            "level": "INFO",
+            "class": "logging.FileHandler",
+            "filename": ALLOWED_LOGS['creation'],
+            "formatter": "simple",
         }
     },
 
@@ -476,6 +482,11 @@ LOGGING = {
          'django.request': {
             'handlers': ['django_error_file'],
             'level': 'ERROR',
+            'propagate': False,
+        },
+         'creation': {
+            'handlers': ['creation_file'],
+            'level': 'INFO',
             'propagate': False,
         },
     },
