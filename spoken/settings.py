@@ -463,7 +463,7 @@ LOGGING = {
         "mail_file": {
             "level": "WARNING",
             "class": "logging.FileHandler",
-            "filename": ALLOWED_LOGS['spoken-mails.log'],
+            "filename": ALLOWED_LOGS['spoken-mails'],
             "formatter": "simple",
         },
     },
