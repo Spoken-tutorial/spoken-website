@@ -459,7 +459,13 @@ LOGGING = {
             "class": "logging.FileHandler",
             "filename": ALLOWED_LOGS['training'],
             "formatter": "simple",
-        }
+        },
+        "mail_file": {
+            "level": "WARNING",
+            "class": "logging.FileHandler",
+            "filename": ALLOWED_LOGS['spoken-mails'],
+            "formatter": "simple",
+        },
     },
 
     "loggers": {
