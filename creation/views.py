@@ -4,6 +4,10 @@ import re
 import subprocess
 import time
 import collections
+import logging
+import traceback
+
+logger = logging.getLogger(__name__)
 from django.utils import timezone
 from decimal import Decimal
 from string import Template
@@ -179,15 +183,21 @@ def get_video_info(path):
 def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     filepath = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
+    logger.info("Thumbnail generation selected timestamp: %s", thumb_time)
     try:
+        cmd = ['/usr/bin/ffmpeg', '-nostdin', '-hide_banner', '-nostats', '-y', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename]
+        logger.info("Thumbnail generation ffmpeg command: %s", " ".join(cmd))
         #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-        process = subprocess.Popen(['/usr/bin/ffmpeg', '-nostdin', '-hide_banner', '-nostats', '-y', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT, start_new_session=True)
+        process = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, start_new_session=True)
         stdout, stderr = process.communicate()
+        logger.info("Thumbnail generation return code: %s", process.returncode)
+        logger.info("Thumbnail generation stdout: %s", stdout)
+        logger.info("Thumbnail generation stderr: %s", stderr)
         if stderr:
             print((filepath + filename))
             print(stderr)
     except Exception as e:
-        print((1, e))
+        logger.error("Exception in create_thumbnail: type=%s, message=%s\n%s", type(e).__name__, str(e), traceback.format_exc())
         pass
 
 def add_qualityreviewer_notification(tr_rec, comp_title, message):
@@ -1121,23 +1131,34 @@ def upload_keywords(request, trid):
     return render(request, 'creation/templates/upload_keywords.html', context)
 @login_required
 def upload_component(request, trid, component):
+    logger.info("upload_component: trid=%s, component=%s, user=%s", trid, component, request.user.username)
     tr_rec = None
     try:
         tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
         ContributorRole.objects.get(user_id = request.user.id, tutorial_detail_id = tr_rec.tutorial_detail_id, language_id = tr_rec.language_id, status = 1)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
     except Exception as e:
+        logger.error("Permission check failed for trid=%s, component=%s: %s", trid, component, traceback.format_exc())
         raise PermissionDenied()
     if component == 'video' and getattr(tr_rec, component + '_status') == 4:
+        logger.warning("Upload denied: video is already approved for trid=%s", trid)
         raise PermissionDenied()
     elif (component == 'slide' or component == 'code' or component == 'assignment') and getattr(tr_rec.common_content, component + '_status') == 4:
+        logger.warning("Upload denied: component=%s is already approved for trid=%s", component, trid)
         raise PermissionDenied()
     else:
         if request.method == 'POST':
             response_msg = ''
             error_msg = ''
+            
+            # Log file information if present in request.FILES
+            if 'comp' in request.FILES:
+                f = request.FILES['comp']
+                logger.info("File upload request: name=%s, content_type=%s, size=%s bytes", f.name, f.content_type, f.size)
+
             form = ComponentForm(component, request.POST, request.FILES)
             if form.is_valid():
+                logger.info("Validation passed")
                 try:
                     comp_log = ContributorLog()
                     comp_log.user = request.user
@@ -1148,19 +1169,34 @@ def upload_component(request, trid, component):
                         file_name = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-' + tr_rec.language.name + file_extension
                         file_path = settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail.id) + '/'
                         full_path = file_path + file_name
-                        if os.path.isfile(file_path + tr_rec.video) and tr_rec.video_status > 0:
+                        
+                        # check for directory / previous video logging:
+                        dir_exists = os.path.exists(file_path)
+                        dir_writable = os.access(file_path, os.W_OK) if dir_exists else False
+                        prev_video_name = tr_rec.video if tr_rec.video else ""
+                        prev_video_full = file_path + prev_video_name if prev_video_name else ""
+                        prev_video_exists = os.path.isfile(prev_video_full) if prev_video_full else False
+
+                        logger.info("Video upload environment check | Full Path: %s | Dir Exists: %s | Dir Writable: %s | Prev Video: %s | Prev Exists: %s | Tutorial ID: %s | FOSS ID: %s | Language ID: %s",
+                                    full_path, dir_exists, dir_writable, prev_video_name, prev_video_exists, tr_rec.tutorial_detail.id, tr_rec.tutorial_detail.foss_id, tr_rec.language_id)
+
+                        if prev_video_exists and tr_rec.video_status > 0:
                             if 'isarchive' in request.POST and int(request.POST.get('isarchive', 0)) > 0:
                                 archived_file = 'Archived-' + str(request.user.id) + '-' + str(int(time.time())) + '-' + tr_rec.video
+                                logger.info("Archiving previous video as version %s -> %s", tr_rec.version, archived_file)
                                 os.rename(file_path + tr_rec.video, file_path + archived_file)
                                 ArchivedVideo.objects.create(tutorial_resource = tr_rec, user = request.user, version = tr_rec.version, video = archived_file, atype = tr_rec.video_status)
                                 if int(request.POST.get('isarchive', 0)) == 2:
                                     tr_rec.version += 1
+                        
                         fout = open(full_path, 'wb+')
                         f = request.FILES['comp']
                         # Iterate through the chunks.
                         for chunk in f.chunks():
                             fout.write(chunk)
                         fout.close()
+                        logger.info("Video file successfully written to disk: %s (%s bytes)", full_path, f.size)
+
                         comp_log.status = tr_rec.video_status
                         tr_rec.video = file_name
                         tr_rec.video_user = request.user
@@ -1251,7 +1287,7 @@ def upload_component(request, trid, component):
                             '{} waiting for domain review'.format(component.replace('_', ' ').title()))
                         response_msg = 'Additional material uploaded successfully!'
                 except Exception as e:
-                    print(e)
+                    logger.error("Exception in upload_component main block for trid=%s, component=%s: %s", trid, component, traceback.format_exc())
                     error_msg = 'Something went wrong, please try again later.'
                 form = ComponentForm(component)
                 if response_msg:
@@ -1266,6 +1302,7 @@ def upload_component(request, trid, component):
                 context.update(csrf(request))
                 return render(request, 'creation/templates/upload_component.html', context)
             else:
+                logger.warning("Form validation failed for trid=%s, component=%s. Errors: %s", trid, component, form.errors)
                 context = {
                     'form': form,
                     'tr': tr_rec,
