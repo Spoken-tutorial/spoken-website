@@ -884,8 +884,6 @@ class EventAttendanceListView(ListView):
 		context['is_tr_completed'] = is_tr_completed(self.event.id)
 		context['is_event_closed'] = is_event_closed(self.event.id)
 		
-
-		
 		return context
 
 	def post(self, request, *args, **kwargs):
@@ -893,39 +891,47 @@ class EventAttendanceListView(ListView):
 		self.user = request.user
 		eventid = kwargs['eventid']
 		attendance_type = request.POST.get('event_status', None)
+		displayed_users = request.POST.getlist('displayed_users', [])
 
 		if attendance_type == 'attend':
-			if request.POST and 'user' in request.POST:
-				marked_participant = request.POST.getlist('user', None)
-				# delete un marked record if exits
-				EventAttendance.objects.filter(event_id =eventid).exclude(participant_id__in = marked_participant).delete()
-				# insert new record if not exits
+			marked_participant = request.POST.getlist('user', [])
+			if displayed_users:
+				# delete unmarked record if exists, only for displayed users on this page
+				EventAttendance.objects.filter(
+					event_id=eventid,
+					participant_id__in=displayed_users
+				).exclude(
+					participant_id__in=marked_participant
+				).delete()
+				# insert new record if not exists
 				for record in marked_participant:
-					event_attend = EventAttendance.objects.filter(event_id =eventid, participant_id = record)
-					if not event_attend.exists():
-						EventAttendance.objects.create(event_id =eventid, participant_id = record)
-					#print marked_participant
-				success_url = '/training/event/rp/completed'
+					if record in displayed_users:
+						event_attend = EventAttendance.objects.filter(event_id=eventid, participant_id=record)
+						if not event_attend.exists():
+							EventAttendance.objects.create(event_id=eventid, participant_id=record)
 			else:
-				EventAttendance.objects.filter(event_id = eventid).delete()
-				success_url = '/training/event/rp/completed'
+				EventAttendance.objects.filter(event_id=eventid).delete()
+			success_url = '/training/event/rp/completed'
 		
 		elif attendance_type == 'reg':
-			if request.POST and 'user_reg' in request.POST:
-				marked_registrations = request.POST.getlist('user_reg', None)
-				# delete un marked record if exits
-				remove_reg = Participant.objects.filter(event_id =eventid, reg_approval_status=1).exclude(id__in = marked_registrations).update(reg_approval_status=0)
-				
-				# insert new record if not exits
+			marked_registrations = request.POST.getlist('user_reg', [])
+			if displayed_users:
+				# update reg_approval_status to 0 for displayed users that are not marked
+				Participant.objects.filter(
+					event_id=eventid,
+					id__in=displayed_users
+				).exclude(
+					id__in=marked_registrations
+				).update(reg_approval_status=0)
+				# insert new record if not exists
 				for record in marked_registrations:
-					reg_attend = Participant.objects.filter(event_id =eventid, id = record, reg_approval_status=1)
-					if not reg_attend.exists():
-						mark_reg_approval(record, eventid)
-					#print marked_registrations
-				success_url = '/training/event/rp/ongoing'
+					if record in displayed_users:
+						reg_attend = Participant.objects.filter(event_id=eventid, id=record, reg_approval_status=1)
+						if not reg_attend.exists():
+							mark_reg_approval(record, eventid)
 			else:
-				Participant.objects.filter(event_id =eventid).update(reg_approval_status=0)
-				success_url = '/training/event/rp/ongoing'
+				Participant.objects.filter(event_id=eventid).update(reg_approval_status=0)
+			success_url = '/training/event/rp/ongoing'
 		return HttpResponseRedirect(success_url)
 
 
