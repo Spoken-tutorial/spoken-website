@@ -59,6 +59,23 @@ from donate.models import *
 
 import csv
 import requests
+import logging
+
+logger = logging.getLogger("mail_logs.training")
+
+def ensure_username_equals_email(user):
+    """
+    Ensure Django username always matches email.
+    This is required for ILW Moodle authentication.
+    """
+    email = (user.email or "").strip().lower()
+
+    if email and user.username != email:
+        # Prevent duplicate username conflicts
+        if not User.objects.filter(username=email).exclude(id=user.id).exists():
+            user.username = email
+            user.save(update_fields=["username"])
+
 
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
@@ -808,6 +825,11 @@ class ParticipantCreateView(CreateView):
 		try:
 			user = User(username=email, email=email, first_name=first, last_name=last)
 			user.set_password(password)
+			logger.info(
+				"Registration email triggered | user=%s | email=%s",
+				email,
+				email,
+			)
 			confirmation_code = send_registration_confirmation(user)
 			if confirmation_code:
 				user.save()
@@ -917,15 +939,38 @@ def ajax_check_college(request):
 
 
 def get_create_user(row):
-		try:
-			return User.objects.get(email=row[2].strip())
-		except User.DoesNotExist:
-			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
-			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
-			user.save()
-			create_profile(user, '')
-			send_registration_confirmation(user)
-			return user
+    email = row[2].strip().lower()
+
+    try:
+        user = User.objects.get(email=email)
+        ensure_username_equals_email(user)
+        return user
+
+    except User.DoesNotExist:
+        user = User(
+            username=email,
+            email=email,
+            first_name=row[0],
+            last_name=row[1]
+        )
+
+        user.set_password(row[0] + '@ST' + str(random.random()).split('.')[1][:5])
+        user.save()
+
+        ensure_username_equals_email(user)
+
+        create_profile(user, '')
+
+        logger.info(
+            "Registration email triggered | user=%s | user_id=%s | email=%s",
+            getattr(user, "username", None),
+            getattr(user, "id", None),
+            getattr(user, "email", None),
+        )
+
+        send_registration_confirmation(user)
+
+        return user
 
 from io import TextIOWrapper
 from django.contrib.auth.decorators import login_required
