@@ -34,7 +34,7 @@ from django.template.context_processors import csrf
 from cms.cache_registry import unregister_cache_key,list_cache_keys
 from donate.models import Payee
 
-from django.core.cache import cache
+from django.core.cache import cache, caches
 
 import logging
 
