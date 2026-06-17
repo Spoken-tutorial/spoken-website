@@ -65,10 +65,35 @@ def add_youtube_video(request):
 
                 # Find valid video file
                 video_file = None
-                for f in os.listdir(video_dir):
-                    if f.lower().endswith(('.mp4', '.ogv', '.mov', '.avi')):
-                        video_file = os.path.join(video_dir, f)
-                        break
+                if resource.video:
+                    base_name, original_ext = os.path.splitext(resource.video)
+                    # Try checking for extensions 
+                    extensions_to_check = ['.mp4', original_ext.lower(), '.ogv', '.mov', '.avi']
+                    # Remove duplicates 
+                    seen = set()
+                    extensions_to_check = [x for x in extensions_to_check if not (x in seen or seen.add(x))]
+                    
+                    for ext in extensions_to_check:
+                        test_path = os.path.join(video_dir, base_name + ext)
+                        if os.path.isfile(test_path):
+                            video_file = test_path
+                            break
+
+                # Fallback to search list of all files in directory 
+                if not video_file:
+                    lang_name = resource.language.name.lower()
+                    # try to find a video file containing the language name
+                    for f in os.listdir(video_dir):
+                        if f.lower().endswith(('.mp4', '.ogv', '.mov', '.avi')) and lang_name in f.lower():
+                            video_file = os.path.join(video_dir, f)
+                            break
+                    
+                    # fallback to first available video file if no language match found
+                    if not video_file:
+                        for f in os.listdir(video_dir):
+                            if f.lower().endswith(('.mp4', '.ogv', '.mov', '.avi')):
+                                video_file = os.path.join(video_dir, f)
+                                break
                 
                 if not video_file:
                     raise Exception("No video file found in {}".format(video_dir))

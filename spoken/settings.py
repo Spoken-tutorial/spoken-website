@@ -484,5 +484,10 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': False,
         },
+        "mail_logs": {
+            "handlers": ["mail_file"],
+            "level": "WARNING",
+            "propagate": False,
+        },
     },
 }

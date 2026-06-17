@@ -36,6 +36,13 @@ from donate.models import Payee
 
 from django.core.cache import cache
 
+import logging
+
+logger = logging.getLogger("mail_logs.cms")
+
+cache = caches['default']
+
+
 def dispatcher(request, permalink=''):
     if permalink == '':
         return HttpResponseRedirect('/')
@@ -154,8 +161,22 @@ IIT Bombay.
     #email.attach_alternative(message, "text/html")
     try:
         result = email.send(fail_silently=False)
+        logger.info(
+            "Registration email sent | username=%s | user_id=%s | email=%s | subject=%s",
+            user.username,
+            user.id,
+            user.email,
+            subject,
+        )
         return code
     except Exception as e:
+        logger.error(
+            "Registration email failed | username=%s | user_id=%s | email=%s | error=%s",
+            user.username,
+            user.id,
+            user.email,
+            str(e),
+        )
         return None
 
 def email_otp(user, password):
@@ -196,7 +217,20 @@ IIT Bombay.
     #email.attach_alternative(message, "text/html")
     try:
         result = email.send(fail_silently=False)
-    except:
+        logger.info(
+            "OTP email sent | username=%s | user_id=%s | email=%s",
+            user.username,
+            user.id,
+            user.email,
+        )
+    except Exception as e:
+        logger.error(
+            "OTP email failed | username=%s | user_id=%s | email=%s | error=%s",
+            user.username,
+            user.id,
+            user.email,
+            str(e),
+        )
         pass
 
 
@@ -419,15 +453,34 @@ IIT Bombay.
                 to = to, bcc = [], cc = [],
                 headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type":"text/html;charset=iso-8859-1"}
             )
-
-            result = email.send(fail_silently=False)
-            # redirect to next url if there or redirect to login page
-            # use for forum password rest form
-            redirectNext = request.GET.get('next', False)
-            if redirectNext:
-                return HttpResponseRedirect(redirectNext)
-            messages.success(request, "New password sent to your email "+user.email)
-            return HttpResponseRedirect('/accounts/change-password/')
+            try:
+                result = email.send(fail_silently=False)
+                logger.info(
+                    "Password reset email sent | user=%s | user_id=%s | email=%s | ip=%s | path=%s",
+                    getattr(user, "username", None),
+                    getattr(user, "id", None),
+                    getattr(user, "email", None),
+                    request.META.get("REMOTE_ADDR"),
+                    request.path,
+                )    
+                # redirect to next url if there or redirect to login page
+                # use for forum password rest form
+                redirectNext = request.GET.get('next', False)
+                if redirectNext:
+                    return HttpResponseRedirect(redirectNext)
+                messages.success(request, "New password sent to your email "+user.email)
+                return HttpResponseRedirect('/accounts/change-password/')
+            except Exception as e:
+                logger.error(
+                    "Password reset email failed | user=%s | user_id=%s | email=%s | ip=%s | path=%s | error=%s",
+                    getattr(user, "username", None),
+                    getattr(user, "id", None),
+                    getattr(user, "email", None),
+                    request.META.get("REMOTE_ADDR"),
+                    request.path,
+                    str(e),
+                )
+                messages.error(request, "Failed to send password reset email. Please try again.")
 
 
     context = {

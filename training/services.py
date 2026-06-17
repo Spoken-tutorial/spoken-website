@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.template.defaultfilters import slugify
 
-from mdldjango.models import MdlQuizGrades, MdlUser
+from ilwmoodle.models import ILWMdlUser, ILWMdlQuizGrades
 from events.models import Student, StudentMaster
 from donate.subscription import has_active_subscription
 
@@ -115,7 +115,7 @@ def get_moodle_user_map(participants):
         return {}
 
     moodle_users = (
-        MdlUser.objects.using('moodle')
+        ILWMdlUser.objects.using('ilwmoodle')
         .filter(email__in=normalized_emails)
         .only('id', 'email', 'username')
     )
@@ -149,7 +149,7 @@ def get_moodle_grade_map(user_ids, quiz_id):
 
     grade_map = {}
     grades = (
-        MdlQuizGrades.objects.using('moodle')
+        ILWMdlQuizGrades.objects.using('ilwmoodle')
         .filter(userid__in=user_ids, quiz=quiz_id)
         .order_by('userid', '-timemodified')
         .only('userid', 'quiz', 'timemodified')
@@ -218,14 +218,7 @@ def build_swayam_export_rows(event, metadata):
     for index, participant in enumerate(participants, start=1):
         email = (participant.email or '').strip()
         moodle_user = moodle_user_map.get(participant.user_id)
-        moodle_grade = (
-            MdlQuizGrades.objects.using('moodle')
-            .filter(userid=moodle_user.id, quiz=quiz_id)
-            .order_by('-timemodified')
-            .first()
-            if moodle_user and quiz_id
-            else None
-        )
+        moodle_grade = moodle_grade_map.get(moodle_user.id) if moodle_user else None
         final_val = format_ddmmyyyy(dt.datetime.utcfromtimestamp(moodle_grade.timemodified)) if moodle_grade and moodle_grade.timemodified else ''
 
         logger.warning(
