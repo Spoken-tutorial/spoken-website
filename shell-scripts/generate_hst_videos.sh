@@ -1,23 +1,26 @@
-#!/bin/bash
-
 set -e
 
 echo "================================="
 echo "Starting HST → Spoken migration"
 echo "================================="
 
-# HST_ROOT="./test_hst/Media/Content/Tutorial"
+HST_ROOT="./test_hst/Media/Content/Tutorial"
 
-HST_ROOT="./Media/Content/Tutorial"
+# HST_ROOT="./Media/Content/Tutorial"
 
 SPOKEN_MEDIA="./media/videos"
 
+VENV_PATH="/beta_st/django_spoken.test/env_py3" 
 
-if [ -f "venv/bin/activate" ]; then
-source venv/bin/activate
-fi
+if [ -f "$VENV_PATH/bin/activate" ]; then 
+source "$VENV_PATH/bin/activate" 
+fi 
+PYTHON_BIN="$VENV_PATH/bin/python"
 
-PYTHON_BIN=$(which python3)
+# if [ -f "venv/bin/activate" ]; then
+# source venv/bin/activate
+# fi
+
 
 mkdir -p "$SPOKEN_MEDIA"
 
