@@ -1,12 +1,12 @@
 import os
 from django.core.management.base import BaseCommand
 from django.db import connections, transaction
-
-# Import configuration from the project root
 try:
-    from config import TOPICS_BY_FOSS, FOSS_FOLDER
+    from creation.management.hst import TOPICS_BY_FOSS, FOSS_FOLDER
 except ImportError:
-    raise ImportError("Could not import 'config' module. Make sure config.py is in the Python path.")
+    raise ImportError(
+        "Could not import TOPICS_BY_FOSS and FOSS_FOLDER from creation.management.hst"
+    )
 
 
 class Command(BaseCommand):
