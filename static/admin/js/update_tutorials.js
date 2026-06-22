@@ -1,6 +1,6 @@
 var $ = django.jQuery;
 $(document).ready(function(){
-  $("form").submit(function(){
+  $("#id_is_translation_allowed").change(function(){
   	var is_translation_allowed  = $('#id_is_translation_allowed').is(":checked");
   	var status  = $('#id_status').is(":checked");
   	var foss_name  = $('#id_foss').val();
@@ -13,7 +13,7 @@ $(document).ready(function(){
                 data: {
                   'action' 		: 'add',
                   'foss_name'	: foss_name,
-                },
+                },                
                 });
   	}
   	else{
@@ -24,7 +24,7 @@ $(document).ready(function(){
                 data: {
                   'action' 		: 'remove',
                   'foss_name'	: foss_name,
-                },
+                },                
                 });
   	}
   });
