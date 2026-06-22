@@ -102,10 +102,11 @@
 
                     </div>
                     <div class="form-group">
-                      <label for="id_apaar_id" class="col-lg-4 control-label">APAAR ID</label>
+                      <label for="id_apaar_id" class="col-lg-4 control-label">APAAR ID (Optional)</label>
                       <div class="col-lg-8">
                           {% render_field form.apaar_id class+="form-control apaar_id" placeholder="Enter 12-digit APAAR ID" %}
                           {{ form.apaar_id.errors }}
+                          <small>(Not mandatory, leave blank if unavailable)</small>
                       </div>
                     </div>
                     <div class="form-group" id="organizer_info" style="display: none;">
