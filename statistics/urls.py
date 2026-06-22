@@ -18,6 +18,8 @@ urlpatterns =  [ # noqa
     url(r'^online-test/$',  online_test, name="statistics_online_test"),
     url(r'^onlinetest/(?P<rid>\d+)/participants/$',  test_participant,
         name="statistics_test_participants"),
+    url(r'^onlinetest/(?P<rid>\d+)/participants/csv/$',  test_participant_csv,
+        name="statistics_test_participants_csv"),
     url(r'^academic-center/$',  academic_center, name="acdemic_center"),
     url(r'^academic-center/(?P<academic_id>\d+)/$',  academic_center_view,
         name="academic_center_view"),
