@@ -7,20 +7,20 @@ echo "================================="
 
 # ==================== SERVER CONFIG (COMMENTED OUT) ====================
 # HST_SERVER="Ayisha@beta.spoken-tutorial.org"
-# HST_ROOT="/beta_st/tomcat.new/health_data/Media/Content/Tutorial"
-# SPOKEN_MEDIA="/beta_st/django_spoken.test/spoken-website/media/videos"
-# VENV_PATH="/beta_st/django_spoken.test/env_py3"
-# if [ -f "$VENV_PATH/bin/activate" ]; then
-#     source "$VENV_PATH/bin/activate"
-# fi
-# PYTHON_BIN="$VENV_PATH/bin/python"
+HST_ROOT="/beta_st/tomcat.new/health_data/Media/Content/Tutorial"
+SPOKEN_MEDIA="/beta_st/django_spoken.test/spoken-website/media/videos"
+VENV_PATH="/beta_st/django_spoken.test/env_py3"
+if [ -f "$VENV_PATH/bin/activate" ]; then
+    source "$VENV_PATH/bin/activate"
+fi
+PYTHON_BIN="$VENV_PATH/bin/python"
 
 # ==================== LOCAL CONFIG ====================
-HST_ROOT="./test_hst/Media/Content/Tutorial"
-SPOKEN_MEDIA="./media/videos"
+# HST_ROOT="./test_hst/Media/Content/Tutorial"
+# SPOKEN_MEDIA="./media/videos"
 
-source /mnt/d/EDUPYRAMIDS/spoken-website/Python-3.6.15/venv36/bin/activate
-PYTHON_BIN=$(which python)
+# source /mnt/d/EDUPYRAMIDS/spoken-website/Python-3.6.15/venv36/bin/activate
+# PYTHON_BIN=$(which python)
 
 mkdir -p "$SPOKEN_MEDIA"
 
