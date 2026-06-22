@@ -13,7 +13,7 @@ progressbar==2.3
 pycodestyle==2.3.1
 pydns==2.3.6
 pyflakes==1.6.0
-PyJWT==1.6.4
+PyJWT==2.4.0
 requests==2.19.1
 singledispatch==3.4.0.3
 urllib3==1.26.5
