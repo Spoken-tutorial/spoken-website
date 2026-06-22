@@ -1,0 +1,34 @@
+Spoken Tutorial Project - Consent Agreement
+
+By using this platform, you agree to the following terms:
+
+1. Data Collection
+   We collect your name, email address, and academic details to provide
+   training services and issue certificates.
+
+2. Usage of Data
+   Your personal data will be used solely for the purpose of managing
+   your training, assessments, and certification on this platform.
+
+3. Communication
+   You consent to receive emails related to your training progress,
+   upcoming workshops, and certification updates.
+
+4. Content Usage
+   Spoken Tutorial content is licensed under Creative Commons and is
+   intended for educational purposes only. You agree not to use it
+   for commercial purposes without prior written permission.
+
+5. Code of Conduct
+   You agree to use the platform responsibly and respect the guidelines
+   set by the Spoken Tutorial Project, IIT Bombay.
+
+6. Data Retention
+   Your data will be retained as long as your account is active or as
+   required for certification and audit purposes.
+
+7. Right to Withdraw
+   You may withdraw your consent at any time by contacting the
+   administrator. Withdrawal may affect your access to certain services.
+
+For questions, contact: support@spoken-tutorial.org
