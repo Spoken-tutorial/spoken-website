@@ -1707,14 +1707,22 @@ class EventTestCertificateView(ILWTestCertificate, View):
   def post(self, request, *args, **kwargs):
     eventid = self.request.POST.get("eventid")
     event = TrainingEvents.objects.get(id=eventid)
+    from training.helpers import sync_and_check_test_status
+    if event.event_type == "HN":
+        teststatuses = EventTestStatus.objects.filter(event_id=eventid, participant__user=self.request.user, mdlemail=self.request.user.email)
+    else:
+        teststatuses = EventTestStatus.objects.filter(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email)
+    for ts in teststatuses:
+        sync_and_check_test_status(ts)
+
     if event.event_type == "HN":
         teststatus = EventTestStatus.objects.filter(event_id=eventid, participant__user=self.request.user, mdlemail=self.request.user.email, mdlgrade__gte=settings.PASS_GRADE).order_by('-mdlgrade').first()
     else:
         teststatus = EventTestStatus.objects.filter(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email, mdlgrade__gte=settings.PASS_GRADE).order_by('-mdlgrade').first()
-    if event:
+    if event and teststatus:
       return self.create_ilwtest_certificate(event, self.request.user, teststatus)
     else:
-      messages.error(self.request, "Permission Denied!")
+      messages.error(self.request, "Permission Denied or Test Certificate not available!")
     return HttpResponseRedirect("/")
 
 
@@ -1726,6 +1734,12 @@ class BatchTestCertificateView(ILWTestCertificate, View):
         if event.download_access != request.user.email:
             messages.error(request, "Permission Denied!")
             return HttpResponseRedirect("/")
+
+        # Run sync for all participants of this event
+        from training.helpers import sync_and_check_test_status
+        all_test_statuses = EventTestStatus.objects.filter(event=event)
+        for ts in all_test_statuses:
+            sync_and_check_test_status(ts)
 
         output = PdfFileWriter()
         response = HttpResponse(content_type='application/pdf')

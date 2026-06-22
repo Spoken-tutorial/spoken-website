@@ -6,7 +6,7 @@ echo "Starting HST → Spoken migration"
 echo "================================="
 
 # ==================== SERVER CONFIG (COMMENTED OUT) ====================
-# HST_SERVER="Ayisha@beta.spoken-tutorial.org"
+HST_SERVER="Ayisha@beta.spoken-tutorial.org"
 HST_ROOT="/beta_st/tomcat.new/health_data/Media/Content/Tutorial"
 SPOKEN_MEDIA="/beta_st/django_spoken.test/spoken-website/media/videos"
 VENV_PATH="/beta_st/django_spoken.test/env_py3"
