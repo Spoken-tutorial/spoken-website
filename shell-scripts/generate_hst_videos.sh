@@ -25,33 +25,67 @@ PYTHON_BIN="$VENV_PATH/bin/python"
 mkdir -p "$SPOKEN_MEDIA"
 
 echo ""
-echo "Generating tutorial mapping..."
+echo -e "\033[1;34m[STEP 1]\033[0m Generating tutorial mapping..."
+echo -e "\033[1;33mPython:\033[0m $PYTHON_BIN"
+echo -e "\033[1;33mPWD:\033[0m $(pwd)"
 
 # Run Python: stdout → mapping file, stderr → debug log
 "$PYTHON_BIN" manage.py shell <<'PYEOF' 2>/tmp/hst_debug.log > /tmp/hst_mapping.txt
 import sys
 import re
 import os
+
+print("\033[92m[PYTHON STARTED]\033[0m", file=sys.stderr)
+
 from django.db import connections
+
+print("\033[92m[Django imports OK]\033[0m", file=sys.stderr)
+
 from creation.management.hst import FOSS_FOLDER
+
+print("\033[92m[FOSS_FOLDER imported]\033[0m", file=sys.stderr)
 
 source = connections["healthdb"]
 target = connections["default"]
 
+print("\033[92m[DB connections created]\033[0m", file=sys.stderr)
+
 VALID_FOSS = tuple(FOSS_FOLDER.keys())
 topic_map = {}
 
+print("\033[92m[Loading Spoken tutorials]\033[0m", file=sys.stderr)
+
 # Load Spoken tutorials
 with target.cursor() as cur:
+
+    print("\033[93m[DEBUG 1] Running Spoken query\033[0m", file=sys.stderr)
+
     cur.execute("""
-        SELECT id, tutorial, foss_id
+        SELECT
+            id,
+            tutorial,
+            foss_id
         FROM creation_tutorialdetail
         WHERE foss_id IN %s
     """, [VALID_FOSS])
 
-    for tutorial_detail_id, tutorial, foss_id in cur.fetchall():
+    spoken_rows = cur.fetchall()
+
+    print("\033[92m[DEBUG 2] Spoken rows={}\033[0m".format(len(spoken_rows)),file=sys.stderr)
+
+    for tutorial_detail_id, tutorial, foss_id in spoken_rows:
+
         if tutorial:
-            topic_map[tutorial.strip().lower()] = (tutorial_detail_id, foss_id)
+            topic_map[
+                tutorial.strip().lower()
+            ] = (
+                tutorial_detail_id,
+                foss_id
+            )
+
+print("\033[92m[DEBUG 3] Topic map={}\033[0m".format(len(topic_map)),file=sys.stderr)
+
+print("\033[92m[DEBUG 7] Loading healthdb\033[0m", file=sys.stderr)
 
 # Load HST tutorial_resource rows with video column
 with source.cursor() as cur:
@@ -62,8 +96,12 @@ with source.cursor() as cur:
     """)
     rows = cur.fetchall()
 
+print("\033[92m[DEBUG 8] healthdb rows = {}\033[0m".format(len(rows)), file=sys.stderr)
+
 matched = 0
 skipped = 0
+
+print("\033[92m[DEBUG 9] Starting matching\033[0m", file=sys.stderr)
 
 for tutorial_id, topic_name, video_path in rows:
     if not topic_name:
@@ -87,6 +125,7 @@ for tutorial_id, topic_name, video_path in rows:
         match_key = full_name.lower()
         if match_key in topic_map:
             td_id, foss_id = topic_map[match_key]
+            print("\033[92mMATCH {}\033[0m".format(tutorial_id),file=sys.stderr)
             print(f"{tutorial_id}\t{td_id}\t{foss_id}")
             matched += 1
             continue
@@ -111,7 +150,7 @@ echo ""
 echo "=== LINE COUNT ==="
 wc -l /tmp/hst_mapping.txt
 echo ""
-echo "=== DEBUG LOG ==="
+echo -e "\033[1;35m=== DEBUG LOG ===\033[0m"
 cat /tmp/hst_debug.log
 
 # Check if mapping file has content
