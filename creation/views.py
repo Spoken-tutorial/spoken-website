@@ -4,6 +4,7 @@ import re
 import subprocess
 import time
 import collections
+from collections import defaultdict
 import logging
 import traceback
 
@@ -1623,11 +1624,34 @@ def admin_reviewed_video(request):
 def tutorials_needimprovement(request):
     if not is_contributor(request.user):
         raise PermissionDenied()
-    tmp_ids = []
+    
     con_roles = ContributorRole.objects.filter(user_id = request.user.id, status = 1)
-    for rec in con_roles:
-        tr_recs = TutorialResource.objects.filter(tutorial_detail__foss_id = rec.foss_category_id, language_id = rec.language_id, status = 0)
-        for tr_rec in tr_recs:
+    roles_list = list(con_roles)
+    
+    tmp_ids = []
+    
+    if roles_list:
+        role_queries = Q()
+        for rec in roles_list:
+            role_queries |= Q(tutorial_detail__foss_id = rec.foss_category_id, language_id = rec.language_id)
+        
+        tr_recs = TutorialResource.objects.filter(
+            role_queries,
+            status=0
+        ).select_related('language', 'common_content', 'tutorial_detail__foss')
+        tr_recs_list = list(tr_recs)
+    else:
+        tr_recs_list = []
+        
+    resources_by_role = defaultdict(list)
+    for tr_rec in tr_recs_list:
+        key = (tr_rec.tutorial_detail.foss_id, tr_rec.language_id)
+        resources_by_role[key].append(tr_rec)
+        
+    for rec in roles_list:
+        key = (rec.foss_category_id, rec.language_id)
+        matching_resources = resources_by_role[key]
+        for tr_rec in matching_resources:
             flag = 1
             if tr_rec.language.name == 'English':
                 if tr_rec.common_content.slide_status != 5 and tr_rec.common_content.code_status != 5 and tr_rec.common_content.assignment_status != 5 and tr_rec.common_content.prerequisite_status != 5 and tr_rec.common_content.keyword_status != 5:
@@ -1636,11 +1660,12 @@ def tutorials_needimprovement(request):
                 flag = 0
             if flag or tr_rec.outline_status == 5 or tr_rec.script_status == 5 or tr_rec.video_status == 5:
                 tmp_ids.append(tr_rec.id)
+    
     tmp_recs = None
     ordering = ''
     header = ''
     try:
-        tmp_recs = TutorialResource.objects.filter(id__in = tmp_ids)
+        tmp_recs = TutorialResource.objects.filter(id__in = tmp_ids).select_related('tutorial_detail__foss', 'language', 'common_content')
         raw_get_data = request.GET.get('o', None)
         header = {
             1: SortableHeader('S.No', False),
