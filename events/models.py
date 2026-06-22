@@ -1820,3 +1820,12 @@ class AcademicKey(models.Model):
   
   def __str__(self):
     return self.academic.institution_name
+
+class StudentPasswordResetHistory(models.Model):
+    batch = models.ForeignKey('StudentBatch',on_delete=models.CASCADE)
+    changed_by = models.ForeignKey(User,on_delete=models.PROTECT)
+    changed_on = models.DateTimeField(auto_now_add=True)
+    status = models.PositiveSmallIntegerField(default=0,help_text="1 = success, 0 = failed")
+
+    def __str__(self):
+      return f"Batch {self.batch.id} | Status {self.status}"
