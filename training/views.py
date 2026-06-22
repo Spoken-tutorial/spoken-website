@@ -59,6 +59,23 @@ from donate.models import *
 
 import csv
 import requests
+import logging
+
+logger = logging.getLogger("mail_logs.training")
+
+def ensure_username_equals_email(user):
+    """
+    Ensure Django username always matches email.
+    This is required for ILW Moodle authentication.
+    """
+    email = (user.email or "").strip().lower()
+
+    if email and user.username != email:
+        # Prevent duplicate username conflicts
+        if not User.objects.filter(username=email).exclude(id=user.id).exists():
+            user.username = email
+            user.save(update_fields=["username"])
+
 
 class TrainingEventCreateView(CreateView):
 	form_class = CreateTrainingEventForm
@@ -808,6 +825,11 @@ class ParticipantCreateView(CreateView):
 		try:
 			user = User(username=email, email=email, first_name=first, last_name=last)
 			user.set_password(password)
+			logger.info(
+				"Registration email triggered | user=%s | email=%s",
+				email,
+				email,
+			)
 			confirmation_code = send_registration_confirmation(user)
 			if confirmation_code:
 				user.save()
@@ -862,8 +884,6 @@ class EventAttendanceListView(ListView):
 		context['is_tr_completed'] = is_tr_completed(self.event.id)
 		context['is_event_closed'] = is_event_closed(self.event.id)
 		
-
-		
 		return context
 
 	def post(self, request, *args, **kwargs):
@@ -871,39 +891,47 @@ class EventAttendanceListView(ListView):
 		self.user = request.user
 		eventid = kwargs['eventid']
 		attendance_type = request.POST.get('event_status', None)
+		displayed_users = request.POST.getlist('displayed_users', [])
 
 		if attendance_type == 'attend':
-			if request.POST and 'user' in request.POST:
-				marked_participant = request.POST.getlist('user', None)
-				# delete un marked record if exits
-				EventAttendance.objects.filter(event_id =eventid).exclude(participant_id__in = marked_participant).delete()
-				# insert new record if not exits
+			marked_participant = request.POST.getlist('user', [])
+			if displayed_users:
+				# delete unmarked record if exists, only for displayed users on this page
+				EventAttendance.objects.filter(
+					event_id=eventid,
+					participant_id__in=displayed_users
+				).exclude(
+					participant_id__in=marked_participant
+				).delete()
+				# insert new record if not exists
 				for record in marked_participant:
-					event_attend = EventAttendance.objects.filter(event_id =eventid, participant_id = record)
-					if not event_attend.exists():
-						EventAttendance.objects.create(event_id =eventid, participant_id = record)
-					#print marked_participant
-				success_url = '/training/event/rp/completed'
+					if record in displayed_users:
+						event_attend = EventAttendance.objects.filter(event_id=eventid, participant_id=record)
+						if not event_attend.exists():
+							EventAttendance.objects.create(event_id=eventid, participant_id=record)
 			else:
-				EventAttendance.objects.filter(event_id = eventid).delete()
-				success_url = '/training/event/rp/completed'
+				EventAttendance.objects.filter(event_id=eventid).delete()
+			success_url = '/training/event/rp/completed'
 		
 		elif attendance_type == 'reg':
-			if request.POST and 'user_reg' in request.POST:
-				marked_registrations = request.POST.getlist('user_reg', None)
-				# delete un marked record if exits
-				remove_reg = Participant.objects.filter(event_id =eventid, reg_approval_status=1).exclude(id__in = marked_registrations).update(reg_approval_status=0)
-				
-				# insert new record if not exits
+			marked_registrations = request.POST.getlist('user_reg', [])
+			if displayed_users:
+				# update reg_approval_status to 0 for displayed users that are not marked
+				Participant.objects.filter(
+					event_id=eventid,
+					id__in=displayed_users
+				).exclude(
+					id__in=marked_registrations
+				).update(reg_approval_status=0)
+				# insert new record if not exists
 				for record in marked_registrations:
-					reg_attend = Participant.objects.filter(event_id =eventid, id = record, reg_approval_status=1)
-					if not reg_attend.exists():
-						mark_reg_approval(record, eventid)
-					#print marked_registrations
-				success_url = '/training/event/rp/ongoing'
+					if record in displayed_users:
+						reg_attend = Participant.objects.filter(event_id=eventid, id=record, reg_approval_status=1)
+						if not reg_attend.exists():
+							mark_reg_approval(record, eventid)
 			else:
-				Participant.objects.filter(event_id =eventid).update(reg_approval_status=0)
-				success_url = '/training/event/rp/ongoing'
+				Participant.objects.filter(event_id=eventid).update(reg_approval_status=0)
+			success_url = '/training/event/rp/ongoing'
 		return HttpResponseRedirect(success_url)
 
 
@@ -917,15 +945,38 @@ def ajax_check_college(request):
 
 
 def get_create_user(row):
-		try:
-			return User.objects.get(email=row[2].strip())
-		except User.DoesNotExist:
-			user = User(username=row[2], email=row[2].strip(), first_name=row[0], last_name=row[1])
-			user.set_password(row[0]+'@ST'+str(random.random()).split('.')[1][:5])
-			user.save()
-			create_profile(user, '')
-			send_registration_confirmation(user)
-			return user
+    email = row[2].strip().lower()
+
+    try:
+        user = User.objects.get(email=email)
+        ensure_username_equals_email(user)
+        return user
+
+    except User.DoesNotExist:
+        user = User(
+            username=email,
+            email=email,
+            first_name=row[0],
+            last_name=row[1]
+        )
+
+        user.set_password(row[0] + '@ST' + str(random.random()).split('.')[1][:5])
+        user.save()
+
+        ensure_username_equals_email(user)
+
+        create_profile(user, '')
+
+        logger.info(
+            "Registration email triggered | user=%s | user_id=%s | email=%s",
+            getattr(user, "username", None),
+            getattr(user, "id", None),
+            getattr(user, "email", None),
+        )
+
+        send_registration_confirmation(user)
+
+        return user
 
 from io import TextIOWrapper
 from django.contrib.auth.decorators import login_required
@@ -1560,7 +1611,40 @@ class ILWTestCertificate(object):
 
     imgDoc.setFillColorRGB(211, 211, 211)
     imgDoc.setFont('Helvetica', 10, leading=None)
-    imgDoc.drawString(10, 6, certificate_pass)
+    # imgDoc.drawString(10, 6, certificate_pass)
+
+    # Existing certificate code
+    footer_text = certificate_pass
+
+    # Add APAAR ID only if available in participant
+    if teststatus.participant.apaar_id:
+        footer_text += f"    APAAR ID {teststatus.participant.apaar_id}"
+
+    imgDoc.drawString(10, 6, footer_text)
+
+    # Add verification link
+    verify_url = "https://spoken-tutorial.org/training/verify-ilwtest-certificate/"
+
+    imgDoc.setFillColorRGB(1, 1, 1)
+
+    link_x = 220 if teststatus.participant.apaar_id else 110
+    link_y = 6
+
+    imgDoc.drawString(link_x, link_y, "Click here")
+
+    imgDoc.linkURL(
+        verify_url,
+        (link_x, link_y - 2, link_x + 45, link_y + 10),
+        relative=0
+    )
+
+    imgDoc.setFillColorRGB(211, 211, 211)
+
+    imgDoc.drawString(
+        link_x + 50,
+        link_y,
+        "or visit spoken-tutorial.org/training/verify-ilwtest-certificate/"
+    )
 
     #paragraphe
     text = get_test_certi_text(event, user, teststatus)
@@ -1623,14 +1707,22 @@ class EventTestCertificateView(ILWTestCertificate, View):
   def post(self, request, *args, **kwargs):
     eventid = self.request.POST.get("eventid")
     event = TrainingEvents.objects.get(id=eventid)
+    from training.helpers import sync_and_check_test_status
+    if event.event_type == "HN":
+        teststatuses = EventTestStatus.objects.filter(event_id=eventid, participant__user=self.request.user, mdlemail=self.request.user.email)
+    else:
+        teststatuses = EventTestStatus.objects.filter(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email)
+    for ts in teststatuses:
+        sync_and_check_test_status(ts)
+
     if event.event_type == "HN":
         teststatus = EventTestStatus.objects.filter(event_id=eventid, participant__user=self.request.user, mdlemail=self.request.user.email, mdlgrade__gte=settings.PASS_GRADE).order_by('-mdlgrade').first()
     else:
         teststatus = EventTestStatus.objects.filter(event_id=eventid, fossid=kwargs['testfossid'], mdlemail=self.request.user.email, mdlgrade__gte=settings.PASS_GRADE).order_by('-mdlgrade').first()
-    if event:
+    if event and teststatus:
       return self.create_ilwtest_certificate(event, self.request.user, teststatus)
     else:
-      messages.error(self.request, "Permission Denied!")
+      messages.error(self.request, "Permission Denied or Test Certificate not available!")
     return HttpResponseRedirect("/")
 
 
@@ -1642,6 +1734,12 @@ class BatchTestCertificateView(ILWTestCertificate, View):
         if event.download_access != request.user.email:
             messages.error(request, "Permission Denied!")
             return HttpResponseRedirect("/")
+
+        # Run sync for all participants of this event
+        from training.helpers import sync_and_check_test_status
+        all_test_statuses = EventTestStatus.objects.filter(event=event)
+        for ts in all_test_statuses:
+            sync_and_check_test_status(ts)
 
         output = PdfFileWriter()
         response = HttpResponse(content_type='application/pdf')
@@ -1683,7 +1781,32 @@ class BatchTestCertificateView(ILWTestCertificate, View):
 
             pdf_canvas.setFillColorRGB(211, 211, 211)
             pdf_canvas.setFont('Helvetica', 10, leading=None)
-            pdf_canvas.drawString(10, 6, teststatus.cert_code)
+            # pdf_canvas.drawString(10, 6, teststatus.cert_code)
+            cert_text = teststatus.cert_code or ""
+
+            apaar_text = ""
+
+            if teststatus.participant.apaar_id:
+                apaar_text = f"    APAAR ID {teststatus.participant.apaar_id}"
+
+            verify_url = "https://spoken-tutorial.org/training/verify-ilwtest-certificate/"
+
+            pdf_canvas.setFillColorRGB(1, 1, 1)
+            link_x = 220 if apaar_text else 110
+            link_y = 6
+
+            pdf_canvas.linkURL(
+                verify_url,
+                (link_x, link_y - 2, link_x + 45, link_y + 10),
+                relative=0
+            )
+            pdf_canvas.setFillColorRGB(211, 211, 211)
+
+            pdf_canvas.drawString(
+                link_x + 50,
+                link_y,
+                "or visit https://spoken-tutorial.org/training/verify-ilwtest-certificate/"
+            )
 
             pdf_canvas.setFillColorRGB(0, 0, 0)
             pdf_canvas.drawCentredString(150, 115, event.event_end_date.strftime('%d %B %Y'))
@@ -1709,7 +1832,6 @@ class BatchTestCertificateView(ILWTestCertificate, View):
 
         output.write(response)
         return response
-
 
 def ilwtestkey_verification(serial):
     context = {}

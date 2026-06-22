@@ -181,16 +181,15 @@ def check_passgrade_exists(event,testfossid):
   # testfossid = arg_list[1]
   # print("@@@@@@@@@@@@@@@",email, arg_list)
 
-  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event.event, fossid=testfossid, mdlemail=event.email, part_status__gte=2, mdlgrade__gte=40.00)
-  if ilwmdlgradeentry:
-    return True
-  else:
-    return False
+  from training.helpers import sync_and_check_test_status
+  teststatus = EventTestStatus.objects.filter(event=event.event, fossid=testfossid, mdlemail=event.email).first()
+  return sync_and_check_test_status(teststatus)
 
 @register.filter
 def check_hn_passgrade_exists(participant):
-   ilwmdlgradeentry = EventTestStatus.objects.filter(participant=participant, event=participant.event, mdlemail=participant.email, part_status__gte=2, mdlgrade__gte=40.00).exists()
-   return ilwmdlgradeentry
+   from training.helpers import sync_and_check_test_status
+   teststatus = EventTestStatus.objects.filter(participant=participant, event=participant.event, mdlemail=participant.email).first()
+   return sync_and_check_test_status(teststatus)
 
 
 @register.filter
@@ -201,15 +200,19 @@ def get_grade(event, testfossid):
 
   # email= arg_list[0]
   # testfossid = arg_list[1]
-  ilwmdlgradeentry = EventTestStatus.objects.filter(event=event.event, fossid=testfossid, mdlemail=event.email, part_status__gte=2, mdlgrade__gte=40.00).order_by('-mdlgrade').first()
-
-  return ilwmdlgradeentry.mdlgrade
+  from training.helpers import sync_and_check_test_status
+  teststatus = EventTestStatus.objects.filter(event=event.event, fossid=testfossid, mdlemail=event.email).first()
+  if teststatus and sync_and_check_test_status(teststatus):
+    return teststatus.mdlgrade
+  return 0.00
 
 @register.filter
 def get_hn_grade(participant):
-  ilwmdlgradeentry = EventTestStatus.objects.filter(participant=participant, event=participant.event, mdlemail=participant.email, part_status__gte=2, mdlgrade__gte=40.00).order_by('-mdlgrade').first()
-
-  return ilwmdlgradeentry.mdlgrade
+  from training.helpers import sync_and_check_test_status
+  teststatus = EventTestStatus.objects.filter(participant=participant, event=participant.event, mdlemail=participant.email).first()
+  if teststatus and sync_and_check_test_status(teststatus):
+    return teststatus.mdlgrade
+  return 0.00
 
 @register.filter
 def get_item(dictionary, key):

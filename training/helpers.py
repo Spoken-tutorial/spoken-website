@@ -372,3 +372,46 @@ def format_foss_list(foss_list):
     if len(foss_list) == 1:
         return foss_list[0]
     return ', '.join(foss_list[:-1]) + " and " + foss_list[-1]
+
+
+def sync_and_check_test_status(teststatus):
+    if not teststatus:
+        return False
+    if teststatus.part_status >= 2 and teststatus.mdlgrade >= 40.00:
+        return True
+
+    from ilwmoodle.models import ILWMdlUser, ILWMdlQuizAttempts, ILWMdlQuizGrades
+
+    try:
+        email = teststatus.mdlemail
+        if not email:
+            return False
+        mdl_user = ILWMdlUser.objects.using('ilwmoodle').filter(email__iexact=email.strip()).first()
+        if not mdl_user:
+            return False
+
+        attempt = ILWMdlQuizAttempts.objects.using('ilwmoodle').filter(
+            id=teststatus.mdlattempt_id,
+            quiz=teststatus.mdlquiz_id,
+            userid=mdl_user.id
+        ).first()
+
+        if not attempt or attempt.state.lower() != 'finished':
+            return False
+
+        quiz_grade = ILWMdlQuizGrades.objects.using('ilwmoodle').filter(
+            quiz=teststatus.mdlquiz_id,
+            userid=mdl_user.id
+        ).first()
+
+        if quiz_grade and quiz_grade.grade >= 40.00:
+            teststatus.mdlgrade = quiz_grade.grade
+            teststatus.part_status = 2
+            teststatus.save()
+            return True
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in sync_and_check_test_status: {str(e)}")
+
+    return False
