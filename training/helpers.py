@@ -386,11 +386,11 @@ def sync_and_check_test_status(teststatus):
         email = teststatus.mdlemail
         if not email:
             return False
-        mdl_user = ILWMdlUser.objects.using('moodle').filter(email__iexact=email.strip()).first()
+        mdl_user = ILWMdlUser.objects.using('ilwmoodle').filter(email__iexact=email.strip()).first()
         if not mdl_user:
             return False
 
-        attempt = ILWMdlQuizAttempts.objects.using('moodle').filter(
+        attempt = ILWMdlQuizAttempts.objects.using('ilwmoodle').filter(
             id=teststatus.mdlattempt_id,
             quiz=teststatus.mdlquiz_id,
             userid=mdl_user.id
@@ -399,7 +399,7 @@ def sync_and_check_test_status(teststatus):
         if not attempt or attempt.state.lower() != 'finished':
             return False
 
-        quiz_grade = ILWMdlQuizGrades.objects.using('moodle').filter(
+        quiz_grade = ILWMdlQuizGrades.objects.using('ilwmoodle').filter(
             quiz=teststatus.mdlquiz_id,
             userid=mdl_user.id
         ).first()
