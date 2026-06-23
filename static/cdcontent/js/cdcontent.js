@@ -195,12 +195,20 @@ $(document).ready(function(){
             success: function(data) {
             if(data['validate']=='success'){
               $('#registered-success-msg').show();
-        document.getElementById("otp_sent_msg").innerHTML = "Login Successfull";
-        document.getElementById('otp_sent_msg').className = 'label label-success';
-        $("#otp_sent_msg").show();
-        document.getElementById("make_payment").disabled = false;
-
-        }
+              document.getElementById("otp_sent_msg").innerHTML = "Login Successfull";
+              document.getElementById('otp_sent_msg').className = 'label label-success';
+              $("#otp_sent_msg").show();
+              if (typeof user_loggedin !== 'undefined') {
+                  user_loggedin = 'True';
+              } else {
+                  window.user_loggedin = 'True';
+              }
+              if (typeof checkRegisterButton === 'function') {
+                  checkRegisterButton();
+              } else {
+                  document.getElementById("make_payment").disabled = false;
+              }
+            }
             else {
         document.getElementById("otp_sent_msg").innerHTML = "Invalid OTP";
         document.getElementById('otp_sent_msg').className = 'label label-danger';

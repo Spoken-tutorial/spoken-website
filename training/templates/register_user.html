@@ -362,6 +362,7 @@
 {% block jsblock %}
 <script src="{% static 'spoken/js/events.js' %}"></script>
 <script type="text/javascript">
+var user_loggedin = "{{user.is_authenticated|yesno:"True,False"}}";
 
 function show_clg_list(){
     var stateid = $('#id_state').val();
@@ -399,11 +400,7 @@ function show_clg_list(){
 
 
 function payment_btn_activate(){
-var make_payment_btn = $('#make_payment');
-var user_loggedin = "{{user.is_authenticated|yesno:"True,False"}}";
-if($('#make_payment').length > 0 && user_loggedin == 'True'){
-      $('#make_payment').removeAttr('disabled');
-  }
+  checkRegisterButton();
 }
 
 function payment_btn_hide(){
@@ -444,6 +441,13 @@ function checkRegisterButton() {
     var hasCollege = (college && college !== 'None') || saved_college;
     var hasEmptyMandatory = !$('#id_name').val() || !$('#id_email').val() || !$('#id_phone').val() || !$('#id_gender').val() || !$('#id_state').val() || !hasCollege;
     $('#register_paid').prop('disabled', hasEmptyMandatory);
+    
+    var logged_in = (typeof user_loggedin !== 'undefined') ? user_loggedin : window.user_loggedin;
+    if (logged_in === 'True') {
+        $('#make_payment').prop('disabled', hasEmptyMandatory);
+    } else {
+        $('#make_payment').prop('disabled', true);
+    }
 }
 
 $('#id_gender').change(function(){
@@ -644,6 +648,17 @@ $('#id_college').change(function(){
   checkRegisterButton();
 
   $('#register_form').submit(function(event) {
+    var college = $('#id_college').val();
+    var saved_college = $('#college_user_details').val();
+    var hasCollege = (college && college !== 'None') || saved_college;
+    var hasEmptyMandatory = !$('#id_name').val() || !$('#id_email').val() || !$('#id_phone').val() || !$('#id_gender').val() || !$('#id_state').val() || !hasCollege;
+    
+    if (hasEmptyMandatory) {
+      event.preventDefault();
+      alert("Please fill in all the mandatory fields correctly.");
+      return false;
+    }
+
     if (registrationEnded) {
       event.preventDefault();
       $('#registration-ended-msg').show();
@@ -655,6 +670,17 @@ $('#id_college').change(function(){
   });
 
   $('#register_paid, #make_payment').click(function(event) {
+    var college = $('#id_college').val();
+    var saved_college = $('#college_user_details').val();
+    var hasCollege = (college && college !== 'None') || saved_college;
+    var hasEmptyMandatory = !$('#id_name').val() || !$('#id_email').val() || !$('#id_phone').val() || !$('#id_gender').val() || !$('#id_state').val() || !hasCollege;
+    
+    if (hasEmptyMandatory) {
+      event.preventDefault();
+      alert("Please fill in all the mandatory fields correctly.");
+      return false;
+    }
+
     if (registrationEnded) {
       event.preventDefault();
       $('#registration-ended-msg').show();

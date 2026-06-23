@@ -287,8 +287,9 @@ def register_user(request):
 		form.fields["name"].initial = user.get_full_name()
 		form.fields["email"].initial = getattr(user, 'email')
 		form.fields['email'].widget.attrs['readonly'] = True
-		form.fields["phone"].initial = profile.phone
-		form.fields['phone'].widget.attrs['readonly'] = True
+		if profile.phone and str(profile.phone).strip():
+			form.fields["phone"].initial = profile.phone
+			form.fields['phone'].widget.attrs['readonly'] = True
 		if user.profile_set.all():
 			try:
 				form.fields["state"].initial = getattr(user.profile_set.all()[0], 'state')
@@ -370,8 +371,9 @@ def register_user(request):
 					form.fields["name"].initial = request.user.get_full_name()
 					form.fields["email"].initial = request.user.email
 					if profile:
-						form.fields["phone"].initial = profile.phone
-						form.fields['phone'].widget.attrs['readonly'] = True
+						if profile.phone and str(profile.phone).strip():
+							form.fields["phone"].initial = profile.phone
+							form.fields['phone'].widget.attrs['readonly'] = True
 					if student and student.gender:
 						gender_value = student.gender.lower()
 						if gender_value.startswith('f'):
@@ -431,11 +433,14 @@ def register_user(request):
 			context["gst"] = gst
 			form.fields["amount"].initial = final_amount
 			form.fields["amount"].widget.attrs['readonly'] = True
-			context["fossess"] = [foss.id for foss in event_register.course.foss.all()]
 			context['event_obj']= event_register
 	
 	event_register = context.get('event_obj')
 	if event_register:
+		if event_register.course:
+			context["fossess"] = [foss.id for foss in event_register.course.foss.all()]
+		else:
+			context["fossess"] = [event_register.foss.id] if event_register.foss else []
 		if event_register.registartion_end_date < date.today():
 			context['registration_ended'] = True
 			if event_register.is_swayam:

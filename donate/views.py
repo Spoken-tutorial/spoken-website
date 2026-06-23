@@ -204,10 +204,12 @@ def controller(request, purpose):
             # & returns Payee record
             payee_obj_new = form_valid(request, form, purpose)
         else:
-            form_invalid(request, form)
+            return form_invalid(request, form)
     
     if purpose != 'cdcontent': # purpose = event_id in case of ILW
         participant_form = reg_success(request, 'general') 
+        if isinstance(participant_form, HttpResponse):
+            return participant_form
         participant_form.payment_status = payee_obj_new
         try :
             participant_form.save()
