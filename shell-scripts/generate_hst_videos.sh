@@ -185,29 +185,56 @@ do
     mkdir -p "$DEST"
     mkdir -p "$DEST/resources"
 
-    find "$SRC" -type f | while read file
-    do
-        filename=$(basename "$file")
+find "$SRC" -type f | while read file
+do
 
-        case "$file" in
-            */Slide/*)
-                cp -f "$file" "$DEST/resources/"
-                echo "  ✓ Slide: $filename"
-                ;;
-            */Script/*)
-                cp -f "$file" "$DEST/"
-                echo "  ✓ Script: $filename"
-                ;;
-            */TimeScript/*)
-                cp -f "$file" "$DEST/"
-                echo "  ✓ TimeScript: $filename"
-                ;;
-            */Video/*)
-                cp -f "$file" "$DEST/"
-                echo "  ✓ Video: $filename"
-                ;;
-        esac
-    done
+filename=$(basename "$file")
+
+case "$file" in
+
+
+*/Slide/*)
+
+cp -f "$file" "$DEST/resources/"
+
+echo -e "\033[92m✓ Slide:\033[0m $filename"
+
+;;
+
+
+*/Script/*|*/TimeScript/*|*/Video/*)
+
+# ONLY exact English files
+if [[ "$filename" =~ ([-[:space:]]English)\.(mp4|pdf|odt|webm|ogv)$ ]]
+then
+
+new_filename=$(
+echo "$filename" \
+| sed \
+-e 's/ - /-/g' \
+-e 's/ /-/g'
+)
+
+cp -f \
+"$file" \
+"$DEST/$new_filename"
+
+echo -e "\033[92m✓ COPIED:\033[0m"
+
+echo "OLD → $filename"
+echo "NEW → $new_filename"
+
+else
+
+echo -e "\033[31mSKIPPED:\033[0m $filename"
+
+fi
+
+;;
+
+esac
+
+done
 
 done < /tmp/hst_mapping.txt
 
