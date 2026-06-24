@@ -44,6 +44,9 @@ from donate.forms import AcademicSubscriptionForm
 from donate.helpers import *
 from donate.subscription import *
 import requests
+import logging
+
+logger = logging.getLogger("mail_logs.donate")
 
 from .helpers import *
 
@@ -1040,47 +1043,89 @@ def subscription(request):
 
 @csrf_exempt
 def payment_callback(request):
+    logger.warning("payment_callback triggered: Method=%s, POST=%s", request.method, request.POST)
     context = {}
     status_template = 'spoken/templates/payment_status.html'
     order_id = request.POST.get('order_id')
     if not order_id:
+        logger.error("payment_callback: Missing order_id in POST data")
         raise Http404
     
-    ac_sub = AcademicSubscription.objects.get(transaction__order_id=order_id)
+    try:
+        ac_sub = AcademicSubscription.objects.get(transaction__order_id=order_id)
+        logger.warning("payment_callback: Found AcademicSubscription (id=%s, email=%s, subscription_amount=%s) for order_id=%s", ac_sub.id, ac_sub.email, ac_sub.subscription_amount, order_id)
+    except AcademicSubscription.DoesNotExist:
+        logger.error("payment_callback: No AcademicSubscription found for order_id=%s", order_id)
+        context['status'] = 'FAILED'
+        return render(request, status_template, context=context)
+    except AcademicSubscription.MultipleObjectsReturned:
+        logger.error("payment_callback: Multiple AcademicSubscriptions found for order_id=%s", order_id)
+        context['status'] = 'FAILED'
+        return render(request, status_template, context=context)
+
     context['order_id'] = order_id
     try:
         order_status_url = f"{settings.ORDER_STATUS_URL}{order_id}"
         # order status api
         headers = get_request_headers(ac_sub.email)
+        logger.warning("payment_callback: Fetching order status from %s, headers=%s", order_status_url, headers)
         try:
             response = requests.get(order_status_url, headers=headers)
             response_data = response.json()
+            logger.warning("payment_callback: Response status_code=%s, response_data=%s", response.status_code, response_data)
         except requests.exceptions.RequestException as e:
+            logger.exception("payment_callback: RequestException during order status API call")
             context['status'] = 'FAILED'
             return render(request, status_template, context=context)
+        except Exception as e:
+            logger.exception("payment_callback: Exception parsing JSON response from order status API")
+            context['status'] = 'FAILED'
+            return render(request, status_template, context=context)
+
         if response.status_code == 200:
             verified = verify_hmac_signature(request.POST)
+            logger.warning("payment_callback: HMAC signature verified=%s", verified)
             if not verified:
+                logger.error("payment_callback: HMAC signature verification failed")
                 context['status'] = 'FAILED'
                 return render(request, status_template, context=context)
+            
+            logger.warning("payment_callback: calling save_hdfc_success_data")
             save_hdfc_success_data(order_id, response_data)
+            
             context['data'] = get_display_transaction_details(response_data)
             order_status = response_data.get('status', '')
             amount = response_data.get('amount', '')
+            logger.warning("payment_callback: status=%s, amount=%s, expected_amount=%s", order_status, amount, ac_sub.subscription_amount)
             
-            if order_status == 'CHARGED' and amount == ac_sub.subscription_amount:
-                context['status'] = 'CHARGED'
+            if order_status == 'CHARGED':
+                try:
+                    amount_decimal = Decimal(str(amount))
+                except InvalidOperation:
+                    logger.exception("payment_callback: InvalidOperation converting amount '%s' to Decimal", amount)
+                    context['status'] = 'FAILED'
+                    return render(request, status_template, context=context)
+                if amount_decimal == ac_sub.subscription_amount:
+                    logger.warning("payment_callback: status updated to CHARGED successfully")
+                    context['status'] = 'CHARGED'
+                else:
+                    logger.error("payment_callback: Amount mismatch. Expected=%s, Got=%s", ac_sub.subscription_amount, amount_decimal)
+                    context['status'] = 'FAILED'
             elif order_status == 'PENDING_VBV' or order_status == 'AUTHORIZING': #This is a non-terminal transaction status. Show pending screen/polling
+                logger.warning("payment_callback: Status is pending/authorizing (%s)", order_status)
                 context['status'] = 'PENDING'
             else:
+                logger.warning("payment_callback: Status is failed/other (%s)", order_status)
                 context['status'] = 'FAILED'
             return render(request, status_template, context=context)
         else:
+            logger.error("payment_callback: Order status API returned status_code=%s, calling save_hdfc_error_data", response.status_code)
             save_hdfc_error_data(order_id, response_data)  
             context['status'] = 'FAILED'
     except Exception as e:
+        logger.exception("payment_callback: Unexpected exception in callback")
         context['status'] = 'FAILED'
-    return render(request, status_template, context=context) # return to payment page site
+    return render(request, status_template, context=context) # return to payment page site # return to payment page site
 
 
 @csrf_exempt
