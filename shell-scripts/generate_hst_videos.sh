@@ -189,40 +189,42 @@ find "$SRC" -type f | while read file
 do
 
 filename=$(basename "$file")
-
 case "$file" in
 
-
 */Slide/*)
-
 cp -f "$file" "$DEST/resources/"
-
 echo -e "\033[92m✓ Slide:\033[0m $filename"
-
 ;;
-
 
 */Script/*|*/TimeScript/*|*/Video/*)
 
-# ONLY exact English files
 if [[ "$filename" =~ ([-[:space:]]English)\.(mp4|pdf|odt|webm|ogv)$ ]]
 then
 
-new_filename=$(
-echo "$filename" \
-| sed \
--e 's/ - /-/g' \
--e 's/ /-/g'
+db_filename=$(
+"$PYTHON_BIN" manage.py shell -c "
+from creation.models import TutorialResource
+
+r = TutorialResource.objects.filter(
+tutorial_detail_id=$tutorial_detail_id
+).exclude(video='').first()
+
+print(r.video if r else '$filename')
+" 2>/dev/null | tail -1
 )
+
+if [ -z "$db_filename" ]; then
+    db_filename="$filename"
+fi
 
 cp -f \
 "$file" \
-"$DEST/$new_filename"
+"$DEST/$db_filename"
 
 echo -e "\033[92m✓ COPIED:\033[0m"
 
-echo "OLD → $filename"
-echo "NEW → $new_filename"
+echo "SOURCE → $filename"
+echo "DB NAME → $db_filename"
 
 else
 
@@ -245,4 +247,3 @@ echo "================================="
 echo "Migration completed"
 echo "Stored under media/videos/"
 echo "================================="
-
