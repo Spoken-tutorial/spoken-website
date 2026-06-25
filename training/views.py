@@ -869,7 +869,12 @@ class EventAttendanceListView(ListView):
 		
 
 		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)) | Q(payment_status__transaction__order_status="CHARGED"))
-		self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED")).select_related('payment_status')
+		successful_user_ids = main_query.filter(
+			Q(payment_status__status=1) | 
+			Q(registartion_type__in=(1,3)) | 
+			Q(payment_status__transaction__order_status="CHARGED")
+		).values_list('user_id', flat=True)
+		self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED")).exclude(user_id__in=successful_user_ids).select_related('payment_status')
 		if self.event.training_status == 1:
 			self.queryset = main_query.filter(reg_approval_status=1)
 
