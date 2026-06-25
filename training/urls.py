@@ -92,6 +92,7 @@ urlpatterns = [
       name="event_participants"
     ),
     url(r'^ajax_add_teststatus/', ajax_add_teststatus, name="ajax_add_teststatus"),
+    url(r'^ajax_refresh_payment_status/', ajax_refresh_payment_status, name="ajax_refresh_payment_status"),
     url(
       r'^generate_test_certificate/(?P<testfossid>\d+)/$', 
       EventTestCertificateView.as_view(), \

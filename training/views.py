@@ -1536,6 +1536,104 @@ class EventParticipantsListView(ListView):
 
 
 @csrf_exempt
+def ajax_refresh_payment_status(request):
+	if not (request.user.is_authenticated() and (is_resource_person(request.user) or is_administrator(request.user))):
+		return JsonResponse({'status': 'error', 'message': 'Permission Denied'}, status=403)
+
+	participant_id = request.POST.get('participant_id')
+	if not participant_id:
+		return JsonResponse({'status': 'error', 'message': 'Participant ID is required.'}, status=400)
+
+	try:
+		participant = Participant.objects.select_related('payment_status', 'payment_status__transaction').get(id=participant_id)
+	except Participant.DoesNotExist:
+		return JsonResponse({'status': 'error', 'message': 'Participant not found.'}, status=404)
+
+	payee = participant.payment_status
+	if not payee:
+		return JsonResponse({'status': 'error', 'message': 'No payment record associated with this participant.'}, status=400)
+
+	transaction = payee.transaction
+	if not transaction or not transaction.order_id:
+		return JsonResponse({'status': 'error', 'message': 'No transaction order ID found. Payment might not have been initiated via HDFC.'}, status=400)
+
+	order_id = transaction.order_id
+	email = payee.email
+	sub_amount = payee.amount
+
+
+	from donate.subscription import get_request_headers
+	from donate.payment import save_ilw_hdfc_success_data, save_ilw_hdfc_error_data
+	from decimal import Decimal, InvalidOperation
+
+	HDFC_STATUS_URL = f"{settings.ORDER_STATUS_URL}{order_id}"
+	headers = get_request_headers(email)
+
+	try:
+		response = requests.get(HDFC_STATUS_URL, headers=headers)
+		if response.status_code != 200:
+			return JsonResponse({
+				'status': 'error',
+				'message': f'HDFC API returned status code {response.status_code}.'
+			})
+
+		response_data = response.json()
+		order_status = response_data.get('status', '')
+		amount = response_data.get('amount', '')
+
+		if order_status == 'CHARGED':
+			try:
+				amount_decimal = Decimal(str(amount))
+			except InvalidOperation:
+				save_ilw_hdfc_error_data(order_id, response_data, msg="Amount error")
+				return JsonResponse({'status': 'error', 'message': 'Invalid amount returned from HDFC.'})
+
+			if amount_decimal == sub_amount:
+				save_ilw_hdfc_success_data(order_id, response_data)
+				return JsonResponse({
+					'status': 'success',
+					'payment_status': 'CHARGED',
+					'message': 'Payment status successfully updated to CHARGED.'
+				})
+			else:
+				save_ilw_hdfc_error_data(order_id, response_data, msg="Amount mismatch")
+				return JsonResponse({
+					'status': 'error',
+					'message': f'Amount mismatch. Expected: {sub_amount}, Received: {amount_decimal}'
+				})
+		elif order_status in ["AUTHENTICATION_FAILED", "AUTHORIZATION_FAILED"]:
+			save_ilw_hdfc_error_data(order_id, response_data)
+			
+			# Ensure payee status is marked as failed (2)
+			payee.status = 2
+			payee.save()
+
+			# Update transaction status/details
+			transaction.order_status = order_status
+			transaction.save()
+
+			return JsonResponse({
+				'status': 'success',
+				'payment_status': order_status,
+				'message': f'Payment failed status returned: {order_status}'
+			})
+		else:
+			# Status is pending/initiated/etc.
+			if order_status:
+				transaction.order_status = order_status
+				transaction.save()
+			return JsonResponse({
+				'status': 'success',
+				'payment_status': order_status or 'PENDING',
+				'message': f'Payment status is currently: {order_status or "PENDING"}'
+			})
+
+	except Exception as e:
+		logger.exception("Error during manual HDFC status refresh for order_id=%s", order_id)
+		return JsonResponse({'status': 'error', 'message': f'Exception occurred: {str(e)}'}, status=500)
+
+
+@csrf_exempt
 def ajax_add_teststatus(request):
 	partid = int(request.POST.get("partid"))
 	mdlcourseid = int(request.POST.get("mdlcourseid"))

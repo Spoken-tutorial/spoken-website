@@ -136,7 +136,12 @@
 	{% for payee in unsuccessful_payee %}
 	<tr>
 		<td>{{ forloop.counter }}</td>
-		<td>{{ payee.name}}</td>
+		<td>
+			{{ payee.name }}
+			<span class="payment-refresh-status" data-id="{{ payee.id }}" style="margin-left: 10px; font-size: 11px;">
+				<i class="fa fa-refresh fa-spin text-info"></i> <span class="text-muted">checking...</span>
+			</span>
+		</td>
 		<td>{{ payee.email}}</td>
 		<td>{{ payee.college.institution_name}}</td>
 		<td>{{ payee.state.name}}</td>
@@ -203,5 +208,56 @@
     }
   }
   
+  $(document).ready(function() {
+    var indicators = $('.payment-refresh-status');
+    var totalCount = indicators.length;
+    if (totalCount === 0) return;
+
+    var completedCount = 0;
+    var successCount = 0;
+
+    indicators.each(function() {
+      var container = $(this);
+      var participantId = container.data('id');
+
+      $.ajax({
+        type: "POST",
+        url: "{% url 'training:ajax_refresh_payment_status' %}",
+        data: {
+          'participant_id': participantId
+        },
+        success: function(response) {
+          if (response.status === 'success') {
+            if (response.payment_status === 'CHARGED') {
+              container.html('<span class="text-success" style="font-weight: bold;"><i class="fa fa-check"></i> Success</span>');
+              successCount++;
+            } else {
+              container.html('<span class="text-warning"><i class="fa fa-info-circle"></i> ' + response.payment_status + '</span>');
+            }
+          } else {
+            container.html('<span class="text-danger" title="' + response.message + '"><i class="fa fa-exclamation-triangle"></i> error</span>');
+          }
+        },
+        error: function(xhr, status, error) {
+          var errorMsg = 'error';
+          if (xhr.responseJSON && xhr.responseJSON.message) {
+            errorMsg = xhr.responseJSON.message;
+          }
+          container.html('<span class="text-danger" title="' + errorMsg + '"><i class="fa fa-exclamation-triangle"></i> error</span>');
+        },
+        complete: function() {
+          completedCount++;
+          if (completedCount === totalCount) {
+            if (successCount > 0) {
+              // Reload page after a short delay so user can see success indicator
+              setTimeout(function() {
+                location.reload();
+              }, 1500);
+            }
+          }
+        }
+      });
+    });
+  });
   </script>
 {% endblock %}
