@@ -48,15 +48,15 @@ def save_ilw_hdfc_success_data(order_id, data):
 
     #populate participant payee status
     try:
-        payee = Payee.objects.get(transaction__order_id=order_id)
-        logger.warning("save_ilw_hdfc_success_data: Found payee_id=%s for order_id=%s", payee.id, order_id)
-        payee.status = 1 if data.get('status') =='CHARGED' else 2
-        payee.save()
-        logger.warning("save_ilw_hdfc_success_data: Payee status updated to %s", payee.status)
-    except Payee.DoesNotExist:
-        logger.error("save_ilw_hdfc_success_data: Payee matching order_id=%s does not exist", order_id)
-    except Payee.MultipleObjectsReturned:
-        logger.error("save_ilw_hdfc_success_data: Multiple Payees found matching order_id=%s", order_id)
+        payees = Payee.objects.filter(transaction__order_id=order_id)
+        if payees.exists():
+            status_val = 1 if data.get('status') =='CHARGED' else 2
+            for payee in payees:
+                payee.status = status_val
+                payee.save()
+            logger.warning("save_ilw_hdfc_success_data: Payee status updated to %s for all matching payees", status_val)
+        else:
+            logger.error("save_ilw_hdfc_success_data: Payee matching order_id=%s does not exist", order_id)
     except Exception as e:
         logger.exception("save_ilw_hdfc_success_data: Unexpected exception updating payee for order_id=%s", order_id)
 
