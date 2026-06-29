@@ -9,7 +9,7 @@ from creation.models import TutorialResource,\
 from api.serializers import VideoSerializer, CategorySerializer, FossSerializer, LanguageSerializer, RelianceJioSerializer,\
         RelianceJioVideoSerializer, RelianceJioCategorySerializer, RelianceJioLanguageSerializer, TutorialDetailSerializer
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, Q, Prefetch
 import json
 import re
 from django.conf import settings
@@ -311,8 +311,11 @@ def get_all_foss_langauges(request):
 
 @api_view(['GET'])
 def get_all_tutorials(request, fid, lid):
+    resources = TutorialResource.objects.filter(language_id=lid)
     tutorials = TutorialDetailSerializer(
-        TutorialDetail.objects.filter(foss = fid).order_by('order'), 
+        TutorialDetail.objects.filter(foss=fid).prefetch_related(
+            Prefetch('tutorialresource_set', queryset=resources, to_attr='prefetched_resources')
+        ).order_by('order'), 
         context={"lang": lid},
         many=True
         ).data
