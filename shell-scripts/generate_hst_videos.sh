@@ -201,8 +201,12 @@ echo -e "\033[92m✓ Slide:\033[0m $filename"
 if [[ "$filename" =~ ([-[:space:]]English)\.(mp4|pdf|odt|webm|ogv)$ ]]
 then
 
-db_filename=$(
-"$PYTHON_BIN" manage.py shell -c "
+extension="${filename##*.}"
+
+if [ "$extension" = "mp4" ] || [ "$extension" = "webm" ] || [ "$extension" = "ogv" ]; then
+
+    db_filename=$(
+    "$PYTHON_BIN" manage.py shell -c "
 from creation.models import TutorialResource
 
 r = TutorialResource.objects.filter(
@@ -211,20 +215,19 @@ tutorial_detail_id=$tutorial_detail_id
 
 print(r.video if r else '$filename')
 " 2>/dev/null | tail -1
-)
+    )
 
-if [ -z "$db_filename" ]; then
+    [ -z "$db_filename" ] && db_filename="$filename"
+
+else
     db_filename="$filename"
 fi
 
-cp -f \
-"$file" \
-"$DEST/$db_filename"
+cp -f "$file" "$DEST/$db_filename"
 
 echo -e "\033[92m✓ COPIED:\033[0m"
-
 echo "SOURCE → $filename"
-echo "DB NAME → $db_filename"
+echo "DEST   → $db_filename"
 
 else
 
