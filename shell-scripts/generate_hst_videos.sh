@@ -221,8 +221,29 @@ cp -f \
 "$file" \
 "$DEST/$db_filename"
 
-echo -e "\033[92m✓ COPIED:\033[0m"
+    db_filename=$(
+    "$PYTHON_BIN" manage.py shell -c "
+from creation.models import TutorialResource
 
+r = TutorialResource.objects.filter(
+tutorial_detail_id=$tutorial_detail_id
+).exclude(video='').first()
+
+print(r.video if r else '$filename')
+" 2>/dev/null | tail -1
+    )
+
+    [ -z "$db_filename" ] && db_filename="$filename"
+
+else
+    db_filename="$filename"
+fi
+
+cp -f "$file" "$DEST/$db_filename"
+
+echo -e "\033[92m✓ COPIED:\033[0m"
+echo "SOURCE → $filename"
+echo "DEST   → $db_filename"
 echo "SOURCE → $filename"
 echo "DB NAME → $db_filename"
 
