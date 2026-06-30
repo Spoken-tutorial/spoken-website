@@ -13,10 +13,14 @@ class TutorialDetailSerializer(serializers.ModelSerializer):
         fields = ('id', 'tutorial', 'outline')
     
     def get_outline(self, instance):
-        lang = Language.objects.filter(id=self.context.get('lang'))
-        if TutorialResource.objects.filter(tutorial_detail=instance, language=lang).exists():
-            return TutorialResource.objects.filter(tutorial_detail=instance, language=lang)[0].outline
-        else:
+        if hasattr(instance, 'prefetched_resources'):
+            resources = instance.prefetched_resources
+            return resources[0].outline if resources else None
+
+        lang_id = self.context.get('lang')
+        try:
+            return TutorialResource.objects.get(tutorial_detail=instance, language_id=lang_id).outline
+        except TutorialResource.DoesNotExist:
             return None
 
 
