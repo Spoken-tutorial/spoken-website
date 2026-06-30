@@ -182,29 +182,17 @@
 
                       {%else%}
 
-                      {% if user_college %}
-                      <div class="form-group">
-                        <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School*</label>
-                        <div class="col-lg-8">
-                        <input type="text" id="college_user_details" class="form-control"  name="college" value="{{user_college}}">
-                        <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)"  style="display: none;">
-                        </select>
-                        <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later <br> Contact Event Organiser if college/school name is not found in the list </span>
-                        </div>
-                      </div>
-                      {%else%}
                       <div class="form-group">
                         <label for="id_example_suggestion" class="col-lg-4 control-label">College/ School*</label>
                         <div class="col-lg-8">
                         <select class="form-control" id="id_college" name="dropdown_college" onchange="check_college(this)" >
-                      </select>
-                      <span class="help-block">This option cannot be changed later <br>Contact Event Organiser if college/school name is not found in the list</span>
+                        </select>
+                        <input type="text" id="college_user_details" class="form-control" name="college" value="{% if user_college %}{{user_college}}{% endif %}" style="display: none;" disabled>
+                        <span class="help-block"> <button type="button" class="btn btn-default btn-sm" id="edit_clg" style="margin-right: 16px;"><i class="fa fa-edit"></i>  Edit </button> This option cannot be changed later <br> Contact Event Organiser if college/school name is not found in the list </span>
                         </div>
-        <div id="college-info" class="col-md-8 col-md-offset-4" style="display:none" >Please select your college</div>
-      <!-- 	<span class="help-block" style="text-align: center;">This option cannot be changed later</span> -->
+                        <div id="college-info" class="col-md-8 col-md-offset-4" style="display:none" >Please select your college</div>
+                        <!-- 	<span class="help-block" style="text-align: center;">This option cannot be changed later</span> -->
                       </div>
-    
-                      {% endif %}
                         <!-- <input type="hidden" id="id_college" class="form-control"  name="college"  value="621"> -->
                         <!-- <input type="hidden" id="id_event_type" class="form-control"  name="event_type"  value="{{event_obj.event_type}}"> -->
                         
@@ -381,18 +369,36 @@ function show_clg_list(){
             var collegeSelect = $('#id_college');
             collegeSelect.html(data);
 
+            // Pre-select user college
+            var user_college_name = "{{user_college|escapejs}}";
+            var found = false;
+            if (user_college_name) {
+                collegeSelect.find('option').each(function() {
+                    if ($(this).text().trim().toLowerCase() === user_college_name.trim().toLowerCase()) {
+                        $(this).prop('selected', true);
+                        found = true;
+                    }
+                });
+                if (found) {
+                    $('#college-info').hide();
+                    payment_btn_hide();
+                }
+            }
+
             // Count valid college options (ignore "Select College")
             var options = collegeSelect.find('option').filter(function () {
                 return $(this).val() && $(this).val() !== 'None';
             });
 
-            if (options.length === 1) {
-                // AUTO-SELECT if only one college
-                collegeSelect.val(options.first().val()).trigger('change');
-                $('#college-info').hide();
-            } else {
-                // Multiple colleges → user selects
-                $('#college-info').show();
+            if (!user_college_name || !found) {
+                if (options.length === 1) {
+                    // AUTO-SELECT if only one college
+                    collegeSelect.val(options.first().val()).trigger('change');
+                    $('#college-info').hide();
+                } else {
+                    // Multiple colleges → user selects
+                    $('#college-info').show();
+                }
             }
         }
     });
@@ -438,7 +444,7 @@ $('#id_state').change(function(){
 function checkRegisterButton() {
     var college = $('#id_college').val();
     var saved_college = $('#college_user_details').val();
-    var hasCollege = (college && college !== 'None') || saved_college;
+    var hasCollege = (college && college !== 'None' && !$('#id_college').is(':disabled')) || (saved_college && !$('#college_user_details').is(':disabled'));
     var hasEmptyMandatory = !$('#id_name').val() || !$('#id_email').val() || !$('#id_phone').val() || !$('#id_gender').val() || !$('#id_state').val() || !hasCollege;
     $('#register_paid').prop('disabled', hasEmptyMandatory);
     
@@ -607,10 +613,10 @@ $('#pwd').on('focusout',function(){
         });
 
 $( "#edit_clg" ).click(function() {
-  $('#college_user_details').hide();
-  $('#id_college').show();
-  var state = $('#id_state').val();
-  $('#id_state').val(state).trigger('change');
+  $('#id_college').hide().prop('disabled', true);
+  $('#college_user_details').show().prop('disabled', false).prop('readonly', false);
+  $('#edit_clg').hide();
+  checkRegisterButton();
 });
 
 $('#id_college').change(function(){
@@ -644,13 +650,13 @@ $('#id_college').change(function(){
       });
   });
 
-  $('#id_name, #id_email, #id_phone, #id_gender, #id_state, #id_college').on('change input', checkRegisterButton);
+  $('#id_name, #id_email, #id_phone, #id_gender, #id_state, #id_college, #college_user_details').on('change input', checkRegisterButton);
   checkRegisterButton();
 
   $('#register_form').submit(function(event) {
     var college = $('#id_college').val();
     var saved_college = $('#college_user_details').val();
-    var hasCollege = (college && college !== 'None') || saved_college;
+    var hasCollege = (college && college !== 'None' && !$('#id_college').is(':disabled')) || (saved_college && !$('#college_user_details').is(':disabled'));
     var hasEmptyMandatory = !$('#id_name').val() || !$('#id_email').val() || !$('#id_phone').val() || !$('#id_gender').val() || !$('#id_state').val() || !hasCollege;
     
     if (hasEmptyMandatory) {
@@ -672,7 +678,7 @@ $('#id_college').change(function(){
   $('#register_paid, #make_payment').click(function(event) {
     var college = $('#id_college').val();
     var saved_college = $('#college_user_details').val();
-    var hasCollege = (college && college !== 'None') || saved_college;
+    var hasCollege = (college && college !== 'None' && !$('#id_college').is(':disabled')) || (saved_college && !$('#college_user_details').is(':disabled'));
     var hasEmptyMandatory = !$('#id_name').val() || !$('#id_email').val() || !$('#id_phone').val() || !$('#id_gender').val() || !$('#id_state').val() || !hasCollege;
     
     if (hasEmptyMandatory) {

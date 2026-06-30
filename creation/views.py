@@ -1702,21 +1702,35 @@ def tutorials_needimprovement(request):
 def domain_review_index(request):
     if not is_domainreviewer(request.user):
         raise PermissionDenied()
-    tmp_ids = []
-    dr_roles = DomainReviewerRole.objects.filter(user_id = request.user.id, status = 1)
-    for rec in dr_roles:
-        tr_recs = TutorialResource.objects.filter(tutorial_detail_id__in = TutorialDetail.objects.filter(foss_id = rec.foss_category_id).values_list('id'), language_id = rec.language_id, status = 0).order_by('updated')
-        for tr_rec in tr_recs:
-            flag = 1
-            if tr_rec.language.name == 'English':
-                if tr_rec.common_content.slide_status != 2 and tr_rec.common_content.code_status != 2 and \
-                   tr_rec.common_content.assignment_status != 2 and tr_rec.common_content.prerequisite_status != 2 and \
-                   tr_rec.common_content.keyword_status != 2 and tr_rec.common_content.additional_material_status != 2:
-                    flag = 0
-            else:
-                flag = 0
-            if flag or tr_rec.outline_status == 2 or tr_rec.script_status == 2 or tr_rec.video_status == 2:
-                tmp_ids.append(tr_rec.id)
+    
+    dr_roles = DomainReviewerRole.objects.filter(user_id=request.user.id, status=1)
+    if dr_roles.exists():
+        role_queries = Q()
+        for rec in dr_roles:
+            role_queries |= Q(tutorial_detail__foss_id=rec.foss_category_id, language_id=rec.language_id)
+        
+        tr_recs = TutorialResource.objects.filter(
+            role_queries,
+            status=0
+        ).filter(
+            Q(outline_status=2) |
+            Q(script_status=2) |
+            Q(video_status=2) |
+            (
+                Q(language__name='English') & (
+                    Q(common_content__slide_status=2) |
+                    Q(common_content__code_status=2) |
+                    Q(common_content__assignment_status=2) |
+                    Q(common_content__prerequisite_status=2) |
+                    Q(common_content__keyword_status=2) |
+                    Q(common_content__additional_material_status=2)
+                )
+            )
+        ).distinct()
+        tmp_ids = list(tr_recs.values_list('id', flat=True))
+    else:
+        tmp_ids = []
+
     collection = None
     ordering = ''
     header = ''
@@ -1738,7 +1752,7 @@ def domain_review_index(request):
             13: SortableHeader('Keywords', False, '', 'col-center'),
             14: SortableHeader('<span title = "" data-original-title = "" class = "fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
-        collection = TutorialResource.objects.filter(id__in=tmp_ids)
+        collection = TutorialResource.objects.filter(id__in=tmp_ids).select_related('tutorial_detail__foss', 'language', 'common_content')
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         collection = ReviewerFilter(request.POST, queryset=collection)
@@ -1879,7 +1893,9 @@ def domain_reviewed_tutorials(request):
             14: SortableHeader('Status', False, '', 'col-center'),
             15: SortableHeader('created', True, 'Date')
         }
-        collection = TutorialResource.objects.filter(id__in = DomainReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
+        collection = TutorialResource.objects.filter(
+            id__in=DomainReviewLog.objects.filter(user=request.user).values_list('tutorial_resource_id', flat=True).distinct()
+        ).select_related('tutorial_detail__foss', 'language', 'common_content')
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         collection = ReviewerFilter(request.POST, queryset=collection)

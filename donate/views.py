@@ -456,54 +456,89 @@ def school_donation(request):
 
 @csrf_exempt
 def ilw_payment_callback(request):
+    logger.warning("ilw_payment_callback triggered: Method=%s, POST=%s", request.method, request.POST)
     context = {}
     status_template = 'spoken/templates/ilw_payment_status.html'
     order_id = request.POST.get('order_id')
     if not order_id:
+        logger.error("ilw_payment_callback: Missing order_id in POST data")
         raise Http404
     
-    payee = Payee.objects.get(transaction__order_id=order_id)
+    try:
+        payee = Payee.objects.get(transaction__order_id=order_id)
+        logger.warning("ilw_payment_callback: Found payee (id=%s, email=%s, amount=%s) for order_id=%s", payee.id, payee.email, payee.amount, order_id)
+    except Payee.DoesNotExist:
+        logger.error("ilw_payment_callback: No payee found for order_id=%s", order_id)
+        context['status'] = 'FAILED'
+        return render(request, status_template, context=context)
+    except Payee.MultipleObjectsReturned:
+        logger.error("ilw_payment_callback: Multiple payees found for order_id=%s", order_id)
+        context['status'] = 'FAILED'
+        return render(request, status_template, context=context)
+        
     context['order_id'] = order_id
     try:
         order_status_url = f"{settings.ORDER_STATUS_URL}{order_id}"
         # order status api
         headers = get_request_headers(payee.email)
+        logger.warning("ilw_payment_callback: Fetching order status from %s, headers=%s", order_status_url, headers)
         try:
             response = requests.get(order_status_url, headers=headers)
             response_data = response.json()
+            logger.warning("ilw_payment_callback: Response status_code=%s, response_data=%s", response.status_code, response_data)
         except requests.exceptions.RequestException as e:
+            logger.exception("ilw_payment_callback: RequestException during order status API call")
             context['status'] = 'FAILED'
             return render(request, status_template, context=context)
+        except Exception as e:
+            logger.exception("ilw_payment_callback: JSON decode exception or other during API response parsing")
+            context['status'] = 'FAILED'
+            return render(request, status_template, context=context)
+
         if response.status_code == 200:
             verified = verify_hmac_signature(request.POST)
+            logger.warning("ilw_payment_callback: HMAC signature verified=%s", verified)
             if not verified:
+                logger.error("ilw_payment_callback: HMAC signature verification failed")
                 context['status'] = 'FAILED'
                 return render(request, status_template, context=context)
+            
+            logger.warning("ilw_payment_callback: calling save_ilw_hdfc_success_data")
             save_ilw_hdfc_success_data(order_id, response_data)
+            
             data = get_display_transaction_details(response_data)
             data['udf5'] = response_data.get('udf5', '')
             context['data'] = data
             order_status = response_data.get('status', '')
             amount = response_data.get('amount', '')
+            logger.warning("ilw_payment_callback: status=%s, amount=%s, expected_amount=%s", order_status, amount, payee.amount)
+            
             if order_status == 'CHARGED':
                 try:
                     amount_decimal = Decimal(str(amount))
                 except InvalidOperation:
+                    logger.exception("ilw_payment_callback: InvalidOperation converting amount '%s' to Decimal", amount)
                     context['status'] = 'FAILED'
                     return render(request, status_template, context=context)
                 if amount_decimal == payee.amount:
+                    logger.warning("ilw_payment_callback: status updated to CHARGED successfully")
                     context['status'] = 'CHARGED'
                 else:
+                    logger.error("ilw_payment_callback: Amount mismatch. payee.amount=%s, response.amount=%s", payee.amount, amount_decimal)
                     context['status'] = 'FAILED'
                     save_ilw_hdfc_error_data(order_id, response_data, msg="Amount mismatch")
             elif order_status == 'PENDING_VBV' or order_status == 'AUTHORIZING': #This is a non-terminal transaction status. Show pending screen/polling
+                logger.warning("ilw_payment_callback: Status is pending/authorizing (%s)", order_status)
                 context['status'] = 'PENDING'
             else:
+                logger.warning("ilw_payment_callback: Status is failed/other (%s)", order_status)
                 context['status'] = 'FAILED'
             return render(request, status_template, context=context)
         else:
+            logger.error("ilw_payment_callback: Order status API status_code=%s, calling save_ilw_hdfc_error_data", response.status_code)
             save_ilw_hdfc_error_data(order_id, response_data)  
             context['status'] = 'FAILED'
     except Exception as e:
+        logger.exception("ilw_payment_callback: Unexpected exception in callback")
         context['status'] = 'FAILED'
     return render(request, status_template, context=context) # return to payment page site

@@ -15,6 +15,9 @@ import urllib
 import hmac
 import json
 import re
+import logging
+
+logger = logging.getLogger("mail_logs.donate")
 
 
 def generate_hashed_order_id(email):
@@ -191,20 +194,34 @@ def poll_payment_status(order_id, email, sub_amount):
     return {"status": "TIMEOUT", "message": "Max attempts reached, payment is still pending."} 
 
 def save_hdfc_success_data(order_id, data):
-    transaction = HDFCTransactionDetails.objects.get(order_id=order_id)
-    transaction.order_status = data.get('status')
-    transaction.amount = data.get('amount')
-    transaction.udf1 = data.get('udf1')
-    transaction.udf2 = data.get('udf2')
-    transaction.udf3 = data.get('udf3')
-    transaction.udf4 = data.get('udf4')
-    transaction.save()
+    logger.warning("save_hdfc_success_data triggered for order_id=%s, data=%s", order_id, data)
+    try:
+        transaction = HDFCTransactionDetails.objects.get(order_id=order_id)
+        transaction.order_status = data.get('status')
+        transaction.amount = data.get('amount')
+        transaction.udf1 = data.get('udf1')
+        transaction.udf2 = data.get('udf2')
+        transaction.udf3 = data.get('udf3')
+        transaction.udf4 = data.get('udf4')
+        transaction.save()
+        logger.warning("save_hdfc_success_data: HDFCTransactionDetails updated successfully for order_id=%s", order_id)
+    except HDFCTransactionDetails.DoesNotExist:
+        logger.error("save_hdfc_success_data: HDFCTransactionDetails matching order_id=%s does not exist", order_id)
+    except Exception as e:
+        logger.exception("save_hdfc_success_data: Exception updating HDFCTransactionDetails for order_id=%s", order_id)
 
 def save_hdfc_error_data(order_id, data):
-    transaction = HDFCTransactionDetails.objects.get(order_id=order_id)
-    transaction.error_code = data.get('error_code', '-')
-    transaction.error_message = data.get('error_message', '-')
-    transaction.save()
+    logger.warning("save_hdfc_error_data triggered for order_id=%s, data=%s", order_id, data)
+    try:
+        transaction = HDFCTransactionDetails.objects.get(order_id=order_id)
+        transaction.error_code = data.get('error_code', '-')
+        transaction.error_message = data.get('error_message', '-')
+        transaction.save()
+        logger.warning("save_hdfc_error_data: updated HDFCTransactionDetails with error details for order_id=%s", order_id)
+    except HDFCTransactionDetails.DoesNotExist:
+        logger.error("save_hdfc_error_data: HDFCTransactionDetails matching order_id=%s does not exist", order_id)
+    except Exception as e:
+        logger.exception("save_hdfc_error_data: Exception updating HDFCTransactionDetails with error details for order_id=%s", order_id)
 
 def get_display_transaction_details(transaction):
     data = {}

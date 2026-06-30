@@ -12,6 +12,9 @@ import requests
 from django.http import JsonResponse
 import time
 from decimal import Decimal, InvalidOperation
+import logging
+
+logger = logging.getLogger("mail_logs.donate")
 
 
 def save_ilw_hdfc_session_data(session_response):
@@ -25,29 +28,51 @@ def save_ilw_hdfc_session_data(session_response):
     return transaction
 
 def save_ilw_hdfc_success_data(order_id, data):
-    transaction = PayeeHdfcTransaction.objects.get(order_id=order_id)
-    transaction.order_status = data.get('status')
-    transaction.amount = data.get('amount')
-    transaction.udf1 = data.get('udf1')
-    transaction.udf2 = data.get('udf2')
-    transaction.udf3 = data.get('udf3')
-    transaction.udf4 = data.get('udf4')
-    transaction.udf5 = data.get('udf5')
-    transaction.save()
+    logger.warning("save_ilw_hdfc_success_data triggered for order_id=%s, data=%s", order_id, data)
+    try:
+        transaction = PayeeHdfcTransaction.objects.get(order_id=order_id)
+        transaction.order_status = data.get('status')
+        transaction.amount = data.get('amount')
+        transaction.udf1 = data.get('udf1')
+        transaction.udf2 = data.get('udf2')
+        transaction.udf3 = data.get('udf3')
+        transaction.udf4 = data.get('udf4')
+        transaction.udf5 = data.get('udf5')
+        transaction.save()
+        logger.warning("save_ilw_hdfc_success_data: PayeeHdfcTransaction updated successfully for order_id=%s", order_id)
+    except PayeeHdfcTransaction.DoesNotExist:
+        logger.error("save_ilw_hdfc_success_data: PayeeHdfcTransaction matching order_id=%s does not exist", order_id)
+        return
+    except Exception as e:
+        logger.exception("save_ilw_hdfc_success_data: Exception updating PayeeHdfcTransaction for order_id=%s", order_id)
 
     #populate participant payee status
     try:
-        payee = Payee.objects.get(transaction__order_id=order_id)
-        payee.status = 1 if data.get('status') =='CHARGED' else 2
-        payee.save()
-    except:
-        pass
+        payees = Payee.objects.filter(transaction__order_id=order_id)
+        if payees.exists():
+            status_val = 1 if data.get('status') =='CHARGED' else 2
+            for payee in payees:
+                payee.status = status_val
+                payee.save()
+            logger.warning("save_ilw_hdfc_success_data: Payee status updated to %s for all matching payees", status_val)
+        else:
+            logger.error("save_ilw_hdfc_success_data: Payee matching order_id=%s does not exist", order_id)
+    except Exception as e:
+        logger.exception("save_ilw_hdfc_success_data: Unexpected exception updating payee for order_id=%s", order_id)
 
 def save_ilw_hdfc_error_data(order_id, data, msg=""):
-    transaction = PayeeHdfcTransaction.objects.get(order_id=order_id)
-    transaction.error_code = data.get('error_code', '-')
-    transaction.error_message = data.get('error_message', msg)
-    transaction.save()
+    logger.warning("save_ilw_hdfc_error_data triggered for order_id=%s, msg=%s", order_id, msg)
+    try:
+        transaction = PayeeHdfcTransaction.objects.get(order_id=order_id)
+        transaction.error_code = data.get('error_code', '-')
+        transaction.error_message = data.get('error_message', msg)
+        transaction.save()
+        logger.warning("save_ilw_hdfc_error_data: updated PayeeHdfcTransaction with error_code=%s, error_message=%s", 
+                       transaction.error_code, transaction.error_message)
+    except PayeeHdfcTransaction.DoesNotExist:
+        logger.error("save_ilw_hdfc_error_data: PayeeHdfcTransaction matching order_id=%s does not exist", order_id)
+    except Exception as e:
+        logger.exception("save_ilw_hdfc_error_data: Exception updating transaction error details for order_id=%s", order_id)
 
 def get_ilw_session_payload(request, payee_obj_new, participant ):
     return_url = request.build_absolute_uri(reverse('ilw_payment_callback'))
