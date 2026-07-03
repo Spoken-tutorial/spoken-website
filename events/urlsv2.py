@@ -372,6 +372,11 @@ urlpatterns = [
       name='academic_payment_details'
     ),
     url(
+      r'^organiser_academic_payment_details/', 
+      OrganiserAcademicKeyCreateView.as_view(template_name='organiser_academic_payment_details_form.html'), 
+      name='organiser_academic_payment_details'
+    ),
+    url(
       # r'^software-training/ajax-academic-details/', 
       r'^ajax-academic-details/', 
       FetchAcademicDetailsView.as_view(), 

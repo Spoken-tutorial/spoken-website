@@ -671,6 +671,33 @@ class AcademicPaymentStatusForm(forms.ModelForm):
     self.fields['college_type'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
     self.fields['payment_status'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
     self.fields['subscription'].choices = SUBSCRIPTION_CHOICES
+
+class OrganiserAcademicPaymentStatusForm(forms.ModelForm):
+  college_type = forms.CharField(required=False)
+  email = forms.CharField(required = False)
+  phone = forms.CharField(required = False)
+  transactionid = forms.CharField(required = False)
+  pan_number = forms.CharField(required = False)
+  gst_number = forms.CharField(required = False)
+  customer_id = forms.CharField(required = False)
+  invoice_no = forms.CharField(required = False)
+  remarks = forms.CharField(required = False)
+  
+  class Meta(object):
+    model = AcademicPaymentStatus
+    exclude = ['entry_user']
+    widgets = {
+    'payment_date':DateInput(),
+    'phone':forms.NumberInput(),
+    'amount':forms.NumberInput()
+    }
+
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.fields['college_type'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
+    self.fields['payment_status'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
+    self.fields['subscription'].choices = SUBSCRIPTION_CHOICES
+
 class MoodleMappingForm(forms.Form):
   foss = forms.ModelChoiceField(
     queryset=FossCategory.objects.filter(status=True).order_by('foss'),

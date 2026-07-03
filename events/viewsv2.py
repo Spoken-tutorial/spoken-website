@@ -48,7 +48,7 @@ from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
 from mdldjango.models import MdlUser, MdlQuizGrades
 from django.contrib.auth.mixins import UserPassesTestMixin
-from events.formsv2 import StudentGradeFilterForm, AcademicPaymentStatusForm
+from events.formsv2 import StudentGradeFilterForm, AcademicPaymentStatusForm, OrganiserAcademicPaymentStatusForm
 from django.views.generic import FormView
 from django.shortcuts import get_object_or_404
 
@@ -3527,7 +3527,72 @@ class AcademicKeyCreateView(CreateView):
 
       messages.success(self.request, "Payment Details for academic is added successfully.")
       return HttpResponseRedirect(self.success_url)
-    
+
+
+class OrganiserAcademicKeyCreateView(CreateView):
+    form_class = OrganiserAcademicPaymentStatusForm
+    model = AcademicPaymentStatus
+    template_name = "organiser_academic_payment_details_form.html"
+    success_url = "/software-training/organiser_academic_payment_details/"
+
+    @method_decorator(group_required("Organiser"))
+    def get(self, request, *args, **kwargs):
+        academic_id = getattr(self.request.user.organiser, 'academic_id', None)
+        initial_data = {}
+        if academic_id:
+            try:
+                ac = AcademicCenter.objects.get(id=academic_id)
+                initial_data = {
+                    'academic': academic_id,
+                    'state': ac.state_id,
+                    'college_type': ac.institution_type.name,
+                }
+                latest_payment = AcademicPaymentStatus.objects.filter(academic_id=academic_id).latest('entry_date')
+                initial_data['name_of_the_payer'] = latest_payment.name_of_the_payer
+                initial_data['email'] = latest_payment.email
+                initial_data['phone'] = latest_payment.phone
+                initial_data['pan_number'] = latest_payment.pan_number
+                initial_data['gst_number'] = latest_payment.gst_number
+                initial_data['payment_status'] = "Renewal"
+            except AcademicPaymentStatus.DoesNotExist:
+                initial_data['payment_status'] = "New"
+            except AcademicCenter.DoesNotExist:
+                pass
+        form = self.form_class(initial=initial_data)
+        return render(self.request, self.template_name, {'form': form})
+
+    @method_decorator(group_required("Organiser"))
+    def post(self, request, *args, **kwargs):
+        return super(OrganiserAcademicKeyCreateView, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form, **kwargs):
+        self.object = form.save(commit=False)
+        self.object.entry_user = self.request.user
+        
+        # Ensure academic is correctly set for organiser if not bound in POST
+        if hasattr(self.request.user, 'organiser') and self.request.user.organiser.academic:
+            self.object.academic = self.request.user.organiser.academic
+            self.object.state = self.request.user.organiser.academic.state
+
+        self.object.save()
+        
+        u_key = uuid.uuid1()
+        hex_key = u_key.hex
+
+        Subscription_time = int(self.object.subscription)
+        expiry_date = self.object.payment_date + timedelta(days=Subscription_time)
+
+        ac_key = AcademicKey()      
+        ac_key.ac_pay_status = self.object
+        ac_key.academic = self.object.academic
+        ac_key.u_key = u_key
+        ac_key.hex_key = hex_key
+        ac_key.expiry_date = expiry_date
+        ac_key.save()
+
+        messages.success(self.request, "Payment Details for academic is added successfully.")
+        return HttpResponseRedirect(self.success_url)
+
 
 class FetchAcademicDetailsView(View):
   def get(self, request):
