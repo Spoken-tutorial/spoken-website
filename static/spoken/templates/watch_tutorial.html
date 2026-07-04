@@ -544,7 +544,7 @@
                     {% if tr_rec.script_status %}
                         <div class="list-group-item-container">
                             
-                            <a {% if user_authorized %}href="{{ script_base|add:tr_rec.script }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %}target="_blank" class="list-group-item">
+                 <a {% if user_authorized %}{% if tr_rec.is_hst %} href="{{ tr_rec.script }}" {% else %} href="{{ script_base|add:tr_rec.script }}"{% endif %}{% else %}style="pointer-events: none; cursor: default;"{% endif %}target="_blank"class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> 
                                     Script 
                                 </h4>

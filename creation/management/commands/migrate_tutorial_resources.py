@@ -221,7 +221,7 @@ class Command(BaseCommand):
                              status, version, hit_count,
                              created, updated, publish_at,
                              assignment_status, extension_status, submissiondate,
-                             is_unrestricted, is_on_youtube)
+                             is_unrestricted, is_on_youtube,is_hst)
                             VALUES (%s, %s, 22,
                                     %s, %s, %s,
                                     %s, %s, %s,
@@ -231,7 +231,7 @@ class Command(BaseCommand):
                                     %s, 1, 0,
                                     %s, NOW(), NOW(),
                                     0, 0, NOW(),
-                                    0, 0)
+                                    0, 0,1)
                         """, [
                             tutorial_detail_id, common_content_id,
                             outline, user_id, outline_status,
