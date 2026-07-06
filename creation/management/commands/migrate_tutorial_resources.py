@@ -59,7 +59,22 @@ class Command(BaseCommand):
         # Fetch distinct topic names from source (ignore NULL)
         # ------------------------------------------------------------------
         with source.cursor() as src:
-            src.execute("SELECT DISTINCT topic_name FROM tutorial_resource WHERE topic_name IS NOT NULL")
+            src.execute("""
+                SELECT DISTINCT
+                    t.topic_name
+                FROM tutorial_resource tr
+                JOIN contributor_role cr
+                    ON cr.id = tr.con_assigned_tutorial
+                JOIN topic_category tc
+                    ON tc.topic_category_id = cr.topic_cat_id
+                JOIN topic t
+                    ON t.topic_id = tc.topic_id
+                JOIN language l
+                    ON l.lan_id = cr.language_id
+                WHERE tr.enabled = b'1'
+                AND tr.added_queue = b'1'
+                AND l.lan_id = 22
+            """)
             distinct_topics = [row[0] for row in src.fetchall()]
 
         # Cache for (foss_id, topic_name) -> tutorial_detail_id
@@ -101,38 +116,55 @@ class Command(BaseCommand):
                     topic_detail_cache[(foss_id, raw_topic)] = new_id
                     self.stdout.write(f"Created tutorial_detail id={new_id} for '{raw_topic}' (foss={foss_id}, order={order_num})")
 
-        # ------------------------------------------------------------------
-        # Migrate all tutorial_resource rows
-        # ------------------------------------------------------------------
+     
         inserted = 0
         failed = 0
 
         with source.cursor() as src:
             src.execute("""
                 SELECT
-                    tutorial_id,
-                    date_added,
-                    keyword,
-                    keyword_status,
-                    outline,
-                    outline_status,
-                    script,
-                    script_status,
-                    slide,
-                    slide_status,
-                    enabled,
-                    timescript,
-                    video,
-                    video_status,
-                    user_keyword,
-                    user_outline,
-                    user_script,
-                    user_slide,
-                    user_video,
-                    topic_name,
-                    outline_path,
-                    citation
-                FROM tutorial_resource
+                    tr.tutorial_id,
+                    tr.date_added,
+                    tr.keyword,
+                    tr.keyword_status,
+                    tr.outline,
+                    tr.outline_status,
+                    tr.script,
+                    tr.script_status,
+                    tr.slide,
+                    tr.slide_status,
+                    tr.enabled,
+                    tr.timescript,
+                    tr.video,
+                    tr.video_status,
+                    tr.user_keyword,
+                    tr.user_outline,
+                    tr.user_script,
+                    tr.user_slide,
+                    tr.user_video,
+
+                    t.topic_name,          -- <-- use this
+
+                    tr.outline_path,
+                    tr.citation
+
+                FROM tutorial_resource tr
+
+                JOIN contributor_role cr
+                    ON cr.id = tr.con_assigned_tutorial
+
+                JOIN topic_category tc
+                    ON tc.topic_category_id = cr.topic_cat_id
+
+                JOIN topic t
+                    ON t.topic_id = tc.topic_id
+
+                JOIN language l
+                    ON l.lan_id = cr.language_id
+
+                WHERE tr.enabled = b'1'
+                AND tr.added_queue = b'1'
+                AND l.lan_id = 22;
             """)
             rows = src.fetchall()
 
@@ -180,6 +212,7 @@ class Command(BaseCommand):
                     enabled_int = 1 if enabled and enabled != b'\x00' else 0
 
                     with transaction.atomic():
+                        
                         dst.execute("""
                             INSERT INTO creation_tutorialcommoncontent
                             (tutorial_detail_id,
