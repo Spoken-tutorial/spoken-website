@@ -142,9 +142,7 @@ class Command(BaseCommand):
                     tr.user_script,
                     tr.user_slide,
                     tr.user_video,
-
-                    t.topic_name,          -- <-- use this
-
+                    t.topic_name,
                     tr.outline_path,
                     tr.citation
 
