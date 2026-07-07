@@ -4,26 +4,15 @@
 
 set -e
 
-# Local Set Up
-
-SRC_ROOT="./hst_thumbnails"
-
-DEST_ROOT="./media/videos"
-
-source /mnt/d/EDUPYRAMIDS/spoken-website/Python-3.6.15/venv36/bin/activate
-
-#############################################################
-# CONFIGURATION
-#############################################################
 
 # Folder downloaded from Google Drive
-# SRC_ROOT="/beta_st/hst_thumbnails"
+SRC_ROOT="/beta_st/hst_thumbnails"
 
-# # Spoken media folder
-# DEST_ROOT="/beta_st/django_spoken.test/spoken-website/media/videos"
+# Spoken media folder
+DEST_ROOT="/beta_st/django_spoken.test/spoken-website/media/videos"
 
-# # Activate virtualenv
-# source /beta_st/django_spoken.test/env_py3/bin/activate
+# Activate virtualenv
+source /beta_st/django_spoken.test/env_py3/bin/activate
 
 PYTHON_BIN=$(which python)
 
@@ -32,10 +21,6 @@ TMPFILE="/tmp/hst_thumbnail_mapping.txt"
 echo "=========================================="
 echo "Generating thumbnail mapping..."
 echo "=========================================="
-
-#############################################################
-# Generate mapping from DB
-#############################################################
 
 "$PYTHON_BIN" manage.py shell <<'PYEOF' > "$TMPFILE"
 
@@ -75,9 +60,6 @@ for r in resources:
 
 PYEOF
 
-#############################################################
-# Copy thumbnails
-#############################################################
 
 echo ""
 echo "Copying thumbnails..."
@@ -97,20 +79,12 @@ do
     BASENAME=$(basename "$VIDEO")
     BASENAME="${BASENAME%.*}"
 
-    #########################################################
-    # Remove English suffix
-    #########################################################
-
     NAME="$BASENAME"
 
     NAME="${NAME%-English}"
     NAME="${NAME%- English}"
     NAME="${NAME% English}"
     NAME="${NAME%-English}"
-
-    #########################################################
-    # Find thumbnail
-    #########################################################
 
     FOUND=""
 
@@ -126,10 +100,6 @@ do
         fi
 
     done < <(find "$SEARCH_DIR" -type f)
-
-    #########################################################
-    # Copy thumbnail
-    #########################################################
 
     if [ -n "$FOUND" ]; then
 
