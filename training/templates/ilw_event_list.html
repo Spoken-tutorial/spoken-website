@@ -41,13 +41,9 @@
                             </td>
                             <td>{{ event.student_count }}</td>
                             <td>
-                                <a href="{% url 'training:event_participants' event.id %}" title="View Participants">View Participants</a>
+                                <a href="{% url 'training:event_attendance' event.id %}" title="View Participants">View Participants</a>
                                 <br>
-                                {% if today >= event.tdate|default:event.event_end_date %}
-                                    <a href="{% url 'training:event_attendance' event.id %}" title="Mark Attendance">Mark Attendance</a>
-                                {% else %}
-                                    <span title="Available after test date">Mark Attendance</span>
-                                {% endif %}
+                                <a href="{% url 'training:event_participants' event.id %}" title="Mark Attendance">Mark Attendance</a>
                             </td>
                         </tr>
                         {% endfor %}
