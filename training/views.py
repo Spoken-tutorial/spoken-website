@@ -1717,7 +1717,7 @@ class ILWTestCertificate(object):
         teststatus.part_status = 3 #certificate downloaded test over
         teststatus.save()
 
-    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFillColorRGB(0, 0, 0)
     imgDoc.setFont('Helvetica', 10, leading=None)
     # imgDoc.drawString(10, 6, certificate_pass)
 
@@ -1733,7 +1733,7 @@ class ILWTestCertificate(object):
     # Add verification link
     verify_url = "https://spoken-tutorial.org/training/verify-ilwtest-certificate/"
 
-    imgDoc.setFillColorRGB(1, 1, 1)
+    imgDoc.setFillColorRGB(0, 0, 0)
 
     link_x = 220 if teststatus.participant.apaar_id else 110
     link_y = 6
@@ -1746,7 +1746,7 @@ class ILWTestCertificate(object):
         relative=0
     )
 
-    imgDoc.setFillColorRGB(211, 211, 211)
+    imgDoc.setFillColorRGB(0, 0, 0)
 
     imgDoc.drawString(
         link_x + 50,
@@ -1887,7 +1887,7 @@ class BatchTestCertificateView(ILWTestCertificate, View):
             signature_path = get_signature(event.event_start_date)
             pdf_canvas.drawImage(signature_path, 600, 100, 150, 76)
 
-            pdf_canvas.setFillColorRGB(211, 211, 211)
+            pdf_canvas.setFillColorRGB(0, 0, 0)
             pdf_canvas.setFont('Helvetica', 10, leading=None)
             # pdf_canvas.drawString(10, 6, teststatus.cert_code)
             cert_text = teststatus.cert_code or ""
@@ -1899,7 +1899,7 @@ class BatchTestCertificateView(ILWTestCertificate, View):
 
             verify_url = "https://spoken-tutorial.org/training/verify-ilwtest-certificate/"
 
-            pdf_canvas.setFillColorRGB(1, 1, 1)
+            pdf_canvas.setFillColorRGB(0, 0, 0)
             link_x = 220 if apaar_text else 110
             link_y = 6
 
@@ -1908,7 +1908,7 @@ class BatchTestCertificateView(ILWTestCertificate, View):
                 (link_x, link_y - 2, link_x + 45, link_y + 10),
                 relative=0
             )
-            pdf_canvas.setFillColorRGB(211, 211, 211)
+            pdf_canvas.setFillColorRGB(0, 0, 0)
 
             pdf_canvas.drawString(
                 link_x + 50,
