@@ -33,6 +33,8 @@ def normalize(text):
     text = text.replace("1st", "first")
 
     text = re.sub(r"[^\w\s]", " ", text)
+    text = text.replace("mothers milk", "mother s milk")
+    text = text.replace("other milk substitutes", "other substitutes")
 
     text = re.sub(r"\s+", " ", text)
 
@@ -47,9 +49,6 @@ class Command(BaseCommand):
 
         self.stdout.write("Updating HST script URLs...")
 
-        # ----------------------------------------------------------
-        # Build topic -> foss mapping
-        # ----------------------------------------------------------
         topic_to_foss = {}
 
         for foss_id, topics in TOPICS_BY_FOSS.items():
@@ -63,20 +62,34 @@ class Command(BaseCommand):
                 (td.foss_id, normalize(td.tutorial))
             ] = td
 
-        # ----------------------------------------------------------
-        # Read HST tutorial_resource
-        # ----------------------------------------------------------
         with source.cursor() as cur:
 
             cur.execute("""
                 SELECT
-                    tutorial_id,
-                    topic_name,
-                    video
-                FROM tutorial_resource
-                WHERE video IS NOT NULL
-                AND video LIKE '%English%'
-                ORDER BY tutorial_id DESC
+                    tr.tutorial_id,
+                    t.topic_name,
+                    tr.video
+
+                FROM tutorial_resource tr
+
+                JOIN contributor_role cr
+                    ON cr.id = tr.con_assigned_tutorial
+
+                JOIN topic_category tc
+                    ON tc.topic_category_id = cr.topic_cat_id
+
+                JOIN topic t
+                    ON t.topic_id = tc.topic_id
+
+                JOIN language l
+                    ON l.lan_id = cr.language_id
+
+                WHERE tr.enabled = b'1'
+                AND tr.added_queue = b'1'
+                AND l.lan_id = 22
+                AND tr.video IS NOT NULL
+
+                ORDER BY tr.tutorial_id DESC
             """)
 
             rows = cur.fetchall()
@@ -90,12 +103,15 @@ class Command(BaseCommand):
                 skipped += 1
                 continue
 
-            # ----------------------------------------------------------
-            # Determine FOSS using topic_name
-            # ----------------------------------------------------------
             normalized_topic = normalize(topic_name)
 
             foss_id = topic_to_foss.get(normalized_topic)
+
+            if foss_id is None:
+                for topic, mapped_foss in topic_to_foss.items():
+                    if normalized_topic in topic or topic in normalized_topic:
+                        foss_id = mapped_foss
+                        break
 
             if foss_id is None:
                 self.stdout.write(
@@ -106,9 +122,6 @@ class Command(BaseCommand):
                 skipped += 1
                 continue
 
-            # ----------------------------------------------------------
-            # Extract tutorial title from video filename
-            # ----------------------------------------------------------
             tutorial_name = topic_name
 
             if video_path:
@@ -127,9 +140,6 @@ class Command(BaseCommand):
 
                 tutorial_name = filename
 
-            # ----------------------------------------------------------
-            # Find Spoken TutorialDetail
-            # ----------------------------------------------------------
             tutorial_detail = tutorial_lookup.get(
                 (foss_id, normalize(tutorial_name))
             )
@@ -141,6 +151,17 @@ class Command(BaseCommand):
 
             if tutorial_detail is None:
 
+                wanted = normalize(tutorial_name)
+
+                for (fid, tut_name), td in tutorial_lookup.items():
+                    if fid != foss_id:
+                        continue
+
+                    if wanted in tut_name or tut_name in wanted:
+                        tutorial_detail = td
+                        break
+
+            if tutorial_detail is None:
                 self.stdout.write(
                     self.style.WARNING(
                         "TutorialDetail not found: '{}' (video title='{}')".format(
@@ -153,17 +174,11 @@ class Command(BaseCommand):
                 skipped += 1
                 continue
 
-            # ----------------------------------------------------------
-            # Build Original Script URL
-            # ----------------------------------------------------------
             script_url = "{}/{}".format(
                 SCRIPT_BASE,
                 tutorial_id
             )
 
-            # ----------------------------------------------------------
-            # Update Spoken TutorialResource
-            # ----------------------------------------------------------
             count = TutorialResource.objects.filter(
                 tutorial_detail=tutorial_detail,
                 language_id=22,
@@ -198,23 +213,7 @@ class Command(BaseCommand):
                 )
 
         self.stdout.write("")
-        self.stdout.write(
-            self.style.SUCCESS(
-                "======================================="
-            )
-        )
-        self.stdout.write(
-            self.style.SUCCESS(
-                "Updated : {}".format(updated)
-            )
-        )
-        self.stdout.write(
-            self.style.WARNING(
-                "Skipped : {}".format(skipped)
-            )
-        )
-        self.stdout.write(
-            self.style.SUCCESS(
-                "======================================="
-            )
-        )
+        self.stdout.write(self.style.SUCCESS( "=======================================" ))
+        self.stdout.write(self.style.SUCCESS("Updated : {}".format(updated)))
+        self.stdout.write(self.style.WARNING("Skipped : {}".format(skipped)))
+        self.stdout.write(self.style.SUCCESS("======================================="))
