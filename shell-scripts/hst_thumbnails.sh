@@ -4,9 +4,16 @@
 
 set -e
 
+# # Local Set Up
+
+# SRC_ROOT="./hst_thumbnails"
+
+# DEST_ROOT="./media/videos"
+
+# source /mnt/d/EDUPYRAMIDS/spoken-website/Python-3.6.15/venv36/bin/activate
 
 # Folder downloaded from Google Drive
-SRC_ROOT="/beta_st/hst_thumbnails"
+SRC_ROOT="/beta_st/django_spoken.test/spoken-website/media/videos"
 
 # Spoken media folder
 DEST_ROOT="/beta_st/django_spoken.test/spoken-website/media/videos"
@@ -27,12 +34,13 @@ echo "=========================================="
 from creation.management.hst import FOSS_FOLDER
 from creation.models import TutorialResource
 
-# Google Drive folder names for each FOSS
+# Google Drive folder names for each FOSS in local SRC_ROOT
 THUMBNAIL_FOLDER = {
-    183: "Pregnancy, Breastfeeding and Growth Monitoring",
-    184: "6 to 24 Months Complementary Feeding",
-    185: "Teens to Adults Nutrients, Insulin and Recipes",
+    170: "Pregnancy, Breastfeeding and Growth Monitoring",
+    171: "6 to 24 Months Complementary Feeding",
+    172: "Teens to Adults Nutrients, Insulin and Recipes",
 }
+
 
 resources = (
     TutorialResource.objects
@@ -60,7 +68,6 @@ for r in resources:
 
 PYEOF
 
-
 echo ""
 echo "Copying thumbnails..."
 echo ""
@@ -70,7 +77,13 @@ do
 
     [ -z "$VIDEO" ] && continue
 
-    SEARCH_DIR="$SRC_ROOT/$THUMB_FOLDER"
+    #for local
+
+    #SEARCH_DIR="$SRC_ROOT/$THUMB_FOLDER"
+
+    #for server s
+
+    SEARCH_DIR="$SRC_ROOT/$THUMB_FOLDER/$THUMB_FOLDER/thumbs"
 
     DEST="$DEST_ROOT/$FOSS_ID/$TUTORIAL_DETAIL_ID"
 
@@ -101,12 +114,66 @@ do
 
     done < <(find "$SEARCH_DIR" -type f)
 
-    if [ -n "$FOUND" ]; then
+    # Desired thumbnail name
+    NEWNAME="$BASENAME"
+    NEWNAME=$(echo "$NEWNAME" | sed -E 's/[[:space:]]*-[[:space:]]*English$//I')
+    NEWNAME=$(echo "$NEWNAME" | sed -E 's/[[:space:]]+English$//I')
 
-        cp -f "$FOUND" "$DEST/"
+    # Check if destination already contains a thumbnail
+    EXISTING=$(find "$DEST" -maxdepth 1 -type f \
+        \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.webp" \) | head -1)
 
-        echo "✓ $(basename "$FOUND")"
-        echo "  -> $DEST"
+    if [ -n "$EXISTING" ]; then
+
+        EXT="${EXISTING##*.}"
+        TARGET="$DEST/${NEWNAME}.${EXT}"
+
+        EXISTING_FILE=$(basename "$EXISTING")
+        TARGET_FILE=$(basename "$TARGET")
+
+        EXISTING_LOWER=$(echo "$EXISTING_FILE" | tr '[:upper:]' '[:lower:]')
+        TARGET_LOWER=$(echo "$TARGET_FILE" | tr '[:upper:]' '[:lower:]')
+
+        if [ "$EXISTING_LOWER" != "$TARGET_LOWER" ]; then
+
+            # Completely different filename
+            TMP="$DEST/.tmp_thumbnail_${RANDOM}.${EXT}"
+
+            mv -f "$EXISTING" "$TMP"
+            mv -f "$TMP" "$TARGET"
+
+            echo "✓ Renamed thumbnail"
+            echo "  $EXISTING_FILE"
+            echo "  -> $TARGET_FILE"
+
+        elif [ "$EXISTING_FILE" != "$TARGET_FILE" ]; then
+
+            # Only case differs (needed on Windows/WSL)
+            TMP="$DEST/.tmp_thumbnail_${RANDOM}.${EXT}"
+
+            mv -f "$EXISTING" "$TMP"
+            mv -f "$TMP" "$TARGET"
+
+            echo "✓ Corrected filename case"
+            echo "  $EXISTING_FILE"
+            echo "  -> $TARGET_FILE"
+
+        else
+
+            echo "✓ Thumbnail already correctly named"
+            echo "  $TARGET_FILE"
+
+        fi
+
+    elif [ -n "$FOUND" ]; then
+
+        EXT="${FOUND##*.}"
+
+        cp -f "$FOUND" "$DEST/${NEWNAME}.${EXT}"
+
+        echo "✓ Copied thumbnail"
+        echo "  $(basename "$FOUND")"
+        echo "  -> ${NEWNAME}.${EXT}"
 
     else
 
