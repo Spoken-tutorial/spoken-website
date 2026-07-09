@@ -79,7 +79,7 @@ do
 
     #for local
 
-    #SEARCH_DIR="$SRC_ROOT/$THUMB_FOLDER"
+    # SEARCH_DIR="$SRC_ROOT/$THUMB_FOLDER"
 
     #for server s
 
@@ -118,6 +118,8 @@ do
     NEWNAME="$BASENAME"
     NEWNAME=$(echo "$NEWNAME" | sed -E 's/[[:space:]]*-[[:space:]]*English$//I')
     NEWNAME=$(echo "$NEWNAME" | sed -E 's/[[:space:]]+English$//I')
+    # Append "-small"
+    NEWNAME="${NEWNAME}-small"
 
     # Check if destination already contains a thumbnail
     EXISTING=$(find "$DEST" -maxdepth 1 -type f \
