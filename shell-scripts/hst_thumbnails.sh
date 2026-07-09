@@ -119,7 +119,7 @@ do
     NEWNAME=$(echo "$NEWNAME" | sed -E 's/[[:space:]]*-[[:space:]]*English$//I')
     NEWNAME=$(echo "$NEWNAME" | sed -E 's/[[:space:]]+English$//I')
     # Append "-small"
-    NEWNAME="${NEWNAME}-small"
+    NEWNAME="${NEWNAME}-Small"
 
     # Check if destination already contains a thumbnail
     EXISTING=$(find "$DEST" -maxdepth 1 -type f \
