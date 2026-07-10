@@ -49,6 +49,7 @@
 				<tbody>
 					{% for record in object_list %}
 					<tr>
+						<input type="hidden" name="displayed_users" value="{{ record.id }}">
 						<td>{{ forloop.counter }}</td>
 						<td style="text-align: center;">
 							{% if can_mark_attendance %}

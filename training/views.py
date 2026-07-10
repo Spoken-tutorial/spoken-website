@@ -1515,16 +1515,16 @@ class EventParticipantsListView(ListView):
 			raise PermissionDenied()
 		
 		try:
-			# get all participant ids for this event
-			participants = Participant.objects.filter(event_id=event_id).values_list('id', flat=True)
+			# Get only the participant ids displayed on the current page
+			displayed_users = request.POST.getlist('displayed_users', [])
 			
-			for participant_id in participants:
+			for participant_id in displayed_users:
 				# Check if attendance was submitted
 				checkbox_key = f'attendance_{participant_id}'
 				is_marked = checkbox_key in request.POST
 				
-				#attendance record update
-				attendance_record, created = ILWAttendance.objects.update_or_create(
+				# attendance record update
+				ILWAttendance.objects.update_or_create(
 					event_id=event_id,
 					participant_id=participant_id,
 					defaults={
@@ -1537,7 +1537,8 @@ class EventParticipantsListView(ListView):
 		except Exception as e:
 			messages.error(request, f'Error updating attendance: {str(e)}')
 		
-		return redirect('training:event_participants', eventid=event_id)
+		page = request.GET.get('page', 1)
+		return redirect(f"{reverse('training:event_participants', args=[event_id])}?page={page}")
 
 
 @csrf_exempt
