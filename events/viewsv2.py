@@ -26,6 +26,7 @@ from events.decorators import group_required
 from django.utils import timezone
 from training.views import add_Academic_key
 from events.events_email import send_email
+from events.receipt_service import generate_payment_receipt_pdf
 from events import display
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
@@ -3855,39 +3856,12 @@ class DownloadReceiptView(View):
         if payment.verification_status != 1:
             raise PermissionDenied("Receipt is not verified/approved yet.")
             
-        buffer = BytesIO()
-        p = canvas.Canvas(buffer, pagesize=A4)
-        p.drawString(100, 750, f"Receipt ID: {payment.id}")
-        p.drawString(100, 730, f"Institution: {payment.academic.institution_name}")
-        p.drawString(100, 710, f"Payer Name: {payment.name_of_the_payer}")
-        p.drawString(100, 690, f"Amount Paid: INR {payment.amount}")
-        p.drawString(100, 670, f"Payment Date: {payment.payment_date}")
-        p.drawString(100, 650, f"Transaction ID: {payment.transactionid or 'N/A'}")
-        p.drawString(100, 630, f"Invoice No: {payment.invoice_no or 'N/A'}")
-        p.showPage()
-        p.save()
-        
-        template_path = os.path.join(settings.MEDIA_ROOT, 'templates/receipt_template.pdf')
-        if os.path.exists(template_path):
-            try:
-                template_pdf = PdfFileReader(open(template_path, "rb"))
-                page = template_pdf.getPage(0)
-                overlay_pdf = PdfFileReader(BytesIO(buffer.getvalue()))
-                page.mergePage(overlay_pdf.getPage(0))
-                
-                output = PdfFileWriter()
-                output.addPage(page)
-                
-                response = HttpResponse(content_type='application/pdf')
-                response['Content-Disposition'] = f'attachment; filename=receipt_{payment.id}.pdf'
-                output.write(response)
-                return response
-            except Exception as e:
-                pass
-                
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename=receipt_{payment.id}.pdf'
-        response.write(buffer.getvalue())
-        return response
+        try:
+            pdf_buffer = generate_payment_receipt_pdf(payment)
+            response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=receipt_{payment.id}.pdf'
+            return response
+        except Exception as e:
+            return HttpResponse("Error generating receipt PDF.", status=500)
 
 

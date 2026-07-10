@@ -66,7 +66,7 @@
               </td>
               <td>
                 {% if record.verification_status == 1 %}
-                  <a class="btn btn-primary btn-xs" href="#">
+                  <a class="btn btn-primary btn-xs" href="{% url 'eventsv2:download_academic_receipt' record.id %}">
                     <i class="fa fa-download"></i> Download PDF
                   </a>
                 {% else %}
