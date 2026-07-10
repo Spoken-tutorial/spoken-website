@@ -1,0 +1,86 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+{% block title %} Organizer Payment History {% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> Academic Transaction History
+  <a href="{% url 'events:events_dashboard' %}" class='dashboard pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+  {% if messages %}
+    <div class="row">
+      <div class="col-sm-12">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message|safe }}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class='table-responsive'>
+    {% if collection %}
+      <table class="paleblue table table-bordered table-hover table-striped">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Payment Date</th>
+            <th>Payer Name</th>
+            <th>Email</th>
+            <th>Amount (INR)</th>
+            <th>Subscription Duration</th>
+            <th>Transaction ID</th>
+            <th>Verification Status</th>
+            <th>Receipt</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for record in collection %}
+            <tr class="{% cycle 'odd' 'even' %}">
+              <td>{{ forloop.counter }}</td>
+              <td>{{ record.payment_date }}</td>
+              <td>{{ record.name_of_the_payer }}</td>
+              <td>{{ record.email }}</td>
+              <td>{{ record.amount }}</td>
+              <td>
+                {% if record.subscription == '365' %}
+                  1 Year (365 days)
+                {% elif record.subscription == '180' %}
+                  6 Months (180 days)
+                {% else %}
+                  {{ record.subscription }} days
+                {% endif %}
+              </td>
+              <td>{{ record.transactionid|default:"-" }}</td>
+              <td>
+                {% if record.verification_status == 0 %}
+                  <span class="label label-warning">Pending</span>
+                {% elif record.verification_status == 1 %}
+                  <span class="label label-success">Approved</span>
+                {% elif record.verification_status == 2 %}
+                  <span class="label label-danger">Rejected</span>
+                {% else %}
+                  <span class="label label-success">Approved (Legacy)</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if record.verification_status == 1 %}
+                  <a class="btn btn-primary btn-xs" href="#">
+                    <i class="fa fa-download"></i> Download PDF
+                  </a>
+                {% else %}
+                  <button class="btn btn-default btn-xs" disabled>
+                    <i class="fa fa-ban"></i> Not Available
+                  </button>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="no-record"> No payment transactions found!</p>
+    {% endif %}
+  </div>
+{% endblock %}

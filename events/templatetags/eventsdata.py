@@ -4,7 +4,7 @@ from django import template
 from django.contrib.auth.models import User
 from events.models import *
 from events.views import is_organiser, is_invigilator, is_resource_person, is_accountexecutive, is_event_manager, can_clone_training, \
-    is_administrator, is_organiser_deactivated, is_invigilator_deactivated, is_school_training_manager, is_tech_team
+    is_administrator, is_organiser_deactivated, is_invigilator_deactivated, is_school_training_manager, is_tech_team, is_payment_verification_staff
 import datetime
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
@@ -192,6 +192,7 @@ register.filter('can_enter_test', can_enter_test)
 
 register.filter('is_administrator', is_administrator)
 register.filter('is_organiser', is_organiser)
+register.filter('is_payment_verification_staff', is_payment_verification_staff)
 register.filter('is_invigilator', is_invigilator)
 register.filter('is_resource_person', is_resource_person)
 register.filter('is_accountexecutive', is_accountexecutive)

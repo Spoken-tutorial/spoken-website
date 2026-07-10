@@ -140,6 +140,17 @@
                         </div>
                     </div>
                 {% endif %}
+                {% if user|is_payment_verification_staff %}
+                    <div class="panel panel-primary">
+                        <div class="panel-heading panel-heading-notif">Payment Verification Staff</div>
+                        <div class="panel-body">
+                            <h5>Payment Verification</h5>
+                            <ul>
+                                <li><a href="/software-training/payment-verification/">Verify Organiser Payment</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
                 {% if user|is_organiser %}
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Organiser</div>
@@ -168,6 +179,7 @@
                             <h5>Academic Transactions</h5>
                             <ul>
                                 <li><a href="/software-training/organiser_academic_payment_details/">Academic Payment Details</a></li>
+                                <li><a href="/software-training/organiser_payment_history/">Transaction History</a></li>
                             </ul>
                         </div>
                     </div>
