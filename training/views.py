@@ -222,7 +222,7 @@ class ILWEventListView(ListView):
 	model = TrainingEvents
 	template_name = "ilw_event_list.html"
 	context_object_name = "events"
-	paginate_by = 2
+	paginate_by = 50
 
 	def dispatch(self, *args, **kwargs):
 		user = self.request.user
