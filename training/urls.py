@@ -60,6 +60,7 @@ urlpatterns = [
       name="event_attendance"
     ),
     url(r'^ajax_check_college/', ajax_check_college, name="ajax_check_college"),
+    url(r'^ajax-foss-levels/$', ajax_get_foss_levels, name='ajax_foss_levels'),
     url(r'^upload_college_details/', upload_college_details, name="upload_college_details"),
     url(r'^swayam-participant-data/$', DownloadSwayamParticipantDataView.as_view(), name='download_swayam_participant_data'),
     url(

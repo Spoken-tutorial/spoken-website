@@ -129,16 +129,33 @@
 				</div>
 			</div>
 			
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_foss">FOSS <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-					<div class="input-group">
-						{% render_field form.foss_data class+="form-control foss_data" %}
-					</div>
-				</div>
-			</div>
+<div id="foss-container">
 
+<div class="form-group foss-row">
 
+    <label class="col-sm-3 control-label">
+        FOSS <sup style="color:red">*</sup>
+    </label>
+
+    <div class="col-sm-4">
+        {% render_field form.foss_data class+="form-control foss_data" %}
+    </div>
+
+    <div class="col-sm-3">
+        {% render_field form.level class+="form-control level_data" %}
+    </div>
+
+    <div class="col-sm-2">
+       <button
+    type="button"
+    class="btn btn-success add-foss">
+    + Add Another FOSS
+</button>
+    </div>
+
+</div>
+
+</div>
 			<div class="form-group">
 				<label class="col-sm-3 control-label" for= "id_name">Event Start Date <sup style="color:red";>*</sup></label>
 				<div class="col-sm-9">
@@ -220,18 +237,103 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script type="text/javascript">
  $( document ).ready(function() {
-	$('#id_foss_data').select2({
-            placeholder: "Select Foss",
-            allowClear: true
+
+
+	// Initialize first row
+$('.foss_data').select2({
+    placeholder: "Select FOSS",
+    allowClear: true,
+    width: '100%'
+});
+
+
+// Add new FOSS row
+$(document).on("click", ".add-foss", function () {
+
+    var row = $(".foss-row:first").clone(false);
+
+    // Remove Select2 generated HTML
+    row.find("span.select2").remove();
+
+    // Reset FOSS dropdown
+    var fossSelect = row.find(".foss_data");
+
+    fossSelect.removeAttr("data-select2-id");
+    fossSelect.find("option").removeAttr("data-select2-id");
+    fossSelect.val(null);
+
+    // Reset Level dropdown
+    var levelSelect = row.find(".level_data");
+
+    levelSelect.removeAttr("data-select2-id");
+    levelSelect.find("option").removeAttr("data-select2-id");
+    levelSelect.empty();
+
+    // Change Add button to Remove button
+	row.find(".add-foss")
+		.removeClass("add-foss btn-success")
+		.addClass("remove-foss btn-danger")
+		.text("Remove");
+
+    $("#foss-container").append(row);
+
+    // Reinitialize Select2
+    fossSelect.select2({
+        placeholder: "Select FOSS",
+        allowClear: true,
+        width: '100%'
     });
 
-	$('#id_foss_data').on('change', function(e){
-		var selectedValues = $(this).val();
+});
 
-		if(selectedValues && selectedValues.length > 1){
-			$('#id_is_course').prop('checked', true);
-		}
-	})
+
+// Remove row
+$(document).on("click", ".remove-foss", function () {
+
+    $(this).closest(".foss-row").remove();
+
+});
+
+$('#foss-container').on('change', '.foss_data', function () {
+
+    var selectedValues = $(this).val();
+
+    if(!selectedValues){
+        return;
+    }
+
+    var level = $(this)
+        .closest('.foss-row')
+        .find('.level_data');
+
+    $.ajax({
+        url: "/training/ajax-foss-levels/",
+        data:{
+            foss_id:selectedValues
+        },
+        success:function(data){
+
+            level.empty();
+
+            $.each(data,function(i,item){
+
+                level.append(
+                    $('<option>',{
+                        value:item.level_id,
+                        text:item.level__level
+                    })
+                );
+
+            });
+
+            level.find("option:contains('Advanced')")
+                 .prop("selected",true);
+
+        }
+    });
+
+});
+
 	
 	$('#id_event_name').on('input', function(){
 		let val = $(this).val()

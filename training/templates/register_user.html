@@ -197,13 +197,21 @@
                         <!-- <input type="hidden" id="id_event_type" class="form-control"  name="event_type"  value="{{event_obj.event_type}}"> -->
                         
                     {% endif %}
-
-                   
-               
+                    
                   <div class="form-group">
                   <label for="id_foss" class="col-lg-4 control-label" name="foss_id">FOSS* </label>
                   <div class="col-lg-8">
-                      <div class="form-control" style="height: 80px;;" >{{ event_obj.course.foss.all|join:", " }}</div>
+                      <div class="form-control" style="height:auto; min-height:80px;">
+
+{% for item in course_mappings %}
+    {{ item.foss.foss }}
+    {% if item.level %}
+        ({{ item.level.level }})
+    {% endif %}
+    {% if not forloop.last %}<br>{% endif %}
+{% endfor %}
+
+</div>
                   </div>
                   </div>
                   {% if langs %}

@@ -167,11 +167,34 @@ def get_event_details(eventid):
 @register.filter
 def get_ilw_mdlcourseid(eventfossid):
   try:
-    ilwcourse = ILWFossMdlCourses.objects.filter(foss=eventfossid)
+    ilwcourse = ILWFossMdlCourses.objects.filter(foss=eventfossid,)
   except ILWFossMdlCourses.DoesNotExist:
     return None
 
   return ilwcourse
+
+@register.simple_tag
+def get_ilw_mdlcourseid(foss, level):
+    return ILWFossMdlCourses.objects.filter(
+        foss=foss,
+        level=level
+    )
+
+@register.filter
+def get_course_foss_levels(course):
+    if not course:
+        return []
+    return ILWCourseFossLevel.objects.filter(course=course).select_related(
+        'foss',
+        'level'
+    )
+
+@register.simple_tag
+def get_ilw_attempt_courses(foss, level):
+    return ILWFossMdlCourses.objects.filter(
+        foss=foss,
+        level=level
+    )
 
 @register.filter
 def check_passgrade_exists(event,testfossid):

@@ -5,7 +5,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 #import auth user models
 from django.contrib.auth.models import User
-from creation.models import FossCategory, Language
+from creation.models import FossCategory, Language, Level
 from events.models import *
 from donate.models import Payee
 from donate.helpers import GENDER_CHOICES
@@ -175,11 +175,20 @@ class TrainingCertificate(models.Model):
     serial_key = models.CharField(max_length=200, null=True)
     short_key = models.CharField(max_length=50, null=True)
 
+class ILWCourseFossLevel(models.Model):
+    course = models.ForeignKey(ILWCourse, on_delete=models.CASCADE)
+    foss = models.ForeignKey(FossCategory, on_delete=models.CASCADE)
+    level = models.ForeignKey(Level,on_delete=models.PROTECT,default=3)
+
+    class Meta:
+        unique_together = ('course', 'foss', 'level')
+
 class ILWFossMdlCourses(models.Model):
 	foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT, related_name='eventfoss', null=True)
 	mdlcourse_id = models.PositiveIntegerField()
 	mdlquiz_id = models.PositiveIntegerField()
 	testfoss = models.ForeignKey(FossCategory, on_delete=models.PROTECT, related_name='testfoss', null=True)
+	level = models.ForeignKey(Level,on_delete=models.PROTECT,default=3)
 	class Meta(object):
 		ordering = ['foss']
 
