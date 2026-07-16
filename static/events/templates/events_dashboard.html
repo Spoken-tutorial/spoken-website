@@ -140,7 +140,8 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if user|is_payment_verification_staff %}
+                {% check_payment_verification_staff user as is_pvs %}
+                {% if is_pvs %}
                     <div class="panel panel-primary">
                         <div class="panel-heading panel-heading-notif">Payment Verification Staff</div>
                         <div class="panel-body">
