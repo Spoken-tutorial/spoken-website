@@ -41,8 +41,8 @@
                             </td>
                             <td>{{ event.student_count }}</td>
                             <td>
-                                {# <a href="{% url 'training:event_attendance' event.id %}" title="View Participants">View Participants</a> #}
-                                {# <br> #}
+                                <a href="{% url 'training:event_attendance' event.id %}" title="View Participants">View Participants</a>
+                                <br>
                                 <a href="{% url 'training:event_participants' event.id %}" title="Mark Attendance">Mark Attendance</a>
                             </td>
                         </tr>
