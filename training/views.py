@@ -1454,7 +1454,11 @@ class EventParticipantsListView(ListView):
 			if not user.is_authenticated():
 				raise PermissionDenied()
 			
-			if not (is_organiser(user) or is_invigilator(user)):
+			if is_organiser(user):
+				self.academic = user.organiser.academic
+			elif is_invigilator(user):
+				self.academic = user.invigilator.academic
+			else:
 				raise PermissionDenied()
 		
 		return super(EventParticipantsListView, self).dispatch(*args, **kwargs)
@@ -1465,7 +1469,7 @@ class EventParticipantsListView(ListView):
 		main_query = Participant.objects.filter(event_id=event_id)
 
 		if self.event.is_swayam:
-			return main_query.select_related('college', 'state')
+			return main_query.filter(college=self.academic).select_related('college', 'state')
 		
 		if self.event.training_status == 2:
 			return EventAttendance.objects.filter(event_id=event_id).select_related(
