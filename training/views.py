@@ -1195,7 +1195,8 @@ class BatchTrainingCertificateView(FDPTrainingCertificate, View):
 
         page_count = 0
         for participant in participants:
-            if participant.reg_approval_status == 1 and registartion_successful(participant.user, event):
+            attendance_marked = (participant.reg_approval_status == 1) or EventAttendance.objects.filter(event=event, participant=participant).exists()
+            if attendance_marked and registartion_successful(participant.user, event):
                 user = participant.user
 
                 canvas_buffer = BytesIO()
