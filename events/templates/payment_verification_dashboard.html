@@ -1,0 +1,108 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+{% load cmsdata %}
+{% load creationdata %}
+{% block title %} Payment Verification Dashboard {% endblock %}
+{% block cssblock %}{% endblock %}
+{% block heading %}
+  <i class="fa fa-list-ul"></i> Payment Verification Dashboard
+  <a href="{% url 'events:events_dashboard' %}" class='dashboard pull-right'>Dashboard</a>
+{% endblock %}
+{% block content %}
+  {% if messages %}
+    <div class="row">
+      <div class="col-sm-12">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message|safe }}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class='filters row'>
+    <form action="" method="get" class='form-horizontal'>
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_state" class="col-sm-4 control-label">State</label>
+          <div class="col-sm-8">
+            {% render_field form.state class+="form-control state" tabindex="1" %}
+            {{ form.state.errors }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="id_verification_status" class="col-sm-4 control-label">Status</label>
+          <div class="col-sm-8">
+            {% render_field form.verification_status class+="form-control status" tabindex="1" %}
+            {{ form.verification_status.errors }}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 col-md-4 col-sm-4">
+        <div class="form-group">
+          <label for="id_academic__institution_name" class="col-sm-4 control-label">Institution</label>
+          <div class="col-sm-8">
+            {% render_field form.academic__institution_name class+="form-control institution_name" tabindex="1" %}
+            {{ form.academic__institution_name.errors }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="col-sm-offset-4 col-sm-8">
+            <input class="btn btn-success" type="submit" value="Filter" />
+            <a class="btn btn-success" href="{{request.path}}?{{ request.GET|reset_get_values}}">Reset Filter</a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class='table-responsive'>
+    {% if collection %}
+      <table class="paleblue table table-bordered table-hover table-striped">
+        {% get_sortable_header header ordering request.GET %}
+        {% for record in collection %}
+          <tr class="{% cycle 'odd' 'even' %}">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ record.state }}</td>
+            <td>{{ record.academic.academic_code }}</td>
+            <td>{{ record.academic.institution_name }}</td>
+            <td>{{ record.name_of_the_payer }}</td>
+            <td>INR {{ record.amount }}</td>
+            <td>{{ record.payment_date }}</td>
+            <td>
+              {% if record.verification_status == 0 %}
+                <span class="label label-warning">Pending</span>
+              {% elif record.verification_status == 1 %}
+                <span class="label label-success">Approved</span>
+              {% elif record.verification_status == 2 %}
+                <span class="label label-danger">Rejected</span>
+              {% else %}
+                <span class="label label-success">Approved</span>
+              {% endif %}
+            </td>
+            <td>
+              <a class="btn btn-primary btn-xs" href="{% url 'eventsv2:payment_verification_detail' record.id %}" style="margin-right: 5px; margin-top: 2px; margin-bottom: 2px;">
+                <i class="fa fa-search"></i> View Details
+              </a>
+              {% if record.verification_status == 0 %}
+                <a class="btn btn-success btn-xs" href="{% url 'eventsv2:academic_payment_approve' record.id %}" onclick="return confirm('Are you sure you want to approve this payment?');" style="margin-right: 5px; margin-top: 2px; margin-bottom: 2px;">
+                  <i class="fa fa-check"></i> Approve
+                </a>
+                <a class="btn btn-danger btn-xs" href="{% url 'eventsv2:academic_payment_reject' record.id %}" onclick="return confirm('Are you sure you want to reject this payment?');" style="margin-right: 5px; margin-top: 2px; margin-bottom: 2px;">
+                  <i class="fa fa-times"></i> Reject
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p class="no-record"> No payment records found!</p>
+    {% endif %}
+  </div>
+{% endblock %}

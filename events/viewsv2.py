@@ -13,16 +13,20 @@ import os
 
 from config import TARGET, CHANNEL_ID, CHANNEL_KEY, EXCLUDE_FROM_STP
 # Create your views here.
-from django.views.generic import View, ListView
+from django.views.generic import View, ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from events.models import *
 from donate.models import *
 from training.models import *
-from events.filters import TrainingRequestFilter
+from events.filters import TrainingRequestFilter, PaymentVerificationFilter
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.utils.decorators import method_decorator
 from events.decorators import group_required
+from django.utils import timezone
+from training.views import add_Academic_key
+from events.events_email import send_email
+from events.receipt_service import generate_payment_receipt_pdf
 from events import display
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
@@ -48,14 +52,14 @@ from mdldjango.get_or_create_participant import get_or_create_participant
 from django.contrib.auth.decorators import login_required
 from mdldjango.models import MdlUser, MdlQuizGrades
 from django.contrib.auth.mixins import UserPassesTestMixin
-from events.formsv2 import StudentGradeFilterForm, AcademicPaymentStatusForm
+from events.formsv2 import StudentGradeFilterForm, AcademicPaymentStatusForm, OrganiserAcademicPaymentStatusForm
 from django.views.generic import FormView
 from django.shortcuts import get_object_or_404
 
 
 #pdf generate
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter, landscape
+from reportlab.lib.pagesizes import letter, landscape, A4
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
@@ -77,6 +81,8 @@ from spoken.config import TOPPER_WORKER_STATUS
 from django.db import connection, connections
 from donate.utils import send_transaction_email
 from .certificates import *
+from training.views import SortableHeader
+from cms.management.commands.populate_subscription_data import update_subscription, get_users_from_acad
 
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
 
@@ -3505,8 +3511,12 @@ class AcademicKeyCreateView(CreateView):
         return render(self.request, self.template_name, {'form': self.form_class()})
 
     def form_valid(self, form, **kwargs):
+      from django.utils import timezone
       self.object = form.save(commit=False)
       self.object.entry_user = self.request.user
+      self.object.verification_status = 1
+      self.object.approved_by = self.request.user
+      self.object.approved_on = timezone.now()
       self.object.save()
       
 
@@ -3527,7 +3537,73 @@ class AcademicKeyCreateView(CreateView):
 
       messages.success(self.request, "Payment Details for academic is added successfully.")
       return HttpResponseRedirect(self.success_url)
-    
+
+
+class OrganiserAcademicKeyCreateView(CreateView):
+    form_class = OrganiserAcademicPaymentStatusForm
+    model = AcademicPaymentStatus
+    template_name = "organiser_academic_payment_details_form.html"
+    success_url = "/software-training/organiser_academic_payment_details/"
+
+    @method_decorator(group_required("Organiser"))
+    def get(self, request, *args, **kwargs):
+        academic_id = getattr(self.request.user.organiser, 'academic_id', None)
+        initial_data = {}
+        if academic_id:
+            try:
+                ac = AcademicCenter.objects.get(id=academic_id)
+                initial_data = {
+                    'academic': academic_id,
+                    'state': ac.state_id,
+                    'college_type': ac.institution_type.name,
+                }
+                latest_payment = AcademicPaymentStatus.objects.filter(academic_id=academic_id).latest('entry_date')
+                initial_data['name_of_the_payer'] = latest_payment.name_of_the_payer
+                initial_data['email'] = latest_payment.email
+                initial_data['phone'] = latest_payment.phone
+                initial_data['pan_number'] = latest_payment.pan_number
+                initial_data['gst_number'] = latest_payment.gst_number
+                initial_data['payment_status'] = "Renewal"
+            except AcademicPaymentStatus.DoesNotExist:
+                initial_data['payment_status'] = "New"
+            except AcademicCenter.DoesNotExist:
+                pass
+        form = self.form_class(initial=initial_data)
+        return render(self.request, self.template_name, {'form': form})
+
+    @method_decorator(group_required("Organiser"))
+    def post(self, request, *args, **kwargs):
+        return super(OrganiserAcademicKeyCreateView, self).post(request, *args, **kwargs)
+
+    def form_valid(self, form, **kwargs):
+        self.object = form.save(commit=False)
+        self.object.entry_user = self.request.user
+        self.object.verification_status = 0 # Pending
+        
+        # Ensure academic is correctly set for organiser if not bound in POST
+        if hasattr(self.request.user, 'organiser') and self.request.user.organiser.academic:
+            self.object.academic = self.request.user.organiser.academic
+            self.object.state = self.request.user.organiser.academic.state
+
+        self.object.save()
+        
+        u_key = uuid.uuid1()
+        hex_key = u_key.hex
+
+        Subscription_time = int(self.object.subscription)
+        expiry_date = self.object.payment_date + timedelta(days=Subscription_time)
+
+        ac_key = AcademicKey()      
+        ac_key.ac_pay_status = self.object
+        ac_key.academic = self.object.academic
+        ac_key.u_key = u_key
+        ac_key.hex_key = hex_key
+        ac_key.expiry_date = expiry_date
+        ac_key.save()
+
+        messages.success(self.request, "Payment Details for academic is added successfully.")
+        return HttpResponseRedirect(self.success_url)
+
 
 class FetchAcademicDetailsView(View):
   def get(self, request):
@@ -3647,3 +3723,145 @@ class GetMoodleQuizzesView(View):
     
     data = [{'id': q[0], 'name': "{} [ID: {}]".format(q[1], q[0])} for q in quizzes]
     return JsonResponse(data, safe=False)
+
+
+# --- Academic Center Payment Verification Workflow ---
+
+
+class OrganiserPaymentHistoryView(ListView):
+    model = AcademicPaymentStatus
+    template_name = 'organiser_payment_history.html'
+    context_object_name = 'collection'
+    paginate_by = 50
+
+    @method_decorator(group_required("Organiser"))
+    def dispatch(self, *args, **kwargs):
+        return super(OrganiserPaymentHistoryView, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        academic_id = getattr(self.request.user.organiser, 'academic_id', None)
+        if not academic_id:
+            return AcademicPaymentStatus.objects.none()
+        return AcademicPaymentStatus.objects.filter(
+            academic_id=academic_id
+        ).select_related('academic', 'state').order_by('-entry_date')
+
+
+class PaymentVerificationDashboardView(ListView):
+    model = AcademicPaymentStatus
+    template_name = 'payment_verification_dashboard.html'
+    context_object_name = 'collection'
+    paginate_by = 50
+
+    @method_decorator(group_required("Payment Verification Staff"))
+    def dispatch(self, *args, **kwargs):
+        return super(PaymentVerificationDashboardView, self).dispatch(*args, **kwargs)
+
+    def get_queryset(self):
+        qs = AcademicPaymentStatus.objects.select_related('academic', 'state').order_by('-entry_date')
+        self.filter = PaymentVerificationFilter(self.request.GET, queryset=qs)
+        return self.filter.qs
+
+    def get_context_data(self, **kwargs):
+        context = super(PaymentVerificationDashboardView, self).get_context_data(**kwargs)
+        context['form'] = self.filter.form
+        context['header'] = {
+            1: SortableHeader('#', False),
+            2: SortableHeader('state', True, 'State'),
+            3: SortableHeader('academic__academic_code', True, 'Academic Code'),
+            4: SortableHeader('academic__institution_name', True, 'Institution'),
+            5: SortableHeader('name_of_the_payer', True, 'Payer Name'),
+            6: SortableHeader('amount', True, 'Amount'),
+            7: SortableHeader('payment_date', True, 'Payment Date'),
+            8: SortableHeader('verification_status', True, 'Status'),
+            9: SortableHeader('actions', False, 'Actions'),
+        }
+        context['ordering'] = self.request.GET.get('o', '')
+        
+        # Paginate results 
+        page = self.request.GET.get('page')
+        context['collection'] = get_page(self.filter.qs, page)
+        return context
+
+
+class PaymentVerificationDetailView(DetailView):
+    model = AcademicPaymentStatus
+    template_name = 'payment_verification_detail.html'
+    context_object_name = 'record'
+
+    @method_decorator(group_required("Payment Verification Staff"))
+    def dispatch(self, *args, **kwargs):
+        return super(PaymentVerificationDetailView, self).dispatch(*args, **kwargs)
+
+
+@group_required("Payment Verification Staff")
+def AcademicPaymentApproveView(request, pk):
+    payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
+    if payment.verification_status != 1:
+        payment.verification_status = 1
+        payment.approved_by = request.user
+        payment.approved_on = timezone.now()
+        payment.save()
+        
+        # AcademicKey generation
+        if not payment.academickey_set.exists():
+            add_Academic_key(payment, payment.subscription)
+        else:
+            
+            key = payment.academickey_set.first()
+            if key:
+                users = get_users_from_acad(key.academic_id)
+                update_subscription(users, key.expiry_date)
+        
+        # Send approval email
+        send_email('Academic Payment Approved', to=[payment.email], instance=payment)
+        messages.success(request, 'Payment details approved successfully.')
+    else:
+        messages.warning(request, 'Payment is already approved.')
+        
+    return HttpResponseRedirect('/software-training/payment-verification/')
+
+
+@group_required("Payment Verification Staff")
+def AcademicPaymentRejectView(request, pk):
+    payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
+    payment.verification_status = 2
+    payment.approved_by = request.user
+    payment.approved_on = timezone.now()
+    
+    remarks = request.POST.get('remarks')
+    if remarks:
+        payment.remarks = remarks
+    payment.save()
+    
+    # Send rejection email
+    send_email('Academic Payment Rejected', to=[payment.email], instance=payment)
+    messages.success(request, 'Payment details rejected successfully.')
+    
+    return HttpResponseRedirect('/software-training/payment-verification/')
+
+
+class DownloadReceiptView(View):
+    @method_decorator(login_required)
+    def get(self, request, pk, *args, **kwargs):
+        payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
+        
+        # access control for download
+        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists()
+        is_owner = hasattr(request.user, 'organiser') and request.user.organiser.academic_id == payment.academic_id
+        
+        if not (is_staff or is_owner):
+            raise PermissionDenied("You do not have permission to download this receipt.")
+            
+        if payment.verification_status != 1:
+            raise PermissionDenied("Receipt is not verified/approved yet.")
+            
+        try:
+            pdf_buffer = generate_payment_receipt_pdf(payment)
+            response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=receipt_{payment.id}.pdf'
+            return response
+        except Exception as e:
+            return HttpResponse("Error generating receipt PDF.", status=500)
+
+

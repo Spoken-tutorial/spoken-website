@@ -46,6 +46,25 @@ class ActivateAcademicCenterFilter(django_filters.FilterSet):
     model = AcademicCenter
     fields = ['state', 'institution_type', 'institute_category']
 
+class PaymentVerificationFilter(django_filters.FilterSet):
+  state = django_filters.ChoiceFilter(choices=State.objects.none())
+  verification_status = django_filters.ChoiceFilter(choices=[('', '---------'), (0, 'Pending'), (1, 'Approved'), (2, 'Rejected')])
+  academic__institution_name = django_filters.CharFilter(lookup_expr='icontains')
+  
+  def __init__(self, *args, **kwargs):
+    user = None
+    if 'user' in kwargs:
+      user = kwargs['user']
+      kwargs.pop('user')
+    super(PaymentVerificationFilter, self).__init__(*args, **kwargs)
+    choices = list(State.objects.values_list('id', 'name').order_by('name'))
+    choices.insert(0, ('', '---------'),)
+    self.filters['state'].extra.update({'choices' : choices})
+    
+  class Meta(object):
+    model = AcademicPaymentStatus
+    fields = ['state', 'verification_status', 'academic__institution_name']
+
 class OrganiserFilter(django_filters.FilterSet):
   academic__state = django_filters.ChoiceFilter(choices=State.objects.none())
   academic__institution_name = django_filters.CharFilter(lookup_expr='icontains')

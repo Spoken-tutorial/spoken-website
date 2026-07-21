@@ -372,11 +372,44 @@ urlpatterns = [
       name='academic_payment_details'
     ),
     url(
+      r'^organiser_academic_payment_details/', 
+      OrganiserAcademicKeyCreateView.as_view(template_name='organiser_academic_payment_details_form.html'), 
+      name='organiser_academic_payment_details'
+    ),
+    url(
       # r'^software-training/ajax-academic-details/', 
       r'^ajax-academic-details/', 
       FetchAcademicDetailsView.as_view(), 
       name='ajax_academic_details'
     ),
-
-
+    url(
+      r'^organiser_payment_history/',
+      OrganiserPaymentHistoryView.as_view(),
+      name='organiser_payment_history'
+    ),
+    url(
+      r'^payment-verification/$',
+      PaymentVerificationDashboardView.as_view(),
+      name='payment_verification_dashboard'
+    ),
+    url(
+      r'^payment-verification/(?P<pk>\d+)/details/$',
+      PaymentVerificationDetailView.as_view(),
+      name='payment_verification_detail'
+    ),
+    url(
+      r'^payment-verification/(?P<pk>\d+)/approve/$',
+      AcademicPaymentApproveView,
+      name='academic_payment_approve'
+    ),
+    url(
+      r'^payment-verification/(?P<pk>\d+)/reject/$',
+      AcademicPaymentRejectView,
+      name='academic_payment_reject'
+    ),
+    url(
+      r'^academic-receipt/(?P<pk>\d+)/download/$',
+      DownloadReceiptView.as_view(),
+      name='download_academic_receipt'
+    ),
 ]

@@ -266,6 +266,15 @@ def is_organiser(user):
     except:
         pass
 
+def is_payment_verification_staff(user):
+    """Check if the user is in Payment Verification Staff group"""
+    try:
+        if user.groups.filter(name='Payment Verification Staff').exists():
+            return True
+    except:
+        pass
+    return False
+
 def is_administrator(user):
     """Check if the user is having resource person  rights"""
     if user.groups.filter(name='Administrator').count() == 1:

@@ -1,5 +1,6 @@
 
 from django.core.mail import EmailMultiAlternatives
+from events.receipt_service import generate_payment_receipt_pdf
 
 def send_email(status, to = None, instance = None, cc = None, bcc = None):
     subject = None
@@ -104,6 +105,34 @@ Regards,
 Spoken Tutorial Team,
 IIT Bombay.
 '''.format('http://process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf', instance.foss, instance.tdate, instance.ttime, instance.test_code)
+        
+    elif status == 'Academic Payment Approved':
+        subject = 'Spoken Tutorial Academic Center Payment Approved'
+        message = '''Dear Organiser,
+        
+Your payment details submitted for Academic Center {0} have been approved successfully.
+
+You can now access active software training services and download your payment receipt from the Organizer dashboard transaction history.
+
+Regards,
+Spoken Tutorial Team,
+IIT Bombay.
+'''.format(instance.academic.institution_name)
+
+    elif status == 'Academic Payment Rejected':
+        subject = 'Spoken Tutorial Academic Center Payment Rejected'
+        message = '''Dear Organiser,
+        
+Your payment details submitted for Academic Center {0} have been rejected by the verification team.
+
+Remarks / Reason: {1}
+
+Please review your payment details and submit a new payment record.
+
+Regards,
+Spoken Tutorial Team,
+IIT Bombay.
+'''.format(instance.academic.institution_name, instance.remarks or "No remarks provided.")
 
     # send email
     email = EmailMultiAlternatives(
@@ -115,6 +144,13 @@ IIT Bombay.
         }
     )
     
+    if status == 'Academic Payment Approved' and instance:
+        try:
+            pdf_buffer = generate_payment_receipt_pdf(instance)
+            email.attach(f'receipt_{instance.id}.pdf', pdf_buffer.read(), 'application/pdf')
+        except Exception as e:
+            pass
+            
     try:
         result = email.send(fail_silently=True)
     except Exception as e:
