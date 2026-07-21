@@ -868,18 +868,23 @@ class EventAttendanceListView(ListView):
 				  )).select_related('college', 'state'))
 		
 
-		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)) | Q(payment_status__transaction__order_status="CHARGED"))
-		successful_user_ids = main_query.filter(
-			Q(payment_status__status=1) | 
-			Q(registartion_type__in=(1,3)) | 
-			Q(payment_status__transaction__order_status="CHARGED")
-		).values_list('user_id', flat=True)
-		self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED")).exclude(user_id__in=successful_user_ids).select_related('payment_status')
-		if self.event.training_status == 1:
-			self.queryset = main_query.filter(reg_approval_status=1)
+		if self.event.is_swayam:
+			# bypass payment based filter for swayam ilw events 
+			self.queryset = main_query
+			self.unsuccessful_payee = Participant.objects.none()
+		else:
+			self.queryset = main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)) | Q(payment_status__transaction__order_status="CHARGED"))
+			successful_user_ids = main_query.filter(
+				Q(payment_status__status=1) | 
+				Q(registartion_type__in=(1,3)) | 
+				Q(payment_status__transaction__order_status="CHARGED")
+			).values_list('user_id', flat=True)
+			self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED")).exclude(user_id__in=successful_user_ids).select_related('payment_status')
+			if self.event.training_status == 1:
+				self.queryset = main_query.filter(reg_approval_status=1)
 
-		if self.event.training_status == 2:
-			self.queryset = self.event.eventattendance_set.all()
+			if self.event.training_status == 2:
+				self.queryset = self.event.eventattendance_set.all()
 		return super(EventAttendanceListView, self).dispatch(*args, **kwargs)
 
 
@@ -1449,7 +1454,11 @@ class EventParticipantsListView(ListView):
 			if not user.is_authenticated():
 				raise PermissionDenied()
 			
-			if not (is_organiser(user) or is_invigilator(user)):
+			if is_organiser(user):
+				self.academic = user.organiser.academic
+			elif is_invigilator(user):
+				self.academic = user.invigilator.academic
+			else:
 				raise PermissionDenied()
 		
 		return super(EventParticipantsListView, self).dispatch(*args, **kwargs)
@@ -1460,7 +1469,7 @@ class EventParticipantsListView(ListView):
 		main_query = Participant.objects.filter(event_id=event_id)
 
 		if self.event.is_swayam:
-			return main_query.select_related('college', 'state')
+			return main_query.filter(college=self.academic).select_related('college', 'state')
 		
 		if self.event.training_status == 2:
 			return EventAttendance.objects.filter(event_id=event_id).select_related(
