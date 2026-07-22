@@ -3752,6 +3752,7 @@ class PaymentVerificationDashboardView(ListView):
     template_name = 'payment_verification_dashboard.html'
     context_object_name = 'collection'
     paginate_by = 50
+    raw_get_data = None
 
     @method_decorator(group_required("Payment Verification Staff"))
     def dispatch(self, *args, **kwargs):
@@ -3760,12 +3761,7 @@ class PaymentVerificationDashboardView(ListView):
     def get_queryset(self):
         qs = AcademicPaymentStatus.objects.select_related('academic', 'state').order_by('-entry_date')
         self.filter = PaymentVerificationFilter(self.request.GET, queryset=qs)
-        return self.filter.qs
-
-    def get_context_data(self, **kwargs):
-        context = super(PaymentVerificationDashboardView, self).get_context_data(**kwargs)
-        context['form'] = self.filter.form
-        context['header'] = {
+        self.header = {
             1: SortableHeader('#', False),
             2: SortableHeader('state', True, 'State'),
             3: SortableHeader('academic__academic_code', True, 'Academic Code'),
@@ -3776,7 +3772,15 @@ class PaymentVerificationDashboardView(ListView):
             8: SortableHeader('verification_status', True, 'Status'),
             9: SortableHeader('actions', False, 'Actions'),
         }
-        context['ordering'] = self.request.GET.get('o', '')
+        self.raw_get_data = self.request.GET.get('o', None)
+        self.queryset = get_sorted_list(self.request, self.filter.qs, self.header, self.raw_get_data)
+        return self.queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(PaymentVerificationDashboardView, self).get_context_data(**kwargs)
+        context['form'] = self.filter.form
+        context['header'] = self.header
+        context['ordering'] = get_field_index(self.raw_get_data)
         
         # Paginate results 
         page = self.request.GET.get('page')
