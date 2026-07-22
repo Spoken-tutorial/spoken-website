@@ -9,6 +9,8 @@ from .validators import validate_csv_file
 import phonenumbers
 from spoken.config import DEFAULT_ILW_HOST_COLLEGE
 from health_app.models import *
+from creation.models import Level
+
 
 CITY_DEPENDENT_EVENTS=['HN', 'PDP', 'CDP']
 class CreateTrainingEventForm(forms.ModelForm):
@@ -16,7 +18,9 @@ class CreateTrainingEventForm(forms.ModelForm):
     event_coordinator_email = forms.CharField(required = False)
     event_coordinator_contact_no = forms.CharField(required = False)
     # foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id')))
-    foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(id__in=ILWFossMdlCourses.objects.exclude(foss__isnull=True).values_list('foss_id', flat=True).distinct()),required=False)
+    #foss_data = forms.ModelMultipleChoiceField(queryset=FossCategory.objects.filter(id__in=ILWFossMdlCourses.objects.exclude(foss__isnull=True).values_list('foss_id', flat=True).distinct()),required=False)
+    foss_data = forms.ModelChoiceField(queryset=FossCategory.objects.filter(id__in=ILWFossMdlCourses.objects.exclude(foss__isnull=True).values_list('foss_id', flat=True).distinct()),required=False)
+    level = forms.ModelChoiceField(queryset=Level.objects.all(),required=False)
     city = forms.ModelChoiceField(queryset=City.objects.none(), required=False)
     host_college = forms.ModelChoiceField(queryset=AcademicCenter.objects.none(), required=False)
     tdate = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
@@ -55,7 +59,12 @@ class EditTrainingEventForm(CreateTrainingEventForm):
         if self.instance:
             if self.instance.course:
                 self.fields['ilw_course'].initial = self.instance.course.name
-                self.fields['foss_data'].initial = self.instance.course.foss.all()
+                #self.fields['foss_data'].initial = self.instance.course.foss.all()
+                mapping = ILWCourseFossLevel.objects.filter(course=self.instance.course).first()
+
+        if mapping:
+            self.fields['foss_data'].initial = mapping.foss
+            self.fields['level'].initial = mapping.level
             event_type = self.instance.event_type
             selected_state = self.instance.state
             if event_type in CITY_DEPENDENT_EVENTS:
@@ -81,8 +90,12 @@ class EditTrainingEventForm(CreateTrainingEventForm):
             course.save()
         else:
             course = ILWCourse.objects.create(name=ilw_course)
-        course.foss.clear()
-        course.foss.set(foss_data)
+        ILWCourseFossLevel.objects.filter(course=course).delete()
+
+        for foss in foss_data:
+            ILWCourseFossLevel.objects.create(course=course,foss=foss,level=self.cleaned_data['level'])
+        # course.foss.clear()
+        # course.foss.set(foss_data)
         event.course = course
         event.save()
 
@@ -126,7 +139,10 @@ class RegisterUser(forms.ModelForm):
         event_type = self.data.get('event_type')
         if event_id and event_type == 'HN':
             event = TrainingEvents.objects.get(id=event_id)
-            hn_categories = [x.external_course for x in ExternalCourseMap.objects.filter(foss__in=event.course.foss.all())]
+            # hn_categories = [x.external_course for x in ExternalCourseMap.objects.filter(foss__in=event.course.foss.all())]
+            course_mappings = ILWCourseFossLevel.objects.filter(course=event.course)
+            fosses = course_mappings.values_list('foss', flat=True)
+            hn_categories = [x.external_course for x in ExternalCourseMap.objects.filter(foss__in=fosses)]
             topic_categories = TopicCategory.objects.filter(category_id__in=hn_categories).values_list('topic_category_id', flat=True)
             languages = HNContributorRole.objects.filter(topic_cat_id__in=topic_categories).values_list('language_id', flat=True)
             langs = HNLanguage.objects.filter(lan_id__in=languages).distinct()

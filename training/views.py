@@ -100,10 +100,13 @@ class TrainingEventCreateView(CreateView):
 		self.object.entry_user = self.request.user
 		self.object.Language_of_workshop = Language.objects.get(id=22)
 		ilw_course = form.cleaned_data.get('ilw_course', '-')
-		foss_data = form.cleaned_data.get('foss_data', [])
+		foss_data =  self.request.POST.getlist('foss_data')
+		level = self.request.POST.getlist('level')
 		course = ILWCourse.objects.create(name = ilw_course)
-		if foss_data:
-			course.foss.set(foss_data)
+		# if foss_data:
+		# 	ILWCourseFossLevel.objects.create(course=course,foss=foss_data,level=level)
+		for foss, level in zip(foss_data, level):
+			ILWCourseFossLevel.objects.create(course=course,foss_id=foss,level_id=level)
 		self.object.course = course
 		self.object.save()
 		messages.success(self.request, "New Event created successfully.")
@@ -386,7 +389,9 @@ def register_user(request):
 					form.fields['name'].widget.attrs['readonly'] = True
 					form.fields['email'].widget.attrs['readonly'] = True
 
-				fosses = event_register.course.foss.all()
+				course_mappings = ILWCourseFossLevel.objects.filter(course=event_register.course)
+				fosses = [mapping.foss for mapping in course_mappings]
+				context["course_mappings"] = course_mappings
 				if event_register.event_type == 'HN':
 					hn_categories = [x.external_course for x in ExternalCourseMap.objects.filter(foss__in=fosses)]
 					topic_categories = TopicCategory.objects.filter(category_id__in=hn_categories).values_list('topic_category_id', flat=True)
@@ -411,7 +416,9 @@ def register_user(request):
 		event_id = request.POST.get("event_id_info", None) or request.GET.get("event_id", None)
 		if event_id:
 			event_register = TrainingEvents.objects.get(id=event_id)
-			fosses = event_register.course.foss.all()
+			course_mappings = ILWCourseFossLevel.objects.filter(course=event_register.course)
+			fosses = [mapping.foss for mapping in course_mappings]
+			context["course_mappings"] = course_mappings
 			if event_register.event_type == 'HN':
 				hn_categories = [x.external_course for x in ExternalCourseMap.objects.filter(foss__in=fosses)]
 				topic_categories = TopicCategory.objects.filter(category_id__in=hn_categories).values_list('topic_category_id', flat=True)
@@ -957,6 +964,21 @@ def ajax_check_college(request):
 	user_details = is_user_paid(int(college_id))
 	check = user_details
 	return HttpResponse(json.dumps(check), content_type='application/json')
+
+def ajax_get_foss_levels(request):
+    foss_id = request.GET.get('foss_id')
+
+    levels = (
+        ILWFossMdlCourses.objects
+        .filter(foss_id=foss_id)
+        .values(
+            'level_id',
+            'level__level'
+        )
+        .distinct()
+    )
+
+    return JsonResponse(list(levels), safe=False)
 
 
 def get_create_user(row):

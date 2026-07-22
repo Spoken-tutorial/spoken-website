@@ -231,7 +231,9 @@
               <b>Host College :</b> <span>{{event.event.host_college}}, {{event.event.state.name}}</span><br>
             {% endif %}
               <b>Event Coordinator Name :</b> <span>{{event.event.event_coordinator_name}}</span><br>
-              <b>{% if event.event.event_type == "HN"%}Course :{% else %} FOSS:{% endif %}</b> <span >{{event.course.foss.all|join:", "}}</span><span >{{event.event.course.foss.all|join:", "}}</span>
+              <b>{% if event.event.event_type == "HN"%}Course :{% else %} FOSS:{% endif %}</b> <span >{% for mapping in event.event.course|get_course_foss_levels %}
+    {{ mapping.foss.foss }} ({{ mapping.level.level }}){% if not forloop.last %}, {% endif %}
+{% endfor %}</span>
                         <input type="text" id="selected_foss{{item.id}}" name="selected_foss" value='{{event.get_foss_langs}}' style="display: none;">
           </p>
           {% if event.event.event_type == "HN"%}
@@ -368,8 +370,8 @@
                             <input type="hidden" name="eventid" value="{{event.event.id}}">
                             <button class="btn btn-warning" type="submit" 
                             formaction="{% url 'training:generate_training_certificate'%}">Download Training certificate</button>
-                            {% for item in event.event.course.foss.all %}
-                              {% with fossmdlcourse=item|get_ilw_mdlcourseid %}
+                            {% for mapping in event.event.course|get_course_foss_levels %}
+                             {% get_ilw_mdlcourseid mapping.foss mapping.level as fossmdlcourse %}
                                 {% for course in fossmdlcourse %}
                                   {% if not event|check_passgrade_exists:course.testfoss_id%}
                                     <input type="hidden" id="testurl{{course.mdlcourse_id}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}">
@@ -384,7 +386,7 @@
                                       {% endwith %}
                                   {% endif %}
                                 {% endfor %}
-                              {% endwith %}
+                              
                             {% endfor %}
                       {% endif %}
                   {% endif %}
@@ -408,7 +410,9 @@
         {% endif %}
         
         <b>Event Coordinator Name :</b> <span>{{event.event_coordinator_name}}</span><br>
-        <b>FOSS :</b> <span >{{event.course.foss.all|join:", "}}</span>
+        <b>FOSS :</b> <span >{% for mapping in event.course|get_course_foss_levels %}
+    {{ mapping.foss.foss }}{% if not forloop.last %}, {% endif %}
+{% endfor %}</span>
       </p>
       
       <p>                  
