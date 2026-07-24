@@ -13,6 +13,12 @@ class ASCIIValidator(validators.RegexValidator):
     flags = re.ASCII
 
 
+class LastNameValidator(validators.RegexValidator):
+    regex = r'^[\w ./()\-]+\Z'
+    flags = re.ASCII
+    message = _("Last name must contain only letters, numbers, spaces, dots, hyphens, slashes, or parentheses.")
+
+
 
 def validate_csv_file(csv_file):
     file_data = csv_file.read().splitlines()
@@ -23,7 +29,7 @@ def validate_csv_file(csv_file):
         for row in file_data:
             error = dict(line_no=None, fname=None, lname=None, email=None, gender=None,unicode_error=None, extra_errors=None)
             try:
-                ASCIIValidator(regex = r'^[\w .,@+-]+\Z')(row)
+                ASCIIValidator(regex = r'^[\w .,@+/()\-]+\Z')(row)
             except:
                 error.update(dict(line_no="Row: "+str(line+1), unicode_error="You have a invalid character in this row. Only English characters, digits and special characters like '@.-_' are allowed. Please check all the fields in this row."))
                 error_lines.append(error)
@@ -37,7 +43,7 @@ def validate_csv_file(csv_file):
                 except:
                     error.update(dict(fname="First name: "+ col[0] +" has errors."))
                 try:
-                    ASCIIValidator()(col[1].strip())
+                    LastNameValidator()(col[1].strip())
                 except:
                     error.update(dict(lname="Last Name: " + col[1] +" has errors."))
                 try:
