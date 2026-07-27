@@ -16,7 +16,7 @@ from django.db import IntegrityError
 from django.db.models import Exists, OuterRef
 # Python imports
 from datetime import datetime,date
-from ilwmoodle.models import ILWMdlQuizGrades
+from ilwmoodle.models import ILWMdlQuizGrades,ILWMdlQuizAttempts
 import csv
 import json
 import random
@@ -1786,13 +1786,9 @@ class ILWTestCertificate(object):
     # imgDoc.drawCentredString(150, 115, training_end.strftime('%d %B %Y'))
     imgDoc.setFillColorRGB(0, 0, 0)
 
-    # Fetch actual test completion date from Moodle
-    certificate_date = training_end
+    quiz_attempt  = ILWMdlQuizAttempts.objects.get(id=teststatus.mdlattempt_id)
 
-    quiz_grade = ILWMdlQuizGrades.objects.filter(userid=user.id, quiz=teststatus.mdlquiz_id).order_by('-timemodified').first()
-
-    if quiz_grade and quiz_grade.timemodified:
-        certificate_date = datetime.fromtimestamp(quiz_grade.timemodified)
+    certificate_date = datetime.fromtimestamp(quiz_attempt.timemodified)
 
     imgDoc.drawCentredString(150,115,certificate_date.strftime('%d %B %Y'))
 		
