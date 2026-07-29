@@ -1,0 +1,22 @@
+{% extends 'spoken/templates/base.html' %}
+
+{% block title %}Consent Required{% endblock %}
+
+{% block heading %}Consent Required{% endblock %}
+
+{% block content %}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Consent Terms</strong>
+    </div>
+    <div class="panel-body">
+        <div class="consent-text">
+            {{ consent_text|linebreaks }}
+        </div>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">I Accept</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
