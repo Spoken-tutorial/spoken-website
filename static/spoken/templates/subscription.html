@@ -10,9 +10,61 @@
         font-size: 1.2rem;
      }
      .is-invalid {
-    border-color: #dc3545 !important;
-    box-shadow: 0 0 4px #dc3545;
-}
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 4px #dc3545;
+     }
+     
+     /* Transaction history table styling */
+     .table-responsive {
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        margin-bottom: 20px;
+     }
+     
+     .thead-dark th {
+        background-color: #343a40;
+        color: #ffffff;
+        border-color: #454d55;
+        font-weight: 600;
+        font-size: 0.9rem;
+     }
+     
+     .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 123, 255, 0.05);
+     }
+     
+     .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+     }
+     
+     .badge {
+        font-size: 0.8rem;
+        padding: 0.4em 0.6em;
+     }
+     
+     .badge-success {
+        background-color: #28a745;
+     }
+     
+     .badge-warning {
+        background-color: #ffc107;
+        color: #212529;
+     }
+     
+     .badge-danger {
+        background-color: #dc3545;
+     }
+     
+     .badge-secondary {
+        background-color: #6c757d;
+     }
+     
+     .transaction-history h3 {
+        margin-bottom: 20px;
+        color: #495057;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+     }
     </style>
 {% endblock %}
 {% block heading %}
@@ -102,6 +154,69 @@
                     </button>
                 </div>
             </form>
+            
+            <!-- User Transaction History -->
+            {% if user.is_authenticated and user_transactions %}
+            <div class="row transaction-history" style="margin-top: 30px;">
+                <div class="col-sm-12">
+                    <h3><i class="fa fa-history"></i> Your Transaction History</h3>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th><i class="fa fa-calendar"></i> Payment Date</th>
+                                    <th><i class="fa fa-receipt"></i> Transaction ID</th>
+                                    <th><i class="fa fa-calendar-check"></i> Subscription End Date</th>
+                                    <th><i class="fa fa-university"></i> Institute Name</th>
+                                    <th><i class="fa fa-file-text"></i> GST Number</th>
+                                    <th><i class="fa fa-info-circle"></i> Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in user_transactions %}
+                                <tr>
+                                    <td>{{ transaction.payment_date|date:"d M Y" }}</td>
+                                    <td>
+                                        <small class="text-muted">{{ transaction.transaction_id }}</small>
+                                    </td>
+                                    <td>{{ transaction.subscription_end_date|date:"d M Y" }}</td>
+                                    <td>{{ transaction.institute_name }}</td>
+                                    <td>{{ transaction.gst_number }}</td>
+                                    <td>
+                                        {% if transaction.order_status == 'CHARGED' %}
+                                            <span class="badge badge-success">
+                                                <i class="fa fa-check"></i> Paid
+                                            </span>
+                                        {% elif transaction.order_status == 'PENDING' or transaction.order_status == 'PENDING_VBV' or transaction.order_status == 'AUTHORIZING' %}
+                                            <span class="badge badge-warning">
+                                                <i class="fa fa-clock-o"></i> Pending
+                                            </span>
+                                        {% elif transaction.order_status == 'NO_TRANSACTION' %}
+                                            <span class="badge badge-secondary">
+                                                <i class="fa fa-exclamation"></i> No Payment
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-danger">
+                                                <i class="fa fa-times"></i> Failed
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% elif user.is_authenticated %}
+            <div class="row" style="margin-top: 30px;">
+                <div class="col-sm-12">
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle"></i> No transaction history found for your account.
+                    </div>
+                </div>
+            </div>
+            {% endif %}
             
           <div id="paymentMsg">
 
