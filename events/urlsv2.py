@@ -358,7 +358,7 @@ urlpatterns = [
     ),
     url(
       r'^training-certificate/(?P<trid>\d+)/allcertificates/$', 
-      AllTrainingCertificateView.as_view(), \
+      async_training_certificate_all, \
         name="alltraining_certificate"
     ),
     url(
