@@ -135,8 +135,10 @@ Today is : {{today}}
             <td>{{ record.host_college.academic_code }}</td>
             <td>{{ record.host_college.institution_name }}</td>
             <td>
-              {{ record.course.foss.all | join:", " }}
-            </td>
+    {% for mapping in record.course|get_course_foss_levels %}
+        {{ mapping.foss.foss }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+</td>
             <td>{{ record.event_coordinator_name }}</td>
             <td>{{ record.registartion_start_date}} - {{record.registartion_end_date}}</td>
             <td>{{ record.event_start_date }}</td>
