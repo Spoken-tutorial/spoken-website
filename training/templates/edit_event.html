@@ -5,203 +5,258 @@
 {% load eventsdata %}
 {% block title %}Edit Event{% endblock %}
 {% block heading %}
-  <i class="fa fa-list-ul"></i> Edit Event :
+<i class="fa fa-list-ul"></i> Edit Event :
 {% endblock %}
 {% block cssblock %}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
-    <style>
-		#id_is_course, #id_is_swayam{
-			height: 50%;
-		}
-    
-    </style>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+<style>
+	#id_is_course,
+	#id_is_swayam {
+		height: 50%;
+	}
+</style>
 {% endblock %}
 {% block search %}{% endblock %}
 
 {% block content %}
-<div class="row " ><!--main div 1 style="background-color:#fad7a0"-->
+<div class="row "><!--main div 1 style="background-color:#fad7a0"-->
 	<div class='col-sm-15'>
-	<form action="" method="POST" class='form-horizontal'>{% csrf_token %}
-	    <div class="col-sm-11">
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_event_type">Event Type <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.event_type class+="form-control event_type" %}
-				{{ form.event_type.errors }}
+		<form action="" method="POST" class='form-horizontal'>{% csrf_token %}
+			<div class="col-sm-11">
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_event_type">Event Type <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.event_type class+="form-control event_type" %}
+						{{ form.event_type.errors }}
+					</div>
 				</div>
-			</div>
-			<div class="form-group" id="payment_required">
-				<label class="col-sm-3 control-label" for="payment_required">Make Payment Mandatory</label>
-				<div class="col-sm-1">
-				{% render_field form.is_course class+="form-control is_course" checked="checked"  %}
-				{{ form.is_course.errors }}
+				<div class="form-group" id="payment_required">
+					<label class="col-sm-3 control-label" for="payment_required">Make Payment Mandatory</label>
+					<div class="col-sm-1">
+						{% render_field form.is_course class+="form-control is_course" checked="checked" %}
+						{{ form.is_course.errors }}
+					</div>
+					<p>When checked, payment is required from all users, including subscribed college users.</p>
 				</div>
-				<p>When checked, payment is required from all users, including subscribed college users.</p>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_event_fee">Event Charges <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.event_fee class+="form-control event_fee" %}
+						{{ form.event_fee.errors }}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_event_name">Event Name <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.event_name class+="form-control event_name" %}
+						{{ form.event_name.errors }}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_download_access">Email (For Download Access)</label>
+					<div class="col-sm-9">
+						{% render_field form.download_access class+="form-control download_access" %}
+						{{ form.download_access.errors }}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_state">State <sup style="color:red" ;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.state class+="form-control state" %}
+						{{ form.state.errors }}
+					</div>
+				</div>
+
+				<div class="form-group" id="city">
+					<label class="col-sm-3 control-label" for="id_city">City <sup style="color:red" ;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.city class+="form-control city" %}
+						{{ form.city.errors }}
+					</div>
+				</div>
+
+				<div class="form-group" id="institute">
+					<label class="col-sm-3 control-label" for="id_host_college">Host College <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.host_college class+="form-control host_college" %}
+						{{ form.host_college.errors }}
+					</div>
+				</div>
+
+				<div class="form-group" id="company">
+					<label class="col-sm-3 control-label" for="id_company">Company <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.company class+="form-control company" %}
+						{{ form.company.errors }}
+					</div>
+				</div>
+
+				<div class="form-group" id="instructor_name">
+					<label class="col-sm-3 control-label" for="id_company">Instructor Name <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.instructor_name class+="form-control instructor_name" %}
+						{{ form.instructor_name.errors }}
+					</div>
+				</div>
+
+				<div class="form-group" id="company">
+					<label class="col-sm-3 control-label" for="id_company">Course Name</label>
+					<div class="col-sm-9">
+						{% render_field form.ilw_course class+="form-control ilw_course" maxlength="200" %}
+						{{ form.ilw_course.errors }}
+						<span>200 characters limit</span>
+					</div>
+				</div>
+
+				<div class="form-group" id="checkbox">
+					<label class="col-sm-3 control-label" for="id_company">Is Course?</label>
+					<div class="col-sm-1">
+						{% render_field form.is_course class+="form-control is_course" %}
+						{{ form.is_course.errors }}
+
+					</div>
+					<p>If checked, the course name will appear in the participation certificate</p>
+				</div>
+				<div class="form-group" id="checkbox_swayam">
+					<label class="col-sm-3 control-label" for="id_is_swayam">Is Swayam?</label>
+					<div class="col-sm-1">
+						{% render_field form.is_swayam class+="form-control is_swayam" %}
+						{{ form.is_swayam.errors }}
+					</div>
+				</div>
+
+				<div id="foss-container">
+					{% for mapping in course_mappings %}
+					<div class="form-group foss-row">
+						<label class="col-sm-3 control-label">
+							FOSS
+						</label>
+
+						<div class="col-sm-4">
+
+							<select name="foss_data" class="form-control foss_data">
+
+								{% for foss in form.fields.foss_data.queryset %}
+								<option value="{{ foss.id }}" {% if foss.id==mapping.foss.id %}selected{% endif %}>
+									{{ foss.foss }}
+								</option>
+								{% endfor %}
+
+							</select>
+						</div>
+
+						<div class="col-sm-3">
+							<select name="level" class="form-control level_data">
+
+								{% for level in form.fields.level.queryset %}
+								<option value="{{ level.id }}" {% if level.id==mapping.level.id %}selected{% endif %}>
+									{{ level.level }}
+								</option>
+								{% endfor %}
+
+							</select>
+						</div>
+
+						<div class="col-sm-2">
+
+							{% if forloop.first %}
+							<button type="button" class="btn btn-success add-foss">
+								+ Add Another FOSS
+							</button>
+							{% else %}
+							<button type="button" class="btn btn-danger remove-foss">
+								Remove
+							</button>
+							{% endif %}
+
+						</div>
+
+					</div>
+
+					{% endfor %}
+
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_name">Event Start Date <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.event_start_date class+="form-control event_start_date" %}
+						{{ form.event_start_date.errors }}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_name">Event End Date <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.event_end_date class+="form-control event_end_date" %}
+						{{ form.event_end_date.errors }}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_name">Event Coordinator Name <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.event_coordinator_name class+="form-control event_coordinator_name" %}
+						{{ form.event_coordinator_name.errors }}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_name">Event Coordinator Email </label>
+					<div class="col-sm-9">
+						{% render_field form.event_coordinator_email class+="form-control event_coordinator_email" %}
+						{{ form.event_coordinator_email.errors }}
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_name">Event Coordinator Contact No. </label>
+					<div class="col-sm-9">
+						{% render_field form.event_coordinator_contact_no class+="form-control
+						event_coordinator_contact_no" %}
+						{{ form.event_coordinator_contact_no.errors }}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_name">Registartion Start Date <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.registartion_start_date class+="form-control registartion_start_date" %}
+						{{ form.registartion_start_date.errors }}
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="col-sm-3 control-label" for="id_name">Registartion End Date <sup style="color:red"
+							;>*</sup></label>
+					<div class="col-sm-9">
+						{% render_field form.registartion_end_date class+="form-control registartion_end_date" %}
+						{{ form.registartion_end_date.errors }}
+					</div>
+				</div>
+
 			</div>
 
 			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_event_fee">Event Charges <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.event_fee class+="form-control event_fee" %}
-				{{ form.event_fee.errors }}
+				<div class="col-sm-offset-5 col-sm-9">
+					<input class="btn btn-warning btn-lg" type="submit" id="submit_button" value="Edit Event" />
 				</div>
 			</div>
 
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_event_name">Event Name <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.event_name class+="form-control event_name" %}
-				{{ form.event_name.errors }}
-				</div>
-			</div>
-
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_download_access">Email (For Download Access)</label>
-				<div class="col-sm-9">
-				{% render_field form.download_access class+="form-control download_access" %}
-				{{ form.download_access.errors }}
-				</div>
-			</div>
-
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_state">State <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.state class+="form-control state" %}
-				{{ form.state.errors }}
-				</div>
-			</div>
-
-			<div class="form-group" id="city">
-				<label class="col-sm-3 control-label" for= "id_city">City <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.city class+="form-control city" %}
-				{{ form.city.errors }}
-				</div>
-			</div>
-
-			<div class="form-group" id="institute">
-				<label class="col-sm-3 control-label" for= "id_host_college">Host College <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.host_college class+="form-control host_college" %}
-				{{ form.host_college.errors }}
-				</div>
-			</div>
-
-			<div class="form-group" id="company">
-				<label class="col-sm-3 control-label" for= "id_company">Company <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.company class+="form-control company" %}
-				{{ form.company.errors }}
-				</div>
-			</div>
-
-			<div class="form-group" id="instructor_name">
-				<label class="col-sm-3 control-label" for= "id_company">Instructor Name <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.instructor_name class+="form-control instructor_name" %}
-				{{ form.instructor_name.errors }}
-				</div>
-			</div>
-
-			<div class="form-group" id="company">
-				<label class="col-sm-3 control-label" for= "id_company">Course Name</label>
-				<div class="col-sm-9">
-				{% render_field form.ilw_course class+="form-control ilw_course" maxlength="200"  %}
-				{{ form.ilw_course.errors }}
-				<span>200 characters limit</span>
-				</div>
-			</div>
-
-			<div class="form-group" id="checkbox">
-				<label class="col-sm-3 control-label" for= "id_company">Is Course?</label>
-				<div class="col-sm-1">
-				{% render_field form.is_course class+="form-control is_course" %}
-				{{ form.is_course.errors }}
-				
-				</div>
-				<p>If checked, the course name will appear in the participation certificate</p>
-			</div>
-			<div class="form-group" id="checkbox_swayam">
-				<label class="col-sm-3 control-label" for="id_is_swayam">Is Swayam?</label>
-				<div class="col-sm-1">
-				{% render_field form.is_swayam class+="form-control is_swayam" %}
-				{{ form.is_swayam.errors }}
-				</div>
-			</div>
-			
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Foss <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.foss_data class+="form-control foss" %}
-				{{ form.foss_data.errors }}
-				</div>
-			</div>
-
-
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Event Start Date <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.event_start_date class+="form-control event_start_date" %}
-				{{ form.event_start_date.errors }}
-				</div>
-			</div>
-
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Event End Date <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.event_end_date class+="form-control event_end_date" %}
-				{{ form.event_end_date.errors }}
-				</div>
-			</div>
-
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Event Coordinator Name <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.event_coordinator_name class+="form-control event_coordinator_name" %}
-				{{ form.event_coordinator_name.errors }}
-				</div>
-			</div>
-
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Event Coordinator Email </label>
-				<div class="col-sm-9">
-				{% render_field form.event_coordinator_email class+="form-control event_coordinator_email" %}
-				{{ form.event_coordinator_email.errors }}
-				</div>
-			</div>
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Event Coordinator Contact No. </label>
-				<div class="col-sm-9">
-				{% render_field form.event_coordinator_contact_no class+="form-control event_coordinator_contact_no" %}
-				{{ form.event_coordinator_contact_no.errors }}
-				</div>
-			</div>
-
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Registartion Start Date <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.registartion_start_date class+="form-control registartion_start_date" %}
-				{{ form.registartion_start_date.errors }}
-				</div>
-			</div>
-
-			<div class="form-group">
-				<label class="col-sm-3 control-label" for= "id_name">Registartion End Date <sup style="color:red";>*</sup></label>
-				<div class="col-sm-9">
-				{% render_field form.registartion_end_date class+="form-control registartion_end_date" %}
-				{{ form.registartion_end_date.errors }}
-				</div>
-			</div>
-
-		</div>
-
-		<div class="form-group">
-			<div class="col-sm-offset-5 col-sm-9">
-			<input class="btn btn-warning btn-lg" type="submit" id="submit_button" value="Edit Event" />
-			</div>
-		</div>
-
-	</form>
+		</form>
 	</div>
 </div>
 {% endblock %}
@@ -209,84 +264,168 @@
 <script src="{% static 'spoken/js/events.js' %}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script type="text/javascript">
-	
- $( document ).ready(function() {
-	// Change visibility of college, company & city based on event type
-	const event_type = $('#id_event_type').val();
-	$('#company').toggle(event_type === "PDP");
-	$('#city').toggle(event_type === "PDP" || event_type === "CDP" || event_type === "HN" );
-	$('#institute').toggle(event_type !== "PDP" && event_type !== "CDP" && event_type !== "HN" );
-	$('#payment_required').toggle(event_type === "INTERN");
-	$('#instructor_name').toggle(event_type === "INTERN");
-	
-	$('#id_foss_data').on('change', function(e){
-		var selectedValues = $(this).val();
-		if(selectedValues && selectedValues.length > 1){
-			$('#id_is_course').prop('checked', true);
-		}
-	})
 
-	$('#id_state').change(function(){
-		var stateid  = $(this).val();
-		var event_type  = $('#id_event_type').val();
-
-		if(event_type === "PDP" || event_type === "CDP" || event_type === "HN"){
-			// Display cities associated with the selected state
-			ajaxStrateFillDatas('', 'city', '');
-		}else{
-			// Display colleges associated with the selected state
-			$.ajax({
-					type : "POST",
-					url:"/software-training/ajax-state-collage/", 
-					dataType : "json",
-					data: {
-					'state' : stateid,
-					},
-					success: function(data)
-					{
-						$('#id_host_college').html(data);
-					}
-				});
-		}	
-   	});
-
-	$('#id_foss_data').select2({
-		placeholder: "Select Foss",
-		allowClear: true
-    });
-
-	$('#id_event_type').change(function(){
-		var event_type = $(this).val();
-		var state = $("#id_state").val();
-		// reset state 
-		if(event_type === "PDP" || event_type === "CDP" || event_type === "HN"){
-			// var state = $("#id_state").val("");
-			$('#id_state').val(state).trigger('change');
-		}else{
-			// var state = $("#id_state").val("");
-			$('#id_state').val(state).trigger('change');
-		}
-		
+	$(document).ready(function () {
 		// Change visibility of college, company & city based on event type
+		const event_type = $('#id_event_type').val();
 		$('#company').toggle(event_type === "PDP");
 		$('#city').toggle(event_type === "PDP" || event_type === "CDP" || event_type === "HN");
 		$('#institute').toggle(event_type !== "PDP" && event_type !== "CDP" && event_type !== "HN");
 		$('#payment_required').toggle(event_type === "INTERN");
 		$('#instructor_name').toggle(event_type === "INTERN");
-		// Set default college [IIT Bombay (academic id : 621)] and fees if event type is PDP or CDP
-		const host_college = $('#id_host_college');
-		const event_fee = $('#id_event_fee')
-		if(event_type === "PDP"){
-			event_fee.val("{{ pdp_fee }}");
-			host_college.val({{ DEFAULT_ILW_HOST_COLLEGE }});
-		}else if(event_type === "CDP"){
-			event_fee.val("{{ cdp_fee }}");
-			host_college.val({{ DEFAULT_ILW_HOST_COLLEGE }}); 
-		}else if(event_type === "HN"){
-			host_college.val({{ DEFAULT_ILW_HOST_COLLEGE }}); 
+
+
+
+		$('#id_state').change(function () {
+			var stateid = $(this).val();
+			var event_type = $('#id_event_type').val();
+
+			if (event_type === "PDP" || event_type === "CDP" || event_type === "HN") {
+				// Display cities associated with the selected state
+				ajaxStrateFillDatas('', 'city', '');
+			} else {
+				// Display colleges associated with the selected state
+				$.ajax({
+					type: "POST",
+					url: "/software-training/ajax-state-collage/",
+					dataType: "json",
+					data: {
+						'state': stateid,
+					},
+					success: function (data) {
+						$('#id_host_college').html(data);
+					}
+				});
+			}
+		});
+
+		$('.foss_data').select2({
+			placeholder: "Select FOSS",
+			allowClear: true,
+			width: '100%'
+		});
+
+		$(document).on("click", ".add-foss", function () {
+
+			var row = $(".foss-row:first").clone(false);
+
+			row.find("span.select2").remove();
+
+			var foss = row.find(".foss_data");
+
+			foss.removeAttr("data-select2-id");
+			foss.find("option").removeAttr("data-select2-id");
+			foss.val("");
+
+			var level = row.find(".level_data");
+
+			level.removeAttr("data-select2-id");
+			level.find("option").removeAttr("data-select2-id");
+			level.empty();
+
+			row.find(".add-foss")
+				.removeClass("add-foss btn-success")
+				.addClass("remove-foss btn-danger")
+				.text("Remove");
+
+			$("#foss-container").append(row);
+
+			foss.select2({
+				placeholder: "Select FOSS",
+				allowClear: true,
+				width: '100%'
+			});
+
+		});
+		$(document).on("click", ".remove-foss", function () {
+
+			if ($(".foss-row").length == 1) {
+				return;
+			}
+
+			$(this).closest(".foss-row").remove();
+
+		});
+
+		$('#foss-container').on('change', '.foss_data', function () {
+
+			var foss = $(this).val();
+
+			if (!foss)
+				return;
+
+			var level = $(this)
+				.closest(".foss-row")
+				.find(".level_data");
+
+			$.ajax({
+
+				url: "/training/ajax-foss-levels/",
+
+				data: {
+					foss_id: foss
+				},
+
+				success: function (data) {
+
+					level.empty();
+
+					$.each(data, function (i, item) {
+
+						level.append(
+
+							$('<option>', {
+
+								value: item.level_id,
+								text: item.level__level
+
+							})
+
+						);
+
+					});
+
+					level.find("option:contains('Advanced')")
+						.prop("selected", true);
+
+				}
+
+			});
+
+		});
+
+		$('#id_event_type').change(function () {
+			var event_type = $(this).val();
+			var state = $("#id_state").val();
+			// reset state 
+			if (event_type === "PDP" || event_type === "CDP" || event_type === "HN") {
+				// var state = $("#id_state").val("");
+				$('#id_state').val(state).trigger('change');
+			} else {
+				// var state = $("#id_state").val("");
+				$('#id_state').val(state).trigger('change');
+			}
+
+			// Change visibility of college, company & city based on event type
+			$('#company').toggle(event_type === "PDP");
+			$('#city').toggle(event_type === "PDP" || event_type === "CDP" || event_type === "HN");
+			$('#institute').toggle(event_type !== "PDP" && event_type !== "CDP" && event_type !== "HN");
+			$('#payment_required').toggle(event_type === "INTERN");
+			$('#instructor_name').toggle(event_type === "INTERN");
+			// Set default college [IIT Bombay (academic id : 621)] and fees if event type is PDP or CDP
+			const host_college = $('#id_host_college');
+			const event_fee = $('#id_event_fee')
+			if (event_type === "PDP") {
+				event_fee.val("{{ pdp_fee }}");
+				host_college.val({{ DEFAULT_ILW_HOST_COLLEGE }});
+	}else if (event_type === "CDP") {
+		event_fee.val("{{ cdp_fee }}");
+		host_college.val({{ DEFAULT_ILW_HOST_COLLEGE }}); 
+		}else if (event_type === "HN") {
+		host_college.val({{ DEFAULT_ILW_HOST_COLLEGE }}); 
 		}	
 	});
   });
 
- </script>
+</script>
 {% endblock %}

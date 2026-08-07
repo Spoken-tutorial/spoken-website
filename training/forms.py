@@ -56,6 +56,8 @@ class CreateTrainingEventForm(forms.ModelForm):
 class EditTrainingEventForm(CreateTrainingEventForm):
     def __init__(self, *args, **kwargs):
         super(EditTrainingEventForm, self).__init__(*args, **kwargs)
+        mapping = None
+        
         if self.instance:
             if self.instance.course:
                 self.fields['ilw_course'].initial = self.instance.course.name
@@ -83,17 +85,17 @@ class EditTrainingEventForm(CreateTrainingEventForm):
     
     def update_event(self, event):
         ilw_course = self.cleaned_data['ilw_course']
-        foss_data = self.cleaned_data['foss_data']
+        # foss_data = self.cleaned_data['foss_data']
         course = event.course
         if course is not None:
             course.name = ilw_course
             course.save()
         else:
             course = ILWCourse.objects.create(name=ilw_course)
-        ILWCourseFossLevel.objects.filter(course=course).delete()
+        # ILWCourseFossLevel.objects.filter(course=course).delete()
 
-        for foss in foss_data:
-            ILWCourseFossLevel.objects.create(course=course,foss=foss,level=self.cleaned_data['level'])
+        # if foss_data:
+        #     ILWCourseFossLevel.objects.create(course=course,foss=foss_data,level=self.cleaned_data['level'])
         # course.foss.clear()
         # course.foss.set(foss_data)
         event.course = course

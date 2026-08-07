@@ -1,4 +1,6 @@
 # Django imports
+from multiprocessing import context
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View, ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
@@ -578,13 +580,31 @@ def edit_training_event(request, pk):
 	fossess = FossCategory.objects.filter(id__in=CourseMap.objects.filter(category=0, test=1).values('foss_id'))
 	context = {}
 	context['fossess']=fossess
-	selected_foss = event.course and event.course.foss.all().values_list('id', flat=True)
-	context['selected_foss'] = selected_foss
+	course_mappings = ILWCourseFossLevel.objects.filter(course=event.course).select_related('foss','level')
+	context['course_mappings'] = course_mappings
+	context['selected_foss'] = list(
+		course_mappings.values_list('foss_id',flat=True))
+	context['selected_levels'] = list(course_mappings.values_list('level_id',flat=True))
+	print(context["selected_foss"])
+	print(context["selected_levels"])
 	
 	if request.method == "POST":
 		form = EditTrainingEventForm(request.POST, instance=event)
 		if form.is_valid():
-			form.save(commit=True)
+			event = form.save(commit=True)
+			course = event.course
+			ILWCourseFossLevel.objects.filter(course=course).delete()
+
+			fosses = request.POST.getlist("foss_data")
+			levels = request.POST.getlist("level")
+
+			for foss, level in zip(fosses, levels):
+				if foss and level:
+					ILWCourseFossLevel.objects.create(
+						course=course,
+						foss_id=foss,
+						level_id=level
+					)
 			messages.add_message(request, messages.SUCCESS, f"event updated successfully")
 			return redirect(reverse('training:edit_event', args=[event.id]))
 	else:
