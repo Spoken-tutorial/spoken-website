@@ -1,11 +1,11 @@
 FOSS_FOLDER = {
-    170: "Pregnancy-Breastfeeding-and-Growth-Monitoring",
-    171: "6-to-24-Months-Complementary-Feeding",
-    172: "Teens-to-Adults-Nutrients-Insulin-and-Recipes",
+    201: "Pregnancy-Breastfeeding-and-Growth-Monitoring",
+    202: "6-to-24-Months-Complementary-Feeding",
+    203: "Teens-to-Adults-Nutrients-Insulin-and-Recipes",
 }
 
 TOPICS_BY_FOSS = {
-    170: [
+    201: [
         "Cross cradle hold for breastfeeding",
         "Breastfeeding latching",
         "Importance of Breastfeeding",
@@ -42,7 +42,7 @@ TOPICS_BY_FOSS = {
         "WHO length-for-age Z score percentile growth charts",
         "Measurement of children's weight and height",
     ],
-    171: [
+    202: [
         "Essential Nutrition Actions for Young Children",
         "Type 1 and type 2 nutrients",
         "Junk food",
@@ -66,7 +66,7 @@ TOPICS_BY_FOSS = {
         "Nutritious Vegetarian Recipes for Kids Parties",
         "Delicious recipes for kids parties",
     ],
-    172: [
+    203: [
         "Vegetarian Recipes for Adolescents",
         "Non-vegetarian Recipes for Adolescents",
         "Pre-pregnancy Nutrition",

@@ -1802,6 +1802,9 @@ class AcademicPaymentStatus(models.Model):
   entry_user = models.ForeignKey(User, on_delete=models.PROTECT )
   via_subscription_page = models.BooleanField(default=False,
                                               verbose_name="Payment made via Spoken Tutorial Subscription page?") 
+  verification_status = models.PositiveSmallIntegerField(choices=((0, 'Pending'), (1, 'Approved'), (2, 'Rejected')), null=True, blank=True)
+  approved_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.PROTECT, related_name='approved_payments')
+  approved_on = models.DateTimeField(null=True, blank=True)
   
   def __str__(self):
     return self.academic.institution_name

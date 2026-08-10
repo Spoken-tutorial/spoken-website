@@ -1,0 +1,131 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+{% block title %} Review Payment Details {% endblock %}
+{% block heading %}
+  <i class="fa fa-info-circle"></i> Review Payment Details
+  <a href="{% url 'eventsv2:payment_verification_dashboard' %}" class='dashboard pull-right'>Back to Dashboard</a>
+{% endblock %}
+{% block content %}
+  {% if messages %}
+    <div class="row">
+      <div class="col-sm-12">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissable">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {{ message|safe }}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading"><b>Transaction Details</b></div>
+        <div class="panel-body">
+          <table class="table table-bordered table-striped">
+            <tr>
+              <th width="30%">Institution Name</th>
+              <td>{{ record.academic.institution_name }} (Code: {{ record.academic.academic_code }})</td>
+            </tr>
+            <tr>
+              <th>State</th>
+              <td>{{ record.state.name }}</td>
+            </tr>
+            <tr>
+              <th>Payer Name</th>
+              <td>{{ record.name_of_the_payer }}</td>
+            </tr>
+            <tr>
+              <th>Email</th>
+              <td>{{ record.email|default:"-" }}</td>
+            </tr>
+            <tr>
+              <th>Phone</th>
+              <td>{{ record.phone|default:"-" }}</td>
+            </tr>
+            <tr>
+              <th>Amount Paid</th>
+              <td>INR <b>{{ record.amount }}</b></td>
+            </tr>
+            <tr>
+              <th>Subscription Time</th>
+              <td>
+                {% if record.subscription == '365' %}
+                  1 Year (365 days)
+                {% elif record.subscription == '180' %}
+                  6 Months (180 days)
+                {% else %}
+                  {{ record.subscription }} days
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th>Transaction ID</th>
+              <td>{{ record.transactionid|default:"-" }}</td>
+            </tr>
+            <tr>
+              <th>Payment Date</th>
+              <td>{{ record.payment_date }}</td>
+            </tr>
+            <tr>
+              <th>Payment Type</th>
+              <td>{{ record.payment_status }}</td>
+            </tr>
+            <tr>
+              <th>College Type</th>
+              <td>{{ record.college_type }}</td>
+            </tr>
+            <tr>
+              <th>PAN Number</th>
+              <td>{{ record.pan_number|default:"-" }}</td>
+            </tr>
+            <tr>
+              <th>GST Number</th>
+              <td>{{ record.gst_number|default:"-" }}</td>
+            </tr>
+            <tr>
+              <th>Customer ID</th>
+              <td>{{ record.customer_id|default:"-" }}</td>
+            </tr>
+            <tr>
+              <th>Invoice Number</th>
+              <td>{{ record.invoice_no|default:"-" }}</td>
+            </tr>
+            <tr>
+              <th>Remarks / Description</th>
+              <td>{{ record.remarks|default:"-" }}</td>
+            </tr>
+            <tr>
+              <th>Submitted On</th>
+              <td>{{ record.entry_date }} (User: {{ record.entry_user.username }})</td>
+            </tr>
+            <tr>
+              <th>Verification Status</th>
+              <td>
+                <b>
+                  {% if record.verification_status == 0 %}
+                    Pending Verification
+                  {% elif record.verification_status == 1 %}
+                    Approved
+                  {% elif record.verification_status == 2 %}
+                    Rejected
+                  {% else %}
+                    Approved
+                  {% endif %}
+                </b>
+              </td>
+            </tr>
+            {% if record.approved_by %}
+              <tr>
+                <th>Moderated By</th>
+                <td>{{ record.approved_by.username }} (On: {{ record.approved_on }})</td>
+              </tr>
+            {% endif %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

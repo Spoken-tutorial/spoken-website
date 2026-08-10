@@ -13,7 +13,7 @@ from django.contrib.auth.validators import ASCIIUsernameValidator
 # Spoken Tutorial Stuff
 from cms.models import *
 from events.models import *
-from cms.validators import ASCIIValidator
+from cms.validators import ASCIIValidator, LastNameValidator
 
 
 
@@ -59,10 +59,10 @@ class RegisterFormHome(forms.Form):
     )
     last_name = forms.CharField(
         validators = [
-            ASCIIValidator(
+            LastNameValidator(
                 message = _(
                         'Please enter a valid last name.'
-                        'This field may contain only English letters.'
+                        'This field may contain only English letters, numbers, slashes, or parentheses.'
                         ' Please do not copy paste here.'
                     ),
                 code = 'invalid_last_name',

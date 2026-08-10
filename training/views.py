@@ -18,7 +18,7 @@ from django.db import IntegrityError
 from django.db.models import Exists, OuterRef
 # Python imports
 from datetime import datetime,date
-from ilwmoodle.models import ILWMdlQuizGrades
+from ilwmoodle.models import ILWMdlQuizGrades,ILWMdlQuizAttempts
 import csv
 import json
 import random
@@ -895,18 +895,23 @@ class EventAttendanceListView(ListView):
 				  )).select_related('college', 'state'))
 		
 
-		self.queryset =	main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)) | Q(payment_status__transaction__order_status="CHARGED"))
-		successful_user_ids = main_query.filter(
-			Q(payment_status__status=1) | 
-			Q(registartion_type__in=(1,3)) | 
-			Q(payment_status__transaction__order_status="CHARGED")
-		).values_list('user_id', flat=True)
-		self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED")).exclude(user_id__in=successful_user_ids).select_related('payment_status')
-		if self.event.training_status == 1:
-			self.queryset = main_query.filter(reg_approval_status=1)
+		if self.event.is_swayam:
+			# bypass payment based filter for swayam ilw events 
+			self.queryset = main_query
+			self.unsuccessful_payee = Participant.objects.none()
+		else:
+			self.queryset = main_query.filter(Q(payment_status__status=1)| Q(registartion_type__in=(1,3)) | Q(payment_status__transaction__order_status="CHARGED"))
+			successful_user_ids = main_query.filter(
+				Q(payment_status__status=1) | 
+				Q(registartion_type__in=(1,3)) | 
+				Q(payment_status__transaction__order_status="CHARGED")
+			).values_list('user_id', flat=True)
+			self.unsuccessful_payee = main_query.filter(Q(payment_status__status__in=(0,2)) &  ~Q(payment_status__transaction__order_status="CHARGED")).exclude(user_id__in=successful_user_ids).select_related('payment_status')
+			if self.event.training_status == 1:
+				self.queryset = main_query.filter(reg_approval_status=1)
 
-		if self.event.training_status == 2:
-			self.queryset = self.event.eventattendance_set.all()
+			if self.event.training_status == 2:
+				self.queryset = self.event.eventattendance_set.all()
 		return super(EventAttendanceListView, self).dispatch(*args, **kwargs)
 
 
@@ -1232,7 +1237,8 @@ class BatchTrainingCertificateView(FDPTrainingCertificate, View):
 
         page_count = 0
         for participant in participants:
-            if participant.reg_approval_status == 1 and registartion_successful(participant.user, event):
+            attendance_marked = (participant.reg_approval_status == 1) or EventAttendance.objects.filter(event=event, participant=participant).exists()
+            if attendance_marked and registartion_successful(participant.user, event):
                 user = participant.user
 
                 canvas_buffer = BytesIO()
@@ -1491,7 +1497,11 @@ class EventParticipantsListView(ListView):
 			if not user.is_authenticated():
 				raise PermissionDenied()
 			
-			if not (is_organiser(user) or is_invigilator(user)):
+			if is_organiser(user):
+				self.academic = user.organiser.academic
+			elif is_invigilator(user):
+				self.academic = user.invigilator.academic
+			else:
 				raise PermissionDenied()
 		
 		return super(EventParticipantsListView, self).dispatch(*args, **kwargs)
@@ -1502,7 +1512,7 @@ class EventParticipantsListView(ListView):
 		main_query = Participant.objects.filter(event_id=event_id)
 
 		if self.event.is_swayam:
-			return main_query.select_related('college', 'state')
+			return main_query.filter(college=self.academic).select_related('college', 'state')
 		
 		if self.event.training_status == 2:
 			return EventAttendance.objects.filter(event_id=event_id).select_related(
@@ -1818,13 +1828,9 @@ class ILWTestCertificate(object):
     # imgDoc.drawCentredString(150, 115, training_end.strftime('%d %B %Y'))
     imgDoc.setFillColorRGB(0, 0, 0)
 
-    # Fetch actual test completion date from Moodle
-    certificate_date = training_end
+    quiz_attempt  = ILWMdlQuizAttempts.objects.get(id=teststatus.mdlattempt_id)
 
-    quiz_grade = ILWMdlQuizGrades.objects.filter(userid=user.id, quiz=teststatus.mdlquiz_id).order_by('-timemodified').first()
-
-    if quiz_grade and quiz_grade.timemodified:
-        certificate_date = datetime.fromtimestamp(quiz_grade.timemodified)
+    certificate_date = datetime.fromtimestamp(quiz_attempt.timemodified)
 
     imgDoc.drawCentredString(150,115,certificate_date.strftime('%d %B %Y'))
 		

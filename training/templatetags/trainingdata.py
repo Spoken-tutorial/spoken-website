@@ -128,6 +128,8 @@ def registartion_successful(user, event):
   participant = Participant.objects.filter(user = user, event = event)
   if participant.filter(payment_status__status=1).exists():
     return True
+  if participant.filter(payment_status__transaction__order_status="CHARGED").exists():
+    return True
   if participant.filter(registartion_type__in=(1,3)).exists():
     return True
   return False 

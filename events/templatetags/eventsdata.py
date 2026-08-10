@@ -192,6 +192,7 @@ register.filter('can_enter_test', can_enter_test)
 
 register.filter('is_administrator', is_administrator)
 register.filter('is_organiser', is_organiser)
+
 register.filter('is_invigilator', is_invigilator)
 register.filter('is_resource_person', is_resource_person)
 register.filter('is_accountexecutive', is_accountexecutive)
@@ -212,6 +213,17 @@ register.filter('feedback_status_average', feedback_status_average)
 register.filter('feedback_status_neutral', feedback_status_neutral)
 register.filter('feedback_status_likely', feedback_status_likely)
 register.filter('can_clone_training', can_clone_training)
+
+
+@register.simple_tag
+def check_payment_verification_staff(user):
+    """Check if the user is in Payment Verification Staff group"""
+    try:
+        if user.groups.filter(name='Payment Verification Staff').exists():
+            return True
+    except:
+        pass
+    return False
 
 
 @register.filter

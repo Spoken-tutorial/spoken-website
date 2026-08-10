@@ -36,9 +36,9 @@ from creation.models import TutorialResource
 
 # Google Drive folder names for each FOSS in local SRC_ROOT
 THUMBNAIL_FOLDER = {
-    170: "Pregnancy, Breastfeeding and Growth Monitoring",
-    171: "6 to 24 Months Complementary Feeding",
-    172: "Teens to Adults Nutrients, Insulin and Recipes",
+    201: "Pregnancy, Breastfeeding and Growth Monitoring",
+    202: "6 to 24 Months Complementary Feeding",
+    203: "Teens to Adults Nutrients, Insulin and Recipes",
 }
 
 
