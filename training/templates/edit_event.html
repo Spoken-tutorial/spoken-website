@@ -147,7 +147,7 @@
 							<select name="foss_data" class="form-control foss_data">
 
 								{% for foss in form.fields.foss_data.queryset %}
-								<option value="{{ foss.id }}" {% if foss.id==mapping.foss.id %}selected{% endif %}>
+								<option value="{{ foss.id }}" {% if foss.id == mapping.foss.id %}selected{% endif %}>
 									{{ foss.foss }}
 								</option>
 								{% endfor %}
@@ -159,7 +159,7 @@
 							<select name="level" class="form-control level_data">
 
 								{% for level in form.fields.level.queryset %}
-								<option value="{{ level.id }}" {% if level.id==mapping.level.id %}selected{% endif %}>
+								<option value="{{ level.id }}" {% if level.id == mapping.level.id %}selected{% endif %}>
 									{{ level.level }}
 								</option>
 								{% endfor %}
