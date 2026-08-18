@@ -565,3 +565,7 @@ class StudentPasswordResetForm(forms.Form):
         if errors:
             raise ValidationError(errors)
         return new_password
+
+
+class AcademicCenterCSVUploadForm(forms.Form):
+    csv_file = forms.FileField(label="Upload Academic Center CSV")
