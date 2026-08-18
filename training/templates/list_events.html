@@ -283,13 +283,32 @@
                         </div>
                     </div>
                 {% endwith %}
-              {% else %}
-                {% if event.reg_approval_status == 1 and user|registartion_successful:event.event %}
-                   <button class="btn btn-primary" type="submit" 
-                  formaction="{% url 'cdcontent:download_ilw_course' event.event.id %}">Download CD Content</button>
-                  
-                {% endif %}
-              {% endif %}
+             {% else %}
+    {% if user|registartion_successful:event.event %}
+    {% if event.event.is_swayam %}
+    {% for mapping in event.event.course|get_course_foss_levels %}
+        <a
+            href="https://spoken-tutorial.org/tutorial-search/?search_foss={{ mapping.foss.foss|urlencode }}&search_language=English"
+            target="_blank"
+            class="btn btn-primary"
+            style="margin-right: 8px; margin-top: 8px;"
+        >
+            View {{ mapping.foss.foss }} Tutorials
+        </a>
+    {% endfor %}
+{% elif event.reg_approval_status == 1 %}
+
+            <button
+                class="btn btn-primary"
+                type="submit"
+                formaction="{% url 'cdcontent:download_ilw_course' event.event.id %}"
+            >
+                Download CD Content
+            </button>
+        {% endif %}
+
+    {% endif %}
+{% endif %}
 
 
               {% if event.event.event_type == "HN"%}
