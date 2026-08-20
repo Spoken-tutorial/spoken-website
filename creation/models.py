@@ -82,6 +82,7 @@ class Domain(models.Model):
     icon = models.ImageField(upload_to='domain_icons/', null=True, blank=True)
     description = models.TextField()
     is_active = models.BooleanField(default=False)
+    order = models.IntegerField(help_text="Enter the display order. Smaller numbers will be displayed first.")
 
     def __str__(self):
         return self.name
