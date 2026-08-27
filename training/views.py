@@ -645,6 +645,9 @@ def listevents(request, role, status):
 		elif status == 'expired':
 			queryset = TrMngerEvents.filter(training_status=0, event_end_date__lt=today)
 
+		event_type = request.GET.get('event_type', None)
+		is_pdp = queryset.filter(event_type='PDP').exists()
+
 		header = {
 		1: SortableHeader('#', False),
 		2: SortableHeader(
@@ -660,7 +663,7 @@ def listevents(request, role, status):
 		4: SortableHeader(
 		  'host_college__institution_name',
 		  True,
-		  'Institution'
+		  'Company' if is_pdp else 'Institution'
 		),
 		5: SortableHeader('foss__foss', True, 'Foss Name'),
 		6: SortableHeader(
@@ -686,8 +689,9 @@ def listevents(request, role, status):
 		10: SortableHeader('Participant Count', True),
 		11: SortableHeader('Action', False)
 		}
-		event_type = request.GET.get('event_type', None)
+		
 		pcount, mcount, fcount = get_all_events_detail(queryset, status, event_type)
+		context['is_pdp'] = event_type == 'PDP'
 		raw_get_data = request.GET.get('o', None)
 		queryset = get_sorted_list(
 			request,

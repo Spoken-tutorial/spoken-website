@@ -133,7 +133,13 @@ Today is : {{today}}
             <td>{{ forloop.counter }}
             <td>{{ record.state }}</td>
             <td>{{ record.host_college.academic_code }}</td>
-            <td>{{ record.host_college.institution_name }}</td>
+            <td>
+    {% if record.event_type == "PDP" %}
+        {{ record.company }}
+    {% else %}
+        {{ record.host_college.institution_name }}
+    {% endif %}
+</td>
             <td>
     {% for mapping in record.course|get_course_foss_levels %}
         {{ mapping.foss.foss }}{% if not forloop.last %}, {% endif %}
