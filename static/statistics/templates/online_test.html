@@ -142,8 +142,13 @@
 
               <!-- actions based on roles -->
               <td>
-                {%if record.get_test_attendance_count %}
+                {% if record.get_test_attendance_count %}
                   <a href="{% url 'statistics:statistics_test_participants' record.id %}" target="_blank">View Participants</a>
+                {% endif %}
+              </td>
+              <td>
+                {% if record.get_test_attendance_count %}
+                  <a href="{% url 'statistics:statistics_test_participants_csv' record.id %}" target="_blank">Download Participant Data</a>
                 {% endif %}
               </td>
             </tr>
