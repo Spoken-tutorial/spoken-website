@@ -181,24 +181,25 @@ def get_video_info(path):
     return info_m
 #create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
 def create_thumbnail(row, attach_str, thumb_time, thumb_size):
-    filepath = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
+    folder_path = os.path.join(settings.MEDIA_ROOT, 'videos', str(row.tutorial_detail.foss_id), str(row.tutorial_detail_id))
+    os.makedirs(folder_path, exist_ok=True)
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
+    output_filepath = os.path.join(folder_path, filename)
+    video_path = os.path.join(folder_path, str(row.video or ''))
     logger.info("Thumbnail generation selected timestamp: %s", thumb_time)
     try:
-        cmd = ['/usr/bin/ffmpeg', '-nostdin', '-hide_banner', '-nostats', '-y', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename]
+        if not os.path.exists(video_path):
+            logger.warning("Video path %s does not exist for thumbnail generation", video_path)
+            return
+        cmd = ['/usr/bin/ffmpeg', '-nostdin', '-hide_banner', '-nostats', '-y', '-i', video_path, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', output_filepath]
         logger.info("Thumbnail generation ffmpeg command: %s", " ".join(cmd))
-        #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
-        process = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, start_new_session=True)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
         stdout, stderr = process.communicate()
         logger.info("Thumbnail generation return code: %s", process.returncode)
-        logger.info("Thumbnail generation stdout: %s", stdout)
-        logger.info("Thumbnail generation stderr: %s", stderr)
-        if stderr:
-            print((filepath + filename))
-            print(stderr)
+        if process.returncode != 0:
+            logger.warning("Thumbnail generation ffmpeg failed: %s", stdout)
     except Exception as e:
         logger.error("Exception in create_thumbnail: type=%s, message=%s\n%s", type(e).__name__, str(e), traceback.format_exc())
-        pass
 
 def add_qualityreviewer_notification(tr_rec, comp_title, message):
     dr_roles = QualityReviewerRole.objects.filter(foss_category = tr_rec.tutorial_detail.foss, language = tr_rec.language, status = 1)
@@ -692,27 +693,26 @@ def upload_publish_outline(request):
 def ajax_upload_prerequisite(request):
     data = ''
     if request.method == 'POST':
-        foss = ''
-        try:
-            foss = int(request.POST.get('foss'))
-            lang_rec = Language.objects.get(name = 'English')
-        except:
-            foss = ''
-        if foss and lang_rec:
-            td_list = TutorialDetail.objects.filter(foss_id = foss).values_list('id')
-            td_recs = TutorialDetail.objects.filter(
-                id__in = TutorialResource.objects.filter(
-                    tutorial_detail_id__in = td_list,
-                    language_id = lang_rec.id,
-                ).values_list(
-                    'tutorial_detail_id'
-                )
-            ).order_by('tutorial')
-            for td_rec in td_recs:
-                data += '<option value = "' + str(td_rec.id) + '">' + td_rec.tutorial + '</option>'
-            if data:
-                data = '<option value = "">Select Tutorial</option>' + data
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+        foss = request.POST.get('foss', '')
+        if foss:
+            try:
+                foss_id = int(foss)
+                lang_rec = Language.objects.filter(name='English').first()
+                if lang_rec:
+                    td_list = TutorialDetail.objects.filter(foss_id=foss_id).values_list('id')
+                    td_recs = TutorialDetail.objects.filter(
+                        id__in=TutorialResource.objects.filter(
+                            tutorial_detail_id__in=td_list,
+                            language_id=lang_rec.id,
+                        ).values_list('tutorial_detail_id')
+                    ).order_by('tutorial')
+                    for td_rec in td_recs:
+                        data += '<option value = "' + str(td_rec.id) + '">' + td_rec.tutorial + '</option>'
+                    if data:
+                        data = '<option value = "">Select Tutorial</option>' + data
+            except Exception as e:
+                logger.error("Error in ajax_upload_prerequisite: %s", e)
+    return JsonResponse(data, safe=False)
 
 @csrf_exempt
 def ajax_upload_foss(request):
@@ -3052,25 +3052,31 @@ def update_prerequisite(request):
         form = UpdatePrerequisiteForm(request.POST)
         if form.is_valid():
             try:
-                source_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['source_tutorial'], foss_id = form.cleaned_data['source_foss'])
-                tcc = TutorialCommonContent.objects.get(tutorial_detail = source_tutorial)
-                if int(form.cleaned_data['destination_tutorial']) == 0:
+                source_tutorial = TutorialDetail.objects.get(
+                    pk=form.cleaned_data['source_tutorial'],
+                    foss_id=form.cleaned_data['source_foss']
+                )
+                tcc, _ = TutorialCommonContent.objects.get_or_create(tutorial_detail=source_tutorial)
+                if str(form.cleaned_data['destination_tutorial']) == '0':
                     tcc.prerequisite_id = None
                     tcc.prerequisite_status = 6
                     messages.success(request, 'Prerequisite for <b>' + source_tutorial.tutorial + '</b> updated to <b>Not Required</b>')
                 else:
-                    destination_tutorial = TutorialDetail.objects.get(pk = form.cleaned_data['destination_tutorial'], foss_id = form.cleaned_data['destination_foss'])
+                    destination_tutorial = TutorialDetail.objects.get(
+                        pk=form.cleaned_data['destination_tutorial'],
+                        foss_id=form.cleaned_data['destination_foss']
+                    )
                     tcc.prerequisite_id = destination_tutorial.id
                     tcc.prerequisite_status = 4
                     messages.success(request, 'Prerequisite <b>' + destination_tutorial.tutorial + '</b> updated to <b>' + source_tutorial.tutorial + '</b>.')
                 tcc.save()
                 return HttpResponseRedirect('/creation/update-prerequisite/')
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error("Error in update_prerequisite: %s", e)
+                messages.error(request, str(e))
     context = {
         'form': form
     }
-    context.update(csrf(request))
     return render(request, 'creation/templates/update_prerequisite.html', context)
 
 
@@ -3083,19 +3089,21 @@ def update_keywords(request):
         form = UpdateKeywordsForm(request.POST)
         if form.is_valid():
             try:
-                tcc = TutorialCommonContent.objects.get(tutorial_detail_id = request.POST.get('tutorial'))
-                tcc.keyword = request.POST.get('keywords')
+                tutorial_detail_id = form.cleaned_data.get('tutorial')
+                keywords = form.cleaned_data.get('keywords')
+                tcc, _ = TutorialCommonContent.objects.get_or_create(tutorial_detail_id=tutorial_detail_id)
+                tcc.keyword = keywords
                 tcc.keyword_user = request.user
                 tcc.keyword_status = 4
                 tcc.save()
                 messages.success(request, 'Keywords updated successfully!')
                 return HttpResponseRedirect('/creation/update-keywords/')
             except Exception as e:
-                pass
+                logger.error("Error in update_keywords: %s", e)
+                messages.error(request, str(e))
     context = {
         'form': form
     }
-    context.update(csrf(request))
     return render(request, 'creation/templates/update_keywords.html', context)
 
 
@@ -3184,18 +3192,17 @@ def ajax_get_tutorials(request):
         foss_id = request.POST.get('foss', '')
         if foss_id:
             tutorials = TutorialResource.objects.filter(
-                Q(status = 1) | Q(status = 2),
-                tutorial_detail__foss_id = foss_id
+                Q(status=1) | Q(status=2),
+                tutorial_detail__foss_id=foss_id
             ).values_list(
                 'tutorial_detail_id',
                 'tutorial_detail__tutorial'
             ).order_by('tutorial_detail__tutorial').distinct()
             for tutorial in tutorials:
-                data += '<option value = "' + str(tutorial[0]) + '">' + \
-                    str(tutorial[1]) + '</option>'
+                data += '<option value = "' + str(tutorial[0]) + '">' + str(tutorial[1]) + '</option>'
             if data:
                 data = '<option value = "">-- Select Tutorial --</option>' + data
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return JsonResponse(data, safe=False)
 
 
 def view_brochure(request):
@@ -3203,10 +3210,9 @@ def view_brochure(request):
     my_dict = services.get_data_for_brochure_display()
     st_brochure = BrochureDocument.objects.filter(foss_course=36)
     pages = BrochurePage.objects.filter(brochure_id=st_brochure)
-    st_pages=[]
+    st_pages = []
     for page in pages:
         st_pages.append(page.page.url)
-
 
     context = {
         'my_dict': my_dict,
@@ -3224,36 +3230,36 @@ def update_assignment(request):
         form = UpdateAssignmentForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                foss_id = request.POST.get('foss')
-                foss = FossCategory.objects.get(pk = foss_id)
+                foss_id = form.cleaned_data.get('foss')
+                foss = FossCategory.objects.get(pk=foss_id)
 
-                tutorial_detail_id = request.POST.get('tutorial')
-                tutorial = TutorialDetail.objects.get(pk = tutorial_detail_id)
+                tutorial_detail_id = form.cleaned_data.get('tutorial')
+                tutorial = TutorialDetail.objects.get(pk=tutorial_detail_id)
                 file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                 file_name = tutorial.tutorial.replace(' ', '-') + '-Assignment' + file_extension
-                file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
+                file_path = os.path.join(settings.MEDIA_ROOT, 'videos', str(foss_id), str(tutorial_detail_id), 'resources', file_name)
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-                fout = open(file_path, 'wb+')
-                f = request.FILES['comp']
-                # Iterate through the chunks.
-                for chunk in f.chunks():
-                    fout.write(chunk)
-                fout.close()
+                uploaded_file = request.FILES['comp']
+                with open(file_path, 'wb+') as fout:
+                    for chunk in uploaded_file.chunks():
+                        fout.write(chunk)
 
-                tr_res = TutorialResource.objects.get(tutorial_detail = tutorial_detail_id, language_id = 22)
-                tr_res.common_content.assignment = file_name
-                tr_res.common_content.assignment_status = 4
-                tr_res.common_content.assignment_user = request.user
-                tr_res.common_content.save()
+                tr_res = TutorialResource.objects.filter(tutorial_detail_id=tutorial_detail_id, language_id=22).select_related('common_content').first()
+                if tr_res and hasattr(tr_res, 'common_content') and tr_res.common_content:
+                    tr_res.common_content.assignment = file_name
+                    tr_res.common_content.assignment_status = 4
+                    tr_res.common_content.assignment_user = request.user
+                    tr_res.common_content.save()
 
                 messages.success(request, 'Assignment updated successfully!')
                 form = UpdateAssignmentForm()
             except Exception as e:
-                print(e)
+                logger.error("Error in update_assignment: %s", e)
+                messages.error(request, str(e))
     context = {
         'form': form,
     }
-    context.update(csrf(request))
     return render(request, 'creation/templates/update_assignment.html', context)
 
 
@@ -3635,49 +3641,15 @@ def money_as_text(amount):
     ans += "Only"
     return ans
 
+@login_required
 def update_codefiles(request):
     if not is_administrator(request.user):
         raise PermissionDenied()
-    form = UpdateCodefilesForm()
-    if request.method == 'POST':
-        form = UpdateCodefilesForm(request.POST, request.FILES)
-        if form.is_valid():
-            try:
-                foss_id = request.POST.get('foss')
-                foss = FossCategory.objects.get(pk = foss_id)
-
-                tutorial_detail_id = request.POST.get('tutorial')
-                tutorial = TutorialDetail.objects.get(pk = tutorial_detail_id)
-                file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
-                file_name = tutorial.tutorial.replace(' ', '-') + '-Codefiles' + file_extension
-                file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
-
-                fout = open(file_path, 'wb+')
-                f = request.FILES['comp']
-                # Iterate through the chunks.
-                for chunk in f.chunks():
-                    fout.write(chunk)
-                fout.close()
-
-                tr_res = TutorialResource.objects.get(tutorial_detail = tutorial_detail_id, language_id = 22)
-                tr_res.common_content.code = file_name
-                tr_res.common_content.code_status = 4
-                tr_res.common_content.code_user = request.user
-                tr_res.common_content.save()
-
-                messages.success(request, 'Codefiles updated successfully!')
-                form = UpdateCodefilesForm()
-            except Exception as e:
-                print(e)
-    context = {
-        'form': form,
-    }
-    context.update(csrf(request))
-    return render(request, 'creation/templates/update_codefiles.html', context)
+    return HttpResponseRedirect('/creation/update-common-component/')
 
 @login_required
 def update_common_component(request):
-    #for codefiles, slides and additional material
+    # for codefiles, slides and additional material
     if not is_administrator(request.user):
         raise PermissionDenied()
     form = UpdateCommonCompForm()
@@ -3685,49 +3657,47 @@ def update_common_component(request):
         form = UpdateCommonCompForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                foss_id = request.POST.get('foss')
+                foss_id = form.cleaned_data.get('foss')
                 foss = FossCategory.objects.get(pk=foss_id)
 
-                common_comp = request.POST.get('component_type')
+                common_comp = form.cleaned_data.get('component_type')
 
-                tutorial_detail_id = request.POST.get('tutorial')
+                tutorial_detail_id = form.cleaned_data.get('tutorial')
                 tutorial = TutorialDetail.objects.get(pk=tutorial_detail_id)
                 file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
-                file_name =  tutorial.tutorial.replace(' ', '-') + '-'+common_comp + file_extension
-                file_path = settings.MEDIA_ROOT + 'videos/' + str(foss_id) + '/' + str(tutorial_detail_id) + '/resources/' + file_name
+                file_name = tutorial.tutorial.replace(' ', '-') + '-' + common_comp + file_extension
+                file_path = os.path.join(settings.MEDIA_ROOT, 'videos', str(foss_id), str(tutorial_detail_id), 'resources', file_name)
+                os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
-                fout = open(file_path, 'wb+')
-                f = request.FILES['comp']
-                # Iterate through the chunks.
-                for chunk in f.chunks():
-                    fout.write(chunk)
-                fout.close()
+                uploaded_file = request.FILES['comp']
+                with open(file_path, 'wb+') as fout:
+                    for chunk in uploaded_file.chunks():
+                        fout.write(chunk)
 
-                tr_res = TutorialResource.objects.get(tutorial_detail=tutorial_detail_id, language_id = 22)
-                if common_comp == 'Codefiles':
-                    tr_res.common_content.code = file_name
-                    tr_res.common_content.code_status = 4
-                    tr_res.common_content.code_user = request.user
-                if common_comp == 'Slides':
-                    tr_res.common_content.slide = file_name
-                    tr_res.common_content.slide_status = 4
-                    tr_res.common_content.slide_user = request.user
-                if common_comp == 'Additionalmaterial':
-                    tr_res.common_content.additional_material = file_name
-                    tr_res.common_content.additional_material_status = 4
-                    tr_res.common_content.additional_material_user = request.user
-                tr_res.common_content.save()
+                tr_res = TutorialResource.objects.filter(tutorial_detail_id=tutorial_detail_id, language_id=22).select_related('common_content').first()
+                if tr_res and hasattr(tr_res, 'common_content') and tr_res.common_content:
+                    if common_comp == 'Codefiles':
+                        tr_res.common_content.code = file_name
+                        tr_res.common_content.code_status = 4
+                        tr_res.common_content.code_user = request.user
+                    elif common_comp == 'Slides':
+                        tr_res.common_content.slide = file_name
+                        tr_res.common_content.slide_status = 4
+                        tr_res.common_content.slide_user = request.user
+                    elif common_comp == 'Additionalmaterial':
+                        tr_res.common_content.additional_material = file_name
+                        tr_res.common_content.additional_material_status = 4
+                        tr_res.common_content.additional_material_user = request.user
+                    tr_res.common_content.save()
 
-
-
-                messages.success(request, common_comp+' updated successfully!')
+                messages.success(request, common_comp + ' updated successfully!')
                 form = UpdateCommonCompForm()
             except Exception as e:
-                print(e)
+                logger.error("Error in update_common_component: %s", e)
+                messages.error(request, str(e))
     context = {
         'form': form,
     }
-    context.update(csrf(request))
     return render(request, 'creation/templates/update_common_comp.html', context)
 
 
@@ -3740,29 +3710,32 @@ def update_thumbnail(request):
         form = UpdateThumbnailForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                foss_id = request.POST.get('foss')
-                foss = FossCategory.objects.get(pk = foss_id)
+                foss_id = form.cleaned_data.get('foss')
+                foss = FossCategory.objects.get(pk=foss_id)
 
-                tutorial_detail_id = request.POST.get('tutorial')
-                tutorial = TutorialDetail.objects.get(pk = tutorial_detail_id)
-                
+                tutorial_detail_id = form.cleaned_data.get('tutorial')
+                tutorial = TutorialDetail.objects.get(pk=tutorial_detail_id)
 
-                tr_res = TutorialResource.objects.get(tutorial_detail = tutorial_detail_id, language_id = 22)
-                tr_res.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
-                tr_res.save()
+                tr_res = TutorialResource.objects.filter(tutorial_detail_id=tutorial_detail_id, language_id=22).first()
+                if tr_res:
+                    thumb_mins = form.cleaned_data.get('thumb_mins') or request.POST.get('thumb_mins', '00')
+                    thumb_secs = form.cleaned_data.get('thumb_secs') or request.POST.get('thumb_secs', '00')
+                    tr_res.video_thumbnail_time = '00:' + str(thumb_mins).zfill(2) + ':' + str(thumb_secs).zfill(2)
+                    tr_res.save()
 
-                create_thumbnail(tr_res, 'Big', tr_res.video_thumbnail_time, '700:500')
-                create_thumbnail(tr_res, 'Small', tr_res.video_thumbnail_time, '170:127')
+                    create_thumbnail(tr_res, 'Big', tr_res.video_thumbnail_time, '700:500')
+                    create_thumbnail(tr_res, 'Small', tr_res.video_thumbnail_time, '170:127')
 
-
-                messages.success(request, 'create_thumbnail updated successfully!')
-                form = UpdateThumbnailForm()
+                    messages.success(request, 'Thumbnail updated successfully!')
+                    form = UpdateThumbnailForm()
+                else:
+                    messages.error(request, 'English tutorial resource not found.')
             except Exception as e:
-                print(e)
+                logger.error("Error in update_thumbnail: %s", e)
+                messages.error(request, str(e))
     context = {
         'form': form,
     }
-    context.update(csrf(request))
     return render(request, 'creation/templates/update_thumbnails.html', context)
 
 

@@ -819,108 +819,108 @@ class AvailableFossForm(forms.ModelForm):
 
 class UpdatePrerequisiteForm(forms.Form):
     source_foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
-        required = True,
-        error_messages = {'required':'FOSS category field is required.'}
+        choices=[('', '-- Select Foss --')] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
+        required=True,
+        error_messages={'required': 'FOSS category field is required.'}
     )
     source_tutorial = forms.ChoiceField(
-        choices = [('', '-- Select Tutorial --'),],
-        widget=forms.Select(attrs = {'disabled': 'disabled'}),
-        required = True,
-        error_messages = {'required': 'Tutorial Name field is required.'}
+        choices=[('', '-- Select Tutorial --')],
+        widget=forms.Select(attrs={'disabled': 'disabled'}),
+        required=True,
+        error_messages={'required': 'Tutorial Name field is required.'}
     )
     destination_foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'), ('0', '-- Not Required --'),] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
-        required = True,
-        error_messages = {'required':'FOSS category field is required.'}
+        choices=[('', '-- Select Foss --'), ('0', '-- Not Required --')] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
+        required=True,
+        error_messages={'required': 'FOSS category field is required.'}
     )
     destination_tutorial = forms.ChoiceField(
-        choices = [('', '-- Select Tutorial --'), ('0', '-- Not Required --'),],
-        widget=forms.Select(attrs = {'disabled': 'disabled'}),
-        required = True,
-        error_messages = {'required': 'Tutorial Name field is required.'}
+        choices=[('', '-- Select Tutorial --'), ('0', '-- Not Required --')],
+        widget=forms.Select(attrs={'disabled': 'disabled'}),
+        required=True,
+        error_messages={'required': 'Tutorial Name field is required.'}
     )
 
     def __init__(self, *args, **kwargs):
-        super(UpdatePrerequisiteForm, self).__init__(*args, **kwargs)
-        if args:
-            if 'source_foss' in args[0]:
-                if args[0]['source_foss'] and args[0]['source_foss'] != '' and args[0]['source_foss'] != 'None':
-                    initial_data = ''
-                    td_list = TutorialDetail.objects.filter(foss_id = args[0]['source_foss']).values_list('id')
-                    lang_rec = Language.objects.get(name = 'English')
+        super().__init__(*args, **kwargs)
+        if args and args[0]:
+            source_foss = args[0].get('source_foss')
+            if source_foss and source_foss != 'None':
+                initial_data = args[0].get('source_tutorial', '')
+                td_list = TutorialDetail.objects.filter(foss_id=source_foss).values_list('id')
+                lang_rec = Language.objects.filter(name='English').first()
+                if lang_rec:
                     choices = list(
                         TutorialDetail.objects.filter(
-                            id__in = TutorialResource.objects.filter(
-                                tutorial_detail_id__in = td_list,
-                                language_id = lang_rec.id,
-                            ).values_list(
-                                'tutorial_detail_id'
-                            )
-                        ).values_list(
-                            'id',
-                            'tutorial'
-                        )
+                            id__in=TutorialResource.objects.filter(
+                                tutorial_detail_id__in=td_list,
+                                language_id=lang_rec.id,
+                            ).values_list('tutorial_detail_id')
+                        ).values_list('id', 'tutorial').order_by('tutorial')
                     )
                     choices.insert(0, ('', 'Select Tutorial'))
                     self.fields['source_tutorial'].choices = choices
-                    self.fields['source_tutorial'].widget.attrs = {}
+                    if choices:
+                        self.fields['source_tutorial'].widget.attrs = {}
                     self.fields['source_tutorial'].initial = initial_data
-            if 'destination_foss' in args[0]:
-                if args[0]['destination_foss'] and args[0]['destination_foss'] != '' and args[0]['destination_foss'] != 'None':
-                    initial_data = ''
-                    td_list = TutorialDetail.objects.filter(foss_id = args[0]['destination_foss']).values_list('id')
-                    lang_rec = Language.objects.get(name = 'English')
-                    choices = list(
-                        TutorialDetail.objects.filter(
-                            id__in = TutorialResource.objects.filter(
-                                tutorial_detail_id__in = td_list,
-                                language_id = lang_rec.id,
-                            ).values_list(
-                                'tutorial_detail_id'
-                            )
-                        ).values_list(
-                            'id',
-                            'tutorial'
-                        )
-                    )
-                    choices.insert(0, ('', '-- Select Tutorial --'))
-                    choices.insert(1, ('0', '-- Not Required --'))
-                    self.fields['destination_tutorial'].choices = choices
+
+            dest_foss = args[0].get('destination_foss')
+            if dest_foss and dest_foss != 'None':
+                initial_data = args[0].get('destination_tutorial', '')
+                if dest_foss == '0':
+                    self.fields['destination_tutorial'].choices = [('', '-- Select Tutorial --'), ('0', '-- Not Required --')]
                     self.fields['destination_tutorial'].widget.attrs = {}
-                    self.fields['destination_tutorial'].initial = initial_data
+                    self.fields['destination_tutorial'].initial = '0'
+                else:
+                    td_list = TutorialDetail.objects.filter(foss_id=dest_foss).values_list('id')
+                    lang_rec = Language.objects.filter(name='English').first()
+                    if lang_rec:
+                        choices = list(
+                            TutorialDetail.objects.filter(
+                                id__in=TutorialResource.objects.filter(
+                                    tutorial_detail_id__in=td_list,
+                                    language_id=lang_rec.id,
+                                ).values_list('tutorial_detail_id')
+                            ).values_list('id', 'tutorial').order_by('tutorial')
+                        )
+                        choices.insert(0, ('', '-- Select Tutorial --'))
+                        choices.insert(1, ('0', '-- Not Required --'))
+                        self.fields['destination_tutorial'].choices = choices
+                        if choices:
+                            self.fields['destination_tutorial'].widget.attrs = {}
+                        self.fields['destination_tutorial'].initial = initial_data
 
 class UpdateKeywordsForm(forms.Form):
     foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
-        required = True,
-        error_messages = {'required':'FOSS category field is required.'}
+        choices=[('', '-- Select Foss --')] + list(FossCategory.objects.filter(status=1).values_list('id', 'foss').order_by('foss')),
+        required=True,
+        error_messages={'required': 'FOSS category field is required.'}
     )
     tutorial = forms.ChoiceField(
-        choices = [('', '-- Select Tutorial --'),],
-        widget=forms.Select(attrs = {'disabled': 'disabled'}),
-        required = True,
-        error_messages = {'required': 'Tutorial Name field is required.'}
+        choices=[('', '-- Select Tutorial --')],
+        widget=forms.Select(attrs={'disabled': 'disabled'}),
+        required=True,
+        error_messages={'required': 'Tutorial Name field is required.'}
     )
     keywords = forms.CharField(
-        widget = forms.Textarea,
-        required = True,
-        error_messages = {'required':'Keywords field required'}
+        widget=forms.Textarea,
+        required=True,
+        error_messages={'required': 'Keywords field required'}
     )
 
     def __init__(self, *args, **kwargs):
-        super(UpdateKeywordsForm, self).__init__(*args, **kwargs)
-        if args:
-            if 'foss' in args[0] and args[0]['foss']:
-                initial_data = ''
-                if 'tutorial' in args[0] and args[0]['tutorial']:
-                    initial_data = args[0]['tutorial']
-                choices = TutorialResource.objects.filter(
-                    tutorial_detail__foss_id = args[0]['foss'],
-                    language__name = 'English'
-                ).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial')
-                self.fields['tutorial'].choices = choices
-                self.fields['tutorial'].widget.attrs = {}
+        super().__init__(*args, **kwargs)
+        if args and args[0]:
+            foss_id = args[0].get('foss')
+            if foss_id:
+                initial_data = args[0].get('tutorial', '')
+                choices = list(TutorialResource.objects.filter(
+                    tutorial_detail__foss_id=foss_id,
+                    language__name='English'
+                ).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial'))
+                self.fields['tutorial'].choices = [('', '-- Select Tutorial --')] + choices
+                if choices:
+                    self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_data
 
 
@@ -964,15 +964,12 @@ class UpdateSheetsForm(forms.Form):
 
 class UpdateAssignmentForm(forms.Form):
     foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) |
-            Q(status = 2), language__name='English').values_list(
-            'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
-            'tutorial_detail__foss__foss').distinct()),
-        required = True,
-        error_messages = {'required':'FOSS category field is required.'}
+        choices=[('', '-- Select Foss --')] + list(TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
+        required=True,
+        error_messages={'required': 'FOSS category field is required.'}
     )
     tutorial = forms.ChoiceField(
-        choices=[('', '-- Select Tutorial --'), ],
+        choices=[('', '-- Select Tutorial --')],
         widget=forms.Select(attrs={'disabled': 'disabled'}),
         required=True,
         error_messages={'required': 'Tutorial field is required.'}
@@ -980,25 +977,23 @@ class UpdateAssignmentForm(forms.Form):
     comp = forms.FileField(required=False)
 
     def clean(self):
-        super(UpdateAssignmentForm, self).clean()
-        component = ''
-        if 'comp' in self.cleaned_data:
-            component = self.cleaned_data['comp']
+        cleaned_data = super().clean()
+        component = cleaned_data.get('comp')
         if not component:
-            self._errors["comp"] = self.error_class(["This field is required."])
-        return component
+            self.add_error('comp', "This field is required.")
+        return cleaned_data
 
     def __init__(self, *args, **kwargs):
-        super(UpdateAssignmentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        if args:
-            if 'foss' in args[0] and args[0]['foss']:
-                initial_tut = ''
-                if 'tutorial' in args[0] and args[0]['tutorial']:
-                    initial_tut = args[0]['tutorial']
-                choices = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = args[0]['foss']).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct()
-                self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
-                self.fields['tutorial'].widget.attrs = {}
+        if args and args[0]:
+            foss_id = args[0].get('foss')
+            if foss_id:
+                initial_tut = args[0].get('tutorial', '')
+                choices = list(TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss_id=foss_id).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct())
+                self.fields['tutorial'].choices = [('', '-- Select tutorial --')] + choices
+                if choices:
+                    self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
 
 
@@ -1108,15 +1103,12 @@ class PaymentHonorariumFilterForm(forms.Form):
 
 class UpdateCodefilesForm(forms.Form):
     foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) |
-            Q(status = 2), language__name='English').values_list(
-            'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
-            'tutorial_detail__foss__foss').distinct()),
-        required = True,
-        error_messages = {'required':'FOSS category field is required.'}
+        choices=[('', '-- Select Foss --')] + list(TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
+        required=True,
+        error_messages={'required': 'FOSS category field is required.'}
     )
     tutorial = forms.ChoiceField(
-        choices=[('', '-- Select Tutorial --'), ],
+        choices=[('', '-- Select Tutorial --')],
         widget=forms.Select(attrs={'disabled': 'disabled'}),
         required=True,
         error_messages={'required': 'Tutorial field is required.'}
@@ -1124,70 +1116,63 @@ class UpdateCodefilesForm(forms.Form):
     comp = forms.FileField(required=False)
 
     def clean(self):
-        super(UpdateCodefilesForm, self).clean()
-        component = ''
-        if 'comp' in self.cleaned_data:
-            component = self.cleaned_data['comp']
+        cleaned_data = super().clean()
+        component = cleaned_data.get('comp')
         if not component:
-            self._errors["comp"] = self.error_class(["This field is required."])
-        return component
+            self.add_error('comp', "This field is required.")
+        return cleaned_data
 
     def __init__(self, *args, **kwargs):
-        super(UpdateCodefilesForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        if args:
-            if 'foss' in args[0] and args[0]['foss']:
-                initial_tut = ''
-                if 'tutorial' in args[0] and args[0]['tutorial']:
-                    initial_tut = args[0]['tutorial']
-                choices = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = args[0]['foss']).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct()
-                self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
-                self.fields['tutorial'].widget.attrs = {}
+        if args and args[0]:
+            foss_id = args[0].get('foss')
+            if foss_id:
+                initial_tut = args[0].get('tutorial', '')
+                choices = list(TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss_id=foss_id).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct())
+                self.fields['tutorial'].choices = [('', '-- Select tutorial --')] + choices
+                if choices:
+                    self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
 
 
 class UpdateCommonCompForm(forms.Form):
     foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) |
-            Q(status = 2), language__name='English').values_list(
-            'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
-            'tutorial_detail__foss__foss').distinct()),
-        required = True,
-        error_messages = {'required':'FOSS category field is required.'}
+        choices=[('', '-- Select Foss --')] + list(TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
+        required=True,
+        error_messages={'required': 'FOSS category field is required.'}
     )
     tutorial = forms.ChoiceField(
-        choices=[('', '-- Select Tutorial --'), ],
+        choices=[('', '-- Select Tutorial --')],
         widget=forms.Select(attrs={'disabled': 'disabled'}),
         required=True,
         error_messages={'required': 'Tutorial field is required.'}
     )
     comp = forms.FileField(required=False)
     component_type = forms.ChoiceField(
-        choices = [('', '-- Select Type --'), ('Codefiles', 'Codefiles'), ('Slides', 'Slides'), ('Additionalmaterial', 'Additional Material')],
-        required = True,
-        error_messages = {'required': 'Please select component type'}
+        choices=[('', '-- Select Type --'), ('Codefiles', 'Codefiles'), ('Slides', 'Slides'), ('Additionalmaterial', 'Additional Material')],
+        required=True,
+        error_messages={'required': 'Please select component type'}
     )
 
     def clean(self):
-        super(UpdateCommonCompForm, self).clean()
-        component = ''
-        if 'comp' in self.cleaned_data:
-            component = self.cleaned_data['comp']
+        cleaned_data = super().clean()
+        component = cleaned_data.get('comp')
         if not component:
-            self._errors["comp"] = self.error_class(["This field is required."])
-        return component
+            self.add_error('comp', "This field is required.")
+        return cleaned_data
 
     def __init__(self, *args, **kwargs):
-        super(UpdateCommonCompForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
-        if args:
-            if 'foss' in args[0] and args[0]['foss']:
-                initial_tut = ''
-                if 'tutorial' in args[0] and args[0]['tutorial']:
-                    initial_tut = args[0]['tutorial']
-                choices = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = args[0]['foss']).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct()
-                self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
-                self.fields['tutorial'].widget.attrs = {}
+        if args and args[0]:
+            foss_id = args[0].get('foss')
+            if foss_id:
+                initial_tut = args[0].get('tutorial', '')
+                choices = list(TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss_id=foss_id).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct())
+                self.fields['tutorial'].choices = [('', '-- Select tutorial --')] + choices
+                if choices:
+                    self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
 
 class LanguageManagerForm(forms.ModelForm):
@@ -1242,22 +1227,19 @@ class DetailsForm(forms.ModelForm):
 
 class UpdateThumbnailForm(forms.Form):
     foss = forms.ChoiceField(
-        choices = [('', '-- Select Foss --'),] + list(TutorialResource.objects.filter(Q(status = 1) |
-            Q(status = 2), language__name='English').values_list(
-            'tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by(
-            'tutorial_detail__foss__foss').distinct()),
-        required = True,
-        error_messages = {'required':'FOSS category field is required.'}
+        choices=[('', '-- Select Foss --')] + list(TutorialResource.objects.filter(Q(status=1) | Q(status=2), language__name='English').values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()),
+        required=True,
+        error_messages={'required': 'FOSS category field is required.'}
     )
     tutorial = forms.ChoiceField(
-        choices=[('', '-- Select Tutorial --'), ],
+        choices=[('', '-- Select Tutorial --')],
         widget=forms.Select(attrs={'disabled': 'disabled'}),
         required=True,
         error_messages={'required': 'Tutorial field is required.'}
     )
 
     def __init__(self, *args, **kwargs):
-        super(UpdateThumbnailForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         tmp_choices1 = []
         tmp_choices2 = []
         for i in range(60):
@@ -1268,23 +1250,23 @@ class UpdateThumbnailForm(forms.Form):
             tmp_choices2.append((i_str, i_str))
         tmp_choices1.insert(0, ('', 'Select Minutes'))
         self.fields['thumb_mins'] = forms.ChoiceField(
-            choices = tmp_choices1,
+            choices=tmp_choices1,
             widget=forms.Select(),
-            required = True,
+            required=True,
         )
         tmp_choices2.insert(0, ('', 'Select Seconds'))
         self.fields['thumb_secs'] = forms.ChoiceField(
-            choices = tmp_choices2,
+            choices=tmp_choices2,
             widget=forms.Select(),
-            required = True,
+            required=True,
         )
 
-        if args:
-            if 'foss' in args[0] and args[0]['foss']:
-                initial_tut = ''
-                if 'tutorial' in args[0] and args[0]['tutorial']:
-                    initial_tut = args[0]['tutorial']
-                choices = TutorialResource.objects.filter(Q(status = 1) | Q(status = 2), tutorial_detail__foss_id = args[0]['foss']).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct()
-                self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
-                self.fields['tutorial'].widget.attrs = {}
+        if args and args[0]:
+            foss_id = args[0].get('foss')
+            if foss_id:
+                initial_tut = args[0].get('tutorial', '')
+                choices = list(TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss_id=foss_id).values_list('tutorial_detail_id', 'tutorial_detail__tutorial').order_by('tutorial_detail__tutorial').distinct())
+                self.fields['tutorial'].choices = [('', '-- Select tutorial --')] + choices
+                if choices:
+                    self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
