@@ -163,15 +163,15 @@ class MediaTestimonialForm(forms.Form):
     '''
 
     def __init__(self, *args, **kwargs):
-        on_home_page = kwargs.pop('on_home_page')
-        super(MediaTestimonialForm, self).__init__(*args, **kwargs)
+        on_home_page = kwargs.pop('on_home_page', 0)
+        super().__init__(*args, **kwargs)
         foss_list_choices = [('', '-- All Courses --'), ]
        
         foss_list = FossCategory.objects.filter(status=1, show_on_homepage=on_home_page).values('foss').annotate(
             Count('id')).order_by('foss').values_list('foss').distinct()
 
         for foss_row in foss_list:
-            foss_list_choices.append((str(foss_row[0]), str(foss_row[0]) ))
+            foss_list_choices.append((str(foss_row[0]), str(foss_row[0])))
 
         self.fields['foss'].choices = foss_list_choices
 
@@ -196,13 +196,16 @@ class MediaTestimonialForm(forms.Form):
                               max_length=500)
 
     def clean(self):
-        if 'media' not in self.cleaned_data:
-            raise ValidationError({'media': ['No file or empty file given', ]})
-        super(MediaTestimonialForm, self).clean()
+        cleaned_data = super().clean()
+        media = cleaned_data.get('media')
+        if not media:
+            self.add_error('media', 'No file or empty file given')
+            return cleaned_data
         formats = ['mp4', 'mp3', 'mov']
-        if self.cleaned_data['media'].name[-3:] not in formats:
-            self._errors["media"] = self.error_class(["Not a valid file format."])
-        return self.cleaned_data['media']
+        ext = os.path.splitext(media.name)[1].lower().replace('.', '')
+        if ext not in formats:
+            self.add_error('media', 'Not a valid file format.')
+        return cleaned_data
 
 
 class MediaTestimonialEditForm(forms.ModelForm):

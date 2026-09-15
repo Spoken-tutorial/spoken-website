@@ -110,10 +110,17 @@ def get_component_name(comp):
     return key.title()
 
 def get_missing_component_reply(mcid):
-    rows = TutorialMissingComponentReply.objects.filter(missing_component_id = mcid)
+    rows = TutorialMissingComponentReply.objects.filter(missing_component_id=mcid).select_related('user')
     replies = ''
     for row in rows:
-        replies += '<p>' + row.reply_message + '<b> -' + row.user.username + '</b></p>'
+        username = ''
+        try:
+            if row.user:
+                username = row.user.username
+        except Exception:
+            username = 'Unknown'
+        username_str = '<b> -' + username + '</b>' if username else ''
+        replies += '<p>' + row.reply_message + username_str + '</p>'
     if replies:
         replies = '<br /><b>Replies:</b>' + replies
     return replies

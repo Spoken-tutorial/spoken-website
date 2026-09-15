@@ -309,69 +309,82 @@ def creation_add_role(request, role_type,languages):
 
 @login_required
 def creation_accept_role_request(request, recid, user_type):
-    if is_administrator(request.user):
-        roles = {
-            0: 'Contributor',
-            1: 'External-Contributor',
-            2: 'Video-Reviewer',
-            3: 'Domain-Reviewer',
-            4: 'Quality-Reviewer',
-        }
-        try:
-            role_rec = RoleRequest.objects.get(pk = recid, status = STATUS_DICT['inactive'])
-            if role_rec.role_type in roles:
-                try:
-                    role_rec.user.groups.add(Group.objects.get(name = roles[role_rec.role_type]))
-                    role_rec.approved_user = request.user
-                    role_rec.status = 1
-                    role_rec.save()
-                    if role_rec.role_type == ROLES_DICT['video-reviewer']:
-                        messages.success(request, roles[role_rec.role_type] +' role is added to '+role_rec.user.username)
-                        add_creation_notification(request, role_rec.role_type, role_rec.user_id , role_rec.language)
-                    else:
-                        messages.success(request, roles[role_rec.role_type] +' role is added to ' + role_rec.user.username + ' for the language '+role_rec.language.name)
-                        add_creation_notification(request, role_rec.role_type, role_rec.user_id , role_rec.language)
-                        if int(role_rec.role_type) in (ROLES_DICT['contributor'],ROLES_DICT['external-contributor']):
-                            print("Okay 1 ",role_rec.role_type)
-                            add_contributorrating(role_rec)
-                except Exception as e:
-                    print (e)
-                    messages.error(request, role_rec.user.username + ' is already having ' + roles[role_rec.role_type] + ' role or Language field is not present')
-            else:
-                messages.error(request, 'Invalid role argument!')
-        except:
-            messages.error(request, 'The given role request id is either invalid or it is already accepted')
-    else:
+    if not (is_administrator(request.user) or (user_type == 'lang_manager' and is_language_manager(request.user))):
         raise PermissionDenied()
+    roles = {
+        0: 'Contributor',
+        1: 'External-Contributor',
+        2: 'Video-Reviewer',
+        3: 'Domain-Reviewer',
+        4: 'Quality-Reviewer',
+    }
+    role_slug = 'contributor'
+    try:
+        role_rec = RoleRequest.objects.get(pk=recid, status=STATUS_DICT['inactive'])
+        if role_rec.role_type in roles:
+            role_slug = roles[role_rec.role_type].lower()
+            try:
+                group_name = roles[role_rec.role_type]
+                group_obj, _ = Group.objects.get_or_create(name=group_name)
+                role_rec.user.groups.add(group_obj)
+                role_rec.approved_user = request.user
+                role_rec.status = 1
+                role_rec.save()
+                if role_rec.role_type == ROLES_DICT['video-reviewer']:
+                    messages.success(request, group_name + ' role is added to ' + role_rec.user.username)
+                    add_creation_notification(request, role_rec.role_type, role_rec.user_id, role_rec.language)
+                else:
+                    lang_name = role_rec.language.name if role_rec.language else ''
+                    messages.success(request, group_name + ' role is added to ' + role_rec.user.username + ' for the language ' + lang_name)
+                    add_creation_notification(request, role_rec.role_type, role_rec.user_id, role_rec.language)
+                    if int(role_rec.role_type) in (ROLES_DICT['contributor'], ROLES_DICT['external-contributor']):
+                        add_contributorrating(role_rec)
+            except Exception as e:
+                logger.error("Error adding role to user: %s", e)
+                messages.error(request, role_rec.user.username + ' is already having ' + roles[role_rec.role_type] + ' role or Language field is not present')
+        else:
+            messages.error(request, 'Invalid role argument!')
+    except RoleRequest.DoesNotExist:
+        messages.error(request, 'The given role request id is either invalid or it is already accepted')
+    except Exception as e:
+        logger.error("Error in creation_accept_role_request: %s", e)
+        messages.error(request, str(e))
+
     if user_type == 'lang_manager':
-        return HttpResponseRedirect('/creation/role/lang_requests/' + roles[role_rec.role_type].lower() + '/')
+        return HttpResponseRedirect('/creation/role/lang_requests/' + role_slug + '/')
     else:
-        return HttpResponseRedirect('/creation/role/requests/' + roles[role_rec.role_type].lower() + '/')
+        return HttpResponseRedirect('/creation/role/requests/' + role_slug + '/')
 
 @login_required
 def creation_reject_role_request(request, recid, user_type):
-    if is_administrator(request.user):
-        roles = {
-            0: 'Contributor',
-            1: 'External-Contributor',
-            2: 'Video-Reviewer',
-            3: 'Domain-Reviewer',
-            4: 'Quality-Reviewer',
-        }
-        try:
-            role_rec = RoleRequest.objects.get(pk = recid, status = 0)
-            role_rec.delete()
-            messages.success(request, roles[role_rec.role_type]+
-            ' role of '+ str(role_rec.language) +
-            ' has been deleted successfully for '+role_rec.user.username)
-        except:
-            messages.error(request, 'The given role request id is either invalid or it is already rejected')
-    else:
+    if not (is_administrator(request.user) or (user_type == 'lang_manager' and is_language_manager(request.user))):
         raise PermissionDenied()
+    roles = {
+        0: 'Contributor',
+        1: 'External-Contributor',
+        2: 'Video-Reviewer',
+        3: 'Domain-Reviewer',
+        4: 'Quality-Reviewer',
+    }
+    role_slug = 'contributor'
+    try:
+        role_rec = RoleRequest.objects.get(pk=recid, status=0)
+        role_slug = roles.get(role_rec.role_type, 'contributor').lower()
+        role_name = roles.get(role_rec.role_type, 'Role')
+        lang_str = str(role_rec.language) if role_rec.language else ''
+        username = role_rec.user.username
+        role_rec.delete()
+        messages.success(request, role_name + ' role of ' + lang_str + ' has been deleted successfully for ' + username)
+    except RoleRequest.DoesNotExist:
+        messages.error(request, 'The given role request id is either invalid or it is already rejected')
+    except Exception as e:
+        logger.error("Error in creation_reject_role_request: %s", e)
+        messages.error(request, str(e))
+
     if user_type == 'lang_manager':
-        return HttpResponseRedirect('/creation/role/lang_requests/' + roles[role_rec.role_type].lower() + '/')
+        return HttpResponseRedirect('/creation/role/lang_requests/' + role_slug + '/')
     else:
-        return HttpResponseRedirect('/creation/role/requests/' + roles[role_rec.role_type].lower() + '/')
+        return HttpResponseRedirect('/creation/role/requests/' + role_slug + '/')
 
 @login_required
 def creation_revoke_role_request(request, role_type,languages):
@@ -800,7 +813,7 @@ def ajax_upload_foss(request):
             if data:
                 data = '<option value = "">Select Language</option>' + data
 
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+    return JsonResponse(data, safe=False)
 
 @csrf_exempt
 def ajax_get_keywords(request):
@@ -808,11 +821,11 @@ def ajax_get_keywords(request):
     if request.method == 'POST':
         try:
             tutorial_detail_id = int(request.POST.get('tutorial_detail'))
-            tcc = TutorialCommonContent.objects.get(tutorial_detail_id = tutorial_detail_id)
-            data = tcc.keyword
+            tcc = TutorialCommonContent.objects.get(tutorial_detail_id=tutorial_detail_id)
+            data = tcc.keyword or ''
         except Exception as e:
-            pass
-    return HttpResponse(json.dumps(data), content_type = 'application/json')
+            logger.error("Error in ajax_get_keywords: %s", e)
+    return JsonResponse(data, safe=False)
 
 @login_required
 def upload_tutorial(request, trid):
@@ -2792,28 +2805,28 @@ def report_missing_component(request, trid):
         6: 'assignment'
     }
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid)
+        tr_rec = TutorialResource.objects.get(pk=trid)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
-    except:
+    except Exception:
         raise PermissionDenied()
     form = TutorialMissingComponentForm(request.user)
     if request.method == 'POST':
         form = TutorialMissingComponentForm(request.user, request.POST)
         if form.is_valid():
             remarks = ''
-            component = int(request.POST.get('component'))
-            report_type = int(request.POST.get('report_type'))
+            component = int(form.cleaned_data.get('component'))
+            report_type = int(form.cleaned_data.get('report_type'))
             if report_type:
-                remarks = request.POST.get('remarks')
+                remarks = form.cleaned_data.get('remarks') or ''
             else:
                 compStatus = 0
                 compValue = ''
                 if component <= 3:
-                    compStatus = getattr(tr_rec, comps[component] + '_status')
-                    compValue = getattr(tr_rec, comps[component])
+                    compStatus = getattr(tr_rec, comps[component] + '_status', 0)
+                    compValue = getattr(tr_rec, comps[component], '')
                 else:
-                    compStatus = getattr(tr_rec.common_content, comps[component] + '_status')
-                    compValue = getattr(tr_rec.common_content, comps[component])
+                    compStatus = getattr(tr_rec.common_content, comps[component] + '_status', 0) if hasattr(tr_rec, 'common_content') and tr_rec.common_content else 0
+                    compValue = getattr(tr_rec.common_content, comps[component], '') if hasattr(tr_rec, 'common_content') and tr_rec.common_content else ''
                 flag = 0
                 if compStatus == 6:
                     flag = 1
@@ -2823,41 +2836,40 @@ def report_missing_component(request, trid):
                         flag = 1
                         messages.warning(request, 'The selected component is available. However if you wish to report an error, please click on "Some content is missing" radio button.')
                     if component <= 3:
-                        if component != 1 and os.path.isfile(settings.MEDIA_ROOT + 'videos/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/' + compValue):
+                        if component != 1 and os.path.isfile(os.path.join(settings.MEDIA_ROOT, 'videos', str(tr_rec.tutorial_detail.foss_id), str(tr_rec.tutorial_detail_id), compValue)):
                             flag = 1
                             messages.warning(request, 'The selected component is available. However if you wish to report an error, please click on "Some content is missing" radio button.')
                     else:
-                        if os.path.isfile(settings.MEDIA_ROOT + 'videos/resources/' + str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/' + compValue):
+                        if os.path.isfile(os.path.join(settings.MEDIA_ROOT, 'videos', 'resources', str(tr_rec.tutorial_detail.foss_id), str(tr_rec.tutorial_detail_id), compValue)):
                             flag = 1
                             messages.warning(request, 'The selected component is available. However if you wish to report an error, please click on "Some content is missing" radio button.')
                 if flag:
                     context = {
                         'form': form,
                     }
-                    context.update(csrf(request))
                     return render(request, 'creation/templates/report_missing_component.html', context)
             email = ''
-            inform_me = request.POST.get('inform_me')
+            inform_me = form.cleaned_data.get('inform_me')
             if inform_me and not request.user.is_authenticated:
-                email = request.POST.get('email', '')
+                email = form.cleaned_data.get('email', '')
             if request.user.is_authenticated:
                 TutorialMissingComponent.objects.create(
-                    user = request.user,
-                    tutorial_resource = tr_rec,
-                    component = component,
-                    report_type = report_type,
-                    remarks = remarks,
-                    inform_me = inform_me,
-                    email = email,
+                    user=request.user,
+                    tutorial_resource=tr_rec,
+                    component=component,
+                    report_type=report_type,
+                    remarks=remarks,
+                    inform_me=inform_me,
+                    email=email,
                 )
             else:
                 TutorialMissingComponent.objects.create(
-                    tutorial_resource = tr_rec,
-                    component = component,
-                    report_type = report_type,
-                    remarks = remarks,
-                    inform_me = inform_me,
-                    email = email,
+                    tutorial_resource=tr_rec,
+                    component=component,
+                    report_type=report_type,
+                    remarks=remarks,
+                    inform_me=inform_me,
+                    email=email,
                 )
             add_contributor_notification(tr_rec, comp_title, 'Component missing form submitted by public')
             form = TutorialMissingComponentForm(request.user)
@@ -2865,7 +2877,6 @@ def report_missing_component(request, trid):
     context = {
         'form': form
     }
-    context.update(csrf(request))
     return render(request, 'creation/templates/report_missing_component.html', context)
 
 
@@ -2893,14 +2904,19 @@ def report_missing_component_reply(request, tmcid):
         raise PermissionDenied()
     tmc_row = None
     try:
-        tmc_row = TutorialMissingComponent.objects.get(pk = tmcid)
-    except:
+        tmc_row = TutorialMissingComponent.objects.get(pk=tmcid)
+    except Exception:
         raise PermissionDenied()
     form = TutorialMissingComponentReplyForm()
     if request.method == 'POST':
         form = TutorialMissingComponentReplyForm(request.POST)
         if form.is_valid():
-            TutorialMissingComponentReply.objects.create(missing_component = tmc_row, user = request.user, reply_message = request.POST.get('reply_message', ''))
+            reply_msg = form.cleaned_data.get('reply_message', '')
+            TutorialMissingComponentReply.objects.create(
+                missing_component=tmc_row,
+                user=request.user,
+                reply_message=reply_msg
+            )
             if tmc_row.inform_me:
                 # send email
                 to = []
@@ -2922,7 +2938,7 @@ def report_missing_component_reply(request, tmcid):
                     else:
                         to = [tmc_row.email]
                     bcc = settings.ADMINISTRATOR_EMAIL
-                except:
+                except Exception:
                     raise PermissionDenied()
                 subject = "Reply: Missing Component Reply Notifications"
                 message = '''Dear {0},
@@ -2938,26 +2954,22 @@ Following is the reply for your post:
 --
 Regards,
 Spoken Tutorial
-'''.format(username, request.POST.get('reply_message', ''), tmc_row.tutorial_resource.tutorial_detail.foss, tmc_row.tutorial_resource.tutorial_detail.tutorial, tmc_row.tutorial_resource.language, comps[tmc_row.component])
-                # send email
+'''.format(username, reply_msg, tmc_row.tutorial_resource.tutorial_detail.foss, tmc_row.tutorial_resource.tutorial_detail.tutorial, tmc_row.tutorial_resource.language, comps.get(tmc_row.component, 'Component'))
                 email = EmailMultiAlternatives(
                     subject, message, 'no-reply@spoken-tutorial.org',
-                    to = to, bcc = bcc, cc = cc,
-                    headers = {'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type": "text/html;charset = iso-8859-1"}
+                    to=to, bcc=bcc, cc=cc,
+                    headers={'Reply-To': 'no-reply@spoken-tutorial.org', "Content-type": "text/html;charset=iso-8859-1"}
                 )
                 try:
-                    result = email.send(fail_silently=False)
+                    email.send(fail_silently=False)
                 except Exception as e:
-                    print("*******************************************************")
-                    print(message)
-                    print("*******************************************************")
+                    logger.error("Error sending missing component reply email: %s", e)
             messages.success(request, 'Reply message added successfully!')
             form = TutorialMissingComponentReplyForm()
     context = {
         'form': form,
         'tmc_row': tmc_row
     }
-    context.update(csrf(request))
     return render(request, 'creation/templates/report_missing_component_reply.html', context)
 
 
@@ -2965,16 +2977,29 @@ Spoken Tutorial
 def report_missing_component_list(request):
     if not is_contributor(request.user) and not is_administrator(request.user):
         raise PermissionDenied()
-    rows = None
+    rows = TutorialMissingComponent.objects.none()
     if is_administrator(request.user):
-        rows = TutorialMissingComponent.objects.all().order_by('-created')
+        rows = TutorialMissingComponent.objects.all().select_related(
+            'user',
+            'tutorial_resource__tutorial_detail__foss',
+            'tutorial_resource__language'
+        ).order_by('-created')
     elif is_contributor(request.user):
-        contrib_roles = list(ContributorRole.objects.filter(user = request.user).values_list('foss_category_id', 'language_id'))
-        fields = ['tutorial_resource__tutorial_detail__foss_id', 'tutorial_resource__language_id']
-        query = get_and_query_for_contributor_roles(contrib_roles, fields)
-        rows = TutorialMissingComponent.objects.filter(query).order_by('-created')
+        contrib_roles = list(ContributorRole.objects.filter(user=request.user).values_list('foss_category_id', 'language_id'))
+        if contrib_roles:
+            fields = ['tutorial_resource__tutorial_detail__foss_id', 'tutorial_resource__language_id']
+            query = get_and_query_for_contributor_roles(contrib_roles, fields)
+            if query:
+                rows = TutorialMissingComponent.objects.filter(query).select_related(
+                    'user',
+                    'tutorial_resource__tutorial_detail__foss',
+                    'tutorial_resource__language'
+                ).order_by('-created')
+    page = request.GET.get('page')
+    rows = get_page(rows, page, 50)
     context = {
-        'rows': rows
+        'rows': rows,
+        'collection': rows,
     }
     return render(request, 'creation/templates/report_missing_component_list.html', context)
 
@@ -3547,8 +3572,8 @@ def detail_payment_honorarium(request, hr_id):
                 next_url = request.GET.get("next",reverse('creation:payment_honorarium_detail', args=[hr_id]))
                 return HttpResponseRedirect(next_url)
             elif "hono_id" in request.POST:
-                os.remove(loc+request.POST['hono_id'])
-                return HttpResponse(json.dumps('deleted'), content_type='application/json')
+                os.remove(loc + request.POST['hono_id'])
+                return JsonResponse('deleted', safe=False)
             elif 'agreement' in request.FILES:
                 myfile = request.FILES['agreement']
                 if pdf_extn_check(myfile):
@@ -5029,19 +5054,22 @@ def make_latex(certificate_path, file_name, content_tex):
 @csrf_exempt
 def add_details(request):
     form = DetailsForm()
-    context = {}
-    context['form']= form
+    context = {'form': form}
     if request.method == 'POST':
         my_dict = dict()
-        this_user = User.objects.get(id = request.POST.get('user'))
-        details = BankDetail.objects.filter(user=this_user).values(
-                    'account_name','account_number','ifsc','bank','branch','pincode',
-                    'pancard','bankaddress','vendor','vendoraddress')
-        if details:
-            my_dict = details[0]
-        print('-'*10,my_dict)
-        return HttpResponse(json.dumps(my_dict), content_type = 'application/json')
-    context.update(csrf(request))
+        user_id = request.POST.get('user')
+        if user_id:
+            try:
+                this_user = User.objects.get(id=user_id)
+                details = BankDetail.objects.filter(user=this_user).values(
+                    'account_name', 'account_number', 'ifsc', 'bank', 'branch', 'pincode',
+                    'pancard', 'bankaddress', 'vendor', 'vendoraddress'
+                )
+                if details:
+                    my_dict = details[0]
+            except Exception as e:
+                logger.error("Error in add_details: %s", e)
+        return JsonResponse(my_dict, safe=False)
     return render(request, 'creation/templates/add_details.html', context)
 
 @csrf_exempt
@@ -5052,51 +5080,57 @@ def save_details(request):
             form.save()
             messages.success(request, "Details saved successfully")
         else:
-            b_details = BankDetail.objects.get(user= request.POST.get('user'))
-            b_details.account_number = request.POST.get('account_number')
-            b_details.account_name = request.POST.get('account_name')
-            b_details.ifsc = request.POST.get('ifsc')
-            b_details.bank = request.POST.get('bank')
-            b_details.branch = request.POST.get('branch')
-            b_details.pincode = request.POST.get('pincode')
-            b_details.pancard = request.POST.get('pancard')
-            b_details.bankaddress = request.POST.get('bankaddress')
-            b_details.save()
-            messages.success(request, "Details updated !")
+            user_id = request.POST.get('user')
+            if user_id:
+                try:
+                    b_details, _ = BankDetail.objects.get_or_create(user_id=user_id)
+                    b_details.account_number = request.POST.get('account_number')
+                    b_details.account_name = request.POST.get('account_name')
+                    b_details.ifsc = request.POST.get('ifsc')
+                    b_details.bank = request.POST.get('bank')
+                    b_details.branch = request.POST.get('branch')
+                    b_details.pincode = request.POST.get('pincode')
+                    b_details.pancard = request.POST.get('pancard')
+                    b_details.bankaddress = request.POST.get('bankaddress')
+                    b_details.save()
+                    messages.success(request, "Details updated !")
+                except Exception as e:
+                    logger.error("Error saving bank details: %s", e)
+                    messages.error(request, str(e))
     return HttpResponseRedirect('/creation/add_details')
 
 @csrf_protect
 def file_checker(request, username, file_name):
-    filename = file_name+'.pdf'
-    fs = FileSystemStorage(location=settings.MEDIA_ROOT+DOCS+username)
+    filename = file_name + '.pdf'
+    fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, DOCS, username))
     if request.method == 'POST':
-        hono_id = int(file_name[11:16])
-        hono_obj = PaymentHonorarium.objects.get(id=hono_id)
-        if fs.exists(fs.path(name='')+'/'+filename):
-            if request.POST['action'] == 'reject':
-                os.rename(fs.path(name='')+'/'+filename,
-                fs.path(name='')+'/'+file_name+'_rejected.pdf')
-                return HttpResponse('deleted')
-            if request.POST['action'] == 'accept':
-                os.rename(fs.path(name='')+'/'+filename,
-                fs.path(name='')+'/'+file_name+'_accepted.pdf')
-                if 'agreement' in file_name:
-                    if hono_obj.status == 6:
-                        hono_obj.status = 11
-                    else:
-                        hono_obj.status = 5
-                if 'receipt' in file_name:
-                    if hono_obj.status == 5:
-                        hono_obj.status = 11
-                    else:
-                        hono_obj.status = 6
-                hono_obj.save()
-                return HttpResponse('accepted')
+        try:
+            hono_id = int(file_name[11:16])
+            hono_obj = PaymentHonorarium.objects.get(id=hono_id)
+            if fs.exists(filename):
+                if request.POST.get('action') == 'reject':
+                    os.rename(fs.path(filename), fs.path(file_name + '_rejected.pdf'))
+                    return HttpResponse('deleted')
+                if request.POST.get('action') == 'accept':
+                    os.rename(fs.path(filename), fs.path(file_name + '_accepted.pdf'))
+                    if 'agreement' in file_name:
+                        if hono_obj.status == 6:
+                            hono_obj.status = 11
+                        else:
+                            hono_obj.status = 5
+                    if 'receipt' in file_name:
+                        if hono_obj.status == 5:
+                            hono_obj.status = 11
+                        else:
+                            hono_obj.status = 6
+                    hono_obj.save()
+                    return HttpResponse('accepted')
+        except Exception as e:
+            logger.error("Error in file_checker POST: %s", e)
     else:
-        with fs.open(filename) as pdf:
-            response = HttpResponse(pdf, content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; \
-                    filename=%s' % (file_name+'.pdf')
-            response.write(pdf)
+        if fs.exists(filename):
+            pdf = fs.open(filename)
+            response = FileResponse(pdf, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename={file_name}.pdf'
             return response
-    return Http404
+    raise Http404("File not found")

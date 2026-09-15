@@ -710,29 +710,26 @@ class TutorialMissingComponentForm(forms.Form):
     email = forms.EmailField(required = False, error_messages = {'required': 'Please fill the Email field'})
 
     def __init__(self, user, *args, **kwargs):
-        super(TutorialMissingComponentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.user = user
 
     def clean(self):
-        super(TutorialMissingComponentForm, self).clean()
-        print((self.user))
-        if 'report_type' in self.cleaned_data:
-            if self.cleaned_data['report_type'] == '1':
-                if 'remarks' in self.cleaned_data:
-                    if not self.cleaned_data['remarks']:
-                        self._errors['remarks'] = '<ul class="errorlist"><li>Please fill Remarks field</li></ul>'
-                else:
-                    self._errors['remarks'] = '<ul class="errorlist"><li>Please fill Remarks field</li></ul>'
-        if 'inform_me' in self.cleaned_data:
-            print((self.cleaned_data))
-            if self.cleaned_data['inform_me'] == '1':
-                print((self.cleaned_data['inform_me']))
-                if not self.user.is_authenticated:
-                    if 'email' in self.cleaned_data:
-                        if not self.cleaned_data['email']:
-                            self._errors['email'] = '<ul class="errorlist"><li>Please fill Email field</li></ul>'
-                    else:
-                        self._errors['email'] = '<ul class="errorlist"><li>Please fill Email field</li></ul>'
+        cleaned_data = super().clean()
+        report_type = str(cleaned_data.get('report_type', ''))
+        remarks = cleaned_data.get('remarks')
+        if report_type == '1' and not remarks:
+            self.add_error('remarks', 'Please fill Remarks field')
+
+        inform_me = str(cleaned_data.get('inform_me', ''))
+        if inform_me == '1':
+            user_auth = getattr(self.user, 'is_authenticated', False)
+            if callable(user_auth):
+                user_auth = user_auth()
+            if not user_auth:
+                email = cleaned_data.get('email')
+                if not email:
+                    self.add_error('email', 'Please fill Email field')
+        return cleaned_data
 
 class TutorialMissingComponentReplyForm(forms.Form):
     reply_message = forms.CharField(
@@ -1051,11 +1048,12 @@ class PublishedTutorialFilterForm(forms.Form):
         self.fields['language'].choices = language_list
 
     def clean(self):
-        super(PublishedTutorialFilterForm, self).clean()
+        cleaned_data = super(PublishedTutorialFilterForm, self).clean()
         s_date = self.cleaned_data.get('start_date')
         e_date = self.cleaned_data.get('end_date')
         if s_date and e_date and s_date > e_date:
-            raise forms.ValidationError('End date must be later')
+            self.add_error('end_date', 'End date must be later')
+        return cleaned_data
 
 class PaymentHonorariumFilterForm(forms.Form):
     contributor = forms.ChoiceField(
@@ -1094,11 +1092,12 @@ class PaymentHonorariumFilterForm(forms.Form):
         self.fields['contributor'].choices = contributor_list
 
     def clean(self):
-        super(PaymentHonorariumFilterForm, self).clean()
+        cleaned_data = super(PaymentHonorariumFilterForm, self).clean()
         s_date = self.cleaned_data.get('start_date')
         e_date = self.cleaned_data.get('end_date')
         if s_date and e_date and s_date > e_date:
             self.add_error('end_date', "End date must be later than start date.")
+        return cleaned_data
 
 
 class UpdateCodefilesForm(forms.Form):
