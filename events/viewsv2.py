@@ -292,7 +292,7 @@ def get_language_level_option(request):
                 pass
         if course_id:
             cm = CourseMap.objects.get(id=course_id)
-            fmdl = FossMdlCourses.objects.filter(foss_id=cm.foss_id)
+            fmdl = FossMdlCourses.objects.filter(foss_id=cm.foss_id,is_active=True)
             for item in fmdl:
                 item_name = str(item).strip().lower()
                 if not include_basic and "basic" in item_name:
