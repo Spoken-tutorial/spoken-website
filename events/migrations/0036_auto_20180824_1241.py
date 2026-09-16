@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('user', models.CharField(max_length=255)),
                 ('content', models.CharField(max_length=255)),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('foss', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='creation.FossCategory')),
+                ('foss', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='creation.FossCategory')),
             ],
             options={
                 'verbose_name': 'Media Testimonials',

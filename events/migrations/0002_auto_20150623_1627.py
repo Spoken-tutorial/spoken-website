@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='test',
             name='training',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='events.TrainingRequest', null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.TrainingRequest', null=True),
         ),
     ]

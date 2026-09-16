@@ -39,8 +39,8 @@ class Migration(migrations.Migration):
                 ('do_agree', models.CharField(max_length=50, choices=[(b'', b'-----'), (b'Yes', b'Yes'), (b'No', b'No')])),
                 ('no_objection', models.CharField(max_length=50, choices=[(b'', b'-----'), (b'Yes', b'Yes'), (b'No', b'No')])),
                 ('other_comments', models.CharField(max_length=500)),
-                ('city', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='events.City')),
-                ('state', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='events.State')),
+                ('city', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.City')),
+                ('state', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.State')),
             ],
         ),
     ]

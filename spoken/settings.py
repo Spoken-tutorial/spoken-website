@@ -56,6 +56,8 @@ DEBUG = DEBUG_MODE
 
 COMPRESS_ENABLED = True
 
+TEMPLATE_DEBUG = True
+
 ALLOWED_HOSTS = ['*']
 
 # Application definition

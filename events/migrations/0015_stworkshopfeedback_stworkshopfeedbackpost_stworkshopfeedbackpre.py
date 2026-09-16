@@ -169,7 +169,7 @@ class Migration(migrations.Migration):
                 ('how_make_better', models.CharField(max_length=500)),
                 ('experience', models.CharField(max_length=500)),
                 ('suggestions', models.CharField(max_length=500)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -200,7 +200,7 @@ class Migration(migrations.Migration):
                 ('installig_ad_themes', models.CharField(max_length=50, choices=[(b'', b'-----'), (b'Notconfidentatall', b'Not confident at all'), (b'Unconfident', b'Unconfident'), (b'Neitherconfidentnorunconfident', b'Neither confident nor unconfident'), (b'Confident', b'Confident'), (b'Absolutelyconfident', b'Absolutely confident'), (b'NotApplicable', b'Not Applicable')])),
                 ('people_management', models.CharField(max_length=50, choices=[(b'', b'-----'), (b'Notconfidentatall', b'Not confident at all'), (b'Unconfident', b'Unconfident'), (b'Neitherconfidentnorunconfident', b'Neither confident nor unconfident'), (b'Confident', b'Confident'), (b'Absolutelyconfident', b'Absolutely confident'), (b'NotApplicable', b'Not Applicable')])),
                 ('site_management', models.CharField(max_length=50, choices=[(b'', b'-----'), (b'Notconfidentatall', b'Not confident at all'), (b'Unconfident', b'Unconfident'), (b'Neitherconfidentnorunconfident', b'Neither confident nor unconfident'), (b'Confident', b'Confident'), (b'Absolutelyconfident', b'Absolutely confident'), (b'NotApplicable', b'Not Applicable')])),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

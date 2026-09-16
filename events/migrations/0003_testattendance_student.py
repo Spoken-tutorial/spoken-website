@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='testattendance',
             name='student',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='events.Student', null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.Student', null=True),
         ),
     ]

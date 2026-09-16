@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='brochurepage',
             name='brochure',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pages', to='creation.BrochureDocument'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='pages', to='creation.BrochureDocument'),
         ),
         migrations.AlterUniqueTogether(
             name='brochurepage',

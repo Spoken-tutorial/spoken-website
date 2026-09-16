@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('code', models.CharField(default=None, max_length=255)),
                 ('batch_code', models.PositiveIntegerField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('eoi_id', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, default=None, to='events.InductionInterest')),
+                ('eoi_id', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, default=None, to='events.InductionInterest')),
             ],
         ),
     ]

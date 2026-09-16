@@ -193,6 +193,7 @@ def create_thumbnail(row, attach_str, thumb_time, thumb_size):
             return
         cmd = ['/usr/bin/ffmpeg', '-nostdin', '-hide_banner', '-nostats', '-y', '-i', video_path, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', output_filepath]
         logger.info("Thumbnail generation ffmpeg command: %s", " ".join(cmd))
+        #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
         stdout, stderr = process.communicate()
         logger.info("Thumbnail generation return code: %s", process.returncode)

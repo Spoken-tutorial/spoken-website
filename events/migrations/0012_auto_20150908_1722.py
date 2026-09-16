@@ -15,12 +15,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='singletraining',
             name='institution_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='events.InstituteType', null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.InstituteType', null=True),
         ),
         migrations.AddField(
             model_name='singletraining',
             name='state',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='events.State', null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.State', null=True),
         ),
         migrations.AddField(
             model_name='singletraining',

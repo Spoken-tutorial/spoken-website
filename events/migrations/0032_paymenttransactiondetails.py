@@ -28,8 +28,8 @@ class Migration(migrations.Migration):
                 ('msg', models.CharField(max_length=100)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now_add=True)),
-                ('paymentdetail', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='events.PaymentDetails')),
-                ('userId', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('paymentdetail', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.PaymentDetails')),
+                ('userId', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
             ],
         ),
     ]

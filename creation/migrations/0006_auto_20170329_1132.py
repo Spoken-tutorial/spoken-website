@@ -37,11 +37,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='brochuredocument',
             name='foss_course',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='creation.FossCategory'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='creation.FossCategory'),
         ),
         migrations.AddField(
             model_name='brochuredocument',
             name='foss_language',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='creation.Language'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='creation.Language'),
         ),
     ]
