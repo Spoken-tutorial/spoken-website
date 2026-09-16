@@ -2083,12 +2083,21 @@ def quality_review_index(request):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     tmp_ids = []
-    qr_roles = QualityReviewerRole.objects.filter(user_id = request.user.id, status = 1)
+    qr_roles = QualityReviewerRole.objects.filter(user_id=request.user.id, status=1)
     for rec in qr_roles:
         if rec.language.name == 'English':
-            tr_recs = TutorialResource.objects.filter(Q(outline_status = 3) | Q(script_status = 3) | Q(video_status = 3) | Q(common_content__slide_status = 3) | Q(common_content__code_status = 3) | Q(common_content__assignment_status = 3) | Q(common_content__keyword_status = 3) | Q(common_content__prerequisite_status = 3) | Q(common_content__additional_material_status = 3), Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0))
+            tr_recs = TutorialResource.objects.filter(
+                Q(outline_status=3) | Q(script_status=3) | Q(video_status=3) |
+                Q(common_content__slide_status=3) | Q(common_content__code_status=3) |
+                Q(common_content__assignment_status=3) | Q(common_content__keyword_status=3) |
+                Q(common_content__prerequisite_status=3) | Q(common_content__additional_material_status=3),
+                Q(tutorial_detail__foss_id=rec.foss_category_id) & Q(language_id=rec.language_id) & Q(status=0)
+            )
         else:
-            tr_recs = TutorialResource.objects.filter(Q(outline_status = 3) | Q(script_status = 3) | Q(video_status = 3), Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0)).order_by('updated')
+            tr_recs = TutorialResource.objects.filter(
+                Q(outline_status=3) | Q(script_status=3) | Q(video_status=3),
+                Q(tutorial_detail__foss_id=rec.foss_category_id) & Q(language_id=rec.language_id) & Q(status=0)
+            ).order_by('updated')
 
         for tr_rec in tr_recs:
             tmp_ids.append(tr_rec.id)
@@ -2096,6 +2105,7 @@ def quality_review_index(request):
     collection = None
     header = ''
     ordering = ''
+    form = None
     try:
         raw_get_data = request.GET.get('o', None)
         header = {
@@ -2114,7 +2124,7 @@ def quality_review_index(request):
             13: SortableHeader('Keywords', False, '', 'col-center'),
             14: SortableHeader('<span title = "" data-original-title = "" class = "fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
-        collection = TutorialResource.objects.filter(id__in = tmp_ids)
+        collection = TutorialResource.objects.filter(id__in=tmp_ids).select_related('tutorial_detail__foss', 'language', 'common_content')
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         collection = ReviewerFilter(request.POST, queryset=collection)
@@ -2122,7 +2132,7 @@ def quality_review_index(request):
         page = request.GET.get('page')
         collection = get_page(collection.qs, page)
     except Exception as e:
-        print(e)
+        logger.error("Error in quality_review_index: %s", e)
 
     context = {
         'collection': collection,
@@ -2137,12 +2147,22 @@ def publish_tutorial_index(request):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     tmp_ids = []
-    qr_roles = QualityReviewerRole.objects.filter(user_id = request.user.id, status = 1)
+    qr_roles = QualityReviewerRole.objects.filter(user_id=request.user.id, status=1)
     for rec in qr_roles:
         if rec.language.name == 'English':
-            tr_recs = TutorialResource.objects.filter(Q(common_content__code_status = 4) | Q(common_content__code_status = 6), Q(common_content__assignment_status = 4) | Q(common_content__assignment_status = 6), Q(common_content__prerequisite_status = 4) | Q(common_content__prerequisite_status = 6), Q(outline_status = 4) & Q(script_status = 4) & Q(video_status = 4) & Q(common_content__slide_status = 4) & Q(common_content__keyword_status = 4) & Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0))
+            tr_recs = TutorialResource.objects.filter(
+                Q(common_content__code_status=4) | Q(common_content__code_status=6),
+                Q(common_content__assignment_status=4) | Q(common_content__assignment_status=6),
+                Q(common_content__prerequisite_status=4) | Q(common_content__prerequisite_status=6),
+                Q(outline_status=4) & Q(script_status=4) & Q(video_status=4) &
+                Q(common_content__slide_status=4) & Q(common_content__keyword_status=4) &
+                Q(tutorial_detail__foss_id=rec.foss_category_id) & Q(language_id=rec.language_id) & Q(status=0)
+            )
         else:
-            tr_recs = TutorialResource.objects.filter(Q(outline_status = 4) & Q(script_status = 4) & Q(video_status = 4) & Q(tutorial_detail__foss_id = rec.foss_category_id) & Q(language_id = rec.language_id) & Q(status = 0)).order_by('updated')
+            tr_recs = TutorialResource.objects.filter(
+                Q(outline_status=4) & Q(script_status=4) & Q(video_status=4) &
+                Q(tutorial_detail__foss_id=rec.foss_category_id) & Q(language_id=rec.language_id) & Q(status=0)
+            ).order_by('updated')
 
         for tr_rec in tr_recs:
             tmp_ids.append(tr_rec.id)
@@ -2150,6 +2170,7 @@ def publish_tutorial_index(request):
     collection = None
     header = ''
     ordering = ''
+    form = None
     try:
         raw_get_data = request.GET.get('o', None)
         header = {
@@ -2168,15 +2189,15 @@ def publish_tutorial_index(request):
             13: SortableHeader('Keywords', False, '', 'col-center'),
             14: SortableHeader('<span title = "" data-original-title = "" class = "fa fa-cogs fa-2"></span>', False, '', 'col-center')
         }
-        collection = TutorialResource.objects.filter(id__in = tmp_ids)
+        collection = TutorialResource.objects.filter(id__in=tmp_ids).select_related('tutorial_detail__foss', 'language', 'common_content')
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         collection = ReviewerFilter(request.POST, queryset=collection)
         form = collection.form
         page = request.GET.get('page')
         collection = get_page(collection.qs, page)
-    except:
-        pass
+    except Exception as e:
+        logger.error("Error in publish_tutorial_index: %s", e)
 
     context = {
         'collection': collection,
@@ -2272,7 +2293,9 @@ def public_review_list(request):
                 11: SortableHeader('Additional material', False, '', 'col-center'),
                 12: SortableHeader('Prerequisite', False, '', 'col-center'),
                 13: SortableHeader('Keywords', False, '', 'col-center'),
-                14: SortableHeader('<span title = "" data-original-title = "" class = "fa fa-cogs fa-2"></span>', False, '', 'col-center', 'colspan = 2')
+                14: SortableHeader('Review Count', False, '', 'col-center'),
+                15: SortableHeader('Comments Count', False, '', 'col-center'),
+                16: SortableHeader('Final Review', False, '', 'col-center')
             }
             collection = TutorialResource.objects.filter(id__in = tmp_ids)
             collection = get_sorted_list(request, collection, header, raw_get_data)
@@ -2381,16 +2404,16 @@ def quality_review_tutorial(request, trid):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-    except:
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
+    except Exception:
         raise PermissionDenied()
-    if QualityReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1).count() == 0:
+    if QualityReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1).count() == 0:
         raise PermissionDenied()
     try:
-        contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-        review_history = QualityReviewLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-    except:
+        contrib_log = ContributorLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+        review_history = QualityReviewLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+    except Exception:
         contrib_log = None
         review_log = None
         review_history = None
@@ -2409,18 +2432,20 @@ def quality_review_component(request, trid, component):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr = TutorialResource.objects.get(pk = trid, status = 0)
+        tr = TutorialResource.objects.get(pk=trid, status=0)
         comp_title = tr.tutorial_detail.foss.foss + ': ' + tr.tutorial_detail.tutorial + ' - ' + tr.language.name
-    except:
+    except Exception:
         raise PermissionDenied()
-    if QualityReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr.tutorial_detail.foss_id, language_id = tr.language_id, status = 1).count() == 0:
+    if QualityReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr.tutorial_detail.foss_id, language_id=tr.language_id, status=1).count() == 0:
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
     if request.method == 'POST':
         form = QualityReviewComponentForm(request.POST)
         if form.is_valid():
-            if request.POST['component_status'] == '4':
+            comp_status = str(form.cleaned_data.get('component_status', ''))
+            feedback = form.cleaned_data.get('feedback', '')
+            if comp_status == '4':
                 try:
                     execFlag = 0
                     if component == 'outline' or component == 'script' or component == 'video':
@@ -2434,14 +2459,15 @@ def quality_review_component(request, trid, component):
                             execFlag = 1
                     if execFlag:
                         comp_message = component.title() + ' accepted by Quality reviewer'
-                        QualityReviewLog.objects.create(status = 4, component = component, user = request.user, tutorial_resource = tr)
+                        QualityReviewLog.objects.create(status=4, component=component, user=request.user, tutorial_resource=tr)
                         add_contributor_notification(tr, comp_title, comp_message)
                         response_msg = 'Review status updated successfully!'
                     else:
                         error_msg = 'Something went wrong, please try again later.'
                 except Exception as e:
+                    logger.error("Error in quality_review_component status 4: %s", e)
                     error_msg = 'Something went wrong, please try again later.'
-            elif request.POST['component_status'] == '5':
+            elif comp_status == '5':
                 try:
                     prev_state = 0
                     execFlag = 0
@@ -2457,14 +2483,15 @@ def quality_review_component(request, trid, component):
                             tr.common_content.save()
                             execFlag = 1
                     if execFlag:
-                        NeedImprovementLog.objects.create(user = request.user, tutorial_resource = tr, review_state = prev_state, component = component, comment = request.POST['feedback'])
+                        NeedImprovementLog.objects.create(user=request.user, tutorial_resource=tr, review_state=prev_state, component=component, comment=feedback)
                         comp_message = component.title() + ' is under Need Improvement state'
-                        QualityReviewLog.objects.create(status = 5, component = component, user = request.user, tutorial_resource = tr)
+                        QualityReviewLog.objects.create(status=5, component=component, user=request.user, tutorial_resource=tr)
                         add_contributor_notification(tr, comp_title, comp_message)
                         response_msg = 'Review status updated successfully!'
                     else:
                         error_msg = 'Something went wrong, please try again later.'
-                except:
+                except Exception as e:
+                    logger.error("Error in quality_review_component status 5: %s", e)
                     error_msg = 'Something went wrong, please try again later.'
             form = QualityReviewComponentForm()
     else:
@@ -2488,16 +2515,16 @@ def public_review_tutorial(request, trid):
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
-    except:
+    except Exception:
         raise PermissionDenied()
-    if QualityReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1).count() == 0:
+    if QualityReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1).count() == 0:
         raise PermissionDenied()
     if tr_rec.language.name != 'English' and (tr_rec.outline_status > 0 and tr_rec.outline_status != 5) and (tr_rec.script_status > 0 and tr_rec.script_status != 5) and (tr_rec.video_status > 0 and tr_rec.video_status != 5):
         tr_rec.status = 2
         tr_rec.save()
-        PublicReviewLog.objects.create(user = request.user, tutorial_resource = tr_rec)
+        PublicReviewLog.objects.create(user=request.user, tutorial_resource=tr_rec)
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is now available for Public review')
         messages.success(request, 'The selected tutorial is now available for Public review')
     else:
@@ -2507,15 +2534,14 @@ def public_review_tutorial(request, trid):
 
 @login_required
 def publish_tutorial(request, trid):
-    tr_rec = TutorialResource.objects.get(id = trid)
     if not is_qualityreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
-    except:
+    except Exception:
         raise PermissionDenied()
-    if QualityReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1).count() == 0:
+    if QualityReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1).count() == 0:
         raise PermissionDenied()
     flag = 0
     if tr_rec.language.name == 'English':
@@ -2527,14 +2553,14 @@ def publish_tutorial(request, trid):
         tr_rec.status = 1
         tr_rec.publish_at = timezone.now()
         tr_rec.save()
-        PublishTutorialLog.objects.create(user = request.user, tutorial_resource = tr_rec)
+        PublishTutorialLog.objects.create(user=request.user, tutorial_resource=tr_rec)
         create_payment_instance(request, tr_rec) # create instance of tutorial payment
         # add tutorials available here
         refresh_tutorials(request, tr_rec)
         add_contributor_notification(tr_rec, comp_title, 'This tutorial is published now')
         messages.success(request, 'The selected tutorial is published successfully')
     else:
-        messages.error(request, 'The selected tutorial cannot be marked as Public review')
+        messages.error(request, 'The selected tutorial cannot be published')
 
     return HttpResponseRedirect('/creation/quality-review/tutorial/publish/index/')
 
@@ -2544,6 +2570,7 @@ def quality_reviewed_tutorials(request):
     collection = None
     header = ''
     ordering = ''
+    form = None
     try:
         raw_get_data = request.GET.get('o', None)
         header = {
@@ -2563,15 +2590,16 @@ def quality_reviewed_tutorials(request):
             14: SortableHeader('Status', False, '', 'col-center'),
             15: SortableHeader('publishtutoriallog__created', True, 'Date')
         }
-        collection = TutorialResource.objects.filter(id__in = QualityReviewLog.objects.filter(user = request.user).values_list('tutorial_resource_id').distinct())
+        collection = TutorialResource.objects.filter(id__in=QualityReviewLog.objects.filter(user=request.user).values_list('tutorial_resource_id').distinct()).select_related('tutorial_detail__foss', 'language', 'common_content')
         collection = get_sorted_list(request, collection, header, raw_get_data)
         ordering = get_field_index(raw_get_data)
         page = request.GET.get('page')
         collection = ReviewerFilter(request.POST, queryset=collection)
         form = collection.form
         collection = get_page(collection.qs, page)
-    except:
-        messages.error('Something went wrong, Please try again later.')
+    except Exception as e:
+        logger.error("Error in quality_reviewed_tutorials: %s", e)
+        messages.error(request, 'Something went wrong, Please try again later.')
     context = {
         'collection': collection,
         'header': header,
