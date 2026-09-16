@@ -3234,7 +3234,7 @@ def view_brochure(request):
     template = 'creation/templates/view_brochure.html'
     my_dict = services.get_data_for_brochure_display()
     st_brochure = BrochureDocument.objects.filter(foss_course=36)
-    pages = BrochurePage.objects.filter(brochure_id=st_brochure)
+    pages = BrochurePage.objects.filter(brochure__in=st_brochure)
     st_pages = []
     for page in pages:
         st_pages.append(page.page.url)
