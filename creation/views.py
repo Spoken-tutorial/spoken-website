@@ -1746,6 +1746,7 @@ def domain_review_index(request):
     collection = None
     ordering = ''
     header = ''
+    form = None
     try:
         raw_get_data = request.GET.get('o', None)
         header = {
@@ -1772,7 +1773,7 @@ def domain_review_index(request):
         page = request.GET.get('page')
         collection = get_page(collection.qs, page)
     except Exception as e:
-        print(e)
+        logger.error("Error in domain_review_index: %s", e)
     context = {
         'collection': collection,
         'form': form,
@@ -1787,16 +1788,16 @@ def domain_review_tutorial(request, trid):
     if not is_domainreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr_rec = TutorialResource.objects.get(pk = trid, status = 0)
-    except:
+        tr_rec = TutorialResource.objects.get(pk=trid, status=0)
+    except Exception:
         raise PermissionDenied()
-    if DomainReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr_rec.tutorial_detail.foss_id, language_id = tr_rec.language_id, status = 1).count() == 0:
+    if DomainReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr_rec.tutorial_detail.foss_id, language_id=tr_rec.language_id, status=1).count() == 0:
         raise PermissionDenied()
     try:
-        contrib_log = ContributorLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-        review_history = DomainReviewLog.objects.filter(tutorial_resource_id = tr_rec.id).order_by('-created')
-    except:
+        contrib_log = ContributorLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+        review_log = NeedImprovementLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+        review_history = DomainReviewLog.objects.filter(tutorial_resource_id=tr_rec.id).order_by('-created')
+    except Exception:
         contrib_log = None
         review_log = None
         review_history = None
@@ -1815,18 +1816,20 @@ def domain_review_component(request, trid, component):
     if not is_domainreviewer(request.user):
         raise PermissionDenied()
     try:
-        tr = TutorialResource.objects.get(pk = trid, status = 0)
+        tr = TutorialResource.objects.get(pk=trid, status=0)
         comp_title = tr.tutorial_detail.foss.foss + ': ' + tr.tutorial_detail.tutorial + ' - ' + tr.language.name
-    except:
+    except Exception:
         raise PermissionDenied()
-    if DomainReviewerRole.objects.filter(user_id = request.user.id, foss_category_id = tr.tutorial_detail.foss_id, language_id = tr.language_id).count() == 0:
+    if DomainReviewerRole.objects.filter(user_id=request.user.id, foss_category_id=tr.tutorial_detail.foss_id, language_id=tr.language_id).count() == 0:
         raise PermissionDenied()
     response_msg = ''
     error_msg = ''
     if request.method == 'POST':
         form = DomainReviewComponentForm(request.POST)
         if form.is_valid():
-            if request.POST['component_status'] == '3':
+            comp_status = str(form.cleaned_data.get('component_status', ''))
+            feedback = form.cleaned_data.get('feedback', '')
+            if comp_status == '3':
                 try:
                     execFlag = 0
                     if component == 'outline' or component == 'script' or component == 'video':
@@ -1839,16 +1842,16 @@ def domain_review_component(request, trid, component):
                             tr.common_content.save()
                             execFlag = 1
                     if execFlag:
-                        DomainReviewLog.objects.create(status = 3, component = component, user = request.user, tutorial_resource = tr)
+                        DomainReviewLog.objects.create(status=3, component=component, user=request.user, tutorial_resource=tr)
                         add_qualityreviewer_notification(tr, comp_title, component.title() + ' waiting for Quality review')
                         add_contributor_notification(tr, comp_title, component.replace('_', ' ').title() + ' accepted by Domain reviewer')
                         response_msg = 'Review status updated successfully!'
                     else:
                         error_msg = 'Something went wrong, please try again later.'
                 except Exception as e:
-                    print(e)
+                    logger.error("Error updating component status 3: %s", e)
                     error_msg = 'Something went wrong, please try again later.'
-            elif request.POST['component_status'] == '5':
+            elif comp_status == '5':
                 try:
                     prev_state = 0
                     if component == 'outline' or component == 'script' or component == 'video':
@@ -1859,11 +1862,12 @@ def domain_review_component(request, trid, component):
                         prev_state = getattr(tr.common_content, component + '_status')
                         setattr(tr.common_content, component + '_status', 5)
                         tr.common_content.save()
-                    NeedImprovementLog.objects.create(user = request.user, tutorial_resource = tr, review_state = prev_state, component = component, comment = request.POST['feedback'])
-                    DomainReviewLog.objects.create(status = 5, component = component, user = request.user, tutorial_resource = tr)
+                    NeedImprovementLog.objects.create(user=request.user, tutorial_resource=tr, review_state=prev_state, component=component, comment=feedback)
+                    DomainReviewLog.objects.create(status=5, component=component, user=request.user, tutorial_resource=tr)
                     add_contributor_notification(tr, comp_title, component.title() + ' is under Need Improvement state')
                     response_msg = 'Review status updated successfully!'
-                except:
+                except Exception as e:
+                    logger.error("Error updating component status 5: %s", e)
                     error_msg = 'Something went wrong, please try again later.'
             form = DomainReviewComponentForm()
     else:
@@ -1886,6 +1890,7 @@ def domain_reviewed_tutorials(request):
     collection = None
     ordering = ''
     header = ''
+    form = None
     try:
         raw_get_data = request.GET.get('o', None)
         header = {
@@ -1914,8 +1919,9 @@ def domain_reviewed_tutorials(request):
         form = collection.form
         page = request.GET.get('page')
         collection = get_page(collection.qs, page)
-    except:
-        messages.error('Something went wrong, Please try again later.')
+    except Exception as e:
+        logger.error("Error in domain_reviewed_tutorials: %s", e)
+        messages.error(request, 'Something went wrong, Please try again later.')
     context = {
         'collection': collection,
         'header': header,
@@ -1925,6 +1931,7 @@ def domain_reviewed_tutorials(request):
     return render(request, 'creation/templates/domain_review_reviewed.html', context)
 
 
+@login_required
 def accept_all(request, review, trid):
     status_flag = {
         'domain': 3,

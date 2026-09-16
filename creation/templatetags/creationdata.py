@@ -79,8 +79,13 @@ def get_payment_status_symbol(key):
     return status_list[key]
 
 def get_username(key):
-	user = User.objects.get(pk = key)
-	return user.username
+    if not key:
+        return '-'
+    try:
+        user = User.objects.get(pk=key)
+        return user.username
+    except Exception:
+        return '-'
 
 def get_last_video_upload_time(key):
 	rec = None
