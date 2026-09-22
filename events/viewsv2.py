@@ -85,6 +85,7 @@ from training.views import SortableHeader
 from cms.management.commands.populate_subscription_data import update_subscription, get_users_from_acad
 
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
+from spoken.config import WGF_INSTITUTIONS
 
 
 class JSONResponseMixin(object):
@@ -948,7 +949,16 @@ class TrainingCertificate(object):
 
     # Title
     imgDoc.setFont('Helvetica', 35, leading=None)
-    imgDoc.drawCentredString(405, 470, "Certificate of Participation")
+
+    academic_code = ta.training.training_planner.academic.academic_code
+
+    certificate_title, title_y = get_participation_certificate_title(
+        academic_code=academic_code,
+        normal_title_y=470,
+        wgf_title_y=400
+    )
+
+    imgDoc.drawCentredString(405, title_y, certificate_title)
 
     #date
     if ta.training.department.id != 169:
@@ -3314,7 +3324,16 @@ class AllTrainingCertificateView(TrainingCertificate, View):
 
       # Title
       imgDoc.setFont('Helvetica', 35, leading=None)
-      imgDoc.drawCentredString(405, 480, "Certificate of Participation")
+
+      academic_code = ta.training.training_planner.academic.academic_code
+
+      certificate_title, title_y = get_participation_certificate_title(
+          academic_code=academic_code,
+          normal_title_y=480,
+          wgf_title_y=410
+      )
+
+      imgDoc.drawCentredString(405, title_y, certificate_title)
 
       #date
       if ta.training.department.id != 169:

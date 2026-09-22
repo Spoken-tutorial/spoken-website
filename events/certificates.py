@@ -1,5 +1,5 @@
 from django.conf import settings
-from spoken.config import EDUPYRAMIDS_CERTIFICATE_DATE
+from spoken.config import EDUPYRAMIDS_CERTIFICATE_DATE,WGF_INSTITUTIONS
 import re
 import os
 
@@ -20,7 +20,44 @@ EDUPYRAMIDS = {
    'fdp_test': 'fdp-test-certificate_edupyramids.pdf',
 }
 
-def get_cert_template(event_date, cert_type):
+WGF = {
+   'stp': 'Blank-Certificate_edupyramids_wgf.pdf',
+}
+
+def is_wgf_institution(academic_code):
+   return academic_code in WGF_INSTITUTIONS
+
+
+def get_participation_certificate_title(academic_code,normal_title_y,wgf_title_y):
+   """
+   Returns participation certificate title and title position.
+   """
+   if academic_code in WGF_INSTITUTIONS:
+      certificate_title = "Certificate of Participation"
+      title_y = wgf_title_y
+   else:
+      certificate_title = "Participation Certificate"
+      title_y = normal_title_y
+
+   return certificate_title, title_y
+
+
+def get_completion_certificate_title(academic_code,normal_title_y,wgf_title_y,foss_name):
+   """
+   Returns completion certificate title and title position.
+   """
+   if academic_code in WGF_INSTITUTIONS:
+      certificate_title = "Course Completion Certificate"
+      title_y = wgf_title_y
+   else:
+      certificate_title = ("Certificate for the Completion of <br/>"+ foss_name+ " Training")
+      title_y = normal_title_y
+
+   return certificate_title, title_y
+
+def get_cert_template(event_date, cert_type, academic_code=None):
+   if academic_code in WGF_INSTITUTIONS:
+      return os.path.join(settings.MEDIA_ROOT, WGF['stp'])
    if event_date < EDUPYRAMIDS_CERTIFICATE_DATE:
       return os.path.join(settings.MEDIA_ROOT, SPK[cert_type])
    return os.path.join(settings.MEDIA_ROOT, EDUPYRAMIDS[cert_type])
@@ -31,14 +68,14 @@ def get_training_certificate(ta):
       return training certificate template path
       ta : TrainingAttend obj
    """
-   
+   academic_code = ta.training.training_planner.academic.academic_code
    if ta.training.department.id == FDP:
       cert_type = 'fdp'
    elif ta.training.training_planner.academic.institution_type_id == CSC:
       cert_type = 'csc'
    else:
       cert_type = 'stp'
-   return get_cert_template(ta.training.training_start_date, cert_type)
+   return get_cert_template(ta.training.training_start_date, cert_type, academic_code)
 
 
 def get_test_certificate(ta):
@@ -46,13 +83,15 @@ def get_test_certificate(ta):
       return test certificate template path
       ta : TestAttendance obj
    """
+
+   academic_code = ta.test.academic.academic_code
    if ta.test.training.department.id == FDP:
       cert_type = 'fdp_test'
    elif ta.test.academic.institution_type_id == CSC:
       cert_type = 'csc'
    else:
       cert_type = 'stp'
-   return get_cert_template(ta.test.tdate, cert_type)
+   return get_cert_template(ta.test.tdate, cert_type, academic_code)
 
 
 def get_signature(event_date):
@@ -71,9 +110,25 @@ def get_training_cert_text(ta):
    """
    name = f"{ta.student.user.first_name} {ta.student.user.last_name}"
    foss = ta.training.course.foss.foss
+
+   academic = ta.training.training_planner.academic
+   academic_code = academic.academic_code
+   
    institution_name = ta.training.training_planner.academic.institution_name
    organization = get_organization(ta.training.training_start_date)
-   
+   org_course_material = "EduPyramids, SINE, IIT Bombay"
+   org_training = "This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay"
+
+   if is_wgf_institution(academic_code):
+      text = (
+         f"This is to certify that <b>{name}</b> has participated in the "
+         f"<b>{foss}</b> training, offered by "
+         f"<b>EduPyramids, SINE, IIT Bombay</b>."
+         f"<br /><br />"
+         f"A comprehensive set of topics pertaining to "
+         f"<b>{foss}</b> was covered in the training."
+      )
+      return text
    semsplit = re.split('-|, ',ta.training.training_planner.get_semester())
    sem_start = semsplit[0]+semsplit[2]
 
@@ -102,12 +157,30 @@ def get_test_cert_text(test, mdluser, credits=''):
    name = f"{mdluser.firstname} {mdluser.lastname}"
    foss = test.foss.foss
    test_date = test.tdate.strftime("%d-%m-%Y")
-   
+   academic = test.academic
+   academic_code = academic.academic_code
    institution = test.academic.institution_name
    organization = get_organization(test.training.training_start_date)
    organizer = f"{test.organiser.user.first_name} {test.organiser.user.last_name}"
    invigilator = f"{test.invigilator.user.first_name} {test.invigilator.user.last_name}"
-   text_end = f"This training is offered by {organization}"
+   text_end = f"{org_training}"
+
+   # WGF completion certificate text
+   if is_wgf_institution(academic_code):
+      text = (
+         f"This is to certify that <b>{name}</b> has successfully "
+         f"completed the course <b>{foss}</b>, offered by "
+         f"<b>EduPyramids, SINE, IIT Bombay</b>."
+         f"<br /><br />"
+         f"Passing an online exam conducted remotely by EduPyramids "
+         f"is a prerequisite to complete this course. "
+         f"<b>WHEELS Global Foundation</b> organised the invigilation "
+         f"of this exam."
+         f"<br /><br />"
+         f"{credits}"
+      )
+      return text
+
    
    #paragraphe
    if test.training.department.id == FDP:
