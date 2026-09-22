@@ -7,6 +7,7 @@ from redis import Redis
 from rq.job import Job
 from rq.exceptions import NoSuchJobError
 from cron import REDIS_CLIENT
+from spoken.config import WGF_INSTITUTIONS
 
 def get_batches(request):
     school_id = request.GET.get('school_id')
@@ -2492,19 +2493,24 @@ def test_participant_ceritificate(request, wid, participant_id):
     p.wrap(700, 200)
     p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
 
-    #paragraphe
-    text = "Certificate for the Completion of <br/>"+w.foss.foss+" Training"
+    # Certificate title
+    academic_code = w.academic.academic_code
 
+    certificate_title, title_y = get_completion_certificate_title(
+        academic_code=academic_code,
+        normal_title_y=17 * cm,
+        wgf_title_y=14.2 * cm,
+        foss_name=w.foss.foss
+    )
     centered = ParagraphStyle(name = 'centered',
         fontSize = 25,
         leading = 25,
         alignment = 1,
         spaceAfter = 15)
 
-    p = Paragraph(text, centered)
+    p = Paragraph(certificate_title, centered)
     p.wrap(500,20)
-    p.drawOn(imgDoc, 6.2 * cm, 17 * cm)
-
+    p.drawOn(imgDoc, 6.2 * cm, title_y)
 
     imgDoc.save()
 
@@ -2592,18 +2598,27 @@ def test_participant_ceritificate_all(request, testid):
         p.wrap(700, 200)
         p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
 
-        #paragraphe
-        text = "Certificate for Completion of <br/>"+w.foss.foss+" Training"
+        academic_code = w.academic.academic_code
 
-        centered = ParagraphStyle(name = 'centered',
-            fontSize = 25,
-            leading = 25,
-            alignment = 1,
-            spaceAfter = 15)
+        certificate_title, title_y = get_completion_certificate_title(
+            academic_code=academic_code,
+            normal_title_y=17 * cm,
+            wgf_title_y=14.2 * cm,
+            foss_name=w.foss.foss
+        )
 
-        p = Paragraph(text, centered)
-        p.wrap(500,20)
-        p.drawOn(imgDoc, 6.2 * cm, 17 * cm)
+        centered = ParagraphStyle(
+            name='certificate_title',
+            fontSize=25,
+            leading=25,
+            alignment=1,
+            spaceAfter=0
+        )
+
+        p = Paragraph(certificate_title, centered)
+        p.wrap(600, 100)
+        p.drawOn(imgDoc,6.2 * cm,title_y)
+        
         imgDoc.save()
         template_path = get_test_certificate(ta)
         page = PdfFileReader(open(template_path,"rb")).getPage(0)
