@@ -112,7 +112,7 @@ urlpatterns = [
     re_path(r'^certificate/', include(('certificate.urls', 'certificate'), namespace='certificate')),
 
     re_path(r'^creation/', include(('creation.urls', 'creation'), namespace='creation')),
-    re_path(r'^nicedit/', include('nicedit.urls')),
+    # re_path(r'^nicedit/', include('nicedit.urls')),
     # re_path(r'^migration/creation/', include('creationmigrate.urls', namespace='creationmigrate')),
     # re_path(r'^migration/events/', include('eventsmigration.urls', namespace='eventsmigration')),
     #re_path(r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': False}),
