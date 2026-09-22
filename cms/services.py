@@ -27,7 +27,7 @@ def get_user_email(email):
     user = User.objects.filter(email__iexact=email)
     if len(user) == 1:
       return user[0]
-    return User.objects.get(email=email).first()
+    return User.objects.filter(email=email).first()
   except ObjectDoesNotExist:
     return None
 

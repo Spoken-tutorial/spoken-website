@@ -124,13 +124,16 @@ class WOrganiser(models.Model):
         db_table = 'organiser'
 
 
+from django.core.validators import validate_comma_separated_integer_list
+
+
 class WResourcePerson(models.Model):
     id = models.IntegerField(primary_key=True)
     user_uid = models.IntegerField()
     rp_fname = models.CharField(max_length=50)
     phone = models.CharField(max_length=20)
-    states = models.CommaSeparatedIntegerField(max_length=200)
-    state_code = models.CommaSeparatedIntegerField(max_length=200)
+    states = models.CharField(validators=[validate_comma_separated_integer_list], max_length=200)
+    state_code = models.CharField(validators=[validate_comma_separated_integer_list], max_length=200)
 
     class Meta(object):
         db_table = 'resource_person'

@@ -2,6 +2,7 @@
 
 
 from django.db import models, migrations
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -14,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='testattendance',
             name='student',
-            field=models.ForeignKey(to='events.Student', null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.Student', null=True),
         ),
     ]

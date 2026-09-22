@@ -19,7 +19,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonRespons
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 # Spoken Tutorial Stuff
 from cms.forms import *
@@ -514,30 +514,32 @@ def testimonials_new_media(request, testimonial_type):
         else:
             form = MediaTestimonialForm(request.POST, request.FILES, on_home_page=1)
         if form.is_valid():
-            foss = FossCategory.objects.get(foss=request.POST.get('foss'))
+            foss = FossCategory.objects.get(foss=form.cleaned_data.get('foss'))
             if not request.FILES:
-                messages.error(request, 'Nothing uploaded. Choose a file for paste a link')
+                messages.error(request, 'Nothing uploaded. Choose a file or paste a link')
             else:
                 file_container = request.FILES['media']
-                # Put the uploaded file in the desired location.
-                file_name = str(user) + '-' + dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + file_container.name[-4:]
-                file_path = settings.MEDIA_ROOT + 'testimonials/' + str(foss.id) + '/' 
-                from_media_path =  'testimonials/' + str(foss.id) + '/' + file_name
-                os.system("mkdir -p %s" % file_path)
-                full_path = file_path + file_name
-                fout = open(full_path, 'wb+')
-                # Iterate through the chunks.
-                for chunk in file_container.chunks():
-                    fout.write(chunk)
-                fout.close()
+                file_ext = os.path.splitext(file_container.name)[1]
+                file_name = str(user.username) + '-' + dt.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + file_ext
+                file_path = os.path.join(settings.MEDIA_ROOT, 'testimonials', str(foss.id))
+                from_media_path = os.path.join('testimonials', str(foss.id), file_name)
+                os.makedirs(file_path, exist_ok=True)
+                full_path = os.path.join(file_path, file_name)
+                with open(full_path, 'wb+') as fout:
+                    for chunk in file_container.chunks():
+                        fout.write(chunk)
                 # Save in database
-                data = MediaTestimonials(foss=foss, path=from_media_path, user=request.POST.get('name'),workshop_details=request.POST.get('workshop_details'), content= request.POST.get('content'))
-                print(data)
-                messages.success(request, 'Testimonial has posted successfully!')
+                data = MediaTestimonials(
+                    foss=foss,
+                    path=from_media_path,
+                    user=form.cleaned_data.get('name'),
+                    workshop_details=form.cleaned_data.get('workshop_details'),
+                    content=form.cleaned_data.get('content')
+                )
                 data.save()
+                messages.success(request, 'Testimonial has posted successfully!')
             return HttpResponseRedirect('/')
     context['form'] = form
-    context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/mediaform.html', context)
 
 
@@ -555,13 +557,11 @@ def admin_testimonials_media_edit(request, rid):
         else:
             context['form'] = form
             context['instance'] = testimonial
-            context.update(csrf(request))
             return render(request, 'spoken/templates/testimonial/mediaform.html', context)
         
     form = MediaTestimonialEditForm(instance=testimonial)
     context['form'] = form
     context['instance'] = testimonial
-    context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/mediaform.html', context)
 
 
@@ -586,44 +586,27 @@ def testimonials_new(request):
             rid = form_data.id
             file_type = ['application/pdf']
             if 'scan_copy' in request.FILES:
-                if request.FILES['scan_copy'].content_type in file_type:
-                    file_path = settings.MEDIA_ROOT + 'testimonial/'
-                    try:
-                        os.mkdir(file_path)
-                    except Exception as e:
-                        print(e)
-                    file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
-                    try:
-                        os.mkdir(file_path)
-                    except Exception as e:
-                        print(e)
-                    full_path = file_path + str(rid) + ".pdf"
-                    fout = open(full_path, 'wb+')
-                    f = request.FILES['scan_copy']
-                    # Iterate through the chunks.
-                    for chunk in f.chunks():
-                        fout.write(chunk)
-                    fout.close()
+                uploaded_file = request.FILES['scan_copy']
+                if uploaded_file.content_type in file_type or uploaded_file.name.lower().endswith('.pdf'):
+                    file_path = os.path.join(settings.MEDIA_ROOT, 'testimonial', str(rid))
+                    os.makedirs(file_path, exist_ok=True)
+                    full_path = os.path.join(file_path, str(rid) + ".pdf")
+                    with open(full_path, 'wb+') as fout:
+                        for chunk in uploaded_file.chunks():
+                            fout.write(chunk)
 
             messages.success(request, 'Testimonial has posted successfully!')
             return HttpResponseRedirect('/')
     context['form'] = form
-    context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/form.html', context)
 
 
 def admin_testimonials_edit(request, rid):
     user = request.user
     context = {}
-    form = TestimonialsForm()
-    instance = ''
     if not user.has_perm('events.change_testimonials'):
         raise PermissionDenied()
-    try:
-        instance = Testimonials.objects.get(pk=rid)
-    except Exception as e:
-        raise Http404('Page not found')
-        print(e)
+    instance = get_object_or_404(Testimonials, pk=rid)
 
     if request.method == 'POST':
         form = TestimonialsForm(request.POST, request.FILES, instance=instance)
@@ -631,29 +614,17 @@ def admin_testimonials_edit(request, rid):
             form_data = form.save(commit=False)
             form_data.user_id = user.id
             form_data.save()
-            file_type = ['application/pdf','image/jpeg','image/png']
+            file_type = ['application/pdf', 'image/jpeg', 'image/png']
             if 'scan_copy' in request.FILES:
-                if request.FILES['scan_copy'].content_type in file_type:
-                    file_path = settings.MEDIA_ROOT + 'testimonial/'
-                    try:
-                        os.mkdir(file_path)
-                    except Exception as e:
-                        print(e)
-                    file_path = settings.MEDIA_ROOT + 'testimonial/' + str(rid) + '/'
-                    try:
-                        os.mkdir(file_path)
-                    except Exception as e:
-                        print(e)
-                    f = request.FILES['scan_copy']
-                    filename = str(f)
-                    ext = os.path.splitext(filename)[1].lower()
-                    full_path = file_path + str(rid) + ext
-                    fout = open(full_path, 'wb+')
-
-                    # Iterate through the chunks.
-                    for chunk in f.chunks():
-                        fout.write(chunk)
-                    fout.close()
+                uploaded_file = request.FILES['scan_copy']
+                ext = os.path.splitext(uploaded_file.name)[1].lower()
+                if uploaded_file.content_type in file_type or ext in ['.pdf', '.jpg', '.jpeg', '.png']:
+                    file_path = os.path.join(settings.MEDIA_ROOT, 'testimonial', str(rid))
+                    os.makedirs(file_path, exist_ok=True)
+                    full_path = os.path.join(file_path, str(rid) + ext)
+                    with open(full_path, 'wb+') as fout:
+                        for chunk in uploaded_file.chunks():
+                            fout.write(chunk)
 
             messages.success(request, 'Testimonial updated successfully!')
             return HttpResponseRedirect('/')
@@ -661,49 +632,34 @@ def admin_testimonials_edit(request, rid):
     form = TestimonialsForm(instance=instance)
     context['form'] = form
     context['instance'] = instance
-    context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/form.html', context)
 
 
 def admin_testimonials_delete(request, rid):
     user = request.user
     context = {}
-    instance = ''
     if not user.has_perm('events.delete_testimonials'):
         raise PermissionDenied()
-    try:
-        instance = Testimonials.objects.get(pk=rid)
-    except Exception as e:
-        raise Http404('Page not found')
-        print(e)
+    instance = get_object_or_404(Testimonials, pk=rid)
     if request.method == 'POST':
-        instance = Testimonials.objects.get(pk=rid)
         instance.delete()
         messages.success(request, 'Testimonial deleted successfully')
         return HttpResponseRedirect(reverse('admin_testimonials'))
     context['instance'] = instance
-    context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/form.html', context)
 
 
 def admin_testimonials_media_delete(request, rid):
     user = request.user
     context = {}
-    instance = ''
     if not user.has_perm('events.delete_testimonials'):
         raise PermissionDenied()
-    try:
-        instance = MediaTestimonials.objects.get(pk=rid)
-    except Exception as error:
-        print(error)
-        raise Http404('Page not found')
+    instance = get_object_or_404(MediaTestimonials, pk=rid)
     if request.method == 'POST':
-        instance = MediaTestimonials.objects.get(pk=rid)
         instance.delete()
         messages.success(request, 'Testimonial deleted successfully')
         return HttpResponseRedirect(reverse('admin_testimonials'))
     context['instance'] = instance
-    context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/mediaform.html', context)
 
 
@@ -721,7 +677,6 @@ def admin_testimonials(request):
     context['collection'] = collection
     context['mediacollection'] = mediacollection
     context['media_url'] = settings.MEDIA_URL
-    context.update(csrf(request))
     return render(request, 'spoken/templates/testimonial/index.html', context)
 
 
@@ -923,7 +878,7 @@ def saveVideoData(request):
         "mongodb://"+MONGO_USER+':'+MONGO_PASS+'@'+MONGO_HOST+':'+MONGO_PORT+\
         '/?authSource='+MONGO_DB)
     mydb = myclient[MONGO_DB]
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         d = request.POST
         name = request.user.username
         if not name:

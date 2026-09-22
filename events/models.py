@@ -6,7 +6,7 @@ from datetime import datetime, date, timedelta
 from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
 from django.db.models import Q, Count, Sum, Min
-from django.utils.encoding import python_2_unicode_compatible
+from six import python_2_unicode_compatible
 
 from creation.models import FossCategory, Language, Level
 

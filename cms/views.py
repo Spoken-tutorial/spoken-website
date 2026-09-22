@@ -256,7 +256,7 @@ def confirm(request, confirmation_code, username):
 def account_login(request):
     user = request.user
     error_msg = ''
-    if request.user.is_anonymous():
+    if not request.user.is_authenticated:
         form = LoginForm()
         context = {
             'form' : form
@@ -386,7 +386,7 @@ def account_view_profile(request, username):
         'profile' : profile,
         'media_url' : settings.MEDIA_URL,
     }
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         payee_list = Payee.objects.prefetch_related('cdfosslanguages_set__foss','cdfosslanguages_set__lang').filter(user=request.user)
         context['payee_list'] = payee_list
         
@@ -506,7 +506,7 @@ def change_password(request):
                 user.backend = 'django.contrib.auth.backends.ModelBackend'
                 login(request, user)
 
-    if request.user.is_anonymous():
+    if not request.user.is_authenticated:
         return HttpResponseRedirect('/accounts/login/?next=/accounts/change-password/')
 
     if not profile:

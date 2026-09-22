@@ -2,6 +2,7 @@
 
 
 from django.db import models, migrations
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -14,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='traininglanguagefeedback',
             name='training',
-            field=models.ForeignKey(to='events.TrainingRequest'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.TrainingRequest'),
         ),
     ]

@@ -41,8 +41,8 @@ class Users(models.Model):
 
 
 class UsersRoles(models.Model):
-    uid = models.ForeignKey(Users, db_column='uid')
-    rid = models.ForeignKey(Role, db_column='rid')
+    uid = models.ForeignKey(Users, db_column='uid', on_delete=models.PROTECT)
+    rid = models.ForeignKey(Role, db_column='rid', on_delete=models.PROTECT)
 
     class Meta(object):
         db_table = 'users_roles'
@@ -83,22 +83,22 @@ class TutorialDetails(models.Model):
 
 class TutorialCommonContents(models.Model):
     id = models.IntegerField(primary_key=True)
-    tutorial_detail = models.ForeignKey(TutorialDetails)
+    tutorial_detail = models.ForeignKey(TutorialDetails, on_delete=models.PROTECT)
     tutorial_slide = models.TextField()
-    tutorial_slide_uid = models.ForeignKey(Users, related_name='slides', db_column='tutorial_slide_uid')
+    tutorial_slide_uid = models.ForeignKey(Users, related_name='slides', db_column='tutorial_slide_uid', on_delete=models.PROTECT)
     tutorial_slide_status = models.IntegerField()
     tutorial_code = models.TextField()
-    tutorial_code_uid = models.ForeignKey(Users, related_name='codes', db_column='tutorial_code_uid')
+    tutorial_code_uid = models.ForeignKey(Users, related_name='codes', db_column='tutorial_code_uid', on_delete=models.PROTECT)
     tutorial_code_status = models.IntegerField()
     tutorial_assignment = models.TextField()
-    tutorial_assignment_uid = models.ForeignKey(Users, related_name='assignments', db_column='tutorial_assignment_uid')
+    tutorial_assignment_uid = models.ForeignKey(Users, related_name='assignments', db_column='tutorial_assignment_uid', on_delete=models.PROTECT)
     tutorial_assignment_status = models.IntegerField()
     tutorial_prerequisit = models.IntegerField()
     tutorial_prerequisit_uid = models.ForeignKey(
-        Users, related_name='prerequisite', db_column='tutorial_prerequisit_uid')
+        Users, related_name='prerequisite', db_column='tutorial_prerequisit_uid', on_delete=models.PROTECT)
     tutorial_prerequisit_status = models.IntegerField()
     tutorial_keywords = models.TextField()
-    tutorial_keywords_uid = models.ForeignKey(Users, related_name='keywords', db_column='tutorial_keywords_uid')
+    tutorial_keywords_uid = models.ForeignKey(Users, related_name='keywords', db_column='tutorial_keywords_uid', on_delete=models.PROTECT)
 
     class Meta(object):
         db_table = 'tutorial_common_contents'
@@ -107,21 +107,21 @@ class TutorialCommonContents(models.Model):
 
 class TutorialResources(models.Model):
     id = models.IntegerField(primary_key=True)
-    tutorial_detail = models.ForeignKey(TutorialDetails)
-    uid = models.ForeignKey(Users, db_column='uid')
+    tutorial_detail = models.ForeignKey(TutorialDetails, on_delete=models.PROTECT)
+    uid = models.ForeignKey(Users, db_column='uid', on_delete=models.PROTECT)
     language = models.CharField(max_length=50)
     upload_time = models.DateTimeField()
     reviewer = models.CharField(max_length=400)
-    tutorial_content = models.ForeignKey(TutorialCommonContents)
+    tutorial_content = models.ForeignKey(TutorialCommonContents, on_delete=models.PROTECT)
     tutorial_outline = models.TextField()
-    tutorial_outline_uid = models.ForeignKey(Users, related_name='outlines', db_column='tutorial_outline_uid')
+    tutorial_outline_uid = models.ForeignKey(Users, related_name='outlines', db_column='tutorial_outline_uid', on_delete=models.PROTECT)
     tutorial_outline_status = models.IntegerField()
     tutorial_script = models.TextField()
-    tutorial_script_uid = models.ForeignKey(Users, related_name='scripts', db_column='tutorial_script_uid')
+    tutorial_script_uid = models.ForeignKey(Users, related_name='scripts', db_column='tutorial_script_uid', on_delete=models.PROTECT)
     tutorial_script_status = models.IntegerField()
     tutorial_script_timed = models.TextField()
     tutorial_video = models.TextField()
-    tutorial_video_uid = models.ForeignKey(Users, related_name='videos', db_column='tutorial_video_uid')
+    tutorial_video_uid = models.ForeignKey(Users, related_name='videos', db_column='tutorial_video_uid', on_delete=models.PROTECT)
     tutorial_video_status = models.IntegerField()
     tutorial_status = models.CharField(max_length=50)
     cvideo_version = models.IntegerField()
@@ -135,8 +135,8 @@ class TutorialResources(models.Model):
 
 class TutorialDomainReviewerRoles(models.Model):
     id = models.IntegerField(primary_key=True)
-    uid = models.ForeignKey(Users, db_column='uid')
-    language = models.ForeignKey(TutorialLanguages)
+    uid = models.ForeignKey(Users, db_column='uid', on_delete=models.PROTECT)
+    language = models.ForeignKey(TutorialLanguages, on_delete=models.PROTECT)
 
     class Meta(object):
         db_table = 'tutorial_domain_reviewer_roles'
@@ -145,8 +145,8 @@ class TutorialDomainReviewerRoles(models.Model):
 
 class TutorialQualityRoles(models.Model):
     id = models.IntegerField(primary_key=True)
-    uid = models.ForeignKey(Users, db_column='uid')
-    language = models.ForeignKey(TutorialLanguages)
+    uid = models.ForeignKey(Users, db_column='uid', on_delete=models.PROTECT)
+    language = models.ForeignKey(TutorialLanguages, on_delete=models.PROTECT)
 
     class Meta(object):
         db_table = 'tutorial_quality_roles'
@@ -155,7 +155,7 @@ class TutorialQualityRoles(models.Model):
 
 class TutorialUpdateLog(models.Model):
     id = models.IntegerField(primary_key=True)
-    tutorial_resources = models.ForeignKey(TutorialResources)
+    tutorial_resources = models.ForeignKey(TutorialResources, on_delete=models.PROTECT)
     update_time = models.DateTimeField()
     updated_by = models.CharField(max_length=255)
     updated_content = models.CharField(max_length=255)
@@ -167,8 +167,8 @@ class TutorialUpdateLog(models.Model):
 
 class CTutorialMissingComponent(models.Model):
     id = models.IntegerField(primary_key=True)
-    uid = models.ForeignKey(Users, db_column='uid')
-    trid = models.ForeignKey(TutorialResources, db_column='trid')
+    uid = models.ForeignKey(Users, db_column='uid', on_delete=models.PROTECT)
+    trid = models.ForeignKey(TutorialResources, db_column='trid', on_delete=models.PROTECT)
     component = models.CharField(max_length=15)
     type = models.IntegerField()
     remarks = models.TextField()
@@ -186,7 +186,7 @@ class CTutorialMissingComponent(models.Model):
 class CTutorialMissingComponentReply(models.Model):
     id = models.IntegerField(primary_key=True)
     missing_component_id = models.IntegerField()
-    uid = models.ForeignKey(Users, db_column='uid')
+    uid = models.ForeignKey(Users, db_column='uid', on_delete=models.PROTECT)
     reply_message = models.TextField()
     created = models.DateTimeField()
 
@@ -197,8 +197,8 @@ class CTutorialMissingComponentReply(models.Model):
 
 class TutorialPublicReview(models.Model):
     id = models.IntegerField(primary_key=True)
-    uid = models.ForeignKey(Users, db_column='uid')
-    trid = models.ForeignKey(TutorialResources, db_column='trid')
+    uid = models.ForeignKey(Users, db_column='uid', on_delete=models.PROTECT)
+    trid = models.ForeignKey(TutorialResources, db_column='trid', on_delete=models.PROTECT)
     date_time = models.DateTimeField()
     component = models.CharField(max_length=20)
     comment = models.TextField()
@@ -210,7 +210,7 @@ class TutorialPublicReview(models.Model):
 
 class TutorialPublicReviewVideo(models.Model):
     id = models.IntegerField(primary_key=True)
-    tutorial_public_review = models.ForeignKey(TutorialPublicReview)
+    tutorial_public_review = models.ForeignKey(TutorialPublicReview, on_delete=models.PROTECT)
     item = models.IntegerField()
     everywhere = models.IntegerField()
     video_time = models.TimeField()
@@ -222,7 +222,7 @@ class TutorialPublicReviewVideo(models.Model):
 
 class UserRatings(models.Model):
     id = models.IntegerField(primary_key=True)
-    uid = models.ForeignKey(Users, db_column='uid')
+    uid = models.ForeignKey(Users, db_column='uid', on_delete=models.PROTECT)
     page_id = models.IntegerField()
     rated_date = models.DateField()
     rating = models.BigIntegerField()
@@ -234,8 +234,8 @@ class UserRatings(models.Model):
 
 class VideoComments(models.Model):
     id = models.IntegerField(primary_key=True)
-    tutorial_resource = models.ForeignKey(TutorialResources)
-    uid = models.ForeignKey(Users, db_column='uid')
+    tutorial_resource = models.ForeignKey(TutorialResources, on_delete=models.PROTECT)
+    uid = models.ForeignKey(Users, db_column='uid', on_delete=models.PROTECT)
     comments = models.TextField()
     created_at = models.DateTimeField()
 

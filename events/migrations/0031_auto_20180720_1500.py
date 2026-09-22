@@ -2,6 +2,7 @@
 
 
 from django.db import models, migrations
+import django.db.models.deletion
 from django.conf import settings
 
 
@@ -24,8 +25,8 @@ class Migration(migrations.Migration):
                 ('gstno', models.CharField(max_length=15, null=True)),
                 ('created', models.DateTimeField(auto_now_add=True)),
                 ('updated', models.DateTimeField(auto_now_add=True)),
-                ('academic_id', models.ForeignKey(to='events.AcademicCenter')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('academic_id', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.AcademicCenter')),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
                 ('academic_year', models.PositiveIntegerField()),
             ],
         ),

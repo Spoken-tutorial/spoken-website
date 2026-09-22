@@ -3,6 +3,7 @@
 
 # Third Party Stuff
 from django.db import migrations, models
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -36,11 +37,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='brochuredocument',
             name='foss_course',
-            field=models.ForeignKey(to='creation.FossCategory'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='creation.FossCategory'),
         ),
         migrations.AddField(
             model_name='brochuredocument',
             name='foss_language',
-            field=models.ForeignKey(to='creation.Language'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='creation.Language'),
         ),
     ]

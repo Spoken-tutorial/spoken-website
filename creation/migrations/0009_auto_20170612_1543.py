@@ -3,6 +3,7 @@
 
 # Third Party Stuff
 from django.db import migrations, models
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -30,7 +31,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='brochurepage',
             name='brochure',
-            field=models.ForeignKey(related_name='pages', to='creation.BrochureDocument'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='pages', to='creation.BrochureDocument'),
         ),
         migrations.AlterUniqueTogether(
             name='brochurepage',

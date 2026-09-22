@@ -120,7 +120,9 @@ class DomainReviewerRoleAdmin(admin.ModelAdmin):
     list_display = ('user', 'foss_category', 'language',
                     'status', 'created', 'updated')
     list_filter = ('updated', 'language', 'foss_category')
+    ordering = ('-created',)
 
+    @admin.action(description="Mark selected domain reviewer roles as disabled")
     def mark_domain_reviewer_disabled(self, request, queryset):
         rows_updated = queryset.update(status=0)
         if rows_updated == 1:
@@ -129,6 +131,7 @@ class DomainReviewerRoleAdmin(admin.ModelAdmin):
             message_bit = "%s domain reviewer roles were"
         self.message_user(request, "%s successfully disabled." % message_bit)
 
+    @admin.action(description="Mark selected domain reviewer roles as active")
     def mark_domain_reviewer_active(self, request, queryset):
         rows_updated = queryset.update(status=1)
         if rows_updated == 1:
@@ -136,12 +139,10 @@ class DomainReviewerRoleAdmin(admin.ModelAdmin):
         else:
             message_bit = "%s domain reviewer roles were"
         self.message_user(request, "%s successfully activated." % message_bit)
-    mark_domain_reviewer_active.short_description = "Mark selected domain reviewer roles as active"
-    mark_domain_reviewer_disabled.short_description = "Mark selected domain reviewer roles as disabled"
+
     actions = ['mark_domain_reviewer_active', 'mark_domain_reviewer_disabled']
 
     class Media:
-
         js = ('admin/js/domain_reviewer_languages.js', )
 
 
@@ -150,7 +151,9 @@ class QualityReviewerRoleAdmin(admin.ModelAdmin):
     list_display = ('user', 'foss_category', 'language',
                     'status', 'created', 'updated')
     list_filter = ('updated', 'language', 'foss_category')
+    ordering = ('-created',)
 
+    @admin.action(description="Mark selected quality reviewer roles as disabled")
     def mark_quality_reviewer_disabled(self, request, queryset):
         rows_updated = queryset.update(status=0)
         if rows_updated == 1:
@@ -159,6 +162,7 @@ class QualityReviewerRoleAdmin(admin.ModelAdmin):
             message_bit = "%s quality reviewer roles were"
         self.message_user(request, "%s successfully disabled." % message_bit)
 
+    @admin.action(description="Mark selected quality reviewer roles as active")
     def mark_quality_reviewer_active(self, request, queryset):
         rows_updated = queryset.update(status=1)
         if rows_updated == 1:
@@ -166,14 +170,12 @@ class QualityReviewerRoleAdmin(admin.ModelAdmin):
         else:
             message_bit = "%s quality reviewer roles were"
         self.message_user(request, "%s successfully activated." % message_bit)
-    mark_quality_reviewer_active.short_description = "Mark selected quality reviewer roles as active"
-    mark_quality_reviewer_disabled.short_description = "Mark selected quality reviewer roles as disabled"
+
     actions = ['mark_quality_reviewer_active',
                'mark_quality_reviewer_disabled']
 
     class Media:
-
-            js = ('admin/js/quality_reviewer_languages.js', )
+        js = ('admin/js/quality_reviewer_languages.js', )
 
 class FossAvailableForTestAdmin(admin.ModelAdmin):
     form = FossAvailableForTestForm

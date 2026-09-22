@@ -2,6 +2,7 @@
 
 
 from django.db import models, migrations
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -14,12 +15,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='singletraining',
             name='institution_type',
-            field=models.ForeignKey(to='events.InstituteType', null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.InstituteType', null=True),
         ),
         migrations.AddField(
             model_name='singletraining',
             name='state',
-            field=models.ForeignKey(to='events.State', null=True),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.State', null=True),
         ),
         migrations.AddField(
             model_name='singletraining',

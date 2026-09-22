@@ -1,9 +1,6 @@
 # Third Party Stuff
-
-from builtins import object
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 import uuid
 from datetime import timedelta, date
 
@@ -41,7 +38,6 @@ HONORARIUM_STATUS = (
 import datetime
 
 
-@python_2_unicode_compatible
 class Language(models.Model):
     name = models.CharField(max_length=255, unique=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT )
@@ -49,14 +45,13 @@ class Language(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta(object):
+    class Meta:
         ordering = ('name',)
 
     def __str__(self):
         return self.name
 
 
-@python_2_unicode_compatible
 class FossSuperCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -65,7 +60,7 @@ class FossSuperCategory(models.Model):
     # Some of the Fosses are part of Recommendation System
     part_of_recsys = models.BooleanField(max_length=2, default=False)
 
-    class Meta(object):
+    class Meta:
         verbose_name = 'FOSS Category'
         verbose_name_plural = 'FOSS Categories'
         ordering = ('name',)
@@ -88,7 +83,6 @@ class Domain(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
 class FossCategory(models.Model):
     foss = models.CharField(unique=True, max_length=255)
     description = models.TextField()
@@ -115,7 +109,7 @@ class FossCategory(models.Model):
     operating_system = models.CharField(max_length=255, null=True, blank=True)
     download = models.BooleanField(default=False, help_text='If checked, this foss will be available for CD content download')
     
-    class Meta(object):
+    class Meta:
         verbose_name = 'FOSS'
         verbose_name_plural = 'FOSSes'
         ordering = ('foss', )
@@ -132,14 +126,13 @@ class FosscategoryDomain(models.Model):
         unique_together = (('fosscategory', 'domain'),)
 
 
-@python_2_unicode_compatible
 class BrochureDocument(models.Model):
     foss_course = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
     foss_language = models.ForeignKey(Language, on_delete=models.PROTECT )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta(object):
+    class Meta:
         verbose_name = 'FOSS Brochure'
         verbose_name_plural = 'FOSS Brochures'
 
@@ -152,12 +145,11 @@ class BrochurePage(models.Model):
     page = models.FileField(upload_to='brochures/')
     page_no = models.PositiveIntegerField()
 
-    class Meta(object):
+    class Meta:
         ordering = ('page_no', )
         unique_together = (('brochure', 'page_no'),)
 
 
-@python_2_unicode_compatible
 class PlaylistInfo(models.Model):
     foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
     language = models.ForeignKey(Language, on_delete=models.PROTECT )
@@ -165,7 +157,7 @@ class PlaylistInfo(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta(object):
+    class Meta:
         verbose_name = 'Playlist Info'
         unique_together = (('foss', 'language'),)
 
@@ -179,24 +171,22 @@ class PlaylistItem(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta(object):
+    class Meta:
         verbose_name = 'Playlist Item'
         unique_together = (('playlist', 'item_id'),)
 
 
-@python_2_unicode_compatible
 class Level(models.Model):
     level = models.CharField(max_length=255)
     code = models.CharField(max_length=10)
 
-    class Meta(object):
+    class Meta:
         verbose_name = 'Tutorial Level'
 
     def __str__(self):
         return self.level
 
 
-@python_2_unicode_compatible
 class TutorialDetail(models.Model):
     foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
     tutorial = models.CharField(max_length=255)
@@ -206,7 +196,7 @@ class TutorialDetail(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta(object):
+    class Meta:
         verbose_name = 'Tutorial Detail'
         unique_together = (('foss', 'tutorial', 'level'),)
 
@@ -247,7 +237,7 @@ class TutorialCommonContent(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    class Meta(object):
+    class Meta:
         verbose_name = 'Tutorial Common Content'
 
     def keyword_as_list(self):
@@ -303,7 +293,7 @@ class TutorialResource(models.Model):
 class PaymentHonorarium(models.Model):
     amount = models.DecimalField(default=0, max_digits=7, decimal_places=2)
     code = models.CharField(max_length=20, editable=False)
-    initiated_by = models.ForeignKey(User, related_name="initiator",default=7)
+    initiated_by = models.ForeignKey(User, related_name="initiator", default=7, on_delete=models.PROTECT)
     status = models.PositiveSmallIntegerField(default=1, choices=HONORARIUM_STATUS)
     updated = models.DateTimeField(auto_now=True)
 
@@ -323,8 +313,8 @@ class PaymentHonorarium(models.Model):
 
 
 class TutorialPayment(models.Model):
-    user = models.ForeignKey(User, related_name="contributor",)
-    tutorial_resource = models.ForeignKey(TutorialResource)
+    user = models.ForeignKey(User, related_name="contributor", on_delete=models.PROTECT)
+    tutorial_resource = models.ForeignKey(TutorialResource, on_delete=models.PROTECT)
     payment_honorarium = models.ForeignKey('PaymentHonorarium', related_name="tutorials", null=True, blank=True, on_delete=models.SET_NULL)
     user_type = models.PositiveSmallIntegerField(default=3, choices=USER_TYPE)
     seconds = models.PositiveIntegerField(default=0, help_text="Tutorial duration in seconds")
@@ -386,7 +376,7 @@ class ContributorRole(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT )
     language = models.ForeignKey(Language, on_delete=models.PROTECT )
     foss_category = models.ForeignKey(FossCategory, on_delete=models.PROTECT )
-    tutorial_detail = models.ForeignKey(TutorialDetail, null=True)
+    tutorial_detail = models.ForeignKey(TutorialDetail, null=True, on_delete=models.PROTECT)
     status = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -395,7 +385,7 @@ class ContributorRole(models.Model):
         self.status = 0
         self.save()
 
-    class Meta(object):
+    class Meta:
         unique_together = (('user', 'tutorial_detail', 'language',),)
         verbose_name = 'Contributor Role'
 
@@ -522,7 +512,7 @@ class QualityReviewerNotification(models.Model):
 class RoleRequest(models.Model):
     user = models.ForeignKey(User, related_name='user', on_delete=models.PROTECT )
     role_type = models.IntegerField(default=0)
-    language = models.ForeignKey(Language, null=True)
+    language = models.ForeignKey(Language, null=True, on_delete=models.PROTECT)
     status = models.PositiveSmallIntegerField(default=0)
     approved_user = models.ForeignKey(
         User, related_name='approved_user', null=True, blank=True, on_delete=models.PROTECT )
@@ -544,7 +534,7 @@ class FossAvailableForWorkshop(models.Model):
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta(object):
+    class Meta:
         unique_together = (('foss', 'language'),)
 
 
@@ -554,7 +544,7 @@ class FossAvailableForTest(models.Model):
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta(object):
+    class Meta:
         unique_together = (('foss', 'language'),)
 
 
@@ -579,7 +569,6 @@ class TutorialMissingComponentReply(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
 
-@python_2_unicode_compatible
 class OperatingSystem(models.Model):
     name = models.CharField(max_length=255)
 
@@ -587,7 +576,6 @@ class OperatingSystem(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
 class SuggestTopic(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT )
     topic_title = models.CharField(max_length=255)
@@ -601,7 +589,6 @@ class SuggestTopic(models.Model):
         return self.topic_title
 
 
-@python_2_unicode_compatible
 class SuggestExample(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT )
     topic_title = models.CharField(max_length=255)
@@ -614,7 +601,6 @@ class SuggestExample(models.Model):
         return self.topic_title
 
 
-@python_2_unicode_compatible
 class ContributeTowards(models.Model):
     name = models.CharField(max_length=255)
 
@@ -642,18 +628,18 @@ class Collaborate(models.Model):
 
 
 class ContributorRating(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
     choices = ((0,0), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5))
     rating = models.PositiveIntegerField(choices=choices,default=0)
-    language = models.ForeignKey(Language)
+    language = models.ForeignKey(Language, on_delete=models.PROTECT)
 
     class Meta:
         unique_together = (('user', 'language'),)
 
 
 class TutorialsAvailable(models.Model):
-    tutorial_detail = models.ForeignKey(TutorialDetail)
-    language = models.ForeignKey(Language)
+    tutorial_detail = models.ForeignKey(TutorialDetail, on_delete=models.PROTECT)
+    language = models.ForeignKey(Language, on_delete=models.PROTECT)
 
     class Meta:
         unique_together = (('tutorial_detail', 'language'),)
@@ -661,8 +647,8 @@ class TutorialsAvailable(models.Model):
 
 class LanguageManager(models.Model):
 
-    user = models.ForeignKey(User)
-    language = models.ForeignKey(Language)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    language = models.ForeignKey(Language, on_delete=models.PROTECT)
     status = models.BooleanField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -684,4 +670,5 @@ class TutorialSummaryCache(models.Model):
 
     def __str__(self):
         return f"FOSS {self.foss_id}: {self.tutorial_count} tutorials"
+
 

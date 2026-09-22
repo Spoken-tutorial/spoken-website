@@ -3,6 +3,7 @@
 
 # Third Party Stuff
 from django.db import migrations, models
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -306,7 +307,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='answer',
             name='question',
-            field=models.ForeignKey(to='certificate.Question'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='certificate.Question'),
             preserve_default=True,
         ),
         migrations.AddField(

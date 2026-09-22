@@ -2,6 +2,7 @@
 
 
 from django.db import models, migrations
+import django.db.models.deletion
 import datetime
 from django.utils.timezone import utc
 
@@ -62,7 +63,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='stworkshopfeedback',
             name='foss',
-            field=models.ForeignKey(default=22, to='creation.FossCategory'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, default=22, to='creation.FossCategory'),
             preserve_default=False,
         ),
         migrations.AddField(

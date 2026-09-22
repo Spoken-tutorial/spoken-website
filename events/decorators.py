@@ -1,10 +1,9 @@
 from functools import wraps
+from urllib.parse import urlparse
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import resolve_url
-from django.utils.decorators import available_attrs
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.utils.six.moves.urllib.parse import urlparse
 from events.views import is_organiser
 
 default_message = "You don't have enough permission to view this page."
@@ -13,7 +12,7 @@ def user_passes_test(test_func, login_url=None, \
     redirect_field_name=REDIRECT_FIELD_NAME):
 
     def decorator(view_func):
-        @wraps(view_func, assigned=available_attrs(view_func))
+        @wraps(view_func)
         def _wrapped_view(request, *args, **kwargs):
             if test_func(request): 
                 return view_func(request, *args, **kwargs)
@@ -34,7 +33,7 @@ def user_passes_test(test_func, login_url=None, \
 
 def group_required(*group_names):
     def in_groups(request):
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             if 'Organiser' in group_names:
                 if bool(request.user.groups.filter(name__in=group_names)) and is_organiser(request.user):
                     return True

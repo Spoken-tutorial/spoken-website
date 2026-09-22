@@ -2,6 +2,7 @@
 
 
 from django.db import models, migrations
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -52,12 +53,12 @@ class Migration(migrations.Migration):
                 ('testimonial', models.CharField(max_length=500)),
                 ('any_other_suggestions', models.CharField(max_length=500)),
                 ('can_contact', models.CharField(max_length=10, choices=[(b'', b'-----'), (b'0', b'Yes'), (b'1', b'No')])),
-                ('city', models.ForeignKey(to='events.City')),
-                ('district', models.ForeignKey(to='events.District')),
+                ('city', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.City')),
+                ('district', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.District')),
                 ('helpful_for', models.ManyToManyField(related_name='events_HelpfulFor_related', to='events.HelpfulFor')),
                 ('language', models.ManyToManyField(related_name='events_Language_related', to='creation.Language')),
                 ('offered_training_foss', models.ManyToManyField(related_name='events_FossCategory_related', to='creation.FossCategory')),
-                ('state', models.ForeignKey(to='events.State')),
+                ('state', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.State')),
             ],
         ),
         migrations.CreateModel(
@@ -80,6 +81,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='organiserfeedback',
             name='university',
-            field=models.ForeignKey(to='events.AcademicCenter'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='events.AcademicCenter'),
         ),
     ]

@@ -3,6 +3,7 @@
 
 # Third Party Stuff
 from django.db import migrations, models
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -21,7 +22,7 @@ class Migration(migrations.Migration):
                 ('roll_no', models.CharField(max_length=50)),
                 ('created', models.DateTimeField(auto_now_add=True, null=True)),
                 ('updated', models.DateTimeField(auto_now=True, null=True)),
-                ('foss', models.ForeignKey(to='creation.FossCategory', null=True)),
+                ('foss', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='creation.FossCategory', null=True)),
             ],
         ),
         migrations.AlterUniqueTogether(
