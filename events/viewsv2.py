@@ -971,9 +971,10 @@ class TrainingCertificate(object):
     signature_width = 160
     signature_height = get_aspect_height(imgPath, signature_width)
 
-    right_margin = 85
-    signature_x = imgDoc._pagesize[0] - right_margin - signature_width
-    signature_y = 92
+    right_margin = 10
+    # signature_x = imgDoc._pagesize[0] - right_margin - signature_width
+    signature_x = imgDoc._pagesize[0] - right_margin
+    signature_y = 110
     imgDoc.drawImage(
       imgPath,
       signature_x,
