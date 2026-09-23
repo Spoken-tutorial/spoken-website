@@ -163,6 +163,7 @@ def get_test_cert_text(test, mdluser, credits=''):
    organization = get_organization(test.training.training_start_date)
    organizer = f"{test.organiser.user.first_name} {test.organiser.user.last_name}"
    invigilator = f"{test.invigilator.user.first_name} {test.invigilator.user.last_name}"
+   org_training = "This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay"
    text_end = f"{org_training}"
 
    # WGF completion certificate text
@@ -190,3 +191,13 @@ def get_test_cert_text(test, mdluser, credits=''):
    else:
       text = f"This is to certify that <b>{name}</b> has successfully completed <b>{foss}</b> test organized at <b>{institution}</b> by <b>{organizer}</b>  with course material provided by {organization}. Passing an online exam, conducted remotely from IIT Bombay, is a pre-requisite for completing this training. <br /><p><b>{invigilator}</b> from <b>{institution}</b> invigilated this examination. {text_end}.</p><br /><br />{credits}"
    return text
+
+
+def get_aspect_height(imgPath, width):
+    """
+    Returns the height of the image based on a fixed width of 160 pixels, maintaining aspect ratio.
+    """
+    img = ImageReader(imgPath)
+    original_width, original_height = img.getSize()
+    height = width * original_height / original_width
+    return height

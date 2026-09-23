@@ -967,7 +967,8 @@ class TrainingCertificate(object):
 
     # Draw image on Canvas and save PDF in buffer
     imgPath = get_signature(ta.training.training_start_date)
-    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+    height = get_aspect_height(imgPath, 160)
+    imgDoc.drawImage(imgPath, 600, 100, 160, height)
 
     #paragraphe
     text = get_training_cert_text(ta)
@@ -3348,7 +3349,8 @@ class AllTrainingCertificateView(TrainingCertificate, View):
 
       # Draw image on Canvas and save PDF in buffer
       imgPath = get_signature(ta.training.training_start_date)
-      imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+      height = get_aspect_height(imgPath, 160)
+      imgDoc.drawImage(imgPath, 600, 100, 160, height)
 
       #paragraphe
       text = get_training_cert_text(ta)
