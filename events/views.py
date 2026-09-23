@@ -77,7 +77,6 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
-from reportlab.lib.utils import ImageReader
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from django.template.context_processors import csrf
 
