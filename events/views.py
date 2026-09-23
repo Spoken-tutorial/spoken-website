@@ -2477,8 +2477,26 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     # Draw image on Canvas and save PDF in buffer
     imgPath = get_signature(ta.test.tdate)
-    height = get_aspect_height(imgPath, 160)
-    imgDoc.drawImage(imgPath, 600, 95, 160, height)    ## at (399,760) with size 160x160
+
+    signature_width = 160
+    signature_height = get_aspect_height(imgPath, signature_width)
+
+    right_margin = -12
+    signature_x = imgDoc._pagesize[0] - right_margin
+    signature_y = 110
+
+    imgDoc.drawImage(
+          imgPath,
+          signature_x,
+          signature_y,
+          signature_width,
+          signature_height,
+          mask='auto'
+        )
+
+
+    # height = get_aspect_height(imgPath, 160)
+    # imgDoc.drawImage(imgPath, 600, 95, 160, height)    ## at (399,760) with size 160x160
 
     credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
@@ -2491,8 +2509,15 @@ def test_participant_ceritificate(request, wid, participant_id):
         spaceAfter = 20)
 
     p = Paragraph(text, centered)
-    p.wrap(700, 200)
-    p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
+
+    page_width, page_height = imgDoc._pagesize
+    text_width = 700
+
+    p.wrap(text_width, 200)
+    x_start = (page_width + 250 - text_width) / 2
+    p.drawOn(imgDoc, x_start, 6.5 * cm)
+    # p.wrap(700, 200)
+    # p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
 
     # Certificate title
     academic_code = w.academic.academic_code

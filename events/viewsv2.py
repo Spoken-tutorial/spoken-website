@@ -995,9 +995,16 @@ class TrainingCertificate(object):
       spaceAfter = 20
     )
 
+
+    page_width, page_height = imgDoc._pagesize
+    text_width = 630
+
     p = Paragraph(text, centered)
-    p.wrap(630, 200)
-    p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+    p.wrap(text_width, 200)
+    x_start = (page_width + 250 - text_width) / 2
+    p.drawOn(imgDoc, x_start, 7 * cm)
+    # p.wrap(630, 200)
+    # p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
     # Use PyPDF to merge the image-PDF into the template
     template_path = get_training_certificate(ta)
