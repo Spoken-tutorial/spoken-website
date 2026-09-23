@@ -958,7 +958,7 @@ class TrainingCertificate(object):
         wgf_title_y=400
     )
 
-    imgDoc.drawCentredString(405, title_y, certificate_title)
+    imgDoc.drawCentredString(420, title_y, certificate_title)
 
     #date
     if ta.training.department.id != 169:
