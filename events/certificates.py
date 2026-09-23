@@ -34,10 +34,11 @@ def get_participation_certificate_title(academic_code,normal_title_y,wgf_title_y
    Returns participation certificate title and title position.
    """
    if academic_code in WGF_INSTITUTIONS:
-      certificate_title = "Certificate of Participation"
+      certificate_title = "Participation Certificate"
       title_y = wgf_title_y
    else:
-      certificate_title = "Participation Certificate"
+      certificate_title = "Certificate of Participation"
+      
       title_y = normal_title_y
 
    return certificate_title, title_y
