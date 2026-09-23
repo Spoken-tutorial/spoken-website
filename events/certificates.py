@@ -2,6 +2,7 @@ from django.conf import settings
 from spoken.config import EDUPYRAMIDS_CERTIFICATE_DATE,WGF_INSTITUTIONS
 import re
 import os
+from reportlab.lib.utils import ImageReader
 
 SCHOOL = 24
 FDP = 169
