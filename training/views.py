@@ -37,6 +37,7 @@ from cms.sortable import *
 from cms.views import create_profile, send_registration_confirmation, get_confirmation_code
 from cms.models import Profile
 from certificate.views import _clean_certificate_certificate
+from events.certificates import get_aspect_height
 from django.http import HttpResponse
 from django.template import RequestContext
 from .filters import CompanyFilter
@@ -1160,7 +1161,8 @@ class FDPTrainingCertificate(object):
         imgDoc.drawCentredString(405, 470, "Certificate of Participation")
         # Draw image on Canvas and save PDF in buffer
     imgPath = get_signature(training_start)
-    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+    height = get_aspect_height(imgPath, 160)
+    imgDoc.drawImage(imgPath, 600, 100, 160, height)
 
     #password
     certificate_pass = ''
@@ -1252,7 +1254,8 @@ class BatchTrainingCertificateView(FDPTrainingCertificate, View):
                     pdf_canvas.drawCentredString(405, 470, "Certificate of Participation")
 
                 signature_path = get_signature(event.event_start_date)
-                pdf_canvas.drawImage(signature_path, 600, 100, 150, 76)
+                height = get_aspect_height(signature_path, 160)
+                pdf_canvas.drawImage(signature_path, 600, 100, 160, height)
 
                 pdf_canvas.setFillColorRGB(211, 211, 211)
                 pdf_canvas.setFont('Helvetica', 10, leading=None)
@@ -1759,7 +1762,8 @@ class ILWTestCertificate(object):
         imgDoc.drawCentredString(405, 470, "Certificate for Completion of Training")
         # Draw image on Canvas and save PDF in buffer
     imgPath = get_signature(training_start)
-    imgDoc.drawImage(imgPath, 600, 100, 150, 76)
+    height = get_aspect_height(imgPath, 160)
+    imgDoc.drawImage(imgPath, 600, 100, 160, height)
 
     #password
     certificate_pass = ''
@@ -1947,7 +1951,8 @@ class BatchTestCertificateView(ILWTestCertificate, View):
                 pdf_canvas.drawCentredString(405, 470, "Certificate for Completion of Training")
 
             signature_path = get_signature(event.event_start_date)
-            pdf_canvas.drawImage(signature_path, 600, 100, 150, 76)
+            height = get_aspect_height(signature_path, 160)
+            pdf_canvas.drawImage(signature_path, 600, 100, 160, height)
 
             if event.event_type == "INTERN":
                 pdf_canvas.setFillColorRGB(0, 0, 0)

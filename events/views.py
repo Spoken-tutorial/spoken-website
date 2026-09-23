@@ -77,6 +77,7 @@ from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.utils import ImageReader
 from PyPDF2 import PdfFileWriter, PdfFileReader
 from django.template.context_processors import csrf
 
@@ -2477,7 +2478,8 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     # Draw image on Canvas and save PDF in buffer
     imgPath = get_signature(ta.test.tdate)
-    imgDoc.drawImage(imgPath, 600, 95, 150, 76)    ## at (399,760) with size 160x160
+    height = get_aspect_height(imgPath, 160)
+    imgDoc.drawImage(imgPath, 600, 95, 160, height)    ## at (399,760) with size 160x160
 
     credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
@@ -2582,7 +2584,8 @@ def test_participant_ceritificate_all(request, testid):
 
         # Draw image on Canvas and save PDF in buffer
         imgPath = get_signature(ta.test.tdate)
-        imgDoc.drawImage(imgPath, 600, 95, 150, 76)    ## at (399,760) with size 160x160
+        height = get_aspect_height(imgPath, 160)
+        imgDoc.drawImage(imgPath, 600, 95, 160, height)    ## at (399,760) with size 160x160
 
         credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
@@ -3513,3 +3516,4 @@ def add_youtube_video(request):
             return HttpResponseRedirect('/software-training/')
     
     return render(request, template, context)
+
