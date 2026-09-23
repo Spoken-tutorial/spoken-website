@@ -967,8 +967,22 @@ class TrainingCertificate(object):
 
     # Draw image on Canvas and save PDF in buffer
     imgPath = get_signature(ta.training.training_start_date)
-    height = get_aspect_height(imgPath, 160)
-    imgDoc.drawImage(imgPath, 600, 100, 160, height)
+
+    signature_width = 160
+    signature_height = get_aspect_height(imgPath, signature_width)
+
+    right_margin = 85
+    signature_x = imgDoc._pagesize[0] - right_margin - signature_width
+    signature_y = 92
+    imgDoc.drawImage(
+      imgPath,
+      signature_x,
+      signature_y,
+      signature_width,
+      signature_height,
+      mask='auto'
+    )
+    # imgDoc.drawImage(imgPath, 600, 100, 160, height)
 
     #paragraphe
     text = get_training_cert_text(ta)
