@@ -2515,7 +2515,7 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     p.wrap(text_width, 200)
     x_start = (page_width + 250 - text_width) / 2
-    p.drawOn(imgDoc, x_start, 6 * cm)
+    p.drawOn(imgDoc, x_start, 8 * cm)
     # p.drawOn(imgDoc, x_start, 6.5 * cm)
     # p.wrap(700, 200)
     # p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
