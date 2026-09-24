@@ -2502,6 +2502,7 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     #paragraphe
     text = get_test_cert_text(ta.test, mdluser, credits=credits)
+    text = get_test_cert_text(ta.test, mdluser, credits=credits)
     centered = ParagraphStyle(name = 'centered',
         fontSize = 15,
         leading = 24,
@@ -2513,7 +2514,8 @@ def test_participant_ceritificate(request, wid, participant_id):
     page_width, page_height = imgDoc._pagesize
     text_width = 700
 
-    p.wrap(text_width, 200)
+    # p.wrap(text_width, 200)
+    p.wrap(text_width, 250)
     x_start = (page_width + 250 - text_width) / 2
     p.drawOn(imgDoc, x_start, 7.5 * cm)
     # p.drawOn(imgDoc, x_start, 6.5 * cm)
