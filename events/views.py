@@ -2508,6 +2508,15 @@ def test_participant_ceritificate(request, wid, participant_id):
         alignment = 1,
         spaceAfter = 20)
 
+    # Certificate title
+    academic_code = w.academic.academic_code
+
+    certificate_title, title_y = get_completion_certificate_title(
+        academic_code=academic_code,
+        normal_title_y=17 * cm,
+        wgf_title_y=14.2 * cm,
+        foss_name=w.foss.foss
+    )
     p = Paragraph(text, centered)
 
     page_width, page_height = imgDoc._pagesize
@@ -2515,6 +2524,8 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     # p.wrap(text_width, 200)
     # p.wrap(text_width, 250)
+
+    
     paragraph_width, paragraph_height = p.wrap(text_width, 200)
     x_start = (page_width + 250 - text_width) / 2
 
@@ -2527,15 +2538,15 @@ def test_participant_ceritificate(request, wid, participant_id):
     # p.wrap(700, 200)
     # p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
 
-    # Certificate title
-    academic_code = w.academic.academic_code
+    # # Certificate title
+    # academic_code = w.academic.academic_code
 
-    certificate_title, title_y = get_completion_certificate_title(
-        academic_code=academic_code,
-        normal_title_y=17 * cm,
-        wgf_title_y=14.2 * cm,
-        foss_name=w.foss.foss
-    )
+    # certificate_title, title_y = get_completion_certificate_title(
+    #     academic_code=academic_code,
+    #     normal_title_y=17 * cm,
+    #     wgf_title_y=14.2 * cm,
+    #     foss_name=w.foss.foss
+    # )
     centered = ParagraphStyle(name = 'centered',
         fontSize = 25,
         leading = 25,
