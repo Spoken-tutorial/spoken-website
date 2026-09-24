@@ -34,6 +34,7 @@ urlpatterns = [
     url(r'^keyword-search/$',  keyword_search, name="keyword-search"),
     url(r'^watch/([0-9a-zA-Z-+%\(\).,\' ]+)/([0-9a-zA-Z-+%\(\).,\' ]+)/([a-zA-Z-]+)/$',  watch_tutorial, name="watch_tutorial"),
     url(r'^What_is_a_Spoken_Tutorial/$',  what_is_spoken_tutorial, name="what_is_spoken_tutorial"),
+    url(r'^swayam/?$', swayam, name="swayam"),
     url(r'^get-language/(?P<tutorial_type>[\w-]+)/$',  get_language, name="get_language"),
     url(r'^testimonials/new/$',  testimonials_new, name="testimonials_new"),
     url(r'^testimonials/$',  testimonials, name="testimonials"),
