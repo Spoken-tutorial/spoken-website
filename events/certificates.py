@@ -139,8 +139,8 @@ def get_training_cert_text(ta):
 
    if is_wgf_institution(academic_code):
       text = (
-         f"This is to certify that <b>{name}</b> has participated <br />"
-         f"in the <b>{foss}</b> training, organised by<br /> "
+         f"This is to certify that <b>{name}</b> has participated in the "
+         f"<b>{foss}</b> training, organised by "
          f"<b>WHEELS GLOBAL FOUNDATION</b> and "
          f"<b>EduPyramids, SINE, IIT Bombay</b>."
          f"<br /><br />"
@@ -188,16 +188,16 @@ def get_test_cert_text(test, mdluser, credits=''):
    # WGF completion certificate text
    if is_wgf_institution(academic_code):
       text = (
-         f"This is to certify that <b>{name}</b> has successfully completed<br />"
-         f"the course <b>{foss}</b>, organised by<br />"
+         f"This is to certify that <b>{name}</b> has successfully completed "
+         f"the course <b>{foss}</b>, organised by "
          f"<b>WHEELS GLOBAL FOUNDATION</b> and "
          f"<b>EduPyramids, SINE, IIT Bombay</b>."
          f"<br /><br />"
          f"Passing an online exam conducted remotely by EduPyramids "
-         f"is a prerequisite to complete this course. <br />"
+         f"is a prerequisite to complete this course. "
          f"<b>WHEELS GLOBAL FOUNDATION</b> organised the training "
          f"of the course and invigilation of this examination."
-         f"<br />"
+         f"<br /><br />"
          f"{credits}"
       )
       return text
