@@ -1001,11 +1001,17 @@ class TrainingCertificate(object):
     text_width = 630
 
     p = Paragraph(text, centered)
-    p.wrap(text_width, 250)
+    # p.wrap(text_width, 250)
     # p.wrap(text_width, 200)
+    paragraph_width, paragraph_height = p.wrap(text_width, 200)
     x_start = (page_width + 250 - text_width) / 2
     # p.drawOn(imgDoc, x_start, 7 * cm)
-    p.drawOn(imgDoc, x_start, 8 * cm)
+
+    paragraph_top = title_y - 45
+    paragraph_y = paragraph_top - paragraph_height
+
+    p.drawOn(imgDoc, x_start, paragraph_y)
+    # p.drawOn(imgDoc, x_start, 8 * cm)
     # p.wrap(630, 200)
     # p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
