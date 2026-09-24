@@ -988,10 +988,11 @@ class TrainingCertificate(object):
     #paragraphe
     text = get_training_cert_text(ta)
 
+    align = 1 if is_wgf_institution(academic_code) else 0
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
       leading = 30,
-      alignment = 0,
+      alignment = align,
       spaceAfter = 20
     )
 
@@ -3377,10 +3378,11 @@ class AllTrainingCertificateView(TrainingCertificate, View):
       #paragraphe
       text = get_training_cert_text(ta)
 
+      align = 1 if is_wgf_institution(academic_code) else 0
       centered = ParagraphStyle(name = 'centered',
         fontSize = 16,
         leading = 30,
-        alignment = 0,
+        alignment = align,
         spaceAfter = 20
       )
 

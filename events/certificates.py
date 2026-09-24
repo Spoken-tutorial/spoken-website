@@ -122,13 +122,16 @@ def get_training_cert_text(ta):
    org_training = "This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay"
 
    if is_wgf_institution(academic_code):
+      name_formatted = str(name).replace(' ', '&nbsp;')
+      foss_formatted = str(foss).replace(' ', '&nbsp;')
+      org_formatted = "EduPyramids,&nbsp;SINE,&nbsp;IIT&nbsp;Bombay"
       text = (
-         f"This is to certify that <b>{name}</b> has participated in the "
-         f"<b>{foss}</b> training, offered by "
-         f"<b>EduPyramids, SINE, IIT Bombay</b>."
+         f"This is to certify that <b>{name_formatted}</b> has participated in the "
+         f"<b>{foss_formatted}</b> training, offered by "
+         f"<b>{org_formatted}</b>."
          f"<br /><br />"
          f"A comprehensive set of topics pertaining to "
-         f"<b>{foss}</b> was covered in the training."
+         f"<b>{foss_formatted}</b> was covered in the training."
       )
       return text
    semsplit = re.split('-|, ',ta.training.training_planner.get_semester())
@@ -170,14 +173,18 @@ def get_test_cert_text(test, mdluser, credits=''):
 
    # WGF completion certificate text
    if is_wgf_institution(academic_code):
+      name_formatted = str(name).replace(' ', '&nbsp;')
+      foss_formatted = str(foss).replace(' ', '&nbsp;')
+      org_formatted = "EduPyramids,&nbsp;SINE,&nbsp;IIT&nbsp;Bombay"
+      wheels_formatted = "WHEELS&nbsp;Global&nbsp;Foundation"
       text = (
-         f"This is to certify that <b>{name}</b> has successfully "
-         f"completed the course <b>{foss}</b>, offered by "
-         f"<b>EduPyramids, SINE, IIT Bombay</b>."
+         f"This is to certify that <b>{name_formatted}</b> has successfully "
+         f"completed the course <b>{foss_formatted}</b>, offered by "
+         f"<b>{org_formatted}</b>."
          f"<br /><br />"
          f"Passing an online exam conducted remotely by EduPyramids "
          f"is a prerequisite to complete this course. "
-         f"<b>WHEELS Global Foundation</b> organised the invigilation "
+         f"<b>{wheels_formatted}</b> organised the invigilation "
          f"of this exam."
          f"<br /><br />"
          f"{credits}"
