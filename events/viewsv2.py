@@ -993,8 +993,8 @@ class TrainingCertificate(object):
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
       leading = 30,
-      # alignment = 0,
-      alignment = 1,
+      alignment = 0,
+      # alignment = 1,
       spaceAfter = 20
     )
 
