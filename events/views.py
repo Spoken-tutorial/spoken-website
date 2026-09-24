@@ -2502,6 +2502,9 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     #paragraphe
     text = get_test_cert_text(ta.test, mdluser, credits=credits)
+    name = f"{mdluser.firstname} {mdluser.lastname}"
+    foss = w.foss.foss
+
     centered = ParagraphStyle(name = 'centered',
         fontSize = 15,
         leading = 24,
@@ -2529,12 +2532,17 @@ def test_participant_ceritificate(request, wid, participant_id):
     paragraph_width, paragraph_height = p.wrap(text_width, 200)
     x_start = (page_width + 250 - text_width) / 2
 
-    paragraph_top = title_y - 40
-    paragraph_y = paragraph_top - paragraph_height
+    content_y = get_adjusted_content_y(name, foss, 6.5 * cm)
+    p.drawOn(imgDoc, x_start, content_y)
 
-    p.drawOn(imgDoc, x_start, paragraph_y)
+
+#     paragraph_top = title_y - 40
+#     paragraph_y = paragraph_top - paragraph_height
+
+#     p.drawOn(imgDoc, x_start, paragraph_y)
     # p.drawOn(imgDoc, x_start, 7.5 * cm)
     # p.drawOn(imgDoc, x_start, 6.5 * cm)
+
     # p.wrap(700, 200)
     # p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
 
@@ -2634,6 +2642,9 @@ def test_participant_ceritificate_all(request, testid):
 
         #paragraphe
         text = get_test_cert_text(ta.test, mdluser, credits=credits)
+        name = f"{mdluser.firstname} {mdluser.lastname}"
+        foss = w.foss.foss
+
         centered = ParagraphStyle(name = 'centered',
             fontSize = 15,
             leading = 24,
@@ -2642,7 +2653,8 @@ def test_participant_ceritificate_all(request, testid):
 
         p = Paragraph(text, centered)
         p.wrap(700, 200)
-        p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
+        content_y = get_adjusted_content_y(name, foss, 6.5 * cm)
+        p.drawOn(imgDoc, 3 * cm, content_y)
 
         academic_code = w.academic.academic_code
 

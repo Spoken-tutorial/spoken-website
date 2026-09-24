@@ -3,10 +3,26 @@ from spoken.config import EDUPYRAMIDS_CERTIFICATE_DATE,WGF_INSTITUTIONS
 import re
 import os
 from reportlab.lib.utils import ImageReader
+from reportlab.lib.units import cm
 
 SCHOOL = 24
 FDP = 169
 CSC = 18
+
+def get_adjusted_content_y(name, foss, base_y):
+   
+   # adjust the content y coordinate based on character counts of student name and foss name
+ 
+   name_len = len(name) if name else 0
+   foss_len = len(foss) if foss else 0
+   combined_len = name_len + foss_len
+
+   if combined_len > 55 or name_len > 28 or foss_len > 35:
+      return base_y - 0.8 * cm
+   elif combined_len > 35 or name_len > 20 or foss_len > 22:
+      return base_y - 0.5 * cm
+   return base_y
+
 
 SPK = {
    'stp': 'Blank-Certificate.pdf',

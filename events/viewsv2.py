@@ -987,6 +987,8 @@ class TrainingCertificate(object):
 
     #paragraphe
     text = get_training_cert_text(ta)
+    name = f"{ta.student.user.first_name} {ta.student.user.last_name}"
+    foss = ta.training.course.foss.foss
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
@@ -1005,13 +1007,18 @@ class TrainingCertificate(object):
     # p.wrap(text_width, 200)
     paragraph_width, paragraph_height = p.wrap(text_width, 200)
     x_start = (page_width + 250 - text_width) / 2
+
+    content_y = get_adjusted_content_y(name, foss, 7 * cm)
+    p.drawOn(imgDoc, x_start, content_y)
+
     # p.drawOn(imgDoc, x_start, 7 * cm)
 
-    paragraph_top = title_y - 45
-    paragraph_y = paragraph_top - paragraph_height
+#     paragraph_top = title_y - 45
+#     paragraph_y = paragraph_top - paragraph_height
 
-    p.drawOn(imgDoc, x_start, paragraph_y)
+#     p.drawOn(imgDoc, x_start, paragraph_y)
     # p.drawOn(imgDoc, x_start, 8 * cm)
+
     # p.wrap(630, 200)
     # p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
@@ -3385,6 +3392,8 @@ class AllTrainingCertificateView(TrainingCertificate, View):
 
       #paragraphe
       text = get_training_cert_text(ta)
+      name = f"{ta.student.user.first_name} {ta.student.user.last_name}"
+      foss = ta.training.course.foss.foss
 
       centered = ParagraphStyle(name = 'centered',
         fontSize = 16,
@@ -3395,7 +3404,8 @@ class AllTrainingCertificateView(TrainingCertificate, View):
 
       p = Paragraph(text, centered)
       p.wrap(630, 200)
-      p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+      content_y = get_adjusted_content_y(name, foss, 7 * cm)
+      p.drawOn(imgDoc, 4.2 * cm, content_y)
       imgDoc.save()
       # Use PyPDF to merge the image-PDF into the template
       template_path = get_training_certificate(ta)
