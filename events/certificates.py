@@ -127,7 +127,7 @@ def get_training_cert_text(ta):
          f"in the <b>{foss}</b> training, organised by<br /> "
          f"<b>WHEELS GLOBAL FOUNDATION</b> and "
          f"<b>EduPyramids, SINE, IIT Bombay</b>."
-         f"<br />"
+         f"<br /><br />"
          f"A comprehensive set of topics pertaining to "
          f"<b>{foss}</b> was covered in the training."
       )
@@ -176,7 +176,7 @@ def get_test_cert_text(test, mdluser, credits=''):
          f"the course <b>{foss}</b>, organised by<br />"
          f"<b>WHEELS GLOBAL FOUNDATION</b> and "
          f"<b>EduPyramids, SINE, IIT Bombay</b>."
-         f"<br />"
+         f"<br /><br />"
          f"Passing an online exam conducted remotely by EduPyramids "
          f"is a prerequisite to complete this course. <br />"
          f"<b>WHEELS GLOBAL FOUNDATION</b> organised the training "
