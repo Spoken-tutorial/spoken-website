@@ -2562,8 +2562,8 @@ def test_participant_ceritificate(request, wid, participant_id):
         spaceAfter = 15)
 
     p = Paragraph(certificate_title, centered)
-    p.wrap(500,20)
-    p.drawOn(imgDoc, 6.2 * cm, title_y)
+    p.wrap(842, 100)
+    p.drawOn(imgDoc, 0, title_y)
 
     imgDoc.save()
 
@@ -2674,8 +2674,8 @@ def test_participant_ceritificate_all(request, testid):
         )
 
         p = Paragraph(certificate_title, centered)
-        p.wrap(600, 100)
-        p.drawOn(imgDoc,6.2 * cm,title_y)
+        p.wrap(842, 100)
+        p.drawOn(imgDoc, 0, title_y)
         
         imgDoc.save()
         template_path = get_test_certificate(ta)
