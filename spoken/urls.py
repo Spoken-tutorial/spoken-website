@@ -143,10 +143,18 @@ urlpatterns = [
     #donation
     url(r'^donate/', include('donate.urls', namespace='donate')),
 
+     # swayam
+        url(
+        r'^swayam/',
+        include('swayam.urls', namespace='swayam'),
+        ),
+
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
     
     #nep book fiar
     url(r'wbf-book-fair-2023', bookfair,name="bookfair"),
+
+   
     
 ] + static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
