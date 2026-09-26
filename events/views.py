@@ -2635,8 +2635,14 @@ def test_participant_ceritificate_all(request, testid):
 
         # Draw image on Canvas and save PDF in buffer
         imgPath = get_signature(ta.test.tdate)
-        height = get_aspect_height(imgPath, 160)
-        imgDoc.drawImage(imgPath, 600, 95, 160, height)    ## at (399,760) with size 160x160
+
+        signature_width = 160
+        signature_height = get_aspect_height(imgPath,signature_width)
+        right_margin = -12
+        signature_x = (imgDoc._pagesize[0] - right_margin)
+        signature_y = 110
+
+        imgDoc.drawImage(imgPath,signature_x,signature_y,signature_width,signature_height,mask='auto')
 
         credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
@@ -2652,16 +2658,20 @@ def test_participant_ceritificate_all(request, testid):
             spaceAfter = 20)
 
         p = Paragraph(text, centered)
-        p.wrap(700, 200)
-        content_y = get_adjusted_content_y(name, foss, 6.5 * cm)
-        p.drawOn(imgDoc, 3 * cm, content_y)
+        page_width, page_height = imgDoc._pagesize
+        text_width = 700
+        paragraph_width, paragraph_height = p.wrap(text_width,200)
+        x_start = (page_width + 250 - text_width) / 2
+
+        content_y = get_adjusted_content_y(name,foss,6.5 * cm)
+        p.drawOn(imgDoc,x_start,content_y)
 
         academic_code = w.academic.academic_code
 
         certificate_title, title_y = get_completion_certificate_title(
             academic_code=academic_code,
             normal_title_y=17 * cm,
-            wgf_title_y=14.2 * cm,
+            wgf_title_y=14.5 * cm,
             foss_name=w.foss.foss
         )
 
