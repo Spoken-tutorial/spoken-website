@@ -1,0 +1,144 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+
+{% block title %}SWAYAM Plus | Spoken Tutorial{% endblock %}
+
+{% block cssblock %}
+<style>
+    .swayam-card {
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        padding: 35px;
+        margin-top: 20px;
+        margin-bottom: 40px;
+    }
+    .swayam-main-heading {
+        color: #1b83bc;
+        font-weight: 700;
+        font-size: 28px;
+        margin-top: 0;
+        margin-bottom: 25px;
+        text-align: center;
+        border-bottom: 2px solid #eef2f7;
+        padding-bottom: 15px;
+    }
+    .swayam-subheading {
+        color: #333333;
+        font-weight: 600;
+        font-size: 20px;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    .swayam-video-wrapper {
+        max-width: 620px;
+        margin: 0 auto 25px auto;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+        background: #000;
+    }
+    .swayam-question-section {
+        max-width: 620px;
+        margin: 25px auto 25px auto;
+        padding: 20px;
+        background: #f8fafc;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+    }
+    .swayam-question-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 12px;
+        display: block;
+    }
+    .swayam-dropdown {
+        height: 44px;
+        font-size: 15px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e0;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .swayam-action-section {
+        text-align: center;
+        margin-top: 25px;
+        margin-bottom: 15px;
+    }
+    .swayam-btn-cta {
+        background-color: #1b83bc;
+        border-color: #156d9c;
+        color: #ffffff;
+        font-size: 17px;
+        font-weight: 600;
+        padding: 14px 28px;
+        border-radius: 6px;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 3px 8px rgba(27, 131, 188, 0.3);
+        display: inline-block;
+        text-decoration: none !important;
+    }
+    .swayam-btn-cta:hover, .swayam-btn-cta:focus, .swayam-btn-cta:active {
+        background-color: #136694;
+        border-color: #0f5277;
+        color: #ffffff;
+        box-shadow: 0 5px 12px rgba(27, 131, 188, 0.45);
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block search %}
+{% endblock %}
+
+{% block content %}
+<div class="container" style="width: 100%;">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="swayam-card">
+                <!-- 1. Heading -->
+                <h2 class="swayam-main-heading">EduPyramids is now available at SWAYAM Plus</h2>
+
+                <!-- 2. Video section with subheading -->
+                <div class="swayam-video-section">
+                    <h3 class="swayam-subheading">What is Spoken Tutorial?</h3>
+                    <div class="swayam-video-wrapper">
+                        <div class="embed-responsive embed-responsive-16by9">
+                            <iframe class="embed-responsive-item" src="{{ video_url }}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Question with Dropdown -->
+                <div class="swayam-question-section">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="swayam_source" class="swayam-question-label">
+                            <i class="fa fa-question-circle" style="color: #1b83bc;"></i> How did you come to know about EduPyramids' courses available on SWAYAM Plus?
+                        </label>
+                        <select id="swayam_source" name="swayam_source" class="form-control swayam-dropdown">
+                            <option value="" disabled selected>-- Select an option --</option>
+                            <option value="1">I am from Subscribed Institution of EduPyramids</option>
+                            <option value="2">I am from ILW Partnered Institution of EduPyramids</option>
+                            <option value="3">Through WhatsApp message</option>
+                            <option value="4">Through Email communication</option>
+                            <option value="5">Through my friends</option>
+                            <option value="6">Through my HOD/Teacher/Principal</option>
+                            <option value="7">Social Media Platforms (Facebook, LinkedIn)</option>
+                            <option value="8">Through Spoken Tutorial Website</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 4. Action Button -->
+                <div class="swayam-action-section">
+                    <a href="{{ registration_url }}" target="_blank" class="btn swayam-btn-cta">
+                        Let's go to SWAYAM Plus for further process and registration <i class="fa fa-arrow-circle-right" style="margin-left: 6px;"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

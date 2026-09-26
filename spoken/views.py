@@ -30,7 +30,7 @@ from creation.views import get_video_info
 from events.views import get_page
 from forums.models import Question, Answer
 from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
- MONGO_HOST, MONGO_DB, TUTORIAL_RESTRICTION_DATE, ALLOWED_LOGS
+ MONGO_HOST, MONGO_DB, TUTORIAL_RESTRICTION_DATE, ALLOWED_LOGS, SWAYAM_VIDEO_URL, SWAYAM_REGISTRATION_URL
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
 from .search import search_for_results
@@ -1139,3 +1139,12 @@ def check_payment_status(request, order_id):
     email = sub.email
     result = poll_payment_status(order_id, email, amount)
     return JsonResponse(result)
+
+
+def swayam(request):
+    # swayam plus page view
+    context = {
+        'video_url': SWAYAM_VIDEO_URL,
+        'registration_url': SWAYAM_REGISTRATION_URL,
+    }
+    return render(request, 'spoken/templates/swayam.html', context)
