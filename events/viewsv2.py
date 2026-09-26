@@ -3387,9 +3387,12 @@ class AllTrainingCertificateView(TrainingCertificate, View):
 
       # Draw image on Canvas and save PDF in buffer
       imgPath = get_signature(ta.training.training_start_date)
-      height = get_aspect_height(imgPath, 160)
-      imgDoc.drawImage(imgPath, 600, 100, 160, height)
-
+      signature_width = 160
+      signature_height = get_aspect_height(imgPath, signature_width)
+      right_margin = 10
+      signature_x = imgDoc._pagesize[0] - right_margin
+      signature_y = 110
+      imgDoc.drawImage(imgPath,signature_x,signature_y,signature_width,signature_height,mask='auto')
       #paragraphe
       text = get_training_cert_text(ta)
       name = f"{ta.student.user.first_name} {ta.student.user.last_name}"
@@ -3404,7 +3407,7 @@ class AllTrainingCertificateView(TrainingCertificate, View):
 
       p = Paragraph(text, centered)
       p.wrap(630, 200)
-      content_y = get_adjusted_content_y(name, foss, 7 * cm)
+      content_y = get_adjusted_content_y(name, foss, 8 * cm)
       p.drawOn(imgDoc, 4.2 * cm, content_y)
       imgDoc.save()
       # Use PyPDF to merge the image-PDF into the template
