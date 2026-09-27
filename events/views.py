@@ -2671,7 +2671,7 @@ def test_participant_ceritificate_all(request, testid):
         certificate_title, title_y = get_completion_certificate_title(
             academic_code=academic_code,
             normal_title_y=17 * cm,
-            wgf_title_y=14.5 * cm,
+            wgf_title_y=14.2 * cm,
             foss_name=w.foss.foss
         )
 
