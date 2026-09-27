@@ -3372,7 +3372,7 @@ class AllTrainingCertificateView(TrainingCertificate, View):
           wgf_title_y=410
       )
 
-      imgDoc.drawCentredString(405, title_y, certificate_title)
+      imgDoc.drawCentredString(420, title_y, certificate_title)
 
       #date
       if ta.training.department.id != 169:
