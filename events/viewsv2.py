@@ -3368,8 +3368,8 @@ class AllTrainingCertificateView(TrainingCertificate, View):
 
       certificate_title, title_y = get_participation_certificate_title(
           academic_code=academic_code,
-          normal_title_y=480,
-          wgf_title_y=410
+          normal_title_y=470,
+          wgf_title_y=400
       )
 
       imgDoc.drawCentredString(420, title_y, certificate_title)
@@ -3405,10 +3405,15 @@ class AllTrainingCertificateView(TrainingCertificate, View):
         spaceAfter = 20
       )
 
+      page_width, page_height = imgDoc._pagesize
+      text_width = 630
+
       p = Paragraph(text, centered)
-      p.wrap(630, 200)
+      paragraph_width, paragraph_height = p.wrap(text_width, 200)
+      x_start = (page_width + 250 - text_width) / 2
+
       content_y = get_adjusted_content_y(name, foss, 7 * cm)
-      p.drawOn(imgDoc, 4.2 * cm, content_y)
+      p.drawOn(imgDoc, x_start, content_y)
       imgDoc.save()
       # Use PyPDF to merge the image-PDF into the template
       template_path = get_training_certificate(ta)
