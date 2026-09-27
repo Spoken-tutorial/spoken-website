@@ -3407,7 +3407,7 @@ class AllTrainingCertificateView(TrainingCertificate, View):
 
       p = Paragraph(text, centered)
       p.wrap(630, 200)
-      content_y = get_adjusted_content_y(name, foss, 8 * cm)
+      content_y = get_adjusted_content_y(name, foss, 7 * cm)
       p.drawOn(imgDoc, 4.2 * cm, content_y)
       imgDoc.save()
       # Use PyPDF to merge the image-PDF into the template
