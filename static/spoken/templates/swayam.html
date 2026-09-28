@@ -14,6 +14,7 @@
         margin-top: 20px;
         margin-bottom: 40px;
     }
+
     .swayam-main-heading {
         color: #1b83bc;
         font-weight: 700;
@@ -24,6 +25,7 @@
         border-bottom: 2px solid #eef2f7;
         padding-bottom: 15px;
     }
+
     .swayam-subheading {
         color: #333333;
         font-weight: 600;
@@ -32,6 +34,7 @@
         margin-bottom: 15px;
         text-align: center;
     }
+
     .swayam-video-wrapper {
         max-width: 620px;
         margin: 0 auto 25px auto;
@@ -40,6 +43,7 @@
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
         background: #000;
     }
+
     .swayam-question-section {
         max-width: 620px;
         margin: 25px auto 25px auto;
@@ -48,6 +52,7 @@
         border-radius: 6px;
         border: 1px solid #e2e8f0;
     }
+
     .swayam-question-label {
         font-size: 16px;
         font-weight: 600;
@@ -55,18 +60,21 @@
         margin-bottom: 12px;
         display: block;
     }
+
     .swayam-dropdown {
         height: 44px;
         font-size: 15px;
         border-radius: 6px;
         border: 1px solid #cbd5e0;
-        box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
     }
+
     .swayam-action-section {
         text-align: center;
         margin-top: 25px;
         margin-bottom: 15px;
     }
+
     .swayam-btn-cta {
         background-color: #1b83bc;
         border-color: #156d9c;
@@ -80,7 +88,10 @@
         display: inline-block;
         text-decoration: none !important;
     }
-    .swayam-btn-cta:hover, .swayam-btn-cta:focus, .swayam-btn-cta:active {
+
+    .swayam-btn-cta:hover,
+    .swayam-btn-cta:focus,
+    .swayam-btn-cta:active {
         background-color: #136694;
         border-color: #0f5277;
         color: #ffffff;
@@ -106,7 +117,8 @@
                     <h3 class="swayam-subheading">What is Spoken Tutorial?</h3>
                     <div class="swayam-video-wrapper">
                         <div class="embed-responsive embed-responsive-16by9">
-                            <iframe class="embed-responsive-item" src="{{ video_url }}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                            <iframe class="embed-responsive-item" src="{{ video_url }}" allowfullscreen
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
                         </div>
                     </div>
                 </div>
@@ -115,7 +127,8 @@
                 <div class="swayam-question-section">
                     <div class="form-group" style="margin-bottom: 0;">
                         <label for="swayam_source" class="swayam-question-label">
-                            <i class="fa fa-question-circle" style="color: #1b83bc;"></i> How did you come to know about EduPyramids' courses available on SWAYAM Plus?
+                            <i class="fa fa-question-circle" style="color: #1b83bc;"></i> How did you come to know about
+                            EduPyramids' courses available on SWAYAM Plus?
                         </label>
                         <select id="swayam_source" name="swayam_source" class="form-control swayam-dropdown">
                             <option value="" disabled selected>-- Select an option --</option>
@@ -128,17 +141,75 @@
                             <option value="7">Social Media Platforms (Facebook, LinkedIn)</option>
                             <option value="8">Through Spoken Tutorial Website</option>
                         </select>
+                        <div id="swayam_error_msg"
+                            style="display: none; color: #d9534f; margin-top: 8px; font-size: 14px; font-weight: 600;">
+                            <i class="fa fa-exclamation-circle"></i> Please select an option from the dropdown before
+                            proceeding.
+                        </div>
                     </div>
                 </div>
 
                 <!-- 4. Action Button -->
                 <div class="swayam-action-section">
-                    <a href="{{ registration_url }}" target="_blank" class="btn swayam-btn-cta">
-                        Let's go to SWAYAM Plus for further process and registration <i class="fa fa-arrow-circle-right" style="margin-left: 6px;"></i>
+                    {% csrf_token %}
+                    <a href="{{ registration_url }}" target="_blank" id="swayam_cta_btn" class="btn swayam-btn-cta">
+                        Let's go to SWAYAM Plus for further process and registration <i class="fa fa-arrow-circle-right"
+                            style="margin-left: 6px;"></i>
                     </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block jsblock %}
+<script>
+    $(document).ready(function () {
+        var $select = $('#swayam_source');
+        var $error = $('#swayam_error_msg');
+        var $ctaBtn = $('#swayam_cta_btn');
+        var registrationUrl = "{{ registration_url }}";
+
+        $select.on('change', function () {
+            if ($(this).val()) {
+                $error.hide();
+                $select.css('border-color', '#cbd5e0');
+            }
+        });
+
+        $ctaBtn.on('click', function (e) {
+            var selectedVal = $select.val();
+
+            if (!selectedVal) {
+                e.preventDefault();
+                $error.show();
+                $select.css('border-color', '#d9534f');
+                $select.focus();
+                return false;
+            }
+
+            var selectedText = $select.find('option:selected').text();
+            var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+
+            // tracking data
+            $.ajax({
+                url: "{% url 'swayam' %}",
+                type: "POST",
+                data: {
+                    'swayam_source': selectedVal,
+                    'swayam_source_text': selectedText,
+                    'csrfmiddlewaretoken': csrfToken
+                },
+                dataType: "json",
+                success: function (response) {
+                    // tracking saved
+                },
+                error: function (err) {
+                    console.error("Tracking request failed", err);
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

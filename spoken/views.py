@@ -1143,6 +1143,32 @@ def check_payment_status(request, order_id):
 
 def swayam(request):
     # swayam plus page view
+    if request.method == 'POST':
+        from swayam.models import SwayamTracking
+        option = request.POST.get('swayam_source_text') or request.POST.get('swayam_source') or ''
+        is_logged_in = False
+        user = None
+        if hasattr(request, 'user') and request.user:
+            is_logged_in = request.user.is_authenticated() if callable(request.user.is_authenticated) else bool(request.user.is_authenticated)
+            if is_logged_in:
+                user = request.user
+
+        roles = []
+        if user:
+            if is_organiser_insti_subscribed(user):
+                roles.append('organizer')
+            if is_student_insti_subscribed(user):
+                roles.append('student')
+
+        SwayamTracking.objects.create(
+            user=user,
+            dropdown_option=option,
+            is_logged_in=is_logged_in,
+            is_subscribed_institution=bool(roles),
+            roles=", ".join(roles)
+        )
+        return JsonResponse({'status': 'success'})
+
     context = {
         'video_url': SWAYAM_VIDEO_URL,
         'registration_url': SWAYAM_REGISTRATION_URL,
