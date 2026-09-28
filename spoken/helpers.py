@@ -18,6 +18,8 @@ def get_key(identifier, key_val):
 def is_valid_foss(foss):
     if foss is None or foss == '': #for scenerio -- show all foss tutorials
         is_valid = True
+    elif str(foss).strip().isdigit():
+        is_valid = FossCategory.objects.filter(id=int(foss)).exists()
     else:
         is_valid = FossCategory.objects.filter(foss=foss).exists()
     return is_valid
@@ -103,6 +105,10 @@ def get_home_events():
 
 # ----  Tutorials List ----
 def get_tutorials_list(foss, lang):
+    if foss and str(foss).strip().isdigit():
+        foss_obj = FossCategory.objects.filter(id=int(foss)).first()
+        if foss_obj:
+            foss = foss_obj.foss
     foss = foss.lower().strip()
     lang = lang.lower().strip()
     cache_key = get_key("tutorials_list", f"{foss}:{lang}")
@@ -148,6 +154,10 @@ def get_foss_choice(show_on_homepage=1, lang=None):
 
 # ----  Language Choice For Search Bar ----
 def get_lang_choice(show_on_homepage=1, foss=None):
+    if foss and str(foss).strip().isdigit():
+        foss_obj = FossCategory.objects.filter(id=int(foss)).first()
+        if foss_obj:
+            foss = foss_obj.foss
     if is_valid_foss(foss):
         cache_key = get_key("tutorial_search_lang", f"{show_on_homepage}:{foss}")
     else:

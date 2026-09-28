@@ -25,6 +25,8 @@ urlpatterns = [
     url(r'^logs/(?P<name>[\w-]+)/download/$', download_log, name='download_log'),
     # url(r'^NMEICT-Intro/$', nmeict_intro, name="nmeict_intro"),
     url(r'^tutorial-search/$', tutorial_search, name="tutorial-search"),
+    url(r'^tutorial-search/(?P<foss>[^/]+)/$', tutorial_search, name="tutorial-search-foss"),
+    url(r'^tutorial-search/(?P<foss>[^/]+)/(?P<language>[^/]+)/$', tutorial_search, name="tutorial-search-foss-language"),
     url(r'^series/$', series_foss, name="series"),
     url(r'^series_tutorial-search/$',  series_tutorial_search, name="series-tutorial-search"),
     url(r'^archived/$', archived_foss, name="archived"),
@@ -144,10 +146,18 @@ urlpatterns = [
     #donation
     url(r'^donate/', include('donate.urls', namespace='donate')),
 
+     # swayam
+        url(
+        r'^swayam/',
+        include('swayam.urls', namespace='swayam'),
+        ),
+
     # cms
     url(r'^', include('cms.urls', namespace='cms')),
     
     #nep book fiar
     url(r'wbf-book-fair-2023', bookfair,name="bookfair"),
+
+   
     
 ] + static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)

@@ -2502,6 +2502,9 @@ def test_participant_ceritificate(request, wid, participant_id):
 
     #paragraphe
     text = get_test_cert_text(ta.test, mdluser, credits=credits)
+    name = f"{mdluser.firstname} {mdluser.lastname}"
+    foss = w.foss.foss
+
     centered = ParagraphStyle(name = 'centered',
         fontSize = 15,
         leading = 24,
@@ -2529,12 +2532,17 @@ def test_participant_ceritificate(request, wid, participant_id):
     paragraph_width, paragraph_height = p.wrap(text_width, 200)
     x_start = (page_width + 250 - text_width) / 2
 
-    paragraph_top = title_y - 40
-    paragraph_y = paragraph_top - paragraph_height
+    content_y = get_adjusted_content_y(name, foss, 6.5 * cm)
+    p.drawOn(imgDoc, x_start, content_y)
 
-    p.drawOn(imgDoc, x_start, paragraph_y)
+
+#     paragraph_top = title_y - 40
+#     paragraph_y = paragraph_top - paragraph_height
+
+#     p.drawOn(imgDoc, x_start, paragraph_y)
     # p.drawOn(imgDoc, x_start, 7.5 * cm)
     # p.drawOn(imgDoc, x_start, 6.5 * cm)
+
     # p.wrap(700, 200)
     # p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
 
@@ -2554,8 +2562,8 @@ def test_participant_ceritificate(request, wid, participant_id):
         spaceAfter = 15)
 
     p = Paragraph(certificate_title, centered)
-    p.wrap(500,20)
-    p.drawOn(imgDoc, 6.2 * cm, title_y)
+    p.wrap(842, 100)
+    p.drawOn(imgDoc, 0, title_y)
 
     imgDoc.save()
 
@@ -2627,13 +2635,22 @@ def test_participant_ceritificate_all(request, testid):
 
         # Draw image on Canvas and save PDF in buffer
         imgPath = get_signature(ta.test.tdate)
-        height = get_aspect_height(imgPath, 160)
-        imgDoc.drawImage(imgPath, 600, 95, 160, height)    ## at (399,760) with size 160x160
+
+        signature_width = 160
+        signature_height = get_aspect_height(imgPath,signature_width)
+        right_margin = -12
+        signature_x = (imgDoc._pagesize[0] - right_margin)
+        signature_y = 110
+
+        imgDoc.drawImage(imgPath,signature_x,signature_y,signature_width,signature_height,mask='auto')
 
         credits = "<p><b>Credits:</b> "+str(w.foss.credits)+"&nbsp&nbsp&nbsp<b>Score:</b> "+str('{:.2f}'.format(mdlgrade.grade))+"%</p>"
 
         #paragraphe
         text = get_test_cert_text(ta.test, mdluser, credits=credits)
+        name = f"{mdluser.firstname} {mdluser.lastname}"
+        foss = w.foss.foss
+
         centered = ParagraphStyle(name = 'centered',
             fontSize = 15,
             leading = 24,
@@ -2641,8 +2658,13 @@ def test_participant_ceritificate_all(request, testid):
             spaceAfter = 20)
 
         p = Paragraph(text, centered)
-        p.wrap(700, 200)
-        p.drawOn(imgDoc, 3 * cm, 6.5 * cm)
+        page_width, page_height = imgDoc._pagesize
+        text_width = 700
+        paragraph_width, paragraph_height = p.wrap(text_width,200)
+        x_start = (page_width + 250 - text_width) / 2
+
+        content_y = get_adjusted_content_y(name,foss,6.5 * cm)
+        p.drawOn(imgDoc,x_start,content_y)
 
         academic_code = w.academic.academic_code
 
@@ -2662,8 +2684,8 @@ def test_participant_ceritificate_all(request, testid):
         )
 
         p = Paragraph(certificate_title, centered)
-        p.wrap(600, 100)
-        p.drawOn(imgDoc,6.2 * cm,title_y)
+        p.wrap(842, 100)
+        p.drawOn(imgDoc, 0, title_y)
         
         imgDoc.save()
         template_path = get_test_certificate(ta)

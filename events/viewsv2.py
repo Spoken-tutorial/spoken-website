@@ -987,12 +987,14 @@ class TrainingCertificate(object):
 
     #paragraphe
     text = get_training_cert_text(ta)
+    name = f"{ta.student.user.first_name} {ta.student.user.last_name}"
+    foss = ta.training.course.foss.foss
 
     centered = ParagraphStyle(name = 'centered',
       fontSize = 16,
       leading = 30,
-      # alignment = 0,
-      alignment = 1,
+      alignment = 0,
+      # alignment = 1,
       spaceAfter = 20
     )
 
@@ -1005,13 +1007,18 @@ class TrainingCertificate(object):
     # p.wrap(text_width, 200)
     paragraph_width, paragraph_height = p.wrap(text_width, 200)
     x_start = (page_width + 250 - text_width) / 2
+
+    content_y = get_adjusted_content_y(name, foss, 7 * cm)
+    p.drawOn(imgDoc, x_start, content_y)
+
     # p.drawOn(imgDoc, x_start, 7 * cm)
 
-    paragraph_top = title_y - 45
-    paragraph_y = paragraph_top - paragraph_height
+#     paragraph_top = title_y - 45
+#     paragraph_y = paragraph_top - paragraph_height
 
-    p.drawOn(imgDoc, x_start, paragraph_y)
+#     p.drawOn(imgDoc, x_start, paragraph_y)
     # p.drawOn(imgDoc, x_start, 8 * cm)
+
     # p.wrap(630, 200)
     # p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
     imgDoc.save()
@@ -3361,11 +3368,11 @@ class AllTrainingCertificateView(TrainingCertificate, View):
 
       certificate_title, title_y = get_participation_certificate_title(
           academic_code=academic_code,
-          normal_title_y=480,
-          wgf_title_y=410
+          normal_title_y=470,
+          wgf_title_y=400
       )
 
-      imgDoc.drawCentredString(405, title_y, certificate_title)
+      imgDoc.drawCentredString(420, title_y, certificate_title)
 
       #date
       if ta.training.department.id != 169:
@@ -3380,11 +3387,16 @@ class AllTrainingCertificateView(TrainingCertificate, View):
 
       # Draw image on Canvas and save PDF in buffer
       imgPath = get_signature(ta.training.training_start_date)
-      height = get_aspect_height(imgPath, 160)
-      imgDoc.drawImage(imgPath, 600, 100, 160, height)
-
+      signature_width = 160
+      signature_height = get_aspect_height(imgPath, signature_width)
+      right_margin = 10
+      signature_x = imgDoc._pagesize[0] - right_margin
+      signature_y = 110
+      imgDoc.drawImage(imgPath,signature_x,signature_y,signature_width,signature_height,mask='auto')
       #paragraphe
       text = get_training_cert_text(ta)
+      name = f"{ta.student.user.first_name} {ta.student.user.last_name}"
+      foss = ta.training.course.foss.foss
 
       centered = ParagraphStyle(name = 'centered',
         fontSize = 16,
@@ -3393,9 +3405,15 @@ class AllTrainingCertificateView(TrainingCertificate, View):
         spaceAfter = 20
       )
 
+      page_width, page_height = imgDoc._pagesize
+      text_width = 630
+
       p = Paragraph(text, centered)
-      p.wrap(630, 200)
-      p.drawOn(imgDoc, 4.2 * cm, 7 * cm)
+      paragraph_width, paragraph_height = p.wrap(text_width, 200)
+      x_start = (page_width + 250 - text_width) / 2
+
+      content_y = get_adjusted_content_y(name, foss, 7 * cm)
+      p.drawOn(imgDoc, x_start, content_y)
       imgDoc.save()
       # Use PyPDF to merge the image-PDF into the template
       template_path = get_training_certificate(ta)
