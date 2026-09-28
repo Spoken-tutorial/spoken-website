@@ -1,18 +1,20 @@
 import logging
 
+from django.contrib.auth.models import User
 from django.db import transaction
+from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
-from creation.models import FossCategory
+from creation.models import (
+    FossCategory,
+    TutorialDetail,
+    Language,
+)
 from .client import SwayamClient
-
-from django.contrib.auth.models import User
-
-from .models import SwayamUser
-
 from .models import (
     SwayamEnrollment,
     SwayamUser,
+    SwayamTutorialProgress,
 )
 
 logger = logging.getLogger(__name__)
@@ -275,3 +277,68 @@ class SwayamUserService(object):
         )
 
         return enrollment
+
+
+# to track video progress, update enrollment course completion
+class SwayamProgressService(object):
+    def __init__(self, client=None):
+        self.client = client or SwayamClient()
+
+    @transaction.atomic
+    def record_progress(self, user, foss, tutorial_detail, video_time=0.0, duration=0.0, language=None):
+        video_time, duration = float(video_time or 0.0), float(duration or 0.0)
+        calc_percent = min(100, int(round((video_time / duration) * 100))) if duration > 0 else 0
+        enrollment = SwayamEnrollment.objects.filter(user=user, foss=foss).first()
+
+        prog, created = SwayamTutorialProgress.objects.select_for_update().get_or_create(
+            user=user, tutorial_detail=tutorial_detail,
+            defaults={
+                'enrollment': enrollment, 'foss': foss, 'language': language,
+                'video_time': video_time, 'video_duration': duration,
+                'progress_percent': calc_percent,
+                'is_completed': (calc_percent >= 90),
+                'completed_at': timezone.now() if calc_percent >= 90 else None,
+            }
+        )
+        if not created:
+            prog.video_time = video_time
+            if duration > 0:
+                prog.video_duration = duration
+            prog.progress_percent = max(prog.progress_percent, calc_percent)
+            if prog.progress_percent >= 90 and not prog.is_completed:
+                prog.is_completed = True
+                prog.completed_at = timezone.now()
+            if enrollment and not prog.enrollment:
+                prog.enrollment = enrollment
+            if language and not prog.language:
+                prog.language = language
+            prog.save()
+
+        # Update overall enrollment course progress
+        if enrollment:
+            total = TutorialDetail.objects.filter(foss=enrollment.foss).count()
+            completed = SwayamTutorialProgress.objects.filter(user=user, foss=enrollment.foss, is_completed=True).count()
+            course_percent = min(100, int(round((float(completed) / float(total)) * 100))) if total > 0 else 0
+
+            enrollment.progress_percent = course_percent
+            if enrollment.status == SwayamEnrollment.STATUS_ACCESS_PROVISIONED and course_percent > 0:
+                enrollment.status = SwayamEnrollment.STATUS_IN_PROGRESS
+            if course_percent >= 100:
+                enrollment.status = SwayamEnrollment.STATUS_COMPLETED
+                if not enrollment.completed_at:
+                    enrollment.completed_at = timezone.now()
+            enrollment.save(update_fields=['progress_percent', 'status', 'completed_at', 'updated'])
+
+            # for swayam api
+            self.report_progress(enrollment)
+
+        return prog
+
+    # to transmit progress to swayam api
+    def report_progress(self, enrollment):
+        try:
+            self.client.update_progress(enrollment.swayam_enrollment_id, enrollment.progress_percent)
+            if enrollment.status == SwayamEnrollment.STATUS_COMPLETED:
+                self.client.confirm_completion(enrollment.swayam_enrollment_id)
+        except Exception as exc:
+            logger.warning('SWAYAM API progress report skipped/failed: %s', exc)
