@@ -4,6 +4,7 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.encoding import python_2_unicode_compatible
+from events.models import AcademicCenter
 
 
 @python_2_unicode_compatible
@@ -13,6 +14,14 @@ class SwayamTracking(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
+        related_name='swayam_trackings'
+    )
+    academic_center = models.ForeignKey(
+        AcademicCenter,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        verbose_name="Academic Center",
         related_name='swayam_trackings'
     )
     dropdown_option = models.CharField(max_length=255, verbose_name="Option chosen from dropdown")

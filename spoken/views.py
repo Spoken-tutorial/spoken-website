@@ -1154,14 +1154,33 @@ def swayam(request):
                 user = request.user
 
         roles = []
+        academic_center = None
         if user:
             if is_organiser_insti_subscribed(user):
                 roles.append('organizer')
             if is_student_insti_subscribed(user):
                 roles.append('student')
 
+            try:
+                from events.models import Organiser
+                org = Organiser.objects.filter(user=user).select_related('academic').first()
+                if org and org.academic:
+                    academic_center = org.academic
+            except Exception:
+                pass
+
+            if not academic_center:
+                try:
+                    from events.models import StudentMaster
+                    sm = StudentMaster.objects.filter(student__user=user).select_related('batch__academic').first()
+                    if sm and sm.batch and sm.batch.academic:
+                        academic_center = sm.batch.academic
+                except Exception:
+                    pass
+
         SwayamTracking.objects.create(
             user=user,
+            academic_center=academic_center,
             dropdown_option=option,
             is_logged_in=is_logged_in,
             is_subscribed_institution=bool(roles),
