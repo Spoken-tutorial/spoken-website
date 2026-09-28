@@ -130,7 +130,7 @@ def keyword_search(request):
 
 
 @csrf_exempt
-def tutorial_search(request):
+def tutorial_search(request, foss=None, language=None):
     context = {}
     collection = None
     form = TutorialSearchForm()
@@ -138,13 +138,26 @@ def tutorial_search(request):
     show_on_homepage = 1
     queryset = TutorialResource.objects.filter(Q(status=1) | Q(status=2), tutorial_detail__foss__show_on_homepage = show_on_homepage)
 
-    if request.method == 'GET' and request.GET:
-        foss_get = request.GET.get('search_foss', '')
-        language_get = request.GET.get('search_language', '')
-        form = TutorialSearchForm(request.GET, foss=foss_get, lang=language_get)
+    if request.method == 'GET' and (request.GET or foss is not None):
+        foss_get = request.GET.get('search_foss', '') or foss or ''
+        language_get = request.GET.get('search_language', '') or language or ''
+
+        if foss_get and str(foss_get).strip().isdigit():
+            foss_obj = FossCategory.objects.filter(id=int(foss_get)).first()
+            if foss_obj:
+                foss_get = foss_obj.foss
+
+        data = request.GET.copy()
+        if foss_get:
+            data['search_foss'] = foss_get
+        if language_get:
+            data['search_language'] = language_get
+
+        form = TutorialSearchForm(data, foss=foss_get, lang=language_get)
         if form.is_valid():
             collection = get_tutorials_list(foss_get, language_get)
-            
+        elif foss_get:
+            collection = get_tutorials_list(foss_get, language_get)
     else:
         foss = queryset.filter(language__name='English').values('tutorial_detail__foss__foss').annotate(Count('id')).values_list('tutorial_detail__foss__foss').distinct().order_by('?')[:1].first()
         collection = queryset.filter(tutorial_detail__foss__foss=foss[0], language__name='English')
