@@ -101,6 +101,7 @@ INSTALLED_APPS = [
     'cron',
     'ilwmoodle',
     'health_app',
+    'swayam',
 ]
 
 
