@@ -769,36 +769,59 @@ function clickListener(e)
       }    
     }
 }
-var log_data = []
-let pause = 0
-let play = 0
-if ({{ perform_analysis }} ){
-        let video = document.getElementById("st_video_html5_api")
-        let act_pp =''
-        let videotime = ''
-        video.addEventListener('play',logData)
-        video.addEventListener('pause',logData)
-        var arrayWithElements = new Array();
-        document.onclick = clickListener;
-}
+        var log_data = [];
+        let pause = 0;
+        let play = 0;
+        var performAnalysis = ("{{ perform_analysis }}" === "1" || "{{ perform_analysis }}" === "True");
 
-        function myfun(e){
+        if (performAnalysis) {
+            let video = document.getElementById("st_video_html5_api");
+            let act_pp = '';
+            let videotime = '';
+            if (video) {
+                video.addEventListener('play', logData);
+                video.addEventListener('pause', function(e) {
+                    logData(e);
+                    myfun(e, 'Pause');
+                });
+                video.addEventListener('ended', function(e) {
+                    logData(e);
+                    myfun(e, 'Ended');
+                });
+            }
+            var arrayWithElements = new Array();
+            document.onclick = clickListener;
+        }
+
+        function myfun(e) {
+            let video = document.getElementById("st_video_html5_api");
+            let currentVidTime = video ? video.currentTime : 0;
+            let currentDuration = video ? video.duration : 0;
+            var isSwayam = "{{ request.user.swayam_identity|default:'' }}" !== "";
+            var postUrl = isSwayam ? "/swayam/save-progress/" : "/saveVideoData/";
+
             $.ajax({
-            method: "POST",
-            url: "/saveVideoData/",
-            data: { video_log: log_data },
-            csrfmiddlewaretoken : '{{ csrf_token }}',
+                method: "POST",
+                url: postUrl,
+                data: {
+                    video_log: JSON.stringify(log_data),
+                    tutorial_id: "{{ tr_rec.tutorial_detail.id }}",
+                    foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
+                    lang_id: "{{ tr_rec.language.id }}",
+                    videotime: currentVidTime,
+                    duration: currentDuration
+                },
+                csrfmiddlewaretoken: '{{ csrf_token }}',
             })
-            .done(function( msg ) {
-                console.log( "Data Saved: " + msg );
+            .done(function (msg) {
+                console.log("Data Saved: " + msg);
             });
-            
         }
-        window.onbeforeunload = function(e){
-            if ({{ perform_analysis }} ){
-                e.preventDefault();
-                myfun(e);
-        }
+
+        window.onbeforeunload = function (e) {
+            if (performAnalysis) {
+                myfun(e, 'LeavePage');
+            }
         };
 
 

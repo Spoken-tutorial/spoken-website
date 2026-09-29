@@ -19,4 +19,10 @@ urlpatterns = [
         views.sso_callback,
         name='sso-callback',
     ),
+
+    url(
+        r'^save-progress/$',
+        views.save_progress,
+        name='save-progress',
+    ),
 ]

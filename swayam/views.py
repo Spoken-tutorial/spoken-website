@@ -10,9 +10,10 @@ import requests
 
 from django.conf import settings
 from django.contrib.auth import login
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.utils.http import urlencode
+from django.views.decorators.csrf import csrf_exempt
 
 try:
     from urllib.parse import urlparse
@@ -23,6 +24,11 @@ from .client import SwayamClient
 from .services import (
     SwayamEnrollmentService,
     SwayamUserService,
+    SwayamProgressService,
+)
+from .utils import (
+    is_swayam_user,
+    is_swayam_foss,
 )
 
 
@@ -607,3 +613,46 @@ def sso_callback(request):
         return HttpResponseBadRequest(
             'Could not complete SWAYAM login.'
         )
+
+
+# Endpoint for saving swayam learner video progress
+@csrf_exempt
+def save_progress(request):
+    is_auth = request.user.is_authenticated() if callable(request.user.is_authenticated) else request.user.is_authenticated
+    if not is_auth:
+        return JsonResponse({'status': 'error', 'message': 'Authentication required'}, status=401)
+    if not is_swayam_user(request.user):
+        return JsonResponse({'status': 'error', 'message': 'Not a SWAYAM user'}, status=403)
+
+    foss_id = request.POST.get('foss_id')
+    tutorial_id = request.POST.get('tutorial_id')
+    lang_id = request.POST.get('lang_id')
+    video_time = request.POST.get('videotime', 0.0)
+    duration = request.POST.get('duration', 0.0)
+
+    if not foss_id or not is_swayam_foss(foss_id):
+        return JsonResponse({'status': 'error', 'message': 'FOSS is not part of SWAYAM'}, status=400)
+
+    try:
+        from creation.models import FossCategory, TutorialDetail, Language
+        foss = FossCategory.objects.get(pk=int(foss_id))
+        tutorial = TutorialDetail.objects.get(pk=int(tutorial_id))
+        language = Language.objects.filter(pk=int(lang_id)).first() if lang_id else None
+
+        progress = SwayamProgressService().record_progress(
+            user=request.user,
+            foss=foss,
+            tutorial_detail=tutorial,
+            video_time=video_time,
+            duration=duration,
+            language=language,
+        )
+        return JsonResponse({
+            'status': 'success',
+            'progress_percent': progress.progress_percent,
+            'is_completed': progress.is_completed,
+            'course_progress_percent': progress.enrollment.progress_percent if progress.enrollment else 0,
+        })
+    except Exception as exc:
+        logger.warning('save_progress error: %s', exc)
+        return JsonResponse({'status': 'error', 'message': str(exc)}, status=400)

@@ -1,7 +1,11 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from creation.models import FossCategory
+from creation.models import (
+    FossCategory,
+    TutorialDetail,
+    Language,
+)
 
 
 class SwayamUser(models.Model):
@@ -123,3 +127,25 @@ class SwayamEnrollment(models.Model):
             self.swayam_enrollment_id,
             self.foss,
         )
+
+
+# video and course progress tracking for swayam learners
+class SwayamTutorialProgress(models.Model):
+    user = models.ForeignKey(User, related_name='swayam_tutorial_progress', on_delete=models.CASCADE)
+    enrollment = models.ForeignKey(SwayamEnrollment, related_name='tutorial_progress', null=True, blank=True, on_delete=models.SET_NULL)
+    foss = models.ForeignKey(FossCategory, on_delete=models.PROTECT)
+    tutorial_detail = models.ForeignKey(TutorialDetail, on_delete=models.PROTECT)
+    language = models.ForeignKey(Language, null=True, blank=True, on_delete=models.SET_NULL)
+    video_time = models.FloatField(default=0.0)
+    video_duration = models.FloatField(default=0.0)
+    progress_percent = models.PositiveSmallIntegerField(default=0)
+    is_completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'tutorial_detail')
+
+    def __str__(self):
+        return '{} - {} ({}%)'.format(self.user.username, self.tutorial_detail, self.progress_percent)
