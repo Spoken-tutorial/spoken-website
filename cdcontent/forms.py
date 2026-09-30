@@ -89,9 +89,8 @@ class CDContentForm(forms.Form):
 
                 disqualified_foss_ids = set(TutorialResource.objects.filter(
                     Q(status=1) | Q(status=2),
-                    is_unrestricted=False
-                ).filter(
-                    Q(publish_at__isnull=True) | Q(publish_at__gte=restr_datetime)
+                    is_unrestricted=False,
+                    publish_at__gte=restr_datetime
                 ).values_list('tutorial_detail__foss_id', flat=True).distinct())
 
                 foss_filter = Q(tutorial_detail__foss__download=True) | ~Q(tutorial_detail__foss_id__in=disqualified_foss_ids)
