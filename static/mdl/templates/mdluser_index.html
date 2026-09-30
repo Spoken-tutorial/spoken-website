@@ -27,6 +27,11 @@
     </div>
 {% endblock %}
 {% block content %}
+    <div class="alert alert-info" role="alert" style="margin-bottom: 20px; font-size: 15px; border-left: 5px solid #1b83bc;">
+        <i class="fa fa-info-circle" style="margin-right: 6px;"></i>
+        <span>Spoken Tutorial is now available on SWAYAM Plus.</span>
+        <a href="/swayam/" class="alert-link" style="text-decoration: underline; font-weight: bold; margin-left: 5px;">Click here to know more</a>
+    </div>
     <!-- Nav tabs -->
     <ul class="nav nav-tabs">
         <li class="{% if category == 1 %} active {% endif %}"><a href="{% url 'mdldjango:mdl_index' %}?category=1">Past Training</a></li>
