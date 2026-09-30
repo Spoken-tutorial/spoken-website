@@ -108,12 +108,8 @@ class CDContentForm(forms.Form):
                 tutorial_detail__foss__show_on_homepage=1
             ).filter(foss_filter).values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()) + healthfosslist
         else:
-            healthfosslist = list(FossCategory.objects.filter(show_on_homepage=0, foss__contains='Health', download=True).values_list('id', 'foss'))
-            foss_list = list(TutorialResource.objects.filter(
-                Q(status=1) | Q(status=2),
-                tutorial_detail__foss__show_on_homepage=1,
-                tutorial_detail__foss__download=True
-            ).values_list('tutorial_detail__foss_id', 'tutorial_detail__foss__foss').order_by('tutorial_detail__foss__foss').distinct()) + healthfosslist
+            healthfosslist = []
+            foss_list = []
 
         foss_choices = [('', 'Select FOSS Category')] + foss_list
         self.fields['foss_category'].choices = foss_choices
