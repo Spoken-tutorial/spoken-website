@@ -83,14 +83,14 @@ def send_bulk_student_reset_mail(ac, batches, count, new_password, user):
 
 def get_fossmdlcourse(foss_id, fossmdlmap_id=None):
     if fossmdlmap_id is not None:
-        return FossMdlCourses.objects.get(id = fossmdlmap_id)
+        return FossMdlCourses.objects.get(id = fossmdlmap_id,is_active=True)
     try:
-        fossmdlcourse = FossMdlCourses.objects.get(foss_id = foss_id)
+        fossmdlcourse = FossMdlCourses.objects.get(foss_id = foss_id,is_active=True)
     except FossMdlCourses.MultipleObjectsReturned:
         advanced=3 #default
         english=22 #default
         try:
-            fossmdlcourse = FossMdlCourses.objects.get(foss_id=foss_id, language_id=english, level_id=advanced)
+            fossmdlcourse = FossMdlCourses.objects.get(foss_id=foss_id, language_id=english, level_id=advanced,is_active=True)
         except FossMdlCourses.DoesNotExist:
-            fossmdlcourse = FossMdlCourses.objects.get(foss_id=foss_id, language__isnull=True, level__isnull=True)
+            fossmdlcourse = FossMdlCourses.objects.get(foss_id=foss_id, language__isnull=True, level__isnull=True,is_active=True)
     return fossmdlcourse
