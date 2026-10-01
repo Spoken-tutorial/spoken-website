@@ -19,4 +19,10 @@ urlpatterns = [
         views.sso_callback,
         name='sso-callback',
     ),
+
+    url(
+        r'^page-views/$',
+        views.swayam_page_views,
+        name='swayam_page_views',
+    ),
 ]
