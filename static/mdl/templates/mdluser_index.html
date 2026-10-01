@@ -157,7 +157,8 @@
                     <th>Technology</th>
                     <th>Test Code</th>
                     <th>Date & Time</th>
-                    <th>Action</th>
+                    <th>First Attempt</th>
+                    <th>2nd Attempt</th>
                 </tr>
                 {% for record in ongoing_test %}
                     <tr>
@@ -195,6 +196,46 @@
                                                 {% if record.invigilator %}
                                                  - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
                                                 {% endif %}
+                                            {% else %}
+                                                {{ grade }} (Fail)
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
+                            {% endwith %}
+                        </td>
+                        <td>
+                            {% with sec_status=record.id|get_second_attempt_status:mdluserid %}
+                                {% if sec_status == None %}
+                                    -
+                                {% elif sec_status == 0 %}
+                                    Waiting for Attendance
+                                {% elif sec_status == 1 %}
+                                    {% with courseid=record.id|get_second_attempt_courseid:mdluserid %}
+                                        {% if courseid %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Attempt test</a>
+                                        {% else %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Attempt test</a>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% elif sec_status == 2 %}
+                                    {% with courseid=record.id|get_second_attempt_courseid:mdluserid %}
+                                        {% if courseid %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Continue Test</a>
+                                        {% else %}
+                                            <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Continue Test</a>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% elif sec_status >= 3 %}
+                                    {% with grade=record.id|get_second_attempt_mark:mdluserid %}
+                                        {% if grade is not None %}
+                                            {% if grade >= 40 %}
+                                                {{ grade }}%
+                                                {% with sec_testid=record.id|get_second_attempt_testid:mdluserid %}
+                                                    {% if record.invigilator %}
+                                                     - <a href="{% url 'events:test_participant_ceritificate' sec_testid mdluserid %}">Certificate</a>
+                                                    {% endif %}
+                                                {% endwith %}
                                             {% else %}
                                                 {{ grade }} (Fail)
                                             {% endif %}
