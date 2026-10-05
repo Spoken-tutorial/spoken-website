@@ -289,6 +289,16 @@ def is_student_insti_subscribed(user):
     except Exception as e:
         return False
 
+def is_profile_insti_subscribed(user):
+    try:
+        from cms.models import Profile
+        profile = Profile.objects.filter(user=user).first()
+        if profile and profile.institute_id:
+            return has_active_subscription(profile.institute_id)
+        return False
+    except Exception as e:
+        return False
+
 def check_auth_internal_roles(user):
     # Check if the user has ST internal roles
     allowed_internal_roles = getattr(settings, 'ALLOWED_INTERNAL_ROLES', [1,9,20]) #IDs of auth_group
@@ -313,6 +323,10 @@ def check_auth_external_roles(user, foss, lang):
     
     # check if user has student role and belongs to paid college
     if hasattr(user, 'student') and is_student_insti_subscribed(user):
+        return True
+
+    # check if user's CMS profile institute belongs to paid college
+    if is_profile_insti_subscribed(user):
         return True
 
     if has_cdcontent_access(user, foss, lang):

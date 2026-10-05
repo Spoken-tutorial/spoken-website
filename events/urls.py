@@ -105,6 +105,7 @@ urlpatterns = [
     url(r'ajax-district/$',  ajax_district_data, name='ajax_district_data'),
     url(r'ajax-district-collage/$',  ajax_district_collage, name='ajax_district_collage'),
     url(r'ajax-state-collage/$',  ajax_state_collage, name='ajax_state_collage'),
+    url(r'ajax-state-district-institutes/$',  ajax_state_district_institutes, name='ajax_state_district_institutes'),
     url(r'ajax-dept-foss/$',  ajax_dept_foss, name='ajax_dept_foss'),
     url(r'ajax-language/$',  ajax_language, name='ajax_language'),
     url(r'ajax_state_details/$',  ajax_state_details, name='ajax_state_details'),
