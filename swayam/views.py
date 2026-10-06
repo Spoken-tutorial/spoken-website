@@ -10,8 +10,11 @@ import requests
 
 from django.conf import settings
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.db.models import Avg, Count, Q
 from django.http import HttpResponseBadRequest
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.utils.http import urlencode
 
 try:
@@ -19,7 +22,10 @@ try:
 except ImportError:
     from urlparse import urlparse
 
+from datetime import datetime
+from events.views import is_resource_person
 from .client import SwayamClient
+from .models import SwayamEnrollment, SwayamTracking, SwayamUser
 from .services import (
     SwayamEnrollmentService,
     SwayamUserService,
@@ -607,3 +613,89 @@ def sso_callback(request):
         return HttpResponseBadRequest(
             'Could not complete SWAYAM login.'
         )
+
+
+@login_required
+def swayam_page_views(request):
+    user = request.user
+    is_auth = user.is_authenticated() if callable(user.is_authenticated) else bool(user.is_authenticated)
+    if not (is_auth and (is_resource_person(user) or user.is_staff or user.is_superuser)):
+        raise PermissionDenied()
+
+    # total enrollments
+    total_enrollments = SwayamEnrollment.objects.count()
+
+    # dropdown option stats
+    total_tracking_count = SwayamTracking.objects.count()
+    option_records = (
+        SwayamTracking.objects
+        .values('dropdown_option')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+
+    option_stats = []
+    chart_labels = []
+    chart_data = []
+
+    for item in option_records:
+        opt_name = item['dropdown_option'] if item['dropdown_option'] else 'Not Specified'
+        cnt = item['total']
+        pct = round((float(cnt) / total_tracking_count * 100), 1) if total_tracking_count > 0 else 0
+        option_stats.append({
+            'option': opt_name,
+            'count': cnt,
+            'percentage': pct,
+        })
+        chart_labels.append(opt_name)
+        chart_data.append(cnt)
+
+    # enrollment status
+    enrollment_status_records = (
+        SwayamEnrollment.objects
+        .values('status')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+    status_stats = []
+    status_display_map = dict(SwayamEnrollment.STATUS_CHOICES)
+
+    for item in enrollment_status_records:
+        st_code = item['status']
+        st_label = status_display_map.get(st_code, st_code)
+        cnt = item['total']
+        pct = round((float(cnt) / total_enrollments * 100), 1) if total_enrollments > 0 else 0
+        status_stats.append({
+            'status_label': st_label,
+            'count': cnt,
+            'percentage': pct,
+        })
+
+    # foss 
+    foss_records = (
+        SwayamEnrollment.objects
+        .values('foss__foss')
+        .annotate(
+            total=Count('id'),
+            avg_progress=Avg('progress_percent')
+        )
+        .order_by('-total')
+    )
+    foss_stats = []
+    for item in foss_records:
+        foss_stats.append({
+            'foss': item['foss__foss'] or 'Unknown Course',
+            'count': item['total'],
+            'avg_progress': round(item['avg_progress'] or 0, 1),
+        })
+
+    context = {
+        'total_enrollments': total_enrollments,
+        'total_tracking_count': total_tracking_count,
+        'option_stats': option_stats,
+        'chart_labels_json': json.dumps(chart_labels),
+        'chart_data_json': json.dumps(chart_data),
+        'status_stats': status_stats,
+        'foss_stats': foss_stats,
+    }
+    return render(request, 'swayam/templates/swayam_page_views.html', context)
