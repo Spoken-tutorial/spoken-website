@@ -309,7 +309,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         foss = unquote_plus(foss)
         tutorial = unquote_plus(tutorial)
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
-        tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
+        tr_rec = TutorialResource.objects.select_related('tutorial_detail', 'tutorial_detail__foss', 'language').get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         is_authorized_user = is_valid_user(request.user, foss, lang, tr_rec)
         tr_recs = get_tutorials_list(foss, lang)
     except Exception as e:
