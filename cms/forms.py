@@ -130,65 +130,84 @@ class ProfileForm(forms.ModelForm):
             ext = os.path.splitext(filename)[1].lower()
             if ext[1:] not in content_types:
                 raise forms.ValidationError("Wrong format:Profile picture should be in \"png/jpg\" format only!")
+            return self.cleaned_data['picture']
+       return self.cleaned_data.get('picture')
 
     first_name = forms.CharField(max_length=50)
     last_name = forms.CharField(max_length=50)
-    state = forms.ModelChoiceField(label = 'State',   \
-        widget = forms.Select(attrs = {'class' : 'ac-state'}), queryset = \
-        State.objects.order_by('name'), empty_label = "--- None ---", \
-        help_text = "", error_messages = {'required':'State field required.'})
+    state = forms.ModelChoiceField(label='State', \
+        widget=forms.Select(attrs={'class': 'ac-state'}), queryset=State.objects.order_by('name'), \
+        empty_label="--- None ---", required=False, error_messages={'required': 'State field required.'})
 
-    district = forms.ModelChoiceField(label='Dist',   \
-        widget = forms.Select(attrs = {'class' : 'ac-district'}), \
-        queryset = District.objects.none(), empty_label = "--- None ---", \
-        help_text = "", error_messages = \
-        {'required':'District Type field required.'})
+    district = forms.ModelChoiceField(label='Dist', \
+        widget=forms.Select(attrs={'class': 'ac-district'}), queryset=District.objects.none(), \
+        empty_label="--- None ---", required=False, error_messages={'required': 'District Type field required.'})
 
     institute = forms.ModelChoiceField(label='Institute', \
-        widget = forms.Select(attrs = {'class' : 'ac-institute'}), \
-        queryset = AcademicCenter.objects.none(), empty_label = "--- None ---", \
-        required=False, help_text = "", error_messages = \
-        {'required':'Institute field required.'})
+        widget=forms.Select(attrs={'class': 'ac-institute'}), queryset=AcademicCenter.objects.none(), \
+        empty_label="--- None ---", required=False, error_messages={'required': 'Institute field required.'})
 
-    city = forms.ModelChoiceField(label = 'City',   \
-    widget = forms.Select(attrs = {'class' : 'ac-city'}), \
-    queryset = City.objects.none(), empty_label = "--- None ---", \
-    help_text = "", error_messages = {'required':'City Type field required.'})
+    city = forms.ModelChoiceField(label='City', \
+        widget=forms.Select(attrs={'class': 'ac-city'}), queryset=City.objects.none(), \
+        empty_label="--- None ---", required=False, error_messages={'required': 'City Type field required.'})
 
+    address = forms.CharField(widget=forms.Textarea(attrs={'rows': 3, 'class': 'form-control street'}), required=False)
 
     def __init__(self, user, *args, **kwargs):
-        initial = ''
-        if 'instance' in kwargs:
-            initial = kwargs["instance"]
+        initial = kwargs.get("instance", '')
         if 'user' in kwargs:
-            user = kwargs["user"]
-            del kwargs["user"]
+            user = kwargs.pop("user")
 
         super(ProfileForm, self).__init__(*args, **kwargs)
         self.fields['first_name'].initial = user.first_name
         self.fields['last_name'].initial = user.last_name
         self.fields["state"].queryset = State.objects.filter()
         self.fields['institute'].label_from_instance = lambda obj: "%s - %s" % (obj.academic_code, obj.institution_name)
-        if initial:
-            self.fields["district"].queryset = \
-                District.objects.filter(state__id = initial.state_id)
-            self.fields["city"].queryset = \
-                City.objects.filter(state__id = initial.state_id)
-            if initial.state_id and initial.district_id:
-                self.fields["institute"].queryset = \
-                    AcademicCenter.objects.filter(state_id = initial.state_id, district_id = initial.district_id).order_by('institution_name')
 
-        if args:
-            if 'state' in args[0]:
-                if args[0]['state'] != '' and args[0]['state'] != 'None':
-                    self.fields["district"].queryset = \
-                        District.objects.filter(state__id = args[0]['state'])
-                    self.fields["city"].queryset = \
-                        City.objects.filter(state__id = args[0]['state'])
-            if 'state' in args[0] and 'district' in args[0]:
-                if args[0]['state'] != '' and args[0]['state'] != 'None' and args[0]['district'] != '' and args[0]['district'] != 'None':
-                    self.fields["institute"].queryset = \
-                        AcademicCenter.objects.filter(state_id = args[0]['state'], district_id = args[0]['district']).order_by('institution_name')
+        if initial:
+            if initial.institute_id and initial.institute:
+                initial.state_id = initial.state_id or initial.institute.state_id
+                initial.district_id = initial.district_id or initial.institute.district_id
+                initial.city_id = initial.city_id or initial.institute.city_id
+            if initial.state_id:
+                self.fields["district"].queryset = District.objects.filter(state__id=initial.state_id)
+                self.fields["city"].queryset = City.objects.filter(state__id=initial.state_id)
+            if initial.state_id and initial.district_id:
+                self.fields["institute"].queryset = AcademicCenter.objects.filter(state_id=initial.state_id, district_id=initial.district_id).order_by('institution_name')
+            elif initial.institute_id:
+                self.fields["institute"].queryset = AcademicCenter.objects.filter(id=initial.institute_id)
+
+        if args and args[0]:
+            data = args[0]
+            state_id = data.get('state')
+            district_id = data.get('district')
+            inst_id = data.get('institute')
+            if inst_id and inst_id != 'None':
+                inst = AcademicCenter.objects.filter(id=inst_id).first()
+                if inst:
+                    state_id = state_id if (state_id and state_id != 'None') else inst.state_id
+                    district_id = district_id if (district_id and district_id != 'None') else inst.district_id
+                    self.fields["institute"].queryset = AcademicCenter.objects.filter(state_id=inst.state_id, district_id=inst.district_id).order_by('institution_name')
+            if state_id and state_id != 'None':
+                self.fields["district"].queryset = District.objects.filter(state__id=state_id)
+                self.fields["city"].queryset = City.objects.filter(state__id=state_id)
+                if district_id and district_id != 'None':
+                    self.fields["institute"].queryset = AcademicCenter.objects.filter(state_id=state_id, district_id=district_id).order_by('institution_name')
+
+    def clean(self):
+        cleaned_data = super(ProfileForm, self).clean()
+        institute = cleaned_data.get('institute')
+        if institute:
+            cleaned_data['state'] = cleaned_data.get('state') or institute.state
+            cleaned_data['district'] = cleaned_data.get('district') or institute.district
+            cleaned_data['city'] = cleaned_data.get('city') or institute.city
+            cleaned_data['address'] = cleaned_data.get('address') or institute.address
+            cleaned_data['pincode'] = cleaned_data.get('pincode') or institute.pincode
+        else:
+            for field, label in [('state', 'State field required.'), ('district', 'District Type field required.'), ('city', 'City Type field required.')]:
+                if not cleaned_data.get(field):
+                    self.add_error(field, label)
+        return cleaned_data
 
 
 #Overwrite NewsAdminBodyField
