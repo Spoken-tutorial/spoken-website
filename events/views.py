@@ -3133,6 +3133,18 @@ def ajax_district_collage(request):
         return HttpResponse(json.dumps(tmp), content_type='application/json')
 
 @csrf_exempt
+def ajax_state_district_institutes(request):
+    # get academic centers based on selected state and district 
+    state = request.POST.get('state') or request.GET.get('state')
+    district = request.POST.get('district') or request.GET.get('district')
+    institutes = []
+    if state and district and state != 'None' and district != 'None':
+        institutes = list(AcademicCenter.objects.filter(
+            state_id=state, district_id=district
+        ).order_by('institution_name').values('id', 'academic_code', 'institution_name'))
+    return HttpResponse(json.dumps(institutes), content_type='application/json')
+
+@csrf_exempt
 def ajax_state_collage(request):
 
     if request.method == 'GET':

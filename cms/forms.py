@@ -144,6 +144,12 @@ class ProfileForm(forms.ModelForm):
         help_text = "", error_messages = \
         {'required':'District Type field required.'})
 
+    institute = forms.ModelChoiceField(label='Institute', \
+        widget = forms.Select(attrs = {'class' : 'ac-institute'}), \
+        queryset = AcademicCenter.objects.none(), empty_label = "--- None ---", \
+        required=False, help_text = "", error_messages = \
+        {'required':'Institute field required.'})
+
     city = forms.ModelChoiceField(label = 'City',   \
     widget = forms.Select(attrs = {'class' : 'ac-city'}), \
     queryset = City.objects.none(), empty_label = "--- None ---", \
@@ -162,11 +168,15 @@ class ProfileForm(forms.ModelForm):
         self.fields['first_name'].initial = user.first_name
         self.fields['last_name'].initial = user.last_name
         self.fields["state"].queryset = State.objects.filter()
+        self.fields['institute'].label_from_instance = lambda obj: "%s - %s" % (obj.academic_code, obj.institution_name)
         if initial:
             self.fields["district"].queryset = \
                 District.objects.filter(state__id = initial.state_id)
             self.fields["city"].queryset = \
                 City.objects.filter(state__id = initial.state_id)
+            if initial.state_id and initial.district_id:
+                self.fields["institute"].queryset = \
+                    AcademicCenter.objects.filter(state_id = initial.state_id, district_id = initial.district_id).order_by('institution_name')
 
         if args:
             if 'state' in args[0]:
@@ -175,6 +185,10 @@ class ProfileForm(forms.ModelForm):
                         District.objects.filter(state__id = args[0]['state'])
                     self.fields["city"].queryset = \
                         City.objects.filter(state__id = args[0]['state'])
+            if 'state' in args[0] and 'district' in args[0]:
+                if args[0]['state'] != '' and args[0]['state'] != 'None' and args[0]['district'] != '' and args[0]['district'] != 'None':
+                    self.fields["institute"].queryset = \
+                        AcademicCenter.objects.filter(state_id = args[0]['state'], district_id = args[0]['district']).order_by('institution_name')
 
 
 #Overwrite NewsAdminBodyField

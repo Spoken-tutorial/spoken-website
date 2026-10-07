@@ -541,7 +541,7 @@
                             </a>
                         </div>
                     {% endif %}
-                    {# Script and Timed Script buttons disabled
+                    {# Script and Timed Script buttons disabled  #}
                     {% if tr_rec.script_status %}
                         <div class="list-group-item-container">
                             
@@ -565,7 +565,7 @@
                             {% endwith %}
                         {% endif %}
                     {% endif %}
-                    #}
+                 
                     {% if tr_rec.common_content.slide_status and tr_rec.common_content.slide_status != 6 %}
                         <div class="list-group-item-container">
                             <a  {% if user_authorized %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %} target="_blank" class="list-group-item">

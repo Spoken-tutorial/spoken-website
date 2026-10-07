@@ -30,7 +30,7 @@ from creation.views import get_video_info
 from events.views import get_page
 from forums.models import Question, Answer
 from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
- MONGO_HOST, MONGO_DB, TUTORIAL_RESTRICTION_DATE, ALLOWED_LOGS
+ MONGO_HOST, MONGO_DB, TUTORIAL_RESTRICTION_DATE, ALLOWED_LOGS, SWAYAM_VIDEO_URL, SWAYAM_REGISTRATION_URL
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
 from .search import search_for_results
@@ -309,7 +309,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         foss = unquote_plus(foss)
         tutorial = unquote_plus(tutorial)
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
-        tr_rec = TutorialResource.objects.select_related().get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
+        tr_rec = TutorialResource.objects.select_related('tutorial_detail', 'tutorial_detail__foss', 'language').get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         is_authorized_user = is_valid_user(request.user, foss, lang, tr_rec)
         tr_recs = get_tutorials_list(foss, lang)
     except Exception as e:
@@ -1152,3 +1152,57 @@ def check_payment_status(request, order_id):
     email = sub.email
     result = poll_payment_status(order_id, email, amount)
     return JsonResponse(result)
+
+
+def swayam(request):
+    # swayam plus page view
+    if request.method == 'POST':
+        from swayam.models import SwayamTracking
+        option = request.POST.get('swayam_source_text') or request.POST.get('swayam_source') or ''
+        is_logged_in = False
+        user = None
+        if hasattr(request, 'user') and request.user:
+            is_logged_in = request.user.is_authenticated() if callable(request.user.is_authenticated) else bool(request.user.is_authenticated)
+            if is_logged_in:
+                user = request.user
+
+        roles = []
+        academic_center = None
+        if user:
+            if is_organiser_insti_subscribed(user):
+                roles.append('organizer')
+            if is_student_insti_subscribed(user):
+                roles.append('student')
+
+            try:
+                from events.models import Organiser
+                org = Organiser.objects.filter(user=user).select_related('academic').first()
+                if org and org.academic:
+                    academic_center = org.academic
+            except Exception:
+                pass
+
+            if not academic_center:
+                try:
+                    from events.models import StudentMaster
+                    sm = StudentMaster.objects.filter(student__user=user).select_related('batch__academic').first()
+                    if sm and sm.batch and sm.batch.academic:
+                        academic_center = sm.batch.academic
+                except Exception:
+                    pass
+
+        SwayamTracking.objects.create(
+            user=user,
+            academic_center=academic_center,
+            dropdown_option=option,
+            is_logged_in=is_logged_in,
+            is_subscribed_institution=bool(roles),
+            roles=", ".join(roles)
+        )
+        return JsonResponse({'status': 'success'})
+
+    context = {
+        'video_url': SWAYAM_VIDEO_URL,
+        'registration_url': SWAYAM_REGISTRATION_URL,
+    }
+    return render(request, 'spoken/templates/swayam.html', context)

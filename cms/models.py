@@ -11,7 +11,7 @@ from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
 # Spoken Tutorial Stuff
-from events.models import City, District, Location, State
+from events.models import City, District, Location, State, AcademicCenter
 
 def profile_picture(instance, filename):
     ext = os.path.splitext(filename)[1]
@@ -29,6 +29,7 @@ class Profile(models.Model):
     street = models.CharField(max_length=255, blank=True, null=True)
     location = models.ForeignKey(Location, null=True, on_delete=models.PROTECT )
     district = models.ForeignKey(District, null=True, on_delete=models.PROTECT )
+    institute = models.ForeignKey(AcademicCenter, null=True, blank=True, on_delete=models.PROTECT )
     city = models.ForeignKey(City, null=True, on_delete=models.PROTECT )
     state = models.ForeignKey(State, null=True, on_delete=models.PROTECT )
     country = models.CharField(max_length=255, blank=True, null=True)

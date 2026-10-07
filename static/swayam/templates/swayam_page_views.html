@@ -1,0 +1,186 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+
+{% block title %}Swayam Page Views Statistics{% endblock %}
+
+{% block heading %}
+<i class="fa fa-bar-chart"></i> Swayam Page Views Statistics
+<a href="{% url 'events:events_dashboard' %}" class="dashboard pull-right">Dashboard</a>
+{% endblock %}
+
+{% block search %}{% endblock %}
+
+{% block content %}
+<div class="row" style="margin-top: 15px;">
+    <!-- total enrollments -->
+    <div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3">
+        <div class="panel panel-success text-center">
+            <div class="panel-heading">
+                <h4>Total Swayam Enrollments</h4>
+            </div>
+            <div class="panel-body">
+                <h2>{{ total_enrollments }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- dropdown options breakdown and pie chart -->
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h4 class="panel-title"><i class="fa fa-pie-chart"></i> Swayam Page Dropdown Options </h4>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-7">
+                <table class="table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr class="info">
+                            <th style="width: 10%;">#</th>
+                            <th style="width: 55%;">Option Chosen</th>
+                            <th style="width: 15%;" class="text-center">Count</th>
+                            <th style="width: 20%;" class="text-center">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in option_stats %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ item.option }}</td>
+                            <td class="text-center"><strong>{{ item.count }}</strong></td>
+                            <td class="text-center">{{ item.percentage }}%</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No page view data recorded yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if option_stats %}
+                    <tfoot>
+                        <tr class="active">
+                            <th colspan="2">Total</th>
+                            <th class="text-center">{{ total_tracking_count }}</th>
+                            <th class="text-center">100%</th>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+            <div class="col-md-5 text-center">
+                {% if option_stats %}
+                <div style="max-height: 280px; position: relative;">
+                    <canvas id="optionsPieChart" style="max-height: 260px;"></canvas>
+                </div>
+                {% else %}
+                <p class="text-muted" style="padding-top: 40px;">No chart data available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- enrollment status and courses -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title"><i class="fa fa-tasks"></i> Swayam Enrollment Status</h4>
+            </div>
+            <div class="panel-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr class="info">
+                            <th>Status</th>
+                            <th class="text-center">Count</th>
+                            <th class="text-center">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in status_stats %}
+                        <tr>
+                            <td>{{ item.status_label }}</td>
+                            <td class="text-center"><strong>{{ item.count }}</strong></td>
+                            <td class="text-center">{{ item.percentage }}%</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No enrollment data available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title"><i class="fa fa-book"></i> Enrollments by FOSS</h4>
+            </div>
+            <div class="panel-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr class="info">
+                            <th>Course / FOSS</th>
+                            <th class="text-center">Enrolled</th>
+                            <th class="text-center">Avg Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in foss_stats %}
+                        <tr>
+                            <td>{{ item.foss }}</td>
+                            <td class="text-center"><strong>{{ item.count }}</strong></td>
+                            <td class="text-center">{{ item.avg_progress }}%</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No course data available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block jsblock %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var chartLabels = {{ chart_labels_json|safe }};
+        var chartData = {{ chart_data_json|safe }};
+
+        if (chartLabels.length > 0 && document.getElementById('optionsPieChart')) {
+            var ctx = document.getElementById('optionsPieChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: [
+                            '#337ab7', '#5cb85c', '#f0ad4e', '#d9534f', '#5bc0de',
+                            '#9b59b6', '#34495e', '#1abc9c', '#e67e22', '#2ecc71'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { boxWidth: 12, font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

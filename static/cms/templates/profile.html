@@ -51,6 +51,14 @@
                         <small>Please select your district.</small>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label" for="id_institute">Institute<span class='ajax-refresh ajax-refresh-institute'></span></label>
+                    <div class="col-sm-9">
+                        {% render_field form.institute class+="form-control ac-institute" tabindex="1" data-placeholder="Choose institute" %}
+                        {{ form.institute.errors }}
+                        <small>Please select your institute / academic center.</small>
+                    </div>
+                </div>
                 <!--
                 <div class="form-group">
                     <label class="col-sm-3 control-label" for="id_location">Location</label>
@@ -120,11 +128,58 @@
 {% block jsblock %}
     <script src="{% static 'spoken/js/events.js' %}"></script>
     <script>
+        function loadInstitutes() {
+            var state = $("#id_state").val();
+            var district = $("#id_district").val() || $('.district').val();
+            var $institute = $("#id_institute");
+            if (state && district && state !== 'None' && district !== 'None' && district !== '') {
+                $('.ajax-refresh-institute').show();
+                $.ajax({
+                    url: "/software-training/ajax-state-district-institutes/",
+                    type: "POST",
+                    data: {
+                        state: state,
+                        district: district
+                    },
+                    dataType: "json",
+                    success: function(data) {
+                        if (typeof data === 'string') {
+                            try { data = JSON.parse(data); } catch(e) {}
+                        }
+                        var currentVal = $institute.val();
+                        var options = '<option value="">--- None ---</option>';
+                        if (data && data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                var item = data[i];
+                                options += '<option value="' + item.id + '">' + item.academic_code + ' - ' + item.institution_name + '</option>';
+                            }
+                        }
+                        $institute.html(options);
+                        $institute.removeAttr("disabled");
+                        $institute.prop("disabled", false);
+                        if (currentVal) {
+                            $institute.val(currentVal);
+                        }
+                        $('.ajax-refresh-institute').hide();
+                    },
+                    error: function() {
+                        $('.ajax-refresh-institute').hide();
+                    }
+                });
+            } else {
+                $institute.html('<option value="">--- None ---</option>');
+            }
+        }
         $("#id_state").change(function(){
             ajaxStrateFillDatas('district', 'city', 'university');
+            $("#id_institute").html('<option value="">--- None ---</option>');
         });
         $('.district').change(function(){
             ajaxDistrictFillDatas('location', '', $(this).val());
+            loadInstitutes();
+        });
+        $(document).on('change', '#id_district, .district', function(){
+            loadInstitutes();
         });
     </script>
 {% endblock %}

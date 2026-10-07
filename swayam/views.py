@@ -10,8 +10,14 @@ import requests
 
 from django.conf import settings
 from django.contrib.auth import login
+
 from django.http import HttpResponseBadRequest, JsonResponse
-from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.db.models import Avg, Count, Q
+
+from django.shortcuts import redirect, render
+
 from django.utils.http import urlencode
 from django.views.decorators.csrf import csrf_exempt
 
@@ -20,7 +26,10 @@ try:
 except ImportError:
     from urlparse import urlparse
 
+from datetime import datetime
+from events.views import is_resource_person
 from .client import SwayamClient
+from .models import SwayamEnrollment, SwayamTracking, SwayamUser
 from .services import (
     SwayamEnrollmentService,
     SwayamUserService,
@@ -106,25 +115,66 @@ def _is_allowed_target(target):
     )
 
 def sso_start(request):
+    logger.info('SWAYAM SSO start called.')
+    
     issuer = request.GET.get('iss', '')
     login_hint = request.GET.get('login_hint', '')
     target = request.GET.get('target_link_uri', '')
     enrollment_id = request.GET.get('lti_message_hint','')
 
+    logger.info(
+            'SWAYAM SSO launch received. '
+            'issuer=%s login_hint_present=%s '
+            'enrollment_id=%s target=%s',
+            issuer,
+            bool(login_hint),
+            enrollment_id,
+            target,
+    )
+
     if issuer != _expected_issuer():
+        logger.warning(
+                    'SWAYAM SSO rejected: invalid issuer. '
+                    'received=%s expected=%s',
+                    issuer,
+                    _expected_issuer(),
+        )
         return HttpResponseBadRequest(
             'Invalid SWAYAM issuer.'
         )
 
+    logger.info(
+            'SWAYAM SSO issuer validated.'
+    )
+
     if not enrollment_id:
+        logger.warning(
+                    'SWAYAM SSO rejected: missing enrollment ID.'
+        )
         return HttpResponseBadRequest(
             'Missing SWAYAM enrollment ID.'
         )
 
+    logger.info(
+            'SWAYAM SSO enrollment ID present. '
+            'enrollment_id=%s',
+            enrollment_id,
+    )
+
     if target and not _is_allowed_target(target):
+        logger.warning(
+                    'SWAYAM SSO rejected: invalid target_link_uri. '
+                    'target=%s',
+                    target,
+        )
         return HttpResponseBadRequest(
             'Invalid target_link_uri.'
         )
+
+    logger.info(
+            'SWAYAM SSO target validated. target=%s',
+            target,
+    )
 
     state = _random_urlsafe_string()
     nonce = _random_urlsafe_string()
@@ -132,6 +182,10 @@ def sso_start(request):
 
     code_challenge = _pkce_challenge(
         code_verifier
+    )
+
+    logger.info(
+            'SWAYAM SSO OIDC security values generated.'
     )
 
     request.session[SWAYAM_OIDC_SESSION_KEY] = {
@@ -142,6 +196,10 @@ def sso_start(request):
         'enrollment_id': enrollment_id,
         'target_link_uri': target,
     }
+
+    logger.info(
+            'SWAYAM SSO login state stored in Django session.'
+    )
 
     authorization_endpoint = (
         settings.SWAYAM_BASE_URL.rstrip('/')
@@ -167,6 +225,11 @@ def sso_start(request):
     authorization_url = '{}?{}'.format(
         authorization_endpoint,
         urlencode(params),
+    )
+
+    logger.info(
+            'SWAYAM SSO redirecting browser to authorization endpoint: %s',
+            authorization_endpoint,
     )
 
     return redirect(authorization_url)
@@ -236,6 +299,47 @@ def _exchange_authorization_code(
         )
 
     return data
+
+
+def _fetch_userinfo(access_token):
+    userinfo_url = (
+        settings.SWAYAM_BASE_URL.rstrip('/')
+        + '/oidc/me'
+    )
+
+    try:
+        response = requests.get(
+            userinfo_url,
+            headers={
+                'Authorization':
+                    'Bearer {}'.format(access_token)
+            },
+            timeout=15,
+        )
+
+    except requests.RequestException:
+        logger.exception(
+            'Could not reach SWAYAM userinfo endpoint.'
+        )
+        raise
+
+    if response.status_code != 200:
+        logger.error(
+            'SWAYAM userinfo request failed. '
+            'status=%s body=%s',
+            response.status_code,
+            response.text[:1000],
+        )
+        raise ValueError(
+            'Could not fetch SWAYAM learner profile.'
+        )
+
+    try:
+        return response.json()
+    except ValueError:
+        raise ValueError(
+            'SWAYAM userinfo endpoint returned invalid JSON.'
+        )
 
 def _fetch_jwks():
     jwks_url = (
@@ -477,17 +581,50 @@ def sso_callback(request):
             ],
         )
 
+        access_token = token_data.get('access_token')
+
+        if not access_token:
+            raise ValueError(
+                'SWAYAM token response has no access_token.'
+            )
+
+        userinfo = _fetch_userinfo(access_token)
+
+        if userinfo.get('sub') != claims['sub']:
+            raise ValueError(
+                'SWAYAM userinfo sub does not match ID token.'
+            )
+
         swayam_sub = claims['sub']
 
         email = (
-            claims.get('email')
+            userinfo.get('email')
             or ''
         )
 
         name = (
-            claims.get('name')
+            userinfo.get('name')
             or ''
         )
+
+        logger.info(
+            'SWAYAM userinfo fetched successfully. '
+            'email_present=%s name_present=%s',
+            bool(email),
+            bool(name),
+        )
+
+        # swayam_sub = claims['sub']
+
+        # email = (
+        #     claims.get('email')
+        #     or ''
+        # )
+
+        # name = (
+        #     claims.get('name')
+        #     or ''
+        # )
 
         #
         # Optional but useful consistency check:
@@ -656,3 +793,87 @@ def save_progress(request):
     except Exception as exc:
         logger.warning('save_progress error: %s', exc)
         return JsonResponse({'status': 'error', 'message': str(exc)}, status=400)
+@login_required
+def swayam_page_views(request):
+    user = request.user
+    is_auth = user.is_authenticated() if callable(user.is_authenticated) else bool(user.is_authenticated)
+    if not (is_auth and (is_resource_person(user) or user.is_staff or user.is_superuser)):
+        raise PermissionDenied()
+
+    # total enrollments
+    total_enrollments = SwayamEnrollment.objects.count()
+
+    # dropdown option stats
+    total_tracking_count = SwayamTracking.objects.count()
+    option_records = (
+        SwayamTracking.objects
+        .values('dropdown_option')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+
+    option_stats = []
+    chart_labels = []
+    chart_data = []
+
+    for item in option_records:
+        opt_name = item['dropdown_option'] if item['dropdown_option'] else 'Not Specified'
+        cnt = item['total']
+        pct = round((float(cnt) / total_tracking_count * 100), 1) if total_tracking_count > 0 else 0
+        option_stats.append({
+            'option': opt_name,
+            'count': cnt,
+            'percentage': pct,
+        })
+        chart_labels.append(opt_name)
+        chart_data.append(cnt)
+
+    # enrollment status
+    enrollment_status_records = (
+        SwayamEnrollment.objects
+        .values('status')
+        .annotate(total=Count('id'))
+        .order_by('-total')
+    )
+    status_stats = []
+    status_display_map = dict(SwayamEnrollment.STATUS_CHOICES)
+
+    for item in enrollment_status_records:
+        st_code = item['status']
+        st_label = status_display_map.get(st_code, st_code)
+        cnt = item['total']
+        pct = round((float(cnt) / total_enrollments * 100), 1) if total_enrollments > 0 else 0
+        status_stats.append({
+            'status_label': st_label,
+            'count': cnt,
+            'percentage': pct,
+        })
+
+    # foss 
+    foss_records = (
+        SwayamEnrollment.objects
+        .values('foss__foss')
+        .annotate(
+            total=Count('id'),
+            avg_progress=Avg('progress_percent')
+        )
+        .order_by('-total')
+    )
+    foss_stats = []
+    for item in foss_records:
+        foss_stats.append({
+            'foss': item['foss__foss'] or 'Unknown Course',
+            'count': item['total'],
+            'avg_progress': round(item['avg_progress'] or 0, 1),
+        })
+
+    context = {
+        'total_enrollments': total_enrollments,
+        'total_tracking_count': total_tracking_count,
+        'option_stats': option_stats,
+        'chart_labels_json': json.dumps(chart_labels),
+        'chart_data_json': json.dumps(chart_data),
+        'status_stats': status_stats,
+        'foss_stats': foss_stats,
+    }
+    return render(request, 'swayam/templates/swayam_page_views.html', context)
