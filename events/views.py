@@ -3141,7 +3141,7 @@ def ajax_state_district_institutes(request):
     if state and district and state != 'None' and district != 'None':
         institutes = list(AcademicCenter.objects.filter(
             state_id=state, district_id=district
-        ).order_by('institution_name').values('id', 'academic_code', 'institution_name'))
+        ).order_by('institution_name').values('id', 'academic_code', 'institution_name', 'city_id', 'city__name', 'pincode', 'address'))
     return HttpResponse(json.dumps(institutes), content_type='application/json')
 
 @csrf_exempt

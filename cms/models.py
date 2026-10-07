@@ -37,7 +37,7 @@ class Profile(models.Model):
     phone = models.CharField(max_length=20, null=True)
     picture = models.FileField(upload_to=profile_picture, null=True, blank=True)
     thumb = models.FileField(upload_to=profile_picture_thumb, null=True, blank=True)
-    address = models.TextField(null=True)
+    address = models.TextField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     class Meta(object):
         app_label = 'cms'
