@@ -467,6 +467,14 @@ LOGGING = {
             "filename": ALLOWED_LOGS['spoken-mails'],
             "formatter": "simple",
         },
+        "swayam_file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": ALLOWED_LOGS['swayam'],
+            "maxBytes": 1024 * 1024 * 20,
+            "backupCount": 5,
+            "formatter": "simple",
+        },
     },
 
     "loggers": {
@@ -488,6 +496,11 @@ LOGGING = {
         "mail_logs": {
             "handlers": ["mail_file"],
             "level": "WARNING",
+            "propagate": False,
+        },
+        "swayam": {
+            "handlers": ["swayam_file"],
+            "level": "INFO",
             "propagate": False,
         },
     },
