@@ -291,6 +291,47 @@ def _exchange_authorization_code(
 
     return data
 
+
+def _fetch_userinfo(access_token):
+    userinfo_url = (
+        settings.SWAYAM_BASE_URL.rstrip('/')
+        + '/oidc/me'
+    )
+
+    try:
+        response = requests.get(
+            userinfo_url,
+            headers={
+                'Authorization':
+                    'Bearer {}'.format(access_token)
+            },
+            timeout=15,
+        )
+
+    except requests.RequestException:
+        logger.exception(
+            'Could not reach SWAYAM userinfo endpoint.'
+        )
+        raise
+
+    if response.status_code != 200:
+        logger.error(
+            'SWAYAM userinfo request failed. '
+            'status=%s body=%s',
+            response.status_code,
+            response.text[:1000],
+        )
+        raise ValueError(
+            'Could not fetch SWAYAM learner profile.'
+        )
+
+    try:
+        return response.json()
+    except ValueError:
+        raise ValueError(
+            'SWAYAM userinfo endpoint returned invalid JSON.'
+        )
+
 def _fetch_jwks():
     jwks_url = (
         settings.SWAYAM_BASE_URL.rstrip('/')
@@ -531,17 +572,50 @@ def sso_callback(request):
             ],
         )
 
+        access_token = token_data.get('access_token')
+
+        if not access_token:
+            raise ValueError(
+                'SWAYAM token response has no access_token.'
+            )
+
+        userinfo = _fetch_userinfo(access_token)
+
+        if userinfo.get('sub') != claims['sub']:
+            raise ValueError(
+                'SWAYAM userinfo sub does not match ID token.'
+            )
+
         swayam_sub = claims['sub']
 
         email = (
-            claims.get('email')
+            userinfo.get('email')
             or ''
         )
 
         name = (
-            claims.get('name')
+            userinfo.get('name')
             or ''
         )
+
+        logger.info(
+            'SWAYAM userinfo fetched successfully. '
+            'email_present=%s name_present=%s',
+            bool(email),
+            bool(name),
+        )
+
+        # swayam_sub = claims['sub']
+
+        # email = (
+        #     claims.get('email')
+        #     or ''
+        # )
+
+        # name = (
+        #     claims.get('name')
+        #     or ''
+        # )
 
         #
         # Optional but useful consistency check:
