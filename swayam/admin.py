@@ -6,6 +6,7 @@ from .models import (
     SwayamEnrollment,
     SwayamTracking,
     SwayamUser,
+    SwayamTutorialProgress,
 )
 
 
@@ -48,6 +49,11 @@ class SwayamEnrollmentAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(SwayamTutorialProgress)
+class SwayamTutorialProgressAdmin(admin.ModelAdmin):
+    list_display = ('user', 'foss', 'tutorial_detail', 'video_time', 'progress_percent', 'is_completed', 'updated')
+    list_filter = ('is_completed', 'foss')
+    search_fields = ('user__username', 'tutorial_detail__tutorial')
 @admin.register(SwayamTracking)
 class SwayamTrackingAdmin(admin.ModelAdmin):
     list_display = (

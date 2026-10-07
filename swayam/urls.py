@@ -21,6 +21,9 @@ urlpatterns = [
     ),
 
     url(
+        r'^save-progress/$',
+        views.save_progress,
+        name='save-progress',
         r'^page-views/$',
         views.swayam_page_views,
         name='swayam_page_views',

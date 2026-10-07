@@ -245,4 +245,29 @@ class SwayamClient(object):
                     path,
                     json={},
                 )
+
+    # to transmit learner progress percentage to swayam api
+    def update_progress(self, enrollment_id, progress_percent):
+        path = (
+            '/api/v1/partner/enrollments/{}/progress'
+            .format(enrollment_id)
+        )
+        logger.info(
+            'Sending SWAYAM progress update. enrollment_id=%s progress_percent=%s',
+            enrollment_id,
+            progress_percent,
+        )
+        try:
+            return self._request(
+                'POST',
+                path,
+                json={'progressPercent': int(progress_percent)},
+            )
+        except Exception as exc:
+            logger.warning(
+                'SWAYAM update_progress request skipped or failed: %s',
+                exc,
+            )
+            return None
+
     
