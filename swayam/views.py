@@ -106,25 +106,66 @@ def _is_allowed_target(target):
     )
 
 def sso_start(request):
+    logger.info('SWAYAM SSO start called.')
+    
     issuer = request.GET.get('iss', '')
     login_hint = request.GET.get('login_hint', '')
     target = request.GET.get('target_link_uri', '')
     enrollment_id = request.GET.get('lti_message_hint','')
 
+    logger.info(
+            'SWAYAM SSO launch received. '
+            'issuer=%s login_hint_present=%s '
+            'enrollment_id=%s target=%s',
+            issuer,
+            bool(login_hint),
+            enrollment_id,
+            target,
+    )
+
     if issuer != _expected_issuer():
+        logger.warning(
+                    'SWAYAM SSO rejected: invalid issuer. '
+                    'received=%s expected=%s',
+                    issuer,
+                    _expected_issuer(),
+        )
         return HttpResponseBadRequest(
             'Invalid SWAYAM issuer.'
         )
 
+    logger.info(
+            'SWAYAM SSO issuer validated.'
+    )
+
     if not enrollment_id:
+        logger.warning(
+                    'SWAYAM SSO rejected: missing enrollment ID.'
+        )
         return HttpResponseBadRequest(
             'Missing SWAYAM enrollment ID.'
         )
 
+    logger.info(
+            'SWAYAM SSO enrollment ID present. '
+            'enrollment_id=%s',
+            enrollment_id,
+    )
+
     if target and not _is_allowed_target(target):
+        logger.warning(
+                    'SWAYAM SSO rejected: invalid target_link_uri. '
+                    'target=%s',
+                    target,
+        )
         return HttpResponseBadRequest(
             'Invalid target_link_uri.'
         )
+
+    logger.info(
+            'SWAYAM SSO target validated. target=%s',
+            target,
+    )
 
     state = _random_urlsafe_string()
     nonce = _random_urlsafe_string()
@@ -132,6 +173,10 @@ def sso_start(request):
 
     code_challenge = _pkce_challenge(
         code_verifier
+    )
+
+    logger.info(
+            'SWAYAM SSO OIDC security values generated.'
     )
 
     request.session[SWAYAM_OIDC_SESSION_KEY] = {
@@ -142,6 +187,10 @@ def sso_start(request):
         'enrollment_id': enrollment_id,
         'target_link_uri': target,
     }
+
+    logger.info(
+            'SWAYAM SSO login state stored in Django session.'
+    )
 
     authorization_endpoint = (
         settings.SWAYAM_BASE_URL.rstrip('/')
@@ -167,6 +216,11 @@ def sso_start(request):
     authorization_url = '{}?{}'.format(
         authorization_endpoint,
         urlencode(params),
+    )
+
+    logger.info(
+            'SWAYAM SSO redirecting browser to authorization endpoint: %s',
+            authorization_endpoint,
     )
 
     return redirect(authorization_url)
