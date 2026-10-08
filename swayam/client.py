@@ -229,45 +229,61 @@ class SwayamClient(object):
         return response.json()
 
     def confirm_completion(self, enrollment_id):
-        """
-        We include this API now although progress reporting
-        will be implemented later.
-
-        Call this ONLY when local completion rules are final.
-        """
         path = (
-                    '/api/v1/partner/enrollments/{}/completion'
-                    .format(enrollment_id)
-                )
-        
+            '/api/v1/partner/enrollments/{}/completion'
+            .format(enrollment_id)
+        )
+
+        logger.info(
+            'Sending SWAYAM completion. enrollment_id=%s',
+            enrollment_id,
+        )
+
         self._request(
-                    'POST',
-                    path,
-                    json={},
-                )
+            'POST',
+            path,
+            json={},
+        )
+
+        logger.info(
+            'SWAYAM completion successful. enrollment_id=%s',
+            enrollment_id,
+        )
 
     # to transmit learner progress percentage to swayam api
     def update_progress(self, enrollment_id, progress_percent):
+        progress_percent = int(progress_percent)
+
+        if progress_percent < 0 or progress_percent > 100:
+            raise ValueError(
+                'Progress must be between 0 and 100.'
+            )
+
         path = (
             '/api/v1/partner/enrollments/{}/progress'
             .format(enrollment_id)
         )
+
         logger.info(
-            'Sending SWAYAM progress update. enrollment_id=%s progress_percent=%s',
+            'Sending SWAYAM progress update. '
+            'enrollment_id=%s percent=%s',
             enrollment_id,
             progress_percent,
         )
-        try:
-            return self._request(
-                'POST',
-                path,
-                json={'progressPercent': int(progress_percent)},
-            )
-        except Exception as exc:
-            logger.warning(
-                'SWAYAM update_progress request skipped or failed: %s',
-                exc,
-            )
-            return None
+
+        self._request(
+            'POST',
+            path,
+            json={
+                'percent': progress_percent,
+            },
+        )
+
+        logger.info(
+            'SWAYAM progress update successful. '
+            'enrollment_id=%s percent=%s',
+            enrollment_id,
+            progress_percent,
+        )
 
     
