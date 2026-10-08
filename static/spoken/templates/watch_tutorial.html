@@ -773,8 +773,9 @@ function clickListener(e)
         let pause = 0;
         let play = 0;
         var performAnalysis = ("{{ perform_analysis }}" === "1" || "{{ perform_analysis }}" === "True");
+        var isSwayam = "{{ request.user.swayam_identity|default:'' }}" !== "";
 
-        if (performAnalysis) {
+        if (performAnalysis || isSwayam) {
             let video = document.getElementById("st_video_html5_api");
             let act_pp = '';
             let videotime = '';
@@ -789,15 +790,16 @@ function clickListener(e)
                     myfun(e, 'Ended');
                 });
             }
-            var arrayWithElements = new Array();
-            document.onclick = clickListener;
+            if (performAnalysis) {
+                var arrayWithElements = new Array();
+                document.onclick = clickListener;
+            }
         }
 
         function myfun(e) {
             let video = document.getElementById("st_video_html5_api");
             let currentVidTime = video ? video.currentTime : 0;
             let currentDuration = video ? video.duration : 0;
-            var isSwayam = "{{ request.user.swayam_identity|default:'' }}" !== "";
             var postUrl = isSwayam ? "/swayam/save-progress/" : "/saveVideoData/";
 
             $.ajax({
@@ -819,7 +821,7 @@ function clickListener(e)
         }
 
         window.onbeforeunload = function (e) {
-            if (performAnalysis) {
+            if (performAnalysis || isSwayam) {
                 myfun(e, 'LeavePage');
             }
         };
