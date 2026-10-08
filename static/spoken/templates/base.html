@@ -17,10 +17,11 @@
             <meta name="keywords" content="spoken tutorial, free software training in india, video tutorials, basic IT skills, workshop, software, spoken-tutorial.org">
         {% endblock %}
         {% block meta %}
-            <meta property="og:url" content="https://www.spoken-tutorial.org">
+            <!-- <meta property="og:url" content="https://www.spoken-tutorial.org"> -->
+            <meta property="og:url" content="{{ SPOKEN_BASE_URL }}">
             <meta property="og:title" content="Spoken Tutorial Project, IIT Bombay">
             <meta property="og:description" content="A spoken tutorial is a an audio-video tutorial that explains an activity performed on the computer. An expert explains the working of a software, by demonstrating it on the screen, along with a running commentary.">
-            <meta property="og:image" content="https://spoken-tutorial.org/static/spoken/images/home-banner.jpg" alt="Banner image" />
+            <meta property="og:image" content="{{ SPOKEN_BASE_URL }}/static/spoken/images/home-banner.jpg" alt="Banner image" />
         {% endblock %}
         {% block metatag %}
         {% endblock %}
@@ -76,11 +77,11 @@
                                                                     <h5 class="media-heading"><b>Software Training</b></h5>
                                                                     <div class="media-body">
                                                                         <ul class="media-list">
-                                                                            <li class=""><a href="https://process.spoken-tutorial.org/index.php/Software-Training#About_SELF_Workshops" target="_blank">About the Training</a></li>
-                                                                            <li class=""><a href="https://process.spoken-tutorial.org/index.php/Software-Training#Progress_To_Date" target="_blank">Progress  to Date</a></li>
-                                                                            <li class=""><a href="https://process.spoken-tutorial.org/index.php/Software-Training#Software_Offered" target="_blank">Software Offered</a></li>
-                                                                            <li class=""><a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">Contacts for Training</a></li>
-                                                                            <!-- <li class=""><a href="https://spoken-tutorial.org/change-in-policy/" target="_blank">Change in Training Policy</a></li> -->
+                                                                            <li class=""><a href="{{ PROCESS_URL }}/index.php/Software-Training#About_SELF_Workshops" target="_blank">About the Training</a></li>
+                                                                            <li class=""><a href="{{ PROCESS_URL }}/index.php/Software-Training#Progress_To_Date" target="_blank">Progress  to Date</a></li>
+                                                                            <li class=""><a href="{{ PROCESS_URL }}/index.php/Software-Training#Software_Offered" target="_blank">Software Offered</a></li>
+                                                                            <li class=""><a href="{{ PROCESS_URL }}/index.php/Software-Training#Contacts_For_Training" target="_blank">Contacts for Training</a></li>
+                                                                            <!-- <li class=""><a href="{{ SPOKEN_BASE_URL }}/change-in-policy/" target="_blank">Change in Training Policy</a></li> -->
                                                                         </ul>
                                                                     </div>
                                                                 </div>
@@ -88,8 +89,8 @@
                                                                     <h5 class="media-heading"><b>Procedures</b></h5>
                                                                     <div class="media-body">
                                                                         <ul class="media-list">
-                                                                            <li class=""><a href="https://process.spoken-tutorial.org/index.php/Software-Training#Organising_Training" target="_blank">Organising Training</a></li>
-                                                                            <li class=""><a href="https://process.spoken-tutorial.org/index.php/Software-Training#Downloading_Spoken_Tutorials" target="_blank">Instruction for Downloading Tutorials</a></li>
+                                                                            <li class=""><a href="{{ PROCESS_URL }}/index.php/Software-Training#Organising_Training" target="_blank">Organising Training</a></li>
+                                                                            <li class=""><a href="{{ PROCESS_URL }}/index.php/Software-Training#Downloading_Spoken_Tutorials" target="_blank">Instruction for Downloading Tutorials</a></li>
                                                                             <li class=""><a href="/cdcontent/" target="_blank">Create Your Own Disc Image</a></li>
                                                                             <li class=""><a href="/software-training/resource-center/">Resource Centers</a></li>
                                                                         </ul>
@@ -112,10 +113,10 @@
                                                                     <h5 class="media-heading"><b>Online Test</b></h5>
                                                                     <div class="media-body">
                                                                         <ul class="media-list">
-                                                                        <li class=""><a href="https://process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf" target="_blank">Instruction for Invigilator</a></li>
-                                                                        <li class=""><a href="https://process.spoken-tutorial.org/images/9/95/Test_Instruction_for_Participants.pdf" target="_blank">Instruction for Participants</a></li>
-                                                                        <li class=""><a href="https://spoken-tutorial.org/software-training/test/verify-test-certificate/" target="_blank">Certificate Verification Link</a></li>
-                                                                        <li class=""><a href="https://spoken-tutorial.org/accounts/verify/" target="_blank">Email Verification Link</a></li>
+                                                                        <li class=""><a href="{{ PROCESS_URL }}/images/0/09/Instructions_for_Invigilator.pdf" target="_blank">Instruction for Invigilator</a></li>
+                                                                        <li class=""><a href="{{ PROCESS_URL }}/images/9/95/Test_Instruction_for_Participants.pdf" target="_blank">Instruction for Participants</a></li>
+                                                                        <li class=""><a href="{{ SPOKEN_BASE_URL }}/software-training/test/verify-test-certificate/" target="_blank">Certificate Verification Link</a></li>
+                                                                        <li class=""><a href="{{ SPOKEN_BASE_URL }}/accounts/verify/" target="_blank">Email Verification Link</a></li>
                                                                         <li class=""><span class="badge" id="nav-fdp"style="margin-right: 4px;">new</span><a href="https://jrs.spoken-tutorial.org/" target="_blank">Job Recommendation</a></li>
                                                                         </ul>
                                                                     </div>
@@ -140,8 +141,8 @@
                                                                             {% if user|get_contributor or user|get_domainreviewer or user|get_qualityreviewer or user|get_administrator %}
                                                                                 <li class=""><a target="_blank" href="https://files.spoken-tutorial.org/english-videos/">Video for Dubbing</a></li>
                                                                             {% endif %}
-                                                                            <li class=""><a target="_blank" href="https://process.spoken-tutorial.org/index.php/Main_Page">Creation Process</a></li>
-                                                                            <li class=""><a target="_blank" href="https://script.spoken-tutorial.org/index.php/Main_Page">Outline and Script</a></li>
+                                                                            <li class=""><a target="_blank" href="{{ PROCESS_URL }}/index.php/Main_Page">Creation Process</a></li>
+                                                                            <li class=""><a target="_blank" href="{{ SCRIPT_URL }}Main_Page">Outline and Script</a></li>
                                                                             <li class=""><a href="/creation">Creation Dashboard</a></li>
 
                                                                         </ul>
@@ -212,7 +213,7 @@
                 <div id="search-wrapper">
                     <div class="common-search row">
                         {% tutorialsearch %}
-                         <div class="pull-left"><font color="#C70039">For the purpose of course selection, go here : </font><a href="https://process.spoken-tutorial.org/index.php/Software-Training#Software_Offered" target="_blank">Software Offered</a>
+                         <div class="pull-left"><font color="#C70039">For the purpose of course selection, go here : </font><a href="{{ PROCESS_URL }}/index.php/Software-Training#Software_Offered" target="_blank">Software Offered</a>
                         </div>
                         <div class="pull-right alternate-search-link"><a href="/keyword-search/">Keyword Search</a></div>
                     </div>
@@ -321,8 +322,8 @@
                             </div>
                             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
                                 <ul class="list-unstyled">
-                                    <li><a href="https://process.spoken-tutorial.org/index.php/Software-Training" target="_blank">Software Training</a></li>
-                                    <li class=""><a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">Contacts for Training</a></li>
+                                    <li><a href="{{ PROCESS_URL }}/index.php/Software-Training" target="_blank">Software Training</a></li>
+                                    <li class=""><a href="{{ PROCESS_URL }}/index.php/Software-Training#Contacts_For_Training" target="_blank">Contacts for Training</a></li>
                                     <li><a href="/software-training/">Training Dashboard</a></li>
                                     <li><a href="/creation/">Creation Dashboard</a></li>
                                     
@@ -394,11 +395,11 @@
                                     <img src="{% static 'spoken/images/88x31.png' %}" alt="CC logo" />
                                 </a> 
                                 Spoken Tutorial, created on or before 31 Jan. 2025, by <a href="http://www.iitb.ac.in" target="_blank">IIT Bombay</a> 
-                                is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where stated otherwise <a data-toggle="tooltip" data-placement="top" title="Series which are not shared under CC BY SA but have a perpetual permission to display are: PHP & MySQL, GIMP, Health Series."><i class="fa fa-question-circle fa-lg" aria-hidden="true"></i></a><br />Based on a work at <a xmlns:dct="https://purl.org/dc/terms/" href="/" rel="dct:source">https://spoken-tutorial.org</a>. Permissions beyond the scope of this license may be available at <a xmlns:cc="https://creativecommons.org/ns#" href="/" rel="cc:morePermissions">https://spoken-tutorial.org</a>.
+                                is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>, except where stated otherwise <a data-toggle="tooltip" data-placement="top" title="Series which are not shared under CC BY SA but have a perpetual permission to display are: PHP & MySQL, GIMP, Health Series."><i class="fa fa-question-circle fa-lg" aria-hidden="true"></i></a><br />Based on a work at <a xmlns:dct="https://purl.org/dc/terms/" href="/" rel="dct:source">{{ SPOKEN_BASE_URL }}</a>. Permissions beyond the scope of this license may be available at <a xmlns:cc="https://creativecommons.org/ns#" href="/" rel="cc:morePermissions">{{ SPOKEN_BASE_URL }}</a>.
                              </p>
                               <p style="color: rgb(211, 211, 211)">
                                 <b>EduPyramids</b> has repurposed some courses, which are now available on the main page. The older version of these courses can be accessed through 
-<a href="https://spoken-tutorial.org/archived/" target="_blank">https://spoken-tutorial.org/archived/</a>.
+<a href="{{ SPOKEN_BASE_URL }}/archived/" target="_blank">{{ SPOKEN_BASE_URL }}/archived/</a>.
                              </p>
                              <p style="color: rgb(211, 211, 211)">
                                 <b>Spoken Tutorial, developed at IIT Bombay</b>, is brought to you by EduPyramids Educational Services Private Limited (<b>DBA</b>: EduPyramids Educational Services Pvt Ltd.). EduPyramids Educational Services Private Limited is currently incubated at SINE IIT Bombay. All transactions will be processed under the name EduPyramids Educational Services Private Limited.

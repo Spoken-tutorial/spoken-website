@@ -4,6 +4,8 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.template import Context
 from events.models import *
+from spoken.config import PROCESS_URL
+
 
 plaintext = get_template('email-template.txt')
 htmly     = get_template('email-template.html')
@@ -43,11 +45,11 @@ message = '''Dear Organiser,
     6. In the fourth step, the FC will select from the Master Batch to create a list with the names of students who will learn the particular FOSS/s
 
     7. In the fifth step, the FC will need to download the specified software, for that Click below.
-       Link : http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf
+       Link : {0}/images/1/1b/Download-Tutorials.pdf
        
        And get the lab and systems ready for the training Click below
-       Link : http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf
-       
+       Link : {0}/images/5/58/Machine-Readiness.pdf
+
 IMPORTANT - Learner's Certificates will no longer be provided for FOSS courses that come with Online assessment Tests. For these courses, only Completion Certificate will be given on successfully completing and passing the test. 
 
 As before, the students must go through the instruction sheet and see the tutorials as directed in the instructions mentioned in it and also practice the commands and instruction as shown in the tutorial following the Side by Side method during the Training. Side by Side means that on the screen, we keep the terminal/console window open on the right hand side for the practice and the tutorial window open on the left hand side for the learning.
@@ -56,7 +58,7 @@ Here's wishing you the best and guaranteeing our continued support for offering 
 
 Regards,
 Spoken Tutorial Team,
-IIT Bombay.'''
+IIT Bombay.'''.format(PROCESS_URL)
 
 
 for organiser in organisers:

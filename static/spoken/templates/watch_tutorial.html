@@ -309,13 +309,13 @@
             {% if user.is_authenticated %}
                 Spoken Tutorials published before {{restriction_date}} are accessible to all. 
                 To access subsequent ones, Please  
-                <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers</a>. 
+                <a href="{{ PROCESS_URL }}/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers</a>. 
             {% else %}
                 {% with login_url="http://"|add:request.get_host|add:"/accounts/login/?next="|add:request.path %}
                     Spoken Tutorials published before {{restriction_date}} are accessible without login. 
                     To access subsequent ones, one has to <a href="{{ login_url }}">log in</a>.<br/>
                     If you don't have a login, please contact our 
-                    <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" target="_blank">
+                    <a href="{{ PROCESS_URL }}/index.php/Software-Training#Contacts_For_Training" target="_blank">
                         Training Manager
                     </a>.
                 {% endwith %}
@@ -342,7 +342,7 @@
                             {{ tr_rec|get_srt_path|safe }}
                         </video>
                         <div id="overlay">
-                            <p style="font-size: 1.5rem;">This is a sample video. To access the full content,<br/> please {% if user.is_authenticated %} <a href="https://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training" style="padding: 4px 10px;" target="_blank">contact Training Managers.</a> {% else %} 
+                            <p style="font-size: 1.5rem;">This is a sample video. To access the full content,<br/> please {% if user.is_authenticated %} <a href="{{ PROCESS_URL }}/index.php/Software-Training#Contacts_For_Training" style="padding: 4px 10px;" target="_blank">contact Training Managers.</a> {% else %} 
                                 {% with login_url="http://"|add:request.get_host|add:"/accounts/login/?next="|add:request.path %}
                                      <a href="{{login_url}}">Login</a>
                                 {% endwith %}
@@ -369,7 +369,7 @@
             {% for question in questions %}
 
             <li class="question" id="{{ question.id }}">
-                <a href="https://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank" class="{{ question.id }}">{{ question.title }}</a>
+                <a href="{{ FORUMS_SPOKEN_URL }}/question/{{ question.id }}/{{ question.get_slugified_title }}" target="_blank" class="{{ question.id }}">{{ question.title }}</a>
                 <p>{{ question.body|striptags|safe }}
                 <div class="timing pull-left">
                 {% if not question.minute_range == 'None' %}<small class="timing">{{ question.minute_range }}M</small>{% endif %}
@@ -965,7 +965,7 @@ function clickListener(e)
 									sec_range = "50-60"
 						}
 		
-						 var url = "https://forums.spoken-tutorial.org/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
+						 var url = "{{ FORUMS_SPOKEN_URL }}/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
 						$("#text").attr("href", url);
 				}
     </script>

@@ -5,7 +5,7 @@ import re
 import json
 import requests
 from creation.models import *
-
+from spoken.config import SPOKEN_BASE_URL, SCRIPT_URL
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
@@ -39,7 +39,7 @@ class Command(BaseCommand):
                     course_data = {
                         "course_id": foss.id,
                         "course": foss.foss,
-                        "course_url": f"https://spoken-tutorial.org/tutorial-search/?search_foss={foss_format}&search_language=",
+                        "course_url": (f"{SPOKEN_BASE_URL}/tutorial-search/"f"?search_foss={foss_format}&search_language="),
                         "categories": categories,
                         "languages": languages
                     }
@@ -59,11 +59,11 @@ class Command(BaseCommand):
                             "tutorial_resource_id": tr.id,
                             "tutorial_detail_id": tr.tutorial_detail.id,
                             "title": tr.tutorial_detail.tutorial.strip(),
-                            "url": f"https://spoken-tutorial.org/watch/{foss_format}/{title_formatted}/{language}/",
+                            "url": (f"{SPOKEN_BASE_URL}/watch/"f"{foss_format}/{title_formatted}/{language}/"),
                             "keywords": tr.common_content.keyword,
                             "outline": tr.outline,
                             "language": language,
-                            "script url": f"https://script.spoken-tutorial.org/index.php/{tr.script}",
+                            "script url": f"{SCRIPT_URL}{tr.script}",
                             "tutorial_script": tutorial_script,
                             "duration": duration,
                             "level": tr.tutorial_detail.level.level
@@ -95,7 +95,8 @@ class Command(BaseCommand):
 
     def extract_text_one_paragraph(self, course_id, tr_id,title,lang):
         srt_path = "/Users/ankita/workspace/projects/spoken/project/spoken-website/media/videos/48/478/Introduction-to-BASH-Shell-Scripting-English.srt"
-        url = f"https://spoken-tutorial.org/media/videos/{course_id}/{tr_id}/{title}-{lang}.srt"
+        url = (f"{SPOKEN_BASE_URL}/media/videos/"f"{course_id}/{tr_id}/{title}-{lang}.srt")
+
         try:
             res = requests.get(url, timeout=30)
             res.raise_for_status() # raises error for 4xx/5xx

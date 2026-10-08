@@ -7,8 +7,7 @@ from redis import Redis
 from rq.job import Job
 from rq.exceptions import NoSuchJobError
 from cron import REDIS_CLIENT
-from spoken.config import WGF_INSTITUTIONS
-
+from spoken.config import WGF_INSTITUTIONS, PROCESS_URL, FORUMS_SPOKEN_URL
 def get_batches(request):
     school_id = request.GET.get('school_id')
     if school_id:
@@ -575,9 +574,9 @@ def old_training_attendance_upload(request, wid):
     if enable_form:
         messages.info(request, """
             Please upload the CSV file which you have generated.
-        To know more <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>.
-        <br><b>Note: Participant list should not be exced {0}</b>
-        """.format(training.participant_count))
+        To know more <a href="{0}/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>.
+        <br><b>Note: Participant list should not exceed {1}</b>
+        """.format(PROCESS_URL, training.participant_count))
     context.update(csrf(request))
     return render(request, 'events/templates/training/old-attendance.html', context)
 
@@ -840,7 +839,7 @@ def accountexecutive_request(request, username):
                     messages.error(request, "You are already an accountexecutive ")
                     return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
                 else:
-                    messages.info(request, "Your Account Executive request is yet to be approved. Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ")
+                    messages.info(request,"Your Account Executive request is yet to be approved. Please contact the Resource person of your State. For more details <a href='{0}/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ".format(PROCESS_URL))
                     print("Accountexecutive not yet approve ")
                     return HttpResponseRedirect("/software-training/accountexecutive/view/"+user.username+"/")
             except:
@@ -922,7 +921,7 @@ def organiser_request(request, username):
                     organiser = Organiser.objects.get(user = user)
                     organiser.academic_id=request.POST['college']
                     organiser.save()
-                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours. Once the request is approved, you can request for the Training. </li><li>For more details <a target='_blank' href='http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf'> Click Here</a></li></ul>")
+                messages.success(request, "<ul><li>Thank you. Your request has been sent for Training Manager's approval.</li><li>You will get the approval with in 24 hours. Once the request is approved, you can request for the Training. </li><li>For more details <a target='_blank' href='{0}/images/1/1f/Training-Request-Sheet.pdf'>Click Here</a></li></ul>".format(PROCESS_URL))
                 return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             messages.error(request, "Please fill the following details")
             context = {'form':form}
@@ -940,7 +939,7 @@ def organiser_request(request, username):
                     messages.error(request, "You are already an Organiser ")
                     return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
                 else:
-                    messages.info(request, "Your Organiser request is yet to be approved. Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' target='_blank'> Click Here</a> ")
+                    messages.info(request, "Your Organiser request is yet to be approved. Please contact the Resource person of your State. For more details <a href='{0}/images/5/5d/Create-New-Account.pdf' target='_blank'>Click Here</a> ".format(PROCESS_URL))
                     print("Organiser not yet approve ")
                     return HttpResponseRedirect("/software-training/organiser/view/"+user.username+"/")
             except:
@@ -1068,7 +1067,7 @@ def invigilator_request(request, username):
                     messages.success(request, "You have already  invigilator role ")
                     return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
                 else:
-                    messages.info(request, "<ul><li>Your Invigilator request is yet to be approved.</li><li>Please contact the Resource person of your State. For more details <a href='http://process.spoken-tutorial.org/images/5/5d/Create-New-Account.pdf' traget='_blank'>Click Here</a> </li></ul>")
+                    messages.info(request, "<ul><li>Your Invigilator request is yet to be approved.</li><li>Please contact the Resource person of your State. For more details <a href='{0}/images/5/5d/Create-New-Account.pdf' target='_blank'>Click Here</a> </li></ul>".format(PROCESS_URL))
                     return HttpResponseRedirect("/software-training/invigilator/view/"+user.username+"/")
             except:
                 messages.info(request, "Please fill the following details")
@@ -1291,7 +1290,7 @@ def training_request(request, role, rid = None):
                                 </li>
                                 <li>
                                     For more details on how to create the .csv file.
-                                    Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
+                                    Please <a href="{0}/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
                                 </li>
                             </ul>
                         """)'''
@@ -1323,14 +1322,14 @@ def training_request(request, role, rid = None):
     else:
         messages.info(request, """
             <ul>
-        <li><b>TO HAVE YOUR TRAINING REQUEST APPROVED IT IS NECESSARY TO UPLOAD THE LIST OF PARTICIPANTS <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a></b></li>
+        <li><b>TO HAVE YOUR TRAINING REQUEST APPROVED IT IS NECESSARY TO UPLOAD THE LIST OF PARTICIPANTS <a href="{0}/images/9/96/Upload_Attendance.pdf" class="link alert-link" target="_blank"><b>Click Here</b></a></b></li>
         <li><b style="color:red;">PLEASE ENSURE THAT YOU FILL IN ONLY THE GENUINE EMAIL ID'S OF THE PARTICIPANTS / STUDENTS. IF THEY DON'T HAVE ANY, PLEASE HELP THEM CREATE ONE.</b></li>
         <li>Select a Timing in the Training Request where the chosen FOSS is relevant/useful/matching to the Course/Paper. </li>
         <li>One can also select FOSS which might not be relevant/matching to any Course/Paper.</li>
-                <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf" class="link alert-link" target="_blank">Click Here</a></li>
-                <li>Please check if your machine is ready. For the Machine Readiness document <a href='http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf' class='link alert-link' target='_blank'> Click Here</a>.</li>
+                <li>Please download a copy of tutorials on all the machines. For instructions to download tutorials <a href="{0}/images/1/1b/Download-Tutorials.pdf" class="link alert-link" target="_blank">Click Here</a></li>
+                <li>Please check if your machine is ready. For the Machine Readiness document <a href="{0}/images/5/58/Machine-Readiness.pdf" class='link alert-link' target='_blank'> Click Here</a>.</li>
             </ul>
-        """)
+        """.format(PROCESS_URL))
     if rid and not form:
         form = TrainingForm(instance = Training.objects.get(pk = rid), user = request.user)
 
@@ -1738,10 +1737,10 @@ def training_attendance(request, wid):
                 </li>
                 <li>
                     For more details on how to create the .csv file.
-                    Please <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
+                    Please <a href="{0}/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>
                 </li>
             </ul>
-        """)
+        """.format(PROCESS_URL))
 
     context = {}
     context['psform'] = psform

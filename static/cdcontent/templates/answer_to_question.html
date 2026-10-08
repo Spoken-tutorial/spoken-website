@@ -166,7 +166,7 @@
 {% else %}
             <p style=" text-align: center; padding: 40px"> No answers yet</p>
         {% endif %}
-            <a href="http://forums.spoken-tutorial.org/question/{{ question.id }}/{{ question.title }}.replace(' ','-')/ " target="_blank">Click here to reply/comment online</a>
+            <a href="{{ FORUMS_SPOKEN_URL }}/question/{{ question.id }}/{{ question.title }}.replace(' ','-')/ " target="_blank">Click here to reply/comment online</a>
                     {% endblock %}
                 </div> <!-- /#content -->
             </div> <!-- /#content-inner -->

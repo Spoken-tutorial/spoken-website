@@ -33,7 +33,7 @@ from mdldjango.urls import *
 from django.template.context_processors import csrf
 from cms.cache_registry import unregister_cache_key,list_cache_keys
 from donate.models import Payee
-
+from spoken.config import SPOKEN_BASE_URL
 from django.core.cache import cache, caches
 
 import logging
@@ -116,8 +116,8 @@ def account_register(request):
                 "Thank you for registering.\
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email %s.<br>\
                 In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"
-                 % (email))
+                <a href='%s/accounts/verify/'> %s/accounts/verify/</a>"
+                % (SPOKEN_BASE_URL, SPOKEN_BASE_URL, email))
             return HttpResponseRedirect('/')
         context['form'] = form
         return render(request, 'cms/templates/register.html', context)
@@ -148,8 +148,8 @@ Spoken Tutorials
 IIT Bombay.
     """.format(
         user.username,
-        "https://spoken-tutorial.org",
-        "https://spoken-tutorial.org/accounts/confirm/" + str(code) + "/" + user.username
+        SPOKEN_BASE_URL,
+        SPOKEN_BASE_URL + "/accounts/confirm/" + str(code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
@@ -203,7 +203,7 @@ IIT Bombay.
     """.format(
         user.username,
         str(p.confirmation_code),
-        "https://spoken-tutorial.org",
+        SPOKEN_BASE_URL,
         user.email,
         password
     )
@@ -290,7 +290,7 @@ def account_login(request):
                             error_msg = "Your account is disabled.<br>\
                             Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
                             In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                            <a href='https://spoken-tutorial.org/accounts/verify/'>https://spoken-tutorial.org/accounts/verify/</a>"% (user.email)
+                            <a href='%s/accounts/verify/'>%s/accounts/verify/</a>" % (SPOKEN_BASE_URL, SPOKEN_BASE_URL, user.email)
                     else:
                         error_msg = 'Invalid username / password'
                 else:
@@ -411,7 +411,7 @@ def password_reset(request):
             if not user.profile_set.first():
                 profile = create_profile(user,None)
 
-            changePassUrl = "http://www.spoken-tutorial.org/accounts/change-password"
+            changePassUrl = SPOKEN_BASE_URL + "/accounts/change-password/"
             if request.GET and request.GET['next']:
                 changePassUrl = changePassUrl + "?auto=%s&username=%s&next=%s" % (user.profile_set.first().confirmation_code, user.username, request.GET['next'])
 
@@ -561,7 +561,7 @@ def confirm_student(request, token):
             student.save()
 
             messages.success(request, "Your account has been activated!. Please login to continue.")
-            return HttpResponseRedirect('https://spoken-tutorial.org/participant/login/')
+            return HttpResponseRedirect(SPOKEN_BASE_URL + '/participant/login/')
         else:
             print('can not match record')
             messages.error(request, "Your account not activated!. Please try again!")

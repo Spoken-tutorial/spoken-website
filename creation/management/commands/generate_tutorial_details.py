@@ -5,6 +5,8 @@ from django.conf import settings
 from creation.views import get_video_info
 from django.db.models import Q
 import csv
+from spoken.config import SPOKEN_BASE_URL, SCRIPT_URL
+
 
 class Command(BaseCommand):
         
@@ -28,15 +30,14 @@ class Command(BaseCommand):
                     
                     for l in tut_langs:
 
-                        VideoURL="https://spoken-tutorial.org/watch/{}/{}/{}".format(f.foss, td.tutorial,l)
-
+                        VideoURL = (f"{SPOKEN_BASE_URL}/watch/"f"{f.foss}/{td.tutorial}/{l}")
                         tr_en= TutorialResource.objects.get(Q(status=1) | Q(status=2),tutorial_detail=td, language__name=l)
                         
-                        OriginalScript = "https://script.spoken-tutorial.org/index.php/{}".format(tr_en.script)
+                        OriginalScript = (f"{SCRIPT_URL}{tr_en.script}")
                         # https://script.spoken-tutorial.org/index.php/Advance-C/C2/Command-line-arguments-in-C/English
 
                         if l.name == "English":
-                            TimedScript = "https://script.spoken-tutorial.org/index.php/{}".format(tr_en.timed_script)
+                            TimedScript = (f"{SCRIPT_URL}{tr_en.timed_script}")
                             # https://script.spoken-tutorial.org/index.php/Advance-C/C2/Command-line-arguments-in-C/English-timed
                         else:
                             TimedScript = ""

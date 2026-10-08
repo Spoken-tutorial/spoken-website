@@ -1,6 +1,8 @@
 
 from django.core.mail import EmailMultiAlternatives
 from events.receipt_service import generate_payment_receipt_pdf
+from spoken.config import SPOKEN_BASE_URL, PROCESS_URL
+
 
 def send_email(status, to = None, instance = None, cc = None, bcc = None):
     subject = None
@@ -18,7 +20,8 @@ def send_email(status, to = None, instance = None, cc = None, bcc = None):
 Regards,
 Spoken Tutorial Team,
 IIT Bombay.
-'''.format('http://process.spoken-tutorial.org/images/1/1f/Training-Request-Sheet.pdf', 'http://process.spoken-tutorial.org/index.php/Software-Training#Contacts_For_Training', 'https://spoken-tutorial.org')
+'''.format(PROCESS_URL + '/images/1/1f/Training-Request-Sheet.pdf',PROCESS_URL + '/index.php/Software-Training#Contacts_For_Training',SPOKEN_BASE_URL)
+    
 
     ### Mail 2
     elif status == 'Instructions to be followed before conducting the training':
@@ -42,8 +45,8 @@ For getting the lab and systems ready for the workshop Click below
 Regards,
 Spoken Tutorial Team,
 IIT Bombay.
-'''.format(instance.foss, instance.tdate, 'http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf', 'http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf', 'http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf', instance.ttime, instance.training_code)
-
+'''.format(instance.foss,instance.tdate,PROCESS_URL + '/images/c/c2/Participant_data.pdf',PROCESS_URL + '/images/1/1b/Download-Tutorials.pdf',PROCESS_URL + '/images/5/58/Machine-Readiness.pdf',instance.ttime,instance.training_code)
+        
     ### Mail 3
     elif status == 'Future activities after conducting the Training':
         subject  = 'Important : Future activities after conducting the Training'
@@ -71,8 +74,8 @@ To make an online Test Request please Click here.
 Regards,
 Spoken Tutorial Team,
 IIT Bombay.
-'''.format('https://spoken-tutorial.org', 'process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf','http://process.spoken-tutorial.org/images/a/aa/Test_Request.pdf', instance.training_code, instance.foss )
-
+'''.format(SPOKEN_BASE_URL,PROCESS_URL + '/images/0/09/Instructions_for_Invigilator.pdf',PROCESS_URL + '/images/a/aa/Test_Request.pdf',instance.training_code,instance.foss)
+        
     ### Email 4
     elif status == 'Instructions to be followed before conducting the test-organiser':
         subject  = 'Important : Instructions to be followed before conducting the test - Organiser'
@@ -87,8 +90,7 @@ All the Best to you and all the participants.
 Regards,
 Spoken Tutorial Team,
 IIT Bombay.
-'''.format('http://process.spoken-tutorial.org/images/9/95/Test_Instruction_for_Participants.pdf', instance.foss, instance.tdate, instance.ttime, instance.test_code)
-
+'''.format(PROCESS_URL + '/images/9/95/Test_Instruction_for_Participants.pdf',instance.foss,instance.tdate,instance.ttime,instance.test_code)
     ### Email 5
     elif status == 'Instructions to be followed before conducting the test-invigilator':
         subject  = 'Important : Instructions to be followed before conducting the test - Invigilator'
@@ -104,8 +106,8 @@ Do not forget to Close the test after the completion of the test.
 Regards,
 Spoken Tutorial Team,
 IIT Bombay.
-'''.format('http://process.spoken-tutorial.org/images/0/09/Instructions_for_Invigilator.pdf', instance.foss, instance.tdate, instance.ttime, instance.test_code)
-        
+'''.format(PROCESS_URL + '/images/0/09/Instructions_for_Invigilator.pdf',instance.foss,instance.tdate,instance.ttime,instance.test_code)        
+    
     elif status == 'Academic Payment Approved':
         subject = 'Spoken Tutorial Academic Center Payment Approved'
         message = '''Dear Organiser,
