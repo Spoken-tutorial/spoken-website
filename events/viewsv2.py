@@ -87,7 +87,6 @@ from cms.management.commands.populate_subscription_data import update_subscripti
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
 from spoken.config import WGF_INSTITUTIONS
 
-
 class JSONResponseMixin(object):
   """
   A mixin that can be used to render a JSON response.

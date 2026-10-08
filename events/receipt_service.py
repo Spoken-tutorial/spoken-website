@@ -6,6 +6,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph
+from spoken.config import SPOKEN_BASE_URL
 
 def format_ordinal_date(d):
     """
@@ -46,7 +47,7 @@ def generate_payment_receipt_pdf(payment):
     p.drawCentredString(297.6, 765, "A SINE, IIT Bombay, Incubated Company")
     
     p.setFont("Helvetica", 10)
-    p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
+    p.drawCentredString(297.6, 745, SPOKEN_BASE_URL)
     
     
     # 2. Reference Number
