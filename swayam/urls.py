@@ -30,4 +30,9 @@ urlpatterns = [
         views.swayam_page_views,
         name='swayam_page_views',
     ),
+    url(
+        r'^sso/login/$',
+        views.sso_login,
+        name='sso-login',
+    ),
 ]
