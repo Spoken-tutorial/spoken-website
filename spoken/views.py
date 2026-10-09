@@ -361,6 +361,19 @@ def watch_tutorial(request, foss, tutorial, lang):
         '-date_created'
     )
 
+    swayam_completed = False
+    swayam_progress_percent = 0
+    try:
+        from swayam.utils import is_swayam_user, is_swayam_foss
+        if is_swayam_user(request.user) and is_swayam_foss(td_rec.foss):
+            from swayam.models import SwayamTutorialProgress
+            st_prog = SwayamTutorialProgress.objects.filter(user=request.user, tutorial_detail=td_rec).first()
+            if st_prog:
+                swayam_completed = st_prog.is_completed
+                swayam_progress_percent = st_prog.progress_percent
+    except Exception:
+        pass
+
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
@@ -374,7 +387,9 @@ def watch_tutorial(request, foss, tutorial, lang):
         'video_play_time':getattr(settings, 'VIDEO_TIME', 15),
         'questions': sorted_questions,
         'user_authorized': is_authorized_user,
-        'restriction_date': TUTORIAL_RESTRICTION_DATE.strftime("%-d %b. %Y")
+        'restriction_date': TUTORIAL_RESTRICTION_DATE.strftime("%-d %b. %Y"),
+        'swayam_completed': swayam_completed,
+        'swayam_progress_percent': swayam_progress_percent,
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 

@@ -348,6 +348,19 @@
                                 {% endwith %}
                                 {% endif %} </p>
                         </div>
+                        {% if request.user.swayam_identity %}
+                        <div id="swayam-complete-box" class="{% if not swayam_completed and swayam_progress_percent < 90 %}hidden{% endif %}" style="margin-top: 10px; margin-bottom: 10px; text-align: right;">
+                            {% if swayam_completed %}
+                                <button id="swayam-mark-complete-btn" class="btn btn-default" disabled="disabled">
+                                    <i class="fa fa-check-circle" style="color: #449d44;"></i> Completed
+                                </button>
+                            {% else %}
+                                <button id="swayam-mark-complete-btn" class="btn btn-success">
+                                    <i class="fa fa-check"></i> Mark as Complete
+                                </button>
+                            {% endif %}
+                        </div>
+                        {% endif %}
             </div>
 
 
@@ -679,6 +692,9 @@
     <script>
 
 
+        var isSwayam = "{{ request.user.swayam_identity|default:'' }}" !== "";
+        var performAnalysis = ("{{ perform_analysis }}" === "1" || "{{ perform_analysis }}" === "True");
+
         document.addEventListener('DOMContentLoaded', (event) => {
         
         function logData(e){
@@ -772,8 +788,6 @@ function clickListener(e)
         var log_data = [];
         let pause = 0;
         let play = 0;
-        var performAnalysis = ("{{ perform_analysis }}" === "1" || "{{ perform_analysis }}" === "True");
-        var isSwayam = "{{ request.user.swayam_identity|default:'' }}" !== "";
 
         if (performAnalysis || isSwayam) {
             let video = document.getElementById("st_video_html5_api");
@@ -789,11 +803,29 @@ function clickListener(e)
                     logData(e);
                     myfun(e, 'Ended');
                 });
+                if (isSwayam) {
+                    video.addEventListener('timeupdate', function(e) {
+                        if (video.duration > 0 && (video.currentTime / video.duration) >= 0.9) {
+                            $("#swayam-complete-box").removeClass('hidden').show();
+                        }
+                    });
+                }
             }
             if (performAnalysis) {
                 var arrayWithElements = new Array();
                 document.onclick = clickListener;
             }
+        }
+
+        if (isSwayam) {
+            videojs('st_video').ready(function() {
+                var vjsPlayer = this;
+                vjsPlayer.on('timeupdate', function() {
+                    if (vjsPlayer.duration() > 0 && (vjsPlayer.currentTime() / vjsPlayer.duration()) >= 0.9) {
+                        $("#swayam-complete-box").removeClass('hidden').show();
+                    }
+                });
+            });
         }
 
         function myfun(e) {
@@ -826,6 +858,44 @@ function clickListener(e)
             }
         };
 
+        if (isSwayam) {
+            $(document).on('click', '#swayam-mark-complete-btn', function() {
+                var btn = $(this);
+                if (btn.prop('disabled')) {
+                    return;
+                }
+                let video = document.getElementById("st_video_html5_api");
+                let currentVidTime = video ? video.currentTime : 0;
+                let currentDuration = video ? video.duration : 0;
+                btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Updating...');
+
+                $.ajax({
+                    method: "POST",
+                    url: "/swayam/save-progress/",
+                    data: {
+                        tutorial_id: "{{ tr_rec.tutorial_detail.id }}",
+                        foss_id: "{{ tr_rec.tutorial_detail.foss.id }}",
+                        lang_id: "{{ tr_rec.language.id }}",
+                        videotime: currentVidTime,
+                        duration: currentDuration
+                    },
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                })
+                .done(function (resp) {
+                    if (resp && resp.status === 'success') {
+                        btn.removeClass('btn-success').addClass('btn-default').html('<i class="fa fa-check-circle" style="color: #449d44;"></i> Completed');
+                    } else {
+                        btn.prop('disabled', false).html('<i class="fa fa-check"></i> Mark as Complete');
+                        alert((resp && resp.message) ? resp.message : 'Could not mark as complete');
+                    }
+                })
+                .fail(function (xhr) {
+                    btn.prop('disabled', false).html('<i class="fa fa-check"></i> Mark as Complete');
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Error marking tutorial complete.';
+                    alert(msg);
+                });
+            });
+        }
 
 });
 
@@ -936,6 +1006,10 @@ function clickListener(e)
             previousTime = currentTime;
             currentTime = trackedPlayer.currentTime();
             var cur_time = formatTime(currentTime).toString();
+
+            if (isSwayam && trackedPlayer.duration() > 0 && (currentTime / trackedPlayer.duration()) >= 0.9) {
+                $("#swayam-complete-box").removeClass('hidden').show();
+            }
 
            	trigger( cur_time);
 							$("#text").click(function(e){
