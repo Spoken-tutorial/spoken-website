@@ -26,7 +26,12 @@ from events.decorators import group_required
 from django.utils import timezone
 from training.views import add_Academic_key
 from events.events_email import send_email
-from events.receipt_service import generate_payment_receipt_pdf
+from events.receipt_service import (
+    generate_payment_receipt_pdf,
+    generate_letter_of_association_pdf,
+    generate_letter_of_completion_pdf,
+    generate_letter_of_appreciation_pdf
+)
 from events import display
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
@@ -3979,5 +3984,111 @@ class DownloadReceiptView(View):
             return response
         except Exception as e:
             return HttpResponse("Error generating receipt PDF.", status=500)
+
+
+class DownloadLOAView(View):
+    @method_decorator(login_required)
+    def get(self, request, pk, *args, **kwargs):
+        payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
+        
+        # access control for download
+        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists()
+        is_owner = hasattr(request.user, 'organiser') and request.user.organiser.academic_id == payment.academic_id
+        
+        if not (is_staff or is_owner):
+            raise PermissionDenied("You do not have permission to download this Letter of Association.")
+            
+        if is_staff and not request.user.is_superuser:
+            user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
+            if payment.state_id not in user_states:
+                raise PermissionDenied("You do not have permission to download Letter of Association for this state.")
+            
+        if payment.verification_status != 1:
+            raise PermissionDenied("Letter of Association is not verified/approved yet.")
+            
+        try:
+            pdf_buffer = generate_letter_of_association_pdf(payment)
+            response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=letter_of_association_{payment.id}.pdf'
+            return response
+        except Exception as e:
+            return HttpResponse("Error generating Letter of Association PDF.", status=500)
+
+
+class DownloadLOCView(View):
+    @method_decorator(login_required)
+    def get(self, request, pk, *args, **kwargs):
+        payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
+        
+        # access control for download
+        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists() or request.user.is_superuser
+        is_owner = hasattr(request.user, 'organiser') and request.user.organiser.academic_id == payment.academic_id
+        
+        if not (is_staff or is_owner):
+            raise PermissionDenied("You do not have permission to download this Certificate of Training.")
+            
+        if is_staff and not request.user.is_superuser:
+            user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
+            if payment.state_id not in user_states:
+                raise PermissionDenied("You do not have permission to download Certificate of Training for this state.")
+            
+        if payment.verification_status != 1:
+            raise PermissionDenied("Payment is not verified/approved yet.")
+
+        # Check 1-year completion requirement (staff/superuser can preview/download anytime)
+        if not is_staff and not payment.is_loc_available:
+            raise PermissionDenied(f"Annual Report / Certificate of Training will be available after completion of 1 year on {payment.expiry_date.strftime('%d %B, %Y')}.")
+            
+        try:
+            pdf_buffer = generate_letter_of_completion_pdf(payment)
+            response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=certificate_of_training_{payment.id}.pdf'
+            return response
+        except Exception as e:
+            return HttpResponse("Error generating Certificate of Training PDF.", status=500)
+
+
+class DownloadAppreciationLetterView(View):
+    @method_decorator(login_required)
+    def get(self, request, pk, *args, **kwargs):
+        payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
+        
+        # access control for download
+        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists() or request.user.is_superuser
+        is_owner = hasattr(request.user, 'organiser') and request.user.organiser.academic_id == payment.academic_id
+        
+        if not (is_staff or is_owner):
+            raise PermissionDenied("You do not have permission to download this Letter of Appreciation.")
+            
+        if is_staff and not request.user.is_superuser:
+            user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
+            if payment.state_id not in user_states:
+                raise PermissionDenied("You do not have permission to download Letter of Appreciation for this state.")
+            
+        if payment.verification_status != 1:
+            raise PermissionDenied("Payment is not verified/approved yet.")
+
+        # Check 1-year completion requirement (staff/superuser can preview/download anytime)
+        if not is_staff and not payment.is_loc_available:
+            raise PermissionDenied(f"Letter of Appreciation will be available after completion of 1 year on {payment.expiry_date.strftime('%d %B, %Y')}.")
+            
+        organiser = None
+        if is_owner:
+            organiser = request.user.organiser
+        elif 'organiser_id' in request.GET:
+            try:
+                organiser = Organiser.objects.get(pk=request.GET['organiser_id'], academic=payment.academic)
+            except Organiser.DoesNotExist:
+                pass
+
+        try:
+            pdf_buffer = generate_letter_of_appreciation_pdf(payment, organiser=organiser)
+            response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=letter_of_appreciation_{payment.id}.pdf'
+            return response
+        except Exception as e:
+            return HttpResponse("Error generating Letter of Appreciation PDF.", status=500)
+
+
 
 

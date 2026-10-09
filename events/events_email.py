@@ -1,6 +1,6 @@
 
 from django.core.mail import EmailMultiAlternatives
-from events.receipt_service import generate_payment_receipt_pdf
+from events.receipt_service import generate_payment_receipt_pdf, generate_letter_of_association_pdf
 
 def send_email(status, to = None, instance = None, cc = None, bcc = None):
     subject = None
@@ -177,6 +177,11 @@ IIT Bombay.
         try:
             pdf_buffer = generate_payment_receipt_pdf(instance)
             email.attach(f'receipt_{instance.id}.pdf', pdf_buffer.read(), 'application/pdf')
+        except Exception as e:
+            pass
+        try:
+            loa_buffer = generate_letter_of_association_pdf(instance)
+            email.attach(f'letter_of_association_{instance.id}.pdf', loa_buffer.read(), 'application/pdf')
         except Exception as e:
             pass
             

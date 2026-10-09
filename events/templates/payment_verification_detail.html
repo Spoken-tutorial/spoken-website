@@ -124,6 +124,22 @@
               </tr>
             {% endif %}
           </table>
+          {% if record.verification_status == 1 %}
+            <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+              <a class="btn btn-primary" href="{% url 'eventsv2:download_academic_receipt' record.id %}" style="width: auto !important; white-space: nowrap; margin-bottom: 6px; margin-right: 6px;">
+                <i class="fa fa-download"></i> Download Receipt PDF
+              </a>
+              <a class="btn btn-success" href="{% url 'eventsv2:download_academic_loa' record.id %}" style="width: auto !important; white-space: nowrap; margin-bottom: 6px; margin-right: 6px;">
+                <i class="fa fa-certificate"></i> Download Letter of Association (LOA) PDF
+              </a>
+              <a class="btn btn-info" href="{% url 'eventsv2:download_academic_loc' record.id %}" style="width: auto !important; white-space: nowrap; margin-bottom: 6px; margin-right: 6px;">
+                <i class="fa fa-file-text-o"></i> Download Annual Report (LOC) PDF
+              </a>
+              <a class="btn btn-warning" href="{% url 'eventsv2:download_academic_appreciation' record.id %}" style="width: auto !important; white-space: nowrap; margin-bottom: 6px;">
+                <i class="fa fa-star"></i> Download Letter of Appreciation PDF
+              </a>
+            </div>
+          {% endif %}
         </div>
       </div>
     </div>

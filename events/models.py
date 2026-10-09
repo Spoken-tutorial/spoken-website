@@ -1806,6 +1806,15 @@ class AcademicPaymentStatus(models.Model):
   approved_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.PROTECT, related_name='approved_payments')
   approved_on = models.DateTimeField(null=True, blank=True)
   
+  @property
+  def expiry_date(self):
+    sub_days = int(self.subscription) if self.subscription and str(self.subscription).isdigit() else 365
+    return self.payment_date + timedelta(days=sub_days)
+
+  @property
+  def is_loc_available(self):
+    return date.today() >= self.expiry_date
+
   def __str__(self):
     return self.academic.institution_name
 
