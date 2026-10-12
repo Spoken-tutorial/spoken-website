@@ -412,4 +412,19 @@ urlpatterns = [
       DownloadReceiptView.as_view(),
       name='download_academic_receipt'
     ),
+    url(
+      r'^academic-receipt/(?P<pk>\d+)/download-loa/$',
+      DownloadLOAView.as_view(),
+      name='download_academic_loa'
+    ),
+    url(
+      r'^academic-receipt/(?P<pk>\d+)/download-loc/$',
+      DownloadLOCView.as_view(),
+      name='download_academic_loc'
+    ),
+    url(
+      r'^academic-receipt/(?P<pk>\d+)/download-appreciation/$',
+      DownloadAppreciationLetterView.as_view(),
+      name='download_academic_appreciation'
+    ),
 ]
