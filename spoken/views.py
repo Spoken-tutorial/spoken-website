@@ -361,11 +361,13 @@ def watch_tutorial(request, foss, tutorial, lang):
         '-date_created'
     )
 
+    is_swayam = False
     swayam_completed = False
     swayam_progress_percent = 0
     try:
         from swayam.utils import is_swayam_user, is_swayam_foss
         if is_swayam_user(request.user) and is_swayam_foss(td_rec.foss):
+            is_swayam = True
             from swayam.models import SwayamTutorialProgress
             st_prog = SwayamTutorialProgress.objects.filter(user=request.user, tutorial_detail=td_rec).first()
             if st_prog:
@@ -388,6 +390,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'questions': sorted_questions,
         'user_authorized': is_authorized_user,
         'restriction_date': TUTORIAL_RESTRICTION_DATE.strftime("%-d %b. %Y"),
+        'is_swayam': is_swayam,
         'swayam_completed': swayam_completed,
         'swayam_progress_percent': swayam_progress_percent,
     }
@@ -421,7 +424,8 @@ def what_is_spoken_tutorial(request):
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
-        'script_base': settings.SCRIPT_URL
+        'script_base': settings.SCRIPT_URL,
+        'is_swayam': False
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
