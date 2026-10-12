@@ -348,7 +348,7 @@
                                 {% endwith %}
                                 {% endif %} </p>
                         </div>
-                        {% if request.user.swayam_identity %}
+                        {% if is_swayam %}
                         <div id="swayam-complete-box" class="{% if not swayam_completed and swayam_progress_percent < 90 %}hidden{% endif %}" style="margin-top: 10px; margin-bottom: 10px; text-align: right;">
                             {% if swayam_completed %}
                                 <button id="swayam-mark-complete-btn" class="btn btn-default" disabled="disabled">
@@ -692,7 +692,7 @@
     <script>
 
 
-        var isSwayam = "{{ request.user.swayam_identity|default:'' }}" !== "";
+        var isSwayam = "{{ is_swayam }}" === "True";
         var performAnalysis = ("{{ perform_analysis }}" === "1" || "{{ perform_analysis }}" === "True");
 
         document.addEventListener('DOMContentLoaded', (event) => {
