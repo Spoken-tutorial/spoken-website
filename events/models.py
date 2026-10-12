@@ -24,7 +24,7 @@ from events.signals import revoke_student_permission
 
 #creation app models
 from creation.models import FossAvailableForWorkshop, FossAvailableForTest
-from spoken.config import SUBSCRIPTION_CHOICES
+from spoken.config import SUBSCRIPTION_CHOICES, WGF_INSTITUTIONS
 
 
 PAYMENT_STATUS_CHOICES =(
@@ -810,6 +810,8 @@ class TrainingPlanner(models.Model):
 
   def is_full(self, department_id, batch_id):
     qs = TrainingRequest.objects.filter(training_planner_id = self.id).exclude(Q(participants=0)&Q(status=1))
+    if self.academic.academic_code in WGF_INSTITUTIONS:        
+      return False
     if qs.filter(
       department_id=department_id,
       batch_id=batch_id,
