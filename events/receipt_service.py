@@ -24,9 +24,35 @@ def format_ordinal_date(d):
         suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')
     return f"{day}{suffix} {d.strftime('%B, %Y')}"
 
-def generate_payment_receipt_pdf(payment):
-    
-    # Generates the PDF receipt
+def is_school(payment):
+    """
+    Determines whether the given payment is for a School or College/Institution.
+    Checks college_type on payment or institution_type on the related AcademicCenter.
+    """
+    if isinstance(payment, dict):
+        if str(payment.get('college_type', '')).strip().lower() == 'school':
+            return True
+        academic = payment.get('academic')
+        if isinstance(academic, dict):
+            inst_type = academic.get('institution_type')
+            if isinstance(inst_type, dict) and str(inst_type.get('name', '')).strip().lower() == 'school':
+                return True
+            if isinstance(inst_type, str) and inst_type.strip().lower() == 'school':
+                return True
+        return False
+
+    if hasattr(payment, 'college_type') and payment.college_type and str(payment.college_type).strip().lower() == 'school':
+        return True
+    if hasattr(payment, 'academic') and payment.academic and hasattr(payment.academic, 'institution_type') and payment.academic.institution_type:
+        inst_type = payment.academic.institution_type
+        if hasattr(inst_type, 'name') and str(inst_type.name).strip().lower() == 'school':
+            return True
+        if hasattr(inst_type, 'id') and inst_type.id == 5:
+            return True
+    return False
+
+def generate_college_receipt_pdf(payment):
+    # Generates the PDF receipt for colleges and higher education institutions
     buffer = BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
     
@@ -55,10 +81,10 @@ def generate_payment_receipt_pdf(payment):
     p.setFillColor(colors.HexColor('#0055A5'))
     p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
     
-    
     # 2. Reference Number
     ref_no = f"Ref.No. ST/{payment.payment_date.year}/{10000 + payment.id}"
     p.setFont("Helvetica", 10)
+    p.setFillColor(colors.HexColor('#000000'))
     p.drawString(54, 665, ref_no)
     
     # 3. Title
@@ -179,8 +205,176 @@ def generate_payment_receipt_pdf(payment):
     buffer.seek(0)
     return buffer
 
+def generate_school_receipt_pdf(payment):
+    """
+    Generates the official Acknowledgement Receipt of Payment PDF for a School.
+    Matches the official EduPyramids / Spoken Tutorial IIT Bombay School Receipt template.
+    """
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+    
+    # 1. Header logos and text
+    edu_logo_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
+    spoken_logo_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
+    
+    # Left Logo
+    if os.path.exists(edu_logo_path):
+        p.drawImage(edu_logo_path, 54, 730, width=70, height=70, mask='auto')
+    
+    # Right Logo
+    if os.path.exists(spoken_logo_path):
+        p.drawImage(spoken_logo_path, 471.27, 730, width=70, height=70, mask='auto')
+        
+    # Center Heading Text
+    p.setFont("Helvetica-Bold", 15)
+    p.setFillColor(colors.HexColor('#1F4E78')) # Deep blue
+    p.drawCentredString(297.6, 785, "EduPyramids Educational Services Pvt. Ltd.")
+    
+    p.setFont("Helvetica-Bold", 10)
+    p.setFillColor(colors.HexColor('#D9534F')) # Orange/Red
+    p.drawCentredString(297.6, 765, "A SINE, IIT Bombay, Incubated Company")
+    
+    p.setFont("Helvetica", 10)
+    p.setFillColor(colors.HexColor('#0055A5'))
+    p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
+    
+    # 2. Reference Number & Date
+    ref_no = f"Ref.No. ST/{payment.payment_date.year}/{10000 + payment.id}"
+    date_formatted = format_ordinal_date(payment.payment_date)
+    date_str = f"Date: - {date_formatted}"
+    p.setFont("Helvetica", 10)
+    p.setFillColor(colors.HexColor('#000000'))
+    p.drawString(54, 665, ref_no)
+    p.drawRightString(541.27, 665, date_str)
+    
+    # 3. Title
+    p.setFont("Helvetica-Bold", 13)
+    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.drawCentredString(297.6, 625, "ACKNOWLEDGEMENT RECEIPT OF PAYMENT")
+    
+    # 4. Greetings
+    p.setFont("Helvetica", 10)
+    p.setFillColor(colors.HexColor('#000000'))
+    p.drawString(54, 585, "Greetings from the Spoken Tutorial, EduPyramids, SINE, IIT Bombay!")
+    
+    # Styles for body text
+    body_style = ParagraphStyle(
+        name='SchoolReceiptBody',
+        fontName='Helvetica',
+        fontSize=10.5,
+        leading=16,
+        alignment=4 # Justified
+    )
+    
+    # 5. First Paragraph
+    p1_text = (
+        "We are truly grateful for the prompt payment made to continue the training at your school. "
+        "This indicates a high degree of acceptance of the numerous benefits the courses introduced by "
+        "<b>Spoken Tutorial, EduPyramids, SINE, IIT Bombay</b> are providing to the students. Thank you for the same. "
+        "The Spoken Tutorial was developed at IIT Bombay with funding from the Ministry of Education, Government of India "
+        "to spread IT literacy all over India. We are also proud to share that the <b>Spoken Tutorial, EduPyramids</b> "
+        "pedagogy has recently been approved as an IEEE Global Standard - making it India’s first EdTech model to receive "
+        "such international recognition."
+    )
+    p1 = Paragraph(p1_text, body_style)
+    _, h1 = p1.wrap(487.27, 200)
+    p1.drawOn(p, 54, 570 - h1)
+    
+    # 6. Payment Paragraph
+    try:
+        amount_formatted = "{:,}".format(int(payment.amount))
+    except (ValueError, TypeError):
+        amount_formatted = str(payment.amount)
+        
+    institution = payment.academic.institution_name
+    city = payment.academic.city.name if payment.academic.city else ""
+    district = payment.academic.district.name if payment.academic.district else ""
+    state = payment.academic.state.name if payment.academic.state else ""
+    
+    loc_parts = [p for p in [institution, city, district, state] if p]
+    location_str = ", ".join(loc_parts)
+    
+    p2_text = (
+        f"Please find the acknowledgement of payment of <b>Rs. {amount_formatted}/-</b> "
+        f"made by <b>{location_str}</b> on <b>{date_formatted}</b>."
+    )
+    p2 = Paragraph(p2_text, body_style)
+    _, h2 = p2.wrap(487.27, 100)
+    p2.drawOn(p, 54, 435 - h2)
+    
+    # 7. UTR / Cheque Number
+    utr_str = payment.transactionid or "N/A"
+    p3_text = f"UTR Number / Cheque Number: <b>{utr_str}</b>"
+    p3 = Paragraph(p3_text, body_style)
+    _, h3 = p3.wrap(487.27, 50)
+    p3.drawOn(p, 54, 380)
+    
+    # 8. Formal Receipt
+    p4_text = "Please treat this as a formal receipt."
+    p4 = Paragraph(p4_text, body_style)
+    _, h4 = p4.wrap(487.27, 50)
+    p4.drawOn(p, 54, 340)
+    
+    # 9. Signature Block
+    p.setFont("Helvetica", 9.5)
+    p.setFillColor(colors.HexColor('#000000'))
+    p.drawString(54, 275, "For and on behalf of")
+    p.setFont("Helvetica-Bold", 10)
+    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.drawString(54, 260, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+        
+    # Signature
+    sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature_schools.png')
+    if not os.path.exists(sig_school_path):
+        sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature.png')
+    if os.path.exists(sig_school_path):
+        p.drawImage(sig_school_path, 54, 190, width=120, height=45, mask='auto')
+        
+    # Stamp
+    stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp_schools.png')
+    if not os.path.exists(stamp_school_path):
+        stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
+    if os.path.exists(stamp_school_path):
+        p.drawImage(stamp_school_path, 180, 180, width=75, height=75, mask='auto')
+        
+    # Coordinator Info (Mrs. Nidhi Sony)
+    p.setFont("Helvetica-Bold", 10)
+    p.setFillColor(colors.HexColor('#000000'))
+    p.drawString(54, 150, "Mrs. Nidhi Sony")
+    p.setFont("Helvetica", 9)
+    p.drawString(54, 138, "National Coordinator - Schools")
+    p.drawString(54, 126, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    
+    # 10. Footer Branding Line and Text
+    p.setStrokeColor(colors.HexColor('#1F4E78'))
+    p.setLineWidth(1)
+    p.line(54, 65, 541.27, 65)
+    
+    p.setFont("Helvetica-Bold", 9)
+    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.drawCentredString(297.6, 50, "Spoken Tutorial brought to you by EduPyramids")
+    
+    p.setFont("Helvetica", 8)
+    p.setFillColor(colors.HexColor('#000000'))
+    p.drawCentredString(297.6, 36, "Seat 60, SINE, RBTIC Building, IIT Bombay, Powai, Mumbai - 400 076")
+    p.drawCentredString(297.6, 24, "+ 91 22 25764229")
+    
+    p.showPage()
+    p.save()
+    
+    buffer.seek(0)
+    return buffer
 
-def generate_letter_of_association_pdf(payment):
+def generate_payment_receipt_pdf(payment):
+    """
+    Dispatches payment receipt PDF generation to the appropriate template:
+    School template for schools, College template for higher education institutions.
+    """
+    if is_school(payment):
+        return generate_school_receipt_pdf(payment)
+    return generate_college_receipt_pdf(payment)
+
+def generate_college_loa_pdf(payment):
     """
     Generates the official Letter of Association (LOA) PDF for an Academic Center.
     Matches the official EduPyramids / Spoken Tutorial IIT Bombay LOA template.
@@ -368,6 +562,194 @@ def generate_letter_of_association_pdf(payment):
 
     buffer.seek(0)
     return buffer
+
+def generate_school_loa_pdf(payment):
+    """
+    Generates the official Letter of Association (LOA) PDF for a School.
+    Matches the official EduPyramids / Spoken Tutorial IIT Bombay School LOA template.
+    """
+    buffer = BytesIO()
+    p = canvas.Canvas(buffer, pagesize=A4)
+
+    # 1. Header logos and text
+    edu_logo_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
+    spoken_logo_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
+
+    if os.path.exists(edu_logo_path):
+        p.drawImage(edu_logo_path, 54, 730, width=70, height=70, mask='auto')
+
+    if os.path.exists(spoken_logo_path):
+        p.drawImage(spoken_logo_path, 471.27, 730, width=70, height=70, mask='auto')
+
+    p.setFont("Helvetica-Bold", 15)
+    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.drawCentredString(297.6, 785, "EduPyramids Educational Services Pvt. Ltd.")
+
+    p.setFont("Helvetica-Bold", 10)
+    p.setFillColor(colors.HexColor('#D9534F'))
+    p.drawCentredString(297.6, 765, "A SINE, IIT Bombay, Incubated Company")
+
+    p.setFont("Helvetica", 10)
+    p.setFillColor(colors.HexColor('#0055A5'))
+    p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
+
+    # 2. Reference Number and Date
+    ref_no = f"Ref.No. ST/{payment.payment_date.year}/{10000 + payment.id}"
+    date_formatted = format_ordinal_date(payment.payment_date)
+    date_str = f"Date: - {date_formatted}"
+
+    p.setFont("Helvetica", 10)
+    p.setFillColor(colors.HexColor('#000000'))
+    p.drawString(54, 695, ref_no)
+    p.drawRightString(541.27, 695, date_str)
+
+    # 3. Document Title
+    p.setFont("Helvetica-Bold", 13)
+    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.drawCentredString(297.6, 660, "LETTER OF ASSOCIATION")
+
+    # 4. Recipient block
+    academic = payment.academic
+    institution = academic.institution_name
+    address = academic.address or ""
+    city = academic.city.name if academic.city else ""
+    district = academic.district.name if academic.district else ""
+    state = academic.state.name if academic.state else ""
+    pincode = str(academic.pincode) if academic.pincode else ""
+
+    loc_line = ", ".join([part for part in [city, state] if part])
+    if pincode:
+        loc_line = f"{loc_line} – {pincode}"
+
+    # Clean up newline and whitespace anomalies from raw database address field
+    clean_address = re.sub(r'[\r\n\t]+', ', ', address)
+    clean_address = re.sub(r'\s+', ' ', clean_address)
+    clean_address = re.sub(r'\s*,\s*', ', ', clean_address)
+    clean_address = re.sub(r'(,\s*)+', ', ', clean_address).strip(', ')
+    if institution and clean_address.lower().startswith(institution.lower()):
+        clean_address = clean_address[len(institution):].strip(', ')
+    clean_address = re.sub(r'^(,\s*)+', '', clean_address).strip(', ')
+
+    recipient_style = ParagraphStyle(
+        name='SchoolLOARecipient',
+        fontName='Helvetica',
+        fontSize=10,
+        leading=14,
+        textColor=colors.HexColor('#000000')
+    )
+
+    recipient_lines = ["To,", "The Principal,", f"<b>{institution}</b>,"]
+    if clean_address:
+        recipient_lines.append(f"{clean_address},")
+    if loc_line:
+        recipient_lines.append(f"{loc_line}.")
+
+    recipient_html = "<br/>".join(recipient_lines)
+    recipient_p = Paragraph(recipient_html, recipient_style)
+    _, rec_height = recipient_p.wrap(487.27, 200)
+
+    y = 625
+    recipient_p.drawOn(p, 54, y - rec_height)
+    y = y - rec_height - 14
+
+    # Styles for body text
+    body_style = ParagraphStyle(
+        name='SchoolLOABody',
+        fontName='Helvetica',
+        fontSize=10,
+        leading=15,
+        alignment=4  # Justified
+    )
+
+    # 5. First Paragraph (Association Announcement & IEEE Standard)
+    p1_text = (
+        f"We are happy to announce the <b>ASSOCIATION</b> of Knowledge Partner <b>Spoken Tutorial, "
+        f"EduPyramids, SINE, IIT Bombay</b> with <b>{institution}</b>. Your School is now officially "
+        f"an <b>Academic Partner</b>. Started in 2009, the Spoken Tutorial was developed at IIT Bombay "
+        f"with funding from the Ministry of Education, Government of India to spread IT literacy all "
+        f"over India. We promote the learning and usage of Free & Open-Source Software (FOSS) through an "
+        f"Audio-Video teaching tool, viz, 'Spoken Tutorial'. We are also proud to share that the Spoken "
+        f"Tutorial pedagogy has recently been approved as an IEEE Global Standard - making it India's first "
+        f"EdTech model to receive such international recognition."
+    )
+    p1 = Paragraph(p1_text, body_style)
+    _, h1 = p1.wrap(487.27, 200)
+    p1.drawOn(p, 54, y - h1)
+    y = y - h1 - 14
+
+    # 6. Second Paragraph (School Curriculum & Validity)
+    sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
+    expiry_date = payment.payment_date + timedelta(days=sub_days)
+    expiry_formatted = format_ordinal_date(expiry_date)
+
+    p2_text = (
+        f"This Letter of Association (LoA) is valid from <b>{date_formatted}</b> to <b>{expiry_formatted}</b>. "
+        f"Through this association, students will develop skills in Basic IT, Coding, AI, STEM, Animation & Graphics, "
+        f"and subject specific courses. The programme also offers courses to enhance teachers’ professional skills and "
+        f"support effective teaching and learning."
+    )
+    p2 = Paragraph(p2_text, body_style)
+    _, h2 = p2.wrap(487.27, 100)
+    p2.drawOn(p, 54, y - h2)
+
+    # 7. Signature Block
+    p.setFont("Helvetica", 9.5)
+    p.setFillColor(colors.HexColor('#000000'))
+    p.drawString(54, 265, "For and on behalf of")
+    p.setFont("Helvetica-Bold", 10)
+    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.drawString(54, 250, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+
+    sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature_schools.png')
+    if not os.path.exists(sig_school_path):
+        sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature.png')
+
+    stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp_schools.png')
+    if not os.path.exists(stamp_school_path):
+        stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
+
+    if os.path.exists(sig_school_path):
+        p.drawImage(sig_school_path, 54, 180, width=120, height=45, mask='auto')
+
+    if os.path.exists(stamp_school_path):
+        p.drawImage(stamp_school_path, 180, 170, width=75, height=75, mask='auto')
+
+    p.setFont("Helvetica-Bold", 10)
+    p.setFillColor(colors.HexColor('#000000'))
+    p.drawString(54, 140, "Mrs. Nidhi Sony")
+    p.setFont("Helvetica", 9)
+    p.drawString(54, 128, "National Coordinator - Schools")
+    p.drawString(54, 116, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+
+    # 8. Footer Branding Line and Address
+    p.setStrokeColor(colors.HexColor('#1F4E78'))
+    p.setLineWidth(1)
+    p.line(54, 65, 541.27, 65)
+
+    p.setFont("Helvetica-Bold", 9)
+    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.drawCentredString(297.6, 50, "Spoken Tutorial brought to you by EduPyramids")
+
+    p.setFont("Helvetica", 8)
+    p.setFillColor(colors.HexColor('#000000'))
+    p.drawCentredString(297.6, 36, "6016 A, SINE, RBTIC Building IIT Bombay, Powai, Mumbai 400 076")
+    p.drawCentredString(297.6, 24, "+91 22-25764229 | contact@edupyramids.org | GSTIN: 27AAICE5225E1ZT | CIN: U85499MH2024PTC435910")
+
+    p.showPage()
+    p.save()
+
+    buffer.seek(0)
+    return buffer
+
+def generate_letter_of_association_pdf(payment):
+    """
+    Dispatches Letter of Association (LOA) PDF generation to the appropriate template:
+    School template for schools, College template for higher education institutions.
+    """
+    if is_school(payment):
+        return generate_school_loa_pdf(payment)
+    return generate_college_loa_pdf(payment)
+
 
 
 def generate_letter_of_completion_pdf(payment):
