@@ -11,7 +11,7 @@ from django.db.models import Count
 from django.conf import settings
 from spoken.config import EDUPYRAMIDS_CERTIFICATE_DATE
 from events.certificates import get_organization
-
+from training.models import ILWCourseFossLevel
 
 EVENT_AMOUNT = {
      'FDP': '500', 'Workshop': '1000'
@@ -19,6 +19,17 @@ EVENT_AMOUNT = {
 
 REGISTRATION_TYPE_CHOICES =(
     ('', '-----'),  (1, 'Subscribed College'),(2, 'Manual Registration')
+    )
+
+def get_course_foss_names(course):
+    if not course:
+        return []
+
+    return list(
+        ILWCourseFossLevel.objects
+        .filter(course=course)
+        .values_list('foss__foss', flat=True)
+        .distinct()
     )
 
 def is_user_paid(academic_id):
@@ -67,7 +78,7 @@ def create_certificate(eventid,pname):
                              (certificate_path, template), 'r')
         content = Template(template_file.read())
         template_file.close()
-        foss = format_foss_list([x.foss for x in event.course.foss.all()])
+        foss = format_foss_list(get_course_foss_names(event.course))
         content_tex = content.safe_substitute(
             name = pname,
             event_name = event.event_name,
@@ -239,9 +250,6 @@ def get_ilw_certificate(event, cert_type):
         template = "fdptr-certificate_edupyramids.pdf" if cert_type == "training" else "Blank-Certificate_edupyramids.pdf"
     return os.path.join(settings.MEDIA_ROOT, template)
 
-
-
-
 def get_training_certi_text(event, user):
     participantname = f"{user.first_name} {user.last_name}"
     if event.is_swayam:
@@ -253,7 +261,7 @@ def get_training_certi_text(event, user):
         formatted_start_date = training_start.strftime("%d-%m-%Y")
         formatted_end_date = training_end.strftime("%d-%m-%Y")
         course_name = f" {event.course.name}" if event.is_course else ""
-        foss_list = format_foss_list([foss.foss for foss in event.course.foss.all()])
+        foss_list = format_foss_list(get_course_foss_names(event.course))
         college_name = participant.college.institution_name
         
         return f"""This is to certify that <b>{participantname}</b> has participated in Student Training Programme
@@ -283,7 +291,7 @@ This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay.
             This is to certify that <b>{participantname}</b> of <b>{participant.college.institution_name}</b> has successfully 
             completed an Internship Programme conducted by EduPyramids, SINE, IIT Bombay, from
             <b>{formatted_start_date} to {formatted_end_date}</b>. During this internship, the student completed
-            self-paced training on{course_name_text} <b>{format_foss_list([foss.foss for foss in event.course.foss.all()])}</b>
+            self-paced training on{course_name_text} <b>{format_foss_list(get_course_foss_names(event.course))}</b>
             under the supervision of <b>{event.instructor_name}</b>.<br />
 
             This internship is officially approved and recognized by the receiving institution, 
@@ -305,11 +313,11 @@ This training is offered through SWAYAM Plus by EduPyramids, SINE, IIT Bombay.
             text = f"""
             {line1}
             on the course <b>{event.course.name}</b>, which includes the following {label}: 
-            <b>{format_foss_list([foss.foss for foss in event.course.foss.all()])}</b>, 
+            <b>{format_foss_list(get_course_foss_names(event.course))}</b>, 
             {line2}
             """
         else:
-            foss = format_foss_list([x.foss for x in event.course.foss.all()])
+            foss = format_foss_list(get_course_foss_names(event.course))
             text = f"""{line1}
             on <b>{foss}</b> {line2}"""
 
