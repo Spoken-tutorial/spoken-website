@@ -3972,7 +3972,7 @@ class DownloadLOAView(View):
         payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
         
         # access control for download
-        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists()
+        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists() or request.user.is_superuser
         is_owner = hasattr(request.user, 'organiser') and request.user.organiser.academic_id == payment.academic_id
         
         if not (is_staff or is_owner):
@@ -4055,9 +4055,9 @@ class DownloadAppreciationLetterView(View):
         organiser = None
         if is_owner:
             organiser = request.user.organiser
-        elif 'organiser_id' in request.GET:
+        elif request.GET.get('organiser_id', '').isdigit():
             try:
-                organiser = Organiser.objects.get(pk=request.GET['organiser_id'], academic=payment.academic)
+                organiser = Organiser.objects.get(pk=int(request.GET['organiser_id']), academic=payment.academic)
             except Organiser.DoesNotExist:
                 pass
 

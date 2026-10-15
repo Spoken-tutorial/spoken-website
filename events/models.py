@@ -1810,11 +1810,15 @@ class AcademicPaymentStatus(models.Model):
   
   @property
   def expiry_date(self):
+    if not self.payment_date:
+      return None
     sub_days = int(self.subscription) if self.subscription and str(self.subscription).isdigit() else 365
     return self.payment_date + timedelta(days=sub_days)
 
   @property
   def is_loc_available(self):
+    if not self.expiry_date:
+      return False
     return date.today() >= self.expiry_date
 
   def __str__(self):
