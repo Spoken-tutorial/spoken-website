@@ -52,18 +52,9 @@ class PaymentVerificationFilter(django_filters.FilterSet):
   academic__institution_name = django_filters.CharFilter(lookup_expr='icontains')
   
   def __init__(self, *args, **kwargs):
-    user = None
-    if 'user' in kwargs:
-      user = kwargs.pop('user')
+    kwargs.pop('user', None)
     super(PaymentVerificationFilter, self).__init__(*args, **kwargs)
-    if user and not user.is_superuser:
-      user_states = PaymentVerificationUser.objects.filter(user=user).values_list('state_id', flat=True)
-      if user_states.exists():
-        choices = list(State.objects.filter(id__in=user_states).values_list('id', 'name').order_by('name'))
-      else:
-        choices = []
-    else:
-      choices = list(State.objects.values_list('id', 'name').order_by('name'))
+    choices = list(State.objects.values_list('id', 'name').order_by('name'))
     choices.insert(0, ('', '---------'),)
     self.filters['state'].extra.update({'choices' : choices})
     
