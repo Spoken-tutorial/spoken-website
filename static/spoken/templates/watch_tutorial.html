@@ -825,13 +825,26 @@ function clickListener(e)
                         $("#swayam-complete-box").removeClass('hidden').show();
                     }
                 });
+                vjsPlayer.on('pause', function(e) {
+                    myfun(e);
+                });
+                vjsPlayer.on('seeked', function(e) {
+                    myfun(e);
+                });
+                vjsPlayer.on('ended', function(e) {
+                    myfun(e);
+                });
             });
         }
 
         function myfun(e) {
+            let player = (typeof videojs !== 'undefined') ? videojs('st_video') : null;
             let video = document.getElementById("st_video_html5_api");
-            let currentVidTime = video ? video.currentTime : 0;
-            let currentDuration = video ? video.duration : 0;
+            let currentVidTime = (player && typeof player.currentTime === 'function') ? player.currentTime() : (video ? video.currentTime : 0);
+            let currentDuration = (player && typeof player.duration === 'function') ? player.duration() : (video ? video.duration : 0);
+            if (isSwayam && (!currentDuration || currentDuration <= 0)) {
+                return;
+            }
             var postUrl = isSwayam ? "/swayam/save-progress/" : "/saveVideoData/";
 
             $.ajax({
@@ -847,8 +860,16 @@ function clickListener(e)
                 },
                 csrfmiddlewaretoken: '{{ csrf_token }}',
             })
-            .done(function (msg) {
-                console.log("Data Saved: " + msg);
+            .done(function (resp) {
+                console.log("Data Saved: ", resp);
+                if (isSwayam && resp && resp.status === 'success' && resp.is_completed) {
+                    $("#swayam-complete-box").removeClass('hidden').show();
+                    $("#swayam-mark-complete-btn")
+                        .removeClass('btn-success')
+                        .addClass('btn-default')
+                        .prop('disabled', true)
+                        .html('<i class="fa fa-check-circle" style="color: #449d44;"></i> Completed');
+                }
             });
         }
 
@@ -864,9 +885,10 @@ function clickListener(e)
                 if (btn.prop('disabled')) {
                     return;
                 }
+                let player = (typeof videojs !== 'undefined') ? videojs('st_video') : null;
                 let video = document.getElementById("st_video_html5_api");
-                let currentVidTime = video ? video.currentTime : 0;
-                let currentDuration = video ? video.duration : 0;
+                let currentVidTime = (player && typeof player.currentTime === 'function') ? player.currentTime() : (video ? video.currentTime : 0);
+                let currentDuration = (player && typeof player.duration === 'function') ? player.duration() : (video ? video.duration : 0);
                 btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Updating...');
 
                 $.ajax({
