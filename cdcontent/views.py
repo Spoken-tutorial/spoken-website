@@ -249,12 +249,23 @@ def download_ilw_course(request, event_id):
         request.path,
     )
     if os.path.isfile(file_path):
+        logger.warning(
+            "EXISTING ZIP FOUND | event_id=%s | path=%s | size=%s bytes",
+            event_id,
+            file_path,
+            os.path.getsize(file_path),
+        )
         print(f"ZIP file exists : {file_path}")
         return redirect('/media/cdimage/{}'.format(zipfile_name))
         # response = FileResponse(open(file_path, 'rb'), content_type='application/zip')
         # response['Content-Disposition'] = 'attachment; filename="{}"'.format(zipfile_name)
         # return response
     else:
+        logger.warning(
+            "ZIP FILE NOT FOUND | event_id=%s | path=%s",
+            event_id,
+            file_path,
+        )
         print(f"ZIP file do not exist : {file_path}")
         response = internal_computation(request, 'general', event_id)
         return response
@@ -267,6 +278,12 @@ def internal_computation(request, user_type, event_id=''):
         zipfile_name = f"event_{event_id}.zip"
     else:
         zipfile_name = '{}.zip'.format(datetime.datetime.now().strftime('%Y%m%d%H%M%S%f'))
+    logger.warning(
+        "ZIP CREATION PATH | MEDIA_ROOT=%s | zipfile_name=%s | actual_path=%s",
+        settings.MEDIA_ROOT,
+        zipfile_name,
+        '{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name),
+    )
     file_obj = open('{}cdimage/{}'.format(settings.MEDIA_ROOT, zipfile_name), 'wb')
     archive = zipfile.ZipFile(file_obj, 'w', zipfile.ZIP_DEFLATED, allowZip64=True)
     try:
@@ -307,9 +324,33 @@ def internal_computation(request, user_type, event_id=''):
                 # Temporarily disable questions
                 # question_s = Question.objects.filter(category=foss_rec.foss.replace(' ','-'),tutorial=rec.tutorial_detail.tutorial.replace(' ','-')).order_by('-date_created')
                 question_s = Question.objects.none()
+                logger.warning(
+                    "VIDEO CHECK | foss_id=%s | tutorial_id=%s | "
+                    "language=%s | filename=%s | source_path=%s",
+                    key,
+                    rec.tutorial_detail_id,
+                    rec.language.name,
+                    rec.video,
+                    settings.MEDIA_ROOT + filepath,
+                )
 
                 if os.path.isfile(settings.MEDIA_ROOT + filepath):
+                    logger.warning(
+                        "VIDEO FOUND | path=%s | size=%s bytes",
+                        settings.MEDIA_ROOT + filepath,
+                        os.path.getsize(settings.MEDIA_ROOT + filepath),
+                    )
                     archive.write(settings.MEDIA_ROOT + filepath, 'spoken/' + filepath)
+                    logger.warning(
+                        "VIDEO ADDED TO ZIP | source=%s | destination=%s",
+                        settings.MEDIA_ROOT + filepath,
+                        'spoken/' + filepath,
+                    )
+                else:
+                    logger.error(
+                        "VIDEO MISSING | expected_path=%s",
+                        settings.MEDIA_ROOT + filepath,
+                    )
 
                 # add srt file to archive
                 add_srt_file(archive, rec, filepath, eng_flag, srt_files)
@@ -357,6 +398,14 @@ def internal_computation(request, user_type, event_id=''):
     archive.close()
 
     file_obj.close()
+    logger.warning(
+        "ZIP GENERATION COMPLETED | filename=%s | path=%s | size=%s bytes",
+        zipfile_name,
+        os.path.join(settings.MEDIA_ROOT, "cdimage", zipfile_name),
+        os.path.getsize(
+            os.path.join(settings.MEDIA_ROOT, "cdimage", zipfile_name)
+        ),
+    )
     file_path= os.path.dirname(os.path.realpath(__file__))+'/../media/cdimage/{}'.format(zipfile_name)
     # response = HttpResponse(open(file_path, 'rb'), content_type='application/zip')
     if user_type == 'paid':
