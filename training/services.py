@@ -14,8 +14,7 @@ from ilwmoodle.models import ILWMdlUser, ILWMdlQuizGrades
 from events.models import Student, StudentMaster
 from donate.subscription import has_active_subscription
 
-from .models import ILWFossMdlCourses, Participant
-
+from .models import ILWFossMdlCourses, ILWCourseFossLevel, Participant
 
 CSV_HEADERS = [
     'Sl.No',
@@ -55,7 +54,7 @@ def get_swayam_participants(event):
 def resolve_moodle_quiz_id(event):
     course = getattr(event, 'course', None)
     if course:
-        course_foss_ids = list(course.foss.all().values_list('id', flat=True))
+        course_foss_ids = list(ILWCourseFossLevel.objects.filter(course=course).values_list('foss_id', flat=True).distinct())
         if course_foss_ids:
             quiz_id = (
                 ILWFossMdlCourses.objects.filter(foss_id__in=course_foss_ids)
