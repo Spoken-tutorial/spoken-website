@@ -253,14 +253,14 @@ def get_item(dictionary, key):
 
 @register.filter
 def get_hn_categories(event):
-  foss_ids = [x.id for x in event.course.foss.all()]
+  foss_ids = (ILWCourseFossLevel.objects.filter(course=event.course).values_list('foss_id', flat=True).distinct())
   categories = [str(x.external_course) for x in ExternalCourseMap.objects.filter(foss_id__in=foss_ids)]
   return ','.join(categories)
 
 @register.filter
 def get_hn_tutorial_links(participant):
    event = participant.event
-   foss_ids = [x.id for x in event.course.foss.all()]
+   foss_ids = (ILWCourseFossLevel.objects.filter(course=event.course).values_list('foss_id', flat=True).distinct())
    categories = [str(x.external_course) for x in ExternalCourseMap.objects.filter(foss_id__in=foss_ids)]
    data = []
    categories = Category.objects.filter(category_id__in=categories)

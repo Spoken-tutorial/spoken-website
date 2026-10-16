@@ -138,8 +138,8 @@ class Participant(models.Model):
 		event_lang = str(event.Language_of_workshop.id)
 		user_lang_id = str(self.foss_language.id) if self.foss_language else None
 		languages = [[event_lang, user_lang_id], 0] if user_lang_id else [[event_lang], 0]
-		for foss in event.course.foss.all():
-			selected_foss[foss.id] = languages
+		for mapping in ILWCourseFossLevel.objects.filter(course=event.course):
+			selected_foss[mapping.foss_id] = languages
 		return json.dumps(selected_foss)
 
 

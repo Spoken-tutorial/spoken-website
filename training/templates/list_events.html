@@ -352,9 +352,10 @@
                               <button class="btn btn-warning" type="submit" 
                               formaction="{% url 'training:generate_training_certificate'%}">Download Training certificate</button>
                           {% endif %}
-                          {% for item in event.event.course.foss.all %}
-                            {% with fossmdlcourse=item|get_ilw_mdlcourseid %}
+                         {% for mapping in event.event.course|get_course_foss_levels %}
+                          {% get_ilw_mdlcourseid mapping.foss mapping.level as fossmdlcourse %} 
                               {% for course in fossmdlcourse %}
+
                                 {% if not event|check_passgrade_exists:course.testfoss_id %}
                                   <input type="hidden" id="testurl{{course.mdlcourse_id}}" name="testurl" value="{{ ILW_ONLINE_TEST_URL }}course/view.php?id={{course.mdlcourse_id}}">
                                   {% if not event.event.tdate %}
@@ -383,7 +384,6 @@
                                     {% endwith %}
                                 {% endif %}
                               {% endfor %}
-                            {% endwith %}
                           {% endfor %}
                       {% endif %}
                   {% else %}
