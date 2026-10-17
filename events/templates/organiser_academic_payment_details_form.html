@@ -48,6 +48,14 @@
 			</div>
 
 			<div class="form-group">
+				<label class="col-sm-2 control-label" for="id_salutation">Addressed To <sup style="color:red;">*</sup><br> <small class="text-muted">(Head of Institution)</small> </label>
+				<div class="col-sm-9">
+				{% render_field form.salutation class+="form-control salutation" %}
+				{{ form.salutation.errors }}
+				</div>
+			</div>
+
+			<div class="form-group">
 				<label class="col-sm-2 control-label" for= "id_email">Email </label>
 				<div class="col-sm-9">
 				{% render_field form.email class+="form-control email" %}
