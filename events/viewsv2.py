@@ -3647,12 +3647,14 @@ class OrganiserAcademicKeyCreateView(CreateView):
                 }
                 latest_payment = AcademicPaymentStatus.objects.filter(academic_id=academic_id).latest('entry_date')
                 initial_data['name_of_the_payer'] = latest_payment.name_of_the_payer
+                initial_data['salutation'] = getattr(latest_payment, 'salutation', 'Principal') or 'Principal'
                 initial_data['email'] = latest_payment.email
                 initial_data['phone'] = latest_payment.phone
                 initial_data['pan_number'] = latest_payment.pan_number
                 initial_data['gst_number'] = latest_payment.gst_number
                 initial_data['payment_status'] = "Renewal"
             except AcademicPaymentStatus.DoesNotExist:
+                initial_data['salutation'] = "Principal"
                 initial_data['payment_status'] = "New"
             except AcademicCenter.DoesNotExist:
                 pass
@@ -3706,6 +3708,7 @@ class FetchAcademicDetailsView(View):
         latest_payment = AcademicPaymentStatus.objects.filter(academic_id=academic_id).latest('entry_date')
         data['success'] = True
         data['name_of_the_payer'] = latest_payment.name_of_the_payer
+        data['salutation'] = getattr(latest_payment, 'salutation', 'Principal') or 'Principal'
         data['email'] = latest_payment.email
         data['phone'] = latest_payment.phone
         data['pan_number'] = latest_payment.pan_number
@@ -3713,9 +3716,11 @@ class FetchAcademicDetailsView(View):
         data['payment_status'] = "Renewal"
       except Exception as e:
         data['success'] = False
+        data['salutation'] = "Principal"
         data['payment_status'] = "New"
     else:
       data['success'] = False
+      data['salutation'] = "Principal"
       data['payment_status'] = "New"
     return JsonResponse(data)
 
@@ -3891,6 +3896,17 @@ class PaymentVerificationDetailView(DetailView):
             PaymentVerificationDetailView, self
         ).get_object(queryset)
 
+    def get_context_data(self, **kwargs):
+        context = super(PaymentVerificationDetailView, self).get_context_data(**kwargs)
+        if self.object and self.object.academic:
+            context['organisers'] = Organiser.objects.filter(
+                academic=self.object.academic,
+                status__in=[1, 3]
+            ).select_related('user').order_by('user__first_name', 'user__last_name')
+        else:
+            context['organisers'] = Organiser.objects.none()
+        return context
+
 
 @group_required("Payment Verification Staff")
 def AcademicPaymentApproveView(request, pk):
@@ -4064,7 +4080,8 @@ class DownloadAppreciationLetterView(View):
         try:
             pdf_buffer = generate_letter_of_appreciation_pdf(payment, organiser=organiser)
             response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename=letter_of_appreciation_{payment.id}.pdf'
+            filename_suffix = f"_{organiser.id}" if organiser else ""
+            response['Content-Disposition'] = f'attachment; filename=letter_of_appreciation_{payment.id}{filename_suffix}.pdf'
             return response
         except Exception as e:
             return HttpResponse("Error generating Letter of Appreciation PDF.", status=500)

@@ -670,6 +670,8 @@ class AcademicPaymentStatusForm(forms.ModelForm):
     super().__init__(*args, **kwargs)
     self.fields['college_type'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
     self.fields['payment_status'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
+    if 'salutation' in self.fields:
+      self.fields['salutation'].widget.attrs.update({'class': 'form-control'})
     self.fields['subscription'].choices = SUBSCRIPTION_CHOICES
 
 class OrganiserAcademicPaymentStatusForm(forms.ModelForm):
@@ -696,6 +698,8 @@ class OrganiserAcademicPaymentStatusForm(forms.ModelForm):
     super().__init__(*args, **kwargs)
     self.fields['college_type'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
     self.fields['payment_status'].widget.attrs.update({'class': 'form-control', 'readonly': 'readonly'})
+    if 'salutation' in self.fields:
+      self.fields['salutation'].widget.attrs.update({'class': 'form-control'})
     self.fields['subscription'].choices = SUBSCRIPTION_CHOICES
 
 class MoodleMappingForm(forms.Form):

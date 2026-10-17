@@ -6,7 +6,13 @@ from datetime import datetime, date, timedelta
 from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
 from django.db.models import Q, Count, Sum, Min
-from django.utils.encoding import python_2_unicode_compatible
+try:
+    from django.utils.encoding import python_2_unicode_compatible
+except ImportError:
+    try:
+        from six import python_2_unicode_compatible
+    except ImportError:
+        python_2_unicode_compatible = lambda c: c
 
 from creation.models import FossCategory, Language, Level
 
@@ -33,6 +39,12 @@ PAYMENT_STATUS_CHOICES =(
 COLLEGE_TYPE_CHOICES =(
     ('', '-----'), ('Engg', 'Engg'), ('ASC', 'ASC'), ('Polytechnic', 'Polytechnic'), ('University', 'University'), ('School', 'School')
   )
+SALUTATION_CHOICES = (
+    ('Principal', 'The Principal'),
+    ('Vice Chancellor', 'The Vice Chancellor'),
+    ('Director', 'The Director'),
+    ('Headmaster', 'The Headmaster'),
+)
 
 
 
@@ -1795,6 +1807,7 @@ class AcademicPaymentStatus(models.Model):
   payment_date = models.DateField()
   payment_status = models.CharField(max_length = 50, choices = PAYMENT_STATUS_CHOICES)
   college_type = models.CharField(max_length = 50)
+  salutation = models.CharField(max_length = 50, choices = SALUTATION_CHOICES, default='Principal', blank=True, null=True)
   pan_number = models.CharField(max_length = 100, null=True)
   gst_number = models.CharField(max_length=15, null=True)
   customer_id = models.CharField(max_length = 50, null=True)
@@ -1854,4 +1867,29 @@ class PaymentVerificationUser(models.Model):
     verbose_name = "Payment Verification User"
     verbose_name_plural = "Payment Verification Users"
     unique_together = (("user", "state"),)
+
+
+class AcademicDocument(models.Model):
+  DOCUMENT_TYPES = (
+    ('REC', 'Payment Receipt'),
+    ('LOA', 'Letter of Association'),
+    ('LOC', 'Annual Report (Certificate of Training)'),
+    ('APP', 'Letter of Appreciation'),
+  )
+  payment = models.ForeignKey(AcademicPaymentStatus, on_delete=models.PROTECT, related_name='documents')
+  academic = models.ForeignKey(AcademicCenter, on_delete=models.PROTECT, related_name='academic_documents')
+  doc_type = models.CharField(max_length=10, choices=DOCUMENT_TYPES)
+  reference_no = models.CharField(max_length=100, unique=True)
+  salutation = models.CharField(max_length=50, blank=True, null=True)
+  recipient_name = models.CharField(max_length=255, blank=True, null=True)
+  organiser = models.ForeignKey(Organiser, null=True, blank=True, on_delete=models.SET_NULL, related_name='appreciation_documents')
+  issued_date = models.DateField(auto_now_add=True)
+  created_at = models.DateTimeField(auto_now_add=True)
+
+  def __str__(self):
+    return "{0} - {1}".format(self.reference_no, self.get_doc_type_display())
+
+  class Meta(object):
+    verbose_name = "Academic Document"
+    verbose_name_plural = "Academic Documents"
 
