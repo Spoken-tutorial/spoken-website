@@ -488,6 +488,8 @@ class FossMdlCourses(models.Model):
     mdlquiz_id = models.PositiveIntegerField()
     language = models.ForeignKey(Language, on_delete=models.PROTECT, null=True, blank=True)
     level = models.ForeignKey(Level, on_delete=models.PROTECT, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
 
     def __str__(self):
       if self.language is None:
