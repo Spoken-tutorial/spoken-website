@@ -114,7 +114,15 @@ def index(request):
                 past_test = Test.objects.filter(id__in=tests, status=4).order_by('-tdate')
             if category == 4:
                 # Display only the tests relevant to the student.
-                ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), id__in=tests, tdate__lte=dt.date.today()).order_by('-tdate')
+                raw_ongoing = Test.objects.filter(Q(status=2)|Q(status=3), id__in=tests, tdate__lte=dt.date.today()).order_by('-tdate')
+                seen_trainings = set()
+                ongoing_test = []
+                for t in raw_ongoing:
+                    if t.training_id:
+                        if t.training_id in seen_trainings:
+                            continue
+                        seen_trainings.add(t.training_id)
+                    ongoing_test.append(t)
 
             context = {
                 #'p': p,
