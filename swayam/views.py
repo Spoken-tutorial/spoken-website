@@ -114,6 +114,83 @@ def _is_allowed_target(target):
         and parsed.hostname in allowed_hosts
     )
 
+
+def sso_login(request):
+    """
+    LMS-initiated SWAYAM login.
+
+    Used when a learner visits Spoken Tutorial directly
+    and clicks "Login using SWAYAM".
+
+    Unlike sso_start(), there is no SWAYAM enrollment
+    handoff yet.
+    """
+
+    logger.info(
+        'SWAYAM LMS-initiated login started.'
+    )
+
+    target = request.GET.get('next', '/')
+
+    if not _is_allowed_target(target):
+        logger.warning(
+            'SWAYAM login received invalid next target. '
+            'target=%s',
+            target,
+        )
+        target = '/'
+
+    state = _random_urlsafe_string()
+    nonce = _random_urlsafe_string()
+    code_verifier = _random_urlsafe_string(48)
+
+    code_challenge = _pkce_challenge(
+        code_verifier
+    )
+
+    request.session[SWAYAM_OIDC_SESSION_KEY] = {
+        'state': state,
+        'nonce': nonce,
+        'code_verifier': code_verifier,
+
+        # No SWAYAM launch information here.
+        'login_hint': '',
+        'enrollment_id': '',
+        'target_link_uri': target,
+
+        # Helps us distinguish this flow in callback.
+        'login_source': 'lms',
+    }
+
+    authorization_endpoint = (
+        settings.SWAYAM_BASE_URL.rstrip('/')
+        + '/oidc/auth'
+    )
+
+    params = {
+        'client_id': settings.SWAYAM_OIDC_CLIENT_ID,
+        'redirect_uri': (
+            settings.SWAYAM_OIDC_REDIRECT_URI
+        ),
+        'response_type': 'code',
+        'scope': 'openid email profile',
+        'state': state,
+        'nonce': nonce,
+        'code_challenge': code_challenge,
+        'code_challenge_method': 'S256',
+    }
+
+    authorization_url = '{}?{}'.format(
+        authorization_endpoint,
+        urlencode(params),
+    )
+
+    logger.info(
+        'SWAYAM LMS login redirecting to authorization endpoint.'
+    )
+
+    return redirect(authorization_url)
+
 def sso_start(request):
     logger.info('SWAYAM SSO start called.')
     
@@ -195,6 +272,7 @@ def sso_start(request):
         'login_hint': login_hint,
         'enrollment_id': enrollment_id,
         'target_link_uri': target,
+        'login_source': 'swayam_launch',
     }
 
     logger.info(
@@ -685,21 +763,30 @@ def sso_callback(request):
             'enrollments',
             []
         ):
-            enrollment_service.sync_enrollment_row(
-                row
+            enrollment, created = (
+                enrollment_service.sync_enrollment_row(
+                    row
+                )
             )
+            user_service.link_enrollment(
+                user=user,
+                swayam_enrollment_id=(
+                    enrollment.swayam_enrollment_id
+                ),
+            )
+            
 
         #
         # Link THIS launch's enrollment to the user.
         #
-        enrollment = (
-            user_service.link_enrollment(
-                user=user,
-                swayam_enrollment_id=(
-                    login_data['enrollment_id']
-                ),
-            )
-        )
+        # enrollment = (
+        #     user_service.link_enrollment(
+        #         user=user,
+        #         swayam_enrollment_id=(
+        #             login_data['enrollment_id']
+        #         ),
+        #     )
+        # )
 
         #
         # Log the Django User into Spoken Tutorial.

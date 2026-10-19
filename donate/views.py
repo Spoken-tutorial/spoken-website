@@ -38,7 +38,7 @@ from .models import *
 from .forms import *
 from .subscription import get_request_headers, get_display_transaction_details, verify_hmac_signature
 from donate.payment import save_ilw_hdfc_success_data, save_ilw_hdfc_error_data, get_ilw_session_payload, make_hdfc_session_request
-from training.models import TrainingEvents
+from training.models import TrainingEvents,ILWCourseFossLevel
 from decimal import Decimal, InvalidOperation
 
 import logging
@@ -175,7 +175,8 @@ def form_valid(request, form, purpose):
     else: #for ilw
         event_id = request.POST.get('event')
         event = TrainingEvents.objects.get(id=event_id)
-        fosses = event.course.foss.all()
+        foss_ids = (ILWCourseFossLevel.objects.filter(course=event.course).values_list('foss_id', flat=True).distinct())
+        fosses = FossCategory.objects.filter(id__in=foss_ids)
         foss_language = request.POST.get('foss_language',None)
 
         entries = [ CdFossLanguages(payment=payee_obj, foss=foss, lang=event.Language_of_workshop) for foss in fosses ]

@@ -448,7 +448,7 @@ def register_user(request):
 	event_register = context.get('event_obj')
 	if event_register:
 		if event_register.course:
-			context["fossess"] = [foss.id for foss in event_register.course.foss.all()]
+			context["fossess"] = list(ILWCourseFossLevel.objects.filter(course=event_register.course).values_list('foss_id', flat=True).distinct())
 		else:
 			context["fossess"] = [event_register.foss.id] if event_register.foss else []
 		if event_register.registartion_end_date < date.today():
@@ -1405,7 +1405,7 @@ def participant_transactions(request, purpose):
 		events_ids = list(page_obj.object_list.values_list('paymentdetail__purpose', flat=True))
 		events = TrainingEvents.objects.filter(id__in=events_ids).select_related('course')
 		for event in events:
-			course = ', '.join(event.course.foss.all().values_list('foss', flat=True))
+			course = ', '.join(get_course_foss_names(event.course))
 			event_dict[str(event.id)] = {'name': event.event_name, 'course': course, 'event_start_date': event.event_start_date, 'event_end_date': event.event_end_date}
 	
 	phone_dict = {}
@@ -1447,7 +1447,7 @@ def transaction_csv(request, purpose):
 		if purpose != 'cdcontent':
 			event  = get_event_details(record.paymentdetail.purpose)
 			writer.writerow([count,
-				f"{event.event_name}, {', '.join(x.foss for x in event.course.foss.all())}",
+				f"{event.event_name}, {', '.join(get_course_foss_names(event.course))}",
 	            record.paymentdetail.user.first_name+' '+record.paymentdetail.user.first_name,
 	            record.paymentdetail.email,
 	            record.paymentdetail.state,

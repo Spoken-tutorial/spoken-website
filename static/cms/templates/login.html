@@ -49,5 +49,18 @@
                 </div>
             </div>
         </form>
+        <div style="margin-top: 25px;">
+            <div class="text-center" style="font-size: 12px;">
+                <p>OR</p>
+
+                <a
+                    href="/swayam/sso/login/{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}"
+                    class="btn btn-default btn-md"
+                    style="width: 100%;"
+                >
+                    Login using SWAYAM Plus
+                </a>
+            </div>
+        </div>
     </div>
 {% endblock %}

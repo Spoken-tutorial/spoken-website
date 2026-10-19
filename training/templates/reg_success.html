@@ -95,9 +95,9 @@
       <h5>FOSS</h5>
       <hr>
       <p>
-         {% for foss in participant_obj.event.course.foss.all %}
-            {{ foss.foss }}{% if not forloop.last %}, {% endif %}
-          {% endfor %}
+        {% for mapping in participant_obj.event.course|get_course_foss_levels %}
+        {{ mapping.foss.foss }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
       </p>
       <p>{{participant_obj.event.Language_of_workshop}}
         	{% if participant_obj.foss_language %}

@@ -96,3 +96,12 @@ class PaymentVerificationUserAdmin(admin.ModelAdmin):
 admin.site.register(CourseMap, CourseMapAdmin)
 admin.site.register(PaymentVerificationUser, PaymentVerificationUserAdmin)
 
+
+class AcademicDocumentAdmin(admin.ModelAdmin):
+    list_display = ('reference_no', 'doc_type', 'academic', 'salutation', 'recipient_name', 'organiser', 'issued_date')
+    list_filter = ('doc_type', 'issued_date')
+    search_fields = ('reference_no', 'academic__institution_name', 'recipient_name', 'payment__id')
+    readonly_fields = ('issued_date', 'created_at')
+
+admin.site.register(AcademicDocument, AcademicDocumentAdmin)
+

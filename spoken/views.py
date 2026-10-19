@@ -282,16 +282,25 @@ def archived_tutorial_search(request):
     context['current_foss'] = foss_get
     return render(request, 'spoken/templates/archived_tutorial_search.html', context)
 
-def is_valid_user(user,foss,lang,tr_rec):
+def is_valid_user(user, foss, lang, tr_rec):
     # Allow access to unrestricted tutorials
     if tr_rec.is_unrestricted:
         return True
+
+    # Bypass restriction date check for swayam users
+    try:
+        from swayam.utils import is_swayam_user, is_swayam_foss
+        if is_swayam_user(user) and is_swayam_foss(tr_rec.tutorial_detail.foss):
+            return True
+    except Exception:
+        pass
+
     # Allow access to all tutorials published before a set restriction date
     if tr_rec.publish_at and tr_rec.publish_at.date() < TUTORIAL_RESTRICTION_DATE:
         return True # No restriction on tutorials published before restricted_date
     
     foss = FossCategory.objects.get(foss=foss)
-    if not isinstance(user,User):
+    if not isinstance(user, User):
         return False
     
     if check_auth_internal_roles(user):
@@ -352,6 +361,21 @@ def watch_tutorial(request, foss, tutorial, lang):
         '-date_created'
     )
 
+    is_swayam = False
+    swayam_completed = False
+    swayam_progress_percent = 0
+    try:
+        from swayam.utils import is_swayam_user, is_swayam_foss
+        if is_swayam_user(request.user) and is_swayam_foss(td_rec.foss):
+            is_swayam = True
+            from swayam.models import SwayamTutorialProgress
+            st_prog = SwayamTutorialProgress.objects.filter(user=request.user, tutorial_detail=td_rec).first()
+            if st_prog:
+                swayam_completed = st_prog.is_completed
+                swayam_progress_percent = st_prog.progress_percent
+    except Exception:
+        pass
+
     context = {
         'tr_rec': tr_rec,
         'tr_recs': tr_recs,
@@ -365,7 +389,10 @@ def watch_tutorial(request, foss, tutorial, lang):
         'video_play_time':getattr(settings, 'VIDEO_TIME', 15),
         'questions': sorted_questions,
         'user_authorized': is_authorized_user,
-        'restriction_date': TUTORIAL_RESTRICTION_DATE.strftime("%-d %b. %Y")
+        'restriction_date': TUTORIAL_RESTRICTION_DATE.strftime("%-d %b. %Y"),
+        'is_swayam': is_swayam,
+        'swayam_completed': swayam_completed,
+        'swayam_progress_percent': swayam_progress_percent,
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 
@@ -397,7 +424,8 @@ def what_is_spoken_tutorial(request):
         'media_url': settings.MEDIA_URL,
         'media_path': settings.MEDIA_ROOT,
         'tutorial_path': str(tr_rec.tutorial_detail.foss_id) + '/' + str(tr_rec.tutorial_detail_id) + '/',
-        'script_base': settings.SCRIPT_URL
+        'script_base': settings.SCRIPT_URL,
+        'is_swayam': False
     }
     return render(request, 'spoken/templates/watch_tutorial.html', context)
 

@@ -26,7 +26,12 @@ from events.decorators import group_required
 from django.utils import timezone
 from training.views import add_Academic_key
 from events.events_email import send_email
-from events.receipt_service import generate_payment_receipt_pdf
+from events.receipt_service import (
+    generate_payment_receipt_pdf,
+    generate_letter_of_association_pdf,
+    generate_letter_of_completion_pdf,
+    generate_letter_of_appreciation_pdf
+)
 from events import display
 from events.forms import StudentBatchForm, TrainingRequestForm, \
     TrainingRequestEditForm, CourseMapForm, SingleTrainingForm, \
@@ -3641,12 +3646,14 @@ class OrganiserAcademicKeyCreateView(CreateView):
                 }
                 latest_payment = AcademicPaymentStatus.objects.filter(academic_id=academic_id).latest('entry_date')
                 initial_data['name_of_the_payer'] = latest_payment.name_of_the_payer
+                initial_data['salutation'] = getattr(latest_payment, 'salutation', 'Principal') or 'Principal'
                 initial_data['email'] = latest_payment.email
                 initial_data['phone'] = latest_payment.phone
                 initial_data['pan_number'] = latest_payment.pan_number
                 initial_data['gst_number'] = latest_payment.gst_number
                 initial_data['payment_status'] = "Renewal"
             except AcademicPaymentStatus.DoesNotExist:
+                initial_data['salutation'] = "Principal"
                 initial_data['payment_status'] = "New"
             except AcademicCenter.DoesNotExist:
                 pass
@@ -3700,6 +3707,7 @@ class FetchAcademicDetailsView(View):
         latest_payment = AcademicPaymentStatus.objects.filter(academic_id=academic_id).latest('entry_date')
         data['success'] = True
         data['name_of_the_payer'] = latest_payment.name_of_the_payer
+        data['salutation'] = getattr(latest_payment, 'salutation', 'Principal') or 'Principal'
         data['email'] = latest_payment.email
         data['phone'] = latest_payment.phone
         data['pan_number'] = latest_payment.pan_number
@@ -3707,9 +3715,11 @@ class FetchAcademicDetailsView(View):
         data['payment_status'] = "Renewal"
       except Exception as e:
         data['success'] = False
+        data['salutation'] = "Principal"
         data['payment_status'] = "New"
     else:
       data['success'] = False
+      data['salutation'] = "Principal"
       data['payment_status'] = "New"
     return JsonResponse(data)
 
@@ -3843,9 +3853,6 @@ class PaymentVerificationDashboardView(ListView):
     def get_queryset(self):
         qs = AcademicPaymentStatus.objects.select_related('academic', 'state').order_by('-entry_date')
         user = self.request.user
-        if not user.is_superuser:
-            user_states = PaymentVerificationUser.objects.filter(user=user).values_list('state_id', flat=True)
-            qs = qs.filter(state_id__in=user_states)
         self.filter = PaymentVerificationFilter(self.request.GET, queryset=qs, user=user)
         self.header = {
             1: SortableHeader('#', False),
@@ -3884,22 +3891,25 @@ class PaymentVerificationDetailView(DetailView):
         return super(PaymentVerificationDetailView, self).dispatch(*args, **kwargs)
 
     def get_object(self, queryset=None):
-        obj = super(PaymentVerificationDetailView, self).get_object(queryset)
-        user = self.request.user
-        if not user.is_superuser:
-            user_states = PaymentVerificationUser.objects.filter(user=user).values_list('state_id', flat=True)
-            if obj.state_id not in user_states:
-                raise PermissionDenied("You do not have permission to view records for this state.")
-        return obj
+        return super(
+            PaymentVerificationDetailView, self
+        ).get_object(queryset)
+
+    def get_context_data(self, **kwargs):
+        context = super(PaymentVerificationDetailView, self).get_context_data(**kwargs)
+        if self.object and self.object.academic:
+            context['organisers'] = Organiser.objects.filter(
+                academic=self.object.academic,
+                status__in=[1, 3]
+            ).select_related('user').order_by('user__first_name', 'user__last_name')
+        else:
+            context['organisers'] = Organiser.objects.none()
+        return context
 
 
 @group_required("Payment Verification Staff")
 def AcademicPaymentApproveView(request, pk):
     payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
-    if not request.user.is_superuser:
-        user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
-        if payment.state_id not in user_states:
-            raise PermissionDenied("You do not have permission to approve records for this state.")
 
     if payment.verification_status != 1:
         payment.verification_status = 1
@@ -3929,10 +3939,6 @@ def AcademicPaymentApproveView(request, pk):
 @group_required("Payment Verification Staff")
 def AcademicPaymentRejectView(request, pk):
     payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
-    if not request.user.is_superuser:
-        user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
-        if payment.state_id not in user_states:
-            raise PermissionDenied("You do not have permission to reject records for this state.")
 
     payment.verification_status = 2
     payment.approved_by = request.user
@@ -3962,11 +3968,6 @@ class DownloadReceiptView(View):
         if not (is_staff or is_owner):
             raise PermissionDenied("You do not have permission to download this receipt.")
             
-        if is_staff and not request.user.is_superuser:
-            user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
-            if payment.state_id not in user_states:
-                raise PermissionDenied("You do not have permission to download receipt for this state.")
-
             
         if payment.verification_status != 1:
             raise PermissionDenied("Receipt is not verified/approved yet.")
@@ -3978,5 +3979,112 @@ class DownloadReceiptView(View):
             return response
         except Exception as e:
             return HttpResponse("Error generating receipt PDF.", status=500)
+
+
+class DownloadLOAView(View):
+    @method_decorator(login_required)
+    def get(self, request, pk, *args, **kwargs):
+        payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
+        
+        # access control for download
+        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists() or request.user.is_superuser
+        is_owner = hasattr(request.user, 'organiser') and request.user.organiser.academic_id == payment.academic_id
+        
+        if not (is_staff or is_owner):
+            raise PermissionDenied("You do not have permission to download this Letter of Association.")
+            
+        if is_staff and not request.user.is_superuser:
+            user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
+            if payment.state_id not in user_states:
+                raise PermissionDenied("You do not have permission to download Letter of Association for this state.")
+            
+        if payment.verification_status != 1:
+            raise PermissionDenied("Letter of Association is not verified/approved yet.")
+            
+        try:
+            pdf_buffer = generate_letter_of_association_pdf(payment)
+            response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=letter_of_association_{payment.id}.pdf'
+            return response
+        except Exception as e:
+            return HttpResponse("Error generating Letter of Association PDF.", status=500)
+
+
+class DownloadLOCView(View):
+    @method_decorator(login_required)
+    def get(self, request, pk, *args, **kwargs):
+        payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
+        
+        # access control for download
+        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists() or request.user.is_superuser
+        is_owner = hasattr(request.user, 'organiser') and request.user.organiser.academic_id == payment.academic_id
+        
+        if not (is_staff or is_owner):
+            raise PermissionDenied("You do not have permission to download this Certificate of Training.")
+            
+        if is_staff and not request.user.is_superuser:
+            user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
+            if payment.state_id not in user_states:
+                raise PermissionDenied("You do not have permission to download Certificate of Training for this state.")
+            
+        if payment.verification_status != 1:
+            raise PermissionDenied("Payment is not verified/approved yet.")
+
+        # Check 1-year completion requirement (staff/superuser can preview/download anytime)
+        if not is_staff and not payment.is_loc_available:
+            raise PermissionDenied(f"Annual Report / Certificate of Training will be available after completion of 1 year on {payment.expiry_date.strftime('%d %B, %Y')}.")
+            
+        try:
+            pdf_buffer = generate_letter_of_completion_pdf(payment)
+            response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename=certificate_of_training_{payment.id}.pdf'
+            return response
+        except Exception as e:
+            return HttpResponse("Error generating Certificate of Training PDF.", status=500)
+
+
+class DownloadAppreciationLetterView(View):
+    @method_decorator(login_required)
+    def get(self, request, pk, *args, **kwargs):
+        payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
+        
+        # access control for download
+        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists() or request.user.is_superuser
+        is_owner = hasattr(request.user, 'organiser') and request.user.organiser.academic_id == payment.academic_id
+        
+        if not (is_staff or is_owner):
+            raise PermissionDenied("You do not have permission to download this Letter of Appreciation.")
+            
+        if is_staff and not request.user.is_superuser:
+            user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
+            if payment.state_id not in user_states:
+                raise PermissionDenied("You do not have permission to download Letter of Appreciation for this state.")
+            
+        if payment.verification_status != 1:
+            raise PermissionDenied("Payment is not verified/approved yet.")
+
+        # Check 1-year completion requirement (staff/superuser can preview/download anytime)
+        if not is_staff and not payment.is_loc_available:
+            raise PermissionDenied(f"Letter of Appreciation will be available after completion of 1 year on {payment.expiry_date.strftime('%d %B, %Y')}.")
+            
+        organiser = None
+        if is_owner:
+            organiser = request.user.organiser
+        elif request.GET.get('organiser_id', '').isdigit():
+            try:
+                organiser = Organiser.objects.get(pk=int(request.GET['organiser_id']), academic=payment.academic)
+            except Organiser.DoesNotExist:
+                pass
+
+        try:
+            pdf_buffer = generate_letter_of_appreciation_pdf(payment, organiser=organiser)
+            response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
+            filename_suffix = f"_{organiser.id}" if organiser else ""
+            response['Content-Disposition'] = f'attachment; filename=letter_of_appreciation_{payment.id}{filename_suffix}.pdf'
+            return response
+        except Exception as e:
+            return HttpResponse("Error generating Letter of Appreciation PDF.", status=500)
+
+
 
 
