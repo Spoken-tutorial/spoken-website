@@ -22,6 +22,7 @@ from events.forms import OrganiserForm
 from events.models import *
 from events.signals import get_or_create_user
 from events.views import *
+from spoken.config import PROCESS_URL, SPOKEN_BASE_URL
 
 from .forms import *
 from .get_or_create_participant import check_csvfile, encript_password
@@ -213,8 +214,8 @@ def offline_details(request, wid, category):
     }
     messages.info(request, """
         Please upload the CSV file which you have generated.
-        To know more <a href="http://process.spoken-tutorial.org/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>.
-    """)
+        To know more <a href="{0}/images/9/96/Upload_Attendance.pdf" target="_blank">Click here</a>.
+    """.format(PROCESS_URL))
     context.update(csrf(request))
     return render(request, 'mdl/templates/offline_details.html', context)
 
@@ -238,7 +239,7 @@ def mdl_register(request):
             #Email exits
             try:
                 user = MdlUser.objects.filter(email=request.POST['email']).first().id
-                messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
+                messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='{0}/participant/login/'>here </a>to login".format(SPOKEN_BASE_URL))   
             except Exception as e:
                 mdluser = MdlUser()
                 mdluser.auth = 'manual'
@@ -253,7 +254,7 @@ def mdl_register(request):
                 mdluser.save()
                 mdluser = MdlUser.objects.get(email=mdluser.email)
                 get_or_create_user(mdluser, form.cleaned_data['password'])
-                messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['lastname']+" Created!. Please click <a href='http://www.spoken-tutorial.org/participant/login/'>here </a>to login")
+                messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['lastname']+" Created!. Please click <a href='{0}/participant/login/'>here </a>to login".format(SPOKEN_BASE_URL))
                 return HttpResponseRedirect('/participant/register/')
 
     context['form'] = form

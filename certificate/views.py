@@ -14,7 +14,7 @@ from django.template import RequestContext
 # Spoken Tutorial Stuff
 from certificate.forms import FeedBackForm
 from certificate.models import *
-
+from spoken.config import SPOKEN_BASE_URL, SCRIPT_URL
 
 def index(request):
     return render(request,'index.html', {})
@@ -299,7 +299,7 @@ def drupal_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'day': day, 'serial_key': old_user.short_key}
             certificate = create_drupal_certificate(certificate_path, details,
                                                     qrcode, type, paper, workshop, file_name)
@@ -317,7 +317,7 @@ def drupal_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'day': day, 'serial_key': short_key}
             certificate = create_drupal_certificate(certificate_path, details,
                                                     qrcode, type, paper, workshop, file_name)
@@ -401,7 +401,7 @@ def drupal_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key}
             certificate = create_drupal_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -419,7 +419,7 @@ def drupal_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key}
             certificate = create_drupal_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -505,7 +505,7 @@ def fa_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key}
             certificate = create_fa_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -523,7 +523,7 @@ def fa_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key}
             certificate = create_fa_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -609,7 +609,7 @@ def itp_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'https://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'{SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'college':college}
             certificate = create_itp_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -627,7 +627,7 @@ def itp_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'{SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'college': college}
             certificate = create_itp_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -713,7 +713,7 @@ def koha_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'college':college}
             certificate = create_koha_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -731,7 +731,7 @@ def koha_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: https://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'college': college}
             certificate = create_koha_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -830,7 +830,7 @@ def koha_coordinators_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'college':college}
             certificate = create_koha_coordinators_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -848,7 +848,7 @@ def koha_coordinators_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key) 
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key) 
             details = {'name': name, 'serial_key': short_key, 'college': college}
             certificate = create_koha_coordinators_workshop_certificate(certificate_path, 
                 details, qrcode, type, paper, workshop, file_name)
@@ -941,7 +941,7 @@ def koha_massive_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'college': college, 'remote': remote}
             certificate = create_koha_massive_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -959,7 +959,7 @@ def koha_massive_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'college': college, 'remote': remote}
             certificate = create_koha_massive_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1047,7 +1047,7 @@ def koha_main_workshop9march_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'college': college, 'remote': remote}
             certificate = create_koha_main_workshop9march_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1065,7 +1065,7 @@ def koha_main_workshop9march_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'college': college, 'remote': remote}
             certificate = create_koha_main_workshop9march_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1259,7 +1259,7 @@ def moodle_coordinators_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'college': college}
             certificate = create_moodle_coordinators_workshop_certificate(certificate_path, details, 
                 qrcode, type, paper, workshop, file_name)
@@ -1277,7 +1277,7 @@ def moodle_coordinators_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key) 
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'college': college}
             certificate = create_moodle_coordinators_workshop_certificate(certificate_path, 
                 details, qrcode, type, paper, workshop, file_name)
@@ -1366,7 +1366,7 @@ def moodle_massive_workshop_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'college': college, 'remote': remote}
             certificate = create_moodle_massive_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1384,7 +1384,7 @@ def moodle_massive_workshop_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'college': college, 'remote': remote}
             certificate = create_moodle_massive_workshop_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1485,7 +1485,7 @@ def koha_9marchrc_certificate_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'rcid': rcid, 'remote': remote}
             certificate = create_koha_9march_rc_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1503,7 +1503,7 @@ def koha_9marchrc_certificate_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'rcid': rcid, 'remote': remote}
             certificate = create_koha_9march_rc_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1616,7 +1616,7 @@ def moodle_15marchrc_certificate_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'rcid': rcid, 'remote': remote}
             certificate = create_moodle_15march_rc_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1634,7 +1634,7 @@ def moodle_15marchrc_certificate_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'rcid': rcid, 'remote': remote}
             certificate = create_moodle_15march_rc_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1760,7 +1760,7 @@ def koha_12octrc_certificate_download(request):
         file_name = file_name.replace('.', '')
         try:
             old_user = Certificate.objects.get(email=email, serial_no=serial_no)
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(old_user.short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(old_user.short_key)
             details = {'name': name, 'serial_key': old_user.short_key, 'rcid': rcid, 'remote': remote}
             certificate = create_koha_12oct_rc_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)
@@ -1778,7 +1778,7 @@ def koha_12octrc_certificate_download(request):
                     uniqueness = True
                 else:
                     num += 1
-            qrcode = 'Verify at: http://spoken-tutorial.org/certificate/verify/{0} '.format(short_key)
+            qrcode = f'Verify at: {SPOKEN_BASE_URL}/certificate/verify/{0} '.format(short_key)
             details = {'name': name, 'serial_key': short_key, 'rcid': rcid, 'remote': remote}
             certificate = create_koha_12oct_rc_certificate(certificate_path, details,
                                                              qrcode, type, paper, workshop, file_name)

@@ -5,6 +5,8 @@ from django.conf import settings
 from creation.views import get_video_info
 from django.db.models import Q
 import csv
+from spoken.config import SPOKEN_BASE_URL, SCRIPT_URL
+
 
 class Command(BaseCommand):
         
@@ -30,8 +32,8 @@ class Command(BaseCommand):
                         keywords += tr.tutorial_detail.tutorial_detail.keyword_as_list()
                     except:
                         pass
-                deeplink_url="https://spoken-tutorial.org/tutorial-search/?search_foss={}&search_language={}".format(f.foss, 'English')
-                wiki_url = "https://script.spoken-tutorial.org/index.php/{}".format(f.foss.replace(" ", "_"))
+                deeplink_url = (f"{SPOKEN_BASE_URL}/tutorial-search/"f"?search_foss={f.foss}&search_language=English")
+                wiki_url = (f"{SCRIPT_URL}{f.foss.replace(' ', '_')}")
                 if tr_en.count() >= 1:
                     metadata = [str(f.id), f.foss, self.convert(course_duration_en), deeplink_url, wiki_url, f.description, ", ".join(keywords), 'English', str(tr_en.count())]
                     metawriter.writerow(metadata)
@@ -39,7 +41,7 @@ class Command(BaseCommand):
                 languages = Language.objects.all().exclude(name='English')
                 for l in languages:
                     tr = TutorialResource.objects.filter(Q(status=1) | Q(status=2),tutorial_detail__foss=f, language=l)
-                    deeplink_url="https://spoken-tutorial.org/tutorial-search/?search_foss={}&search_language={}".format(f.foss, l.name)
+                    deeplink_url = (f"{SPOKEN_BASE_URL}/tutorial-search/"f"?search_foss={f.foss}&search_language={l.name}")
                     if tr.count() == tr_en.count() and tr.count() >=1:
                         metadata = [str(f.id), f.foss, self.convert(course_duration_en), deeplink_url, wiki_url, f.description, ", ".join(keywords), l.name, str(tr.count())]
                         metawriter.writerow(metadata)

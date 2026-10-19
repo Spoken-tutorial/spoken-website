@@ -20,7 +20,7 @@ from django.db import transaction as tx
 
 # Spoken Tutorial Stuff
 from cms.models import Profile
-
+from spoken.config import SPOKEN_BASE_URL
 
 class Command(BaseCommand):
 
@@ -53,8 +53,8 @@ class Command(BaseCommand):
                 IIT Bombay.'''.format(
                 user.first_name, 
                 user.last_name,
-                "https://spoken-tutorial.org",
-                "https://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+                SPOKEN_BASE_URL,
+                SPOKEN_BASE_URL + "/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
                 )
             to  = [user.email]
             email = EmailMultiAlternatives(
