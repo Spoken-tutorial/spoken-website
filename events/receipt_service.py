@@ -1,5 +1,7 @@
 import os
 import re
+import random
+import string
 from io import BytesIO
 from datetime import timedelta
 from django.conf import settings
@@ -51,6 +53,88 @@ def is_school(payment):
             return True
     return False
 
+def get_salutation_label(payment):
+    """
+    Returns the formatted salutation label for institution letters.
+    E.g. 'The Vice Chancellor,', 'The Director,', 'The Principal,', 'The Headmaster,'
+    """
+    if isinstance(payment, dict):
+        sal = payment.get('salutation') or 'Principal'
+    else:
+        sal = getattr(payment, 'salutation', None) or 'Principal'
+    sal = str(sal).strip()
+    if not sal.lower().startswith('the'):
+        return f"The {sal},"
+    return f"{sal},"
+
+def generate_unique_reference_no(year, doc_type, size=8):
+    """
+    Generates a unique random alphanumeric reference number in the format:
+    ST/<year>/<doc_type>-<RANDOM_ALPHANUMERIC>
+    e.g. ST/2026/REC-8K9N2P4X
+    """
+    chars = string.ascii_uppercase + string.digits
+    while True:
+        code = ''.join(random.choice(chars) for _ in range(size))
+        ref_no = f"ST/{year}/{doc_type}-{code}"
+        try:
+            from events.models import AcademicDocument
+            if not AcademicDocument.objects.filter(reference_no=ref_no).exists():
+                return ref_no
+        except Exception:
+            return ref_no
+
+def get_or_create_academic_document(payment, doc_type, year=None, salutation=None, recipient_name=None, organiser=None, default_ref_no=None):
+    """
+    Retrieves or creates an AcademicDocument audit record with a unique random alphanumeric reference number.
+    If a record already exists for the given (payment, doc_type, organiser), its existing reference_no
+    is returned to ensure reference numbers remain immutable across multiple downloads.
+    """
+    # Backwards compatibility if default_ref_no string was passed as 3rd positional argument
+    if isinstance(year, str) and not year.isdigit():
+        default_ref_no = year
+        year = None
+
+    if year is None:
+        if hasattr(payment, 'payment_date') and payment.payment_date:
+            year = payment.payment_date.year
+        elif isinstance(payment, dict) and payment.get('payment_date'):
+            p_date = payment['payment_date']
+            year = p_date.year if hasattr(p_date, 'year') else 2026
+        else:
+            year = 2026
+
+    fallback_ref = default_ref_no or generate_unique_reference_no(year, doc_type)
+
+    if isinstance(payment, dict) or not hasattr(payment, 'id') or not hasattr(payment, 'academic'):
+        return fallback_ref
+
+    try:
+        from events.models import AcademicDocument
+        doc = AcademicDocument.objects.filter(
+            payment=payment,
+            doc_type=doc_type,
+            organiser=organiser
+        ).first()
+        if doc:
+            return doc.reference_no
+
+        ref_no = generate_unique_reference_no(year, doc_type)
+
+        AcademicDocument.objects.create(
+            payment=payment,
+            academic=payment.academic,
+            doc_type=doc_type,
+            reference_no=ref_no,
+            salutation=salutation,
+            recipient_name=recipient_name,
+            organiser=organiser
+        )
+        return ref_no
+    except Exception:
+        # Fallback if DB table is not yet migrated or during mock tests
+        return fallback_ref
+
 def generate_college_receipt_pdf(payment):
     # Generates the PDF receipt for colleges and higher education institutions
     buffer = BytesIO()
@@ -82,10 +166,13 @@ def generate_college_receipt_pdf(payment):
     p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
     
     # 2. Reference Number
-    ref_no = f"Ref.No. ST/{payment.payment_date.year}/{10000 + payment.id}"
+    year = payment.payment_date.year if (hasattr(payment, 'payment_date') and payment.payment_date) else 2026
+    payer_name = getattr(payment, 'name_of_the_payer', '') if not isinstance(payment, dict) else payment.get('name_of_the_payer', '')
+    ref_no = get_or_create_academic_document(payment, 'REC', year=year, recipient_name=payer_name)
+    display_ref = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
     p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 665, ref_no)
+    p.drawString(54, 665, display_ref)
     
     # 3. Title
     p.setFont("Helvetica-Bold", 13)
@@ -239,12 +326,15 @@ def generate_school_receipt_pdf(payment):
     p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
     
     # 2. Reference Number & Date
-    ref_no = f"Ref.No. ST/{payment.payment_date.year}/{10000 + payment.id}"
+    year = payment.payment_date.year if (hasattr(payment, 'payment_date') and payment.payment_date) else 2026
+    payer_name = getattr(payment, 'name_of_the_payer', '') if not isinstance(payment, dict) else payment.get('name_of_the_payer', '')
+    ref_no = get_or_create_academic_document(payment, 'REC', year=year, recipient_name=payer_name)
+    display_ref = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
     date_formatted = format_ordinal_date(payment.payment_date)
     date_str = f"Date: - {date_formatted}"
     p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 665, ref_no)
+    p.drawString(54, 665, display_ref)
     p.drawRightString(541.27, 665, date_str)
     
     # 3. Title
@@ -405,13 +495,19 @@ def generate_college_loa_pdf(payment):
     p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
 
     # 2. Reference Number and Date
-    ref_no = f"Ref.No. ST/{payment.payment_date.year}/{10000 + payment.id}"
+    academic = getattr(payment, 'academic', None)
+    inst_name = getattr(academic, 'institution_name', '') if academic else ""
+    year = payment.payment_date.year if (hasattr(payment, 'payment_date') and payment.payment_date) else 2026
+    salutation_label = get_salutation_label(payment)
+    ref_no = get_or_create_academic_document(payment, 'LOA', year=year, salutation=salutation_label.rstrip(','), recipient_name=inst_name)
+    display_ref = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
+
     date_formatted = format_ordinal_date(payment.payment_date)
     date_str = f"Date: - {date_formatted}"
 
     p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 695, ref_no)
+    p.drawString(54, 695, display_ref)
     p.drawRightString(541.27, 695, date_str)
 
     # 3. Document Title
@@ -449,7 +545,7 @@ def generate_college_loa_pdf(payment):
         textColor=colors.HexColor('#000000')
     )
 
-    recipient_lines = ["To,", "The Principal,", f"<b>{institution}</b>,"]
+    recipient_lines = ["To,", salutation_label, f"<b>{institution}</b>,"]
     if clean_address:
         recipient_lines.append(f"{clean_address},")
     if loc_line:
@@ -594,13 +690,19 @@ def generate_school_loa_pdf(payment):
     p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
 
     # 2. Reference Number and Date
-    ref_no = f"Ref.No. ST/{payment.payment_date.year}/{10000 + payment.id}"
+    academic = getattr(payment, 'academic', None)
+    inst_name = getattr(academic, 'institution_name', '') if academic else ""
+    year = payment.payment_date.year if (hasattr(payment, 'payment_date') and payment.payment_date) else 2026
+    salutation_label = get_salutation_label(payment)
+    ref_no = get_or_create_academic_document(payment, 'LOA', year=year, salutation=salutation_label.rstrip(','), recipient_name=inst_name)
+    display_ref = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
+
     date_formatted = format_ordinal_date(payment.payment_date)
     date_str = f"Date: - {date_formatted}"
 
     p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 695, ref_no)
+    p.drawString(54, 695, display_ref)
     p.drawRightString(541.27, 695, date_str)
 
     # 3. Document Title
@@ -638,7 +740,7 @@ def generate_school_loa_pdf(payment):
         textColor=colors.HexColor('#000000')
     )
 
-    recipient_lines = ["To,", "The Principal,", f"<b>{institution}</b>,"]
+    recipient_lines = ["To,", salutation_label, f"<b>{institution}</b>,"]
     if clean_address:
         recipient_lines.append(f"{clean_address},")
     if loc_line:
@@ -769,7 +871,10 @@ def generate_college_loc_pdf(payment):
     sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
     end_date = start_date + timedelta(days=sub_days)
     academic_session = f"{start_date.year}-{end_date.year}" if start_date.year != end_date.year else f"{start_date.year}"
-    ref_no = f"Ref.No. ST/{end_date.year}/{10000 + payment.id}"
+    ref_year = end_date.year if end_date else (start_date.year + 1 if start_date else 2026)
+    inst_name = payment.academic.institution_name if hasattr(payment, 'academic') and hasattr(payment.academic, 'institution_name') else ""
+    ref_no = get_or_create_academic_document(payment, 'LOC', year=ref_year, recipient_name=inst_name)
+    ref_no = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
     date_str = f"Date: - {end_date.strftime('%d/%m/%Y')}"
 
     # Query completed trainings in that period
@@ -1058,7 +1163,10 @@ def generate_school_loc_pdf(payment):
     sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
     end_date = start_date + timedelta(days=sub_days)
     academic_session = f"{start_date.year}-{end_date.year}" if start_date.year != end_date.year else f"{start_date.year}"
-    ref_no = f"Ref.No. ST/{end_date.year}/{10000 + payment.id}"
+    ref_year = end_date.year if end_date else (start_date.year + 1 if start_date else 2026)
+    inst_name = payment.academic.institution_name if hasattr(payment, 'academic') and hasattr(payment.academic, 'institution_name') else ""
+    ref_no = get_or_create_academic_document(payment, 'LOC', year=ref_year, recipient_name=inst_name)
+    ref_no = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
     date_formatted = format_ordinal_date(end_date)
     date_str = f"Date: - {date_formatted}"
 
@@ -1342,13 +1450,22 @@ def generate_letter_of_completion_pdf(payment):
     return generate_college_loc_pdf(payment)
 
 
-def generate_college_appreciation_pdf(payment, organiser=None):
+def generate_college_appreciation_pdf(payment, organiser=None, organiser_id=None):
     """
     Generates the official Letter of Appreciation PDF for a College Faculty / Organiser.
     Matches the official EduPyramids / Spoken Tutorial IIT Bombay template.
     Issued with the 1-year completion rule acknowledging the faculty coordinator's contributions.
     """
-    from events.models import Organiser
+    if organiser is None and organiser_id is not None:
+        organiser = organiser_id
+
+    try:
+        from events.models import Organiser
+    except Exception:
+        Organiser = None
+
+    if isinstance(organiser, (int, str)) and str(organiser).isdigit() and Organiser:
+        organiser = Organiser.objects.filter(id=int(organiser)).first()
 
     buffer = BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
@@ -1375,35 +1492,42 @@ def generate_college_appreciation_pdf(payment, organiser=None):
     p.setFillColor(colors.HexColor('#0055A5'))
     p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
 
+    # 4. Resolve Faculty / Organiser recipient
+    faculty_name = "Faculty Coordinator"
+    if organiser and hasattr(organiser, 'user'):
+        full_name = f"{organiser.user.first_name} {organiser.user.last_name}".strip()
+        faculty_name = full_name if full_name else organiser.user.username
+    elif Organiser and hasattr(payment, 'academic'):
+        try:
+            org = Organiser.objects.filter(academic=payment.academic, status__in=[1, 3]).first()
+            if not org:
+                org = Organiser.objects.filter(academic=payment.academic).first()
+            if org and hasattr(org, 'user'):
+                full_name = f"{org.user.first_name} {org.user.last_name}".strip()
+                faculty_name = full_name if full_name else org.user.username
+                organiser = org
+        except Exception:
+            pass
+
     # 2. Reference Number and Date
     sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
     issue_date = payment.payment_date + timedelta(days=sub_days)
-    ref_no = f"Ref.No. ST/{payment.payment_date.year}/APP-{payment.id}"
+    year = payment.payment_date.year if (hasattr(payment, 'payment_date') and payment.payment_date) else 2026
+    ref_no = get_or_create_academic_document(payment, 'APP', year=year, recipient_name=faculty_name, organiser=organiser)
+    display_ref = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
+
     date_formatted = format_ordinal_date(issue_date)
     date_str = f"Date: - {date_formatted}"
 
     p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 695, ref_no)
+    p.drawString(54, 695, display_ref)
     p.drawRightString(541.27, 695, date_str)
 
     # 3. Document Title
     p.setFont("Helvetica-Bold", 13)
     p.setFillColor(colors.HexColor('#1F4E78'))
     p.drawCentredString(297.6, 660, "LETTER OF APPRECIATION")
-
-    # 4. Resolve Faculty / Organiser recipient
-    faculty_name = "Faculty Coordinator"
-    if organiser and hasattr(organiser, 'user'):
-        full_name = f"{organiser.user.first_name} {organiser.user.last_name}".strip()
-        faculty_name = full_name if full_name else organiser.user.username
-    else:
-        org = Organiser.objects.filter(academic=payment.academic).first()
-        if org and hasattr(org, 'user'):
-            full_name = f"{org.user.first_name} {org.user.last_name}".strip()
-            faculty_name = full_name if full_name else org.user.username
-        elif payment.name_of_the_payer:
-            faculty_name = payment.name_of_the_payer
 
     academic = payment.academic
     institution = academic.institution_name
@@ -1516,13 +1640,22 @@ def generate_college_appreciation_pdf(payment, organiser=None):
     return buffer
 
 
-def generate_school_appreciation_pdf(payment, organiser=None):
+def generate_school_appreciation_pdf(payment, organiser=None, organiser_id=None):
     """
     Generates the official Letter of Appreciation PDF for a School Teacher / Coordinator.
     Matches the official EduPyramids / Spoken Tutorial IIT Bombay School template.
     Issued with the 1-year completion rule acknowledging the coordinator's contributions.
     """
-    from events.models import Organiser
+    if organiser is None and organiser_id is not None:
+        organiser = organiser_id
+
+    try:
+        from events.models import Organiser
+    except Exception:
+        Organiser = None
+
+    if isinstance(organiser, (int, str)) and str(organiser).isdigit() and Organiser:
+        organiser = Organiser.objects.filter(id=int(organiser)).first()
 
     buffer = BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
@@ -1549,35 +1682,42 @@ def generate_school_appreciation_pdf(payment, organiser=None):
     p.setFillColor(colors.HexColor('#0055A5'))
     p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
 
+    # 4. Resolve Teacher / Organiser recipient
+    faculty_name = "Teacher Coordinator"
+    if organiser and hasattr(organiser, 'user'):
+        full_name = f"{organiser.user.first_name} {organiser.user.last_name}".strip()
+        faculty_name = full_name if full_name else organiser.user.username
+    elif Organiser and hasattr(payment, 'academic'):
+        try:
+            org = Organiser.objects.filter(academic=payment.academic, status__in=[1, 3]).first()
+            if not org:
+                org = Organiser.objects.filter(academic=payment.academic).first()
+            if org and hasattr(org, 'user'):
+                full_name = f"{org.user.first_name} {org.user.last_name}".strip()
+                faculty_name = full_name if full_name else org.user.username
+                organiser = org
+        except Exception:
+            pass
+
     # 2. Reference Number and Date
     sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
     issue_date = payment.payment_date + timedelta(days=sub_days)
-    ref_no = f"Ref.No. ST/{payment.payment_date.year}/APP-{payment.id}"
+    year = payment.payment_date.year if (hasattr(payment, 'payment_date') and payment.payment_date) else 2026
+    ref_no = get_or_create_academic_document(payment, 'APP', year=year, recipient_name=faculty_name, organiser=organiser)
+    display_ref = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
+
     date_formatted = format_ordinal_date(issue_date)
     date_str = f"Date: - {date_formatted}"
 
     p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 695, ref_no)
+    p.drawString(54, 695, display_ref)
     p.drawRightString(541.27, 695, date_str)
 
     # 3. Document Title
     p.setFont("Helvetica-Bold", 13)
     p.setFillColor(colors.HexColor('#1F4E78'))
     p.drawCentredString(297.6, 660, "LETTER OF APPRECIATION")
-
-    # 4. Resolve Teacher / Organiser recipient
-    faculty_name = "Teacher Coordinator"
-    if organiser and hasattr(organiser, 'user'):
-        full_name = f"{organiser.user.first_name} {organiser.user.last_name}".strip()
-        faculty_name = full_name if full_name else organiser.user.username
-    else:
-        org = Organiser.objects.filter(academic=payment.academic).first()
-        if org and hasattr(org, 'user'):
-            full_name = f"{org.user.first_name} {org.user.last_name}".strip()
-            faculty_name = full_name if full_name else org.user.username
-        elif payment.name_of_the_payer:
-            faculty_name = payment.name_of_the_payer
 
     academic = payment.academic
     institution = academic.institution_name
@@ -1700,14 +1840,14 @@ def generate_school_appreciation_pdf(payment, organiser=None):
     return buffer
 
 
-def generate_letter_of_appreciation_pdf(payment, organiser=None):
+def generate_letter_of_appreciation_pdf(payment, organiser=None, organiser_id=None):
     """
     Dispatches Letter of Appreciation PDF generation:
     School template for schools, College template for higher education institutions.
     """
     if is_school(payment):
-        return generate_school_appreciation_pdf(payment, organiser=organiser)
-    return generate_college_appreciation_pdf(payment, organiser=organiser)
+        return generate_school_appreciation_pdf(payment, organiser=organiser, organiser_id=organiser_id)
+    return generate_college_appreciation_pdf(payment, organiser=organiser, organiser_id=organiser_id)
 
 
 

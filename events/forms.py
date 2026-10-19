@@ -29,6 +29,13 @@ class AcademicForm(forms.ModelForm):
 
     location = forms.ModelChoiceField(label='Location',   widget = forms.Select(attrs = {'class' : 'ac-location'}), queryset = Location.objects.none(), empty_label = "--- None ---", help_text = "", error_messages = {'required':'City Type field required.'}, required = False)
 
+    address = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'rows': '3',
+            'placeholder': 'Street name, building, or locality only (Do not include City, State, or Pincode)'
+        }),
+        help_text="Please enter only street/locality. City, State, and Pincode are selected separately."
+    )
     contact_person = forms.CharField(widget = forms.Textarea(attrs = {'rows' : '5'}), required = False)
     remarks = forms.CharField(widget = forms.Textarea(attrs = {'rows' : '5'}), required = False)
     rating = forms.ChoiceField(choices = (('1', 'Rating 1'), ('2', 'Rating 2'), ('3', 'Rating 3'), ('4', 'Rating 4'), ('5', 'Rating 5')))
