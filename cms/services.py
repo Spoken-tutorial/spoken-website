@@ -20,7 +20,7 @@ from cms.models import *
 from events.models import Student, StudentBatch
 from mdldjango.get_or_create_participant import encript_password, get_or_create_participant
 from mdldjango.models import MdlUser
-
+from spoken.config import SPOKEN_BASE_URL,EDUPYRAMIDS_URL
 
 def get_user_email(email):
   try:
@@ -67,8 +67,8 @@ IIT Bombay.
 
 def send_verify_email(request,email):
   message = None
-  user_login = "https://spoken-tutorial.org/accounts/login/"
-  student_login = "https://spoken-tutorial.org/participant/login/"
+  user_login = EDUPYRAMIDS_URL + "/accounts/login/"
+  student_login = EDUPYRAMIDS_URL + "/participant/login/"
   user = get_user_email(email)
   if not user:
     message = "User "+email+" not registerd in the system."

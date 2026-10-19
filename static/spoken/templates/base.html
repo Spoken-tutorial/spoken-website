@@ -101,7 +101,7 @@
                                                                         <ul class="media-list">
                                                                             <li class=""><a href="/software-training/">Training & Payment Dashboard</a></li>
                                                                             <li class=""><a href="/software-training/training-planner/">Semester Training Planner Summary (STPS)</a></li>
-                                                                            <li class=""><a href="/participant/login/">Student Dashboard</a></li>
+                                                                            <li class=""><a href="{{ EDUPYRAMIDS_URL }}/participant/login/">Student Dashboard</a></li>
                                                                             <li class=""><span class="badge" id="nav-fdp" style="margin-right: 4px;">new</span><span class="text-muted" style="font-size: 1rem;">Individual Learning</span></li>
                                                                             <li class=""><a href="/training/list_events/ongoing/" target="_blank">Individual Learning Workshop</a></li>   <li class=""><a href="/training/verify-ilwtest-certificate/" target="_blank">Verify ILW test certificate </a></li>
                                                                             <li class=""><a href="/payment/subscription/">Subscription</a></li>
@@ -194,10 +194,10 @@
                                                 </li>
                                             {% else %}
                                                 <li class="dropdown">
-                                                    <a href="/accounts/login">Login</a>
+                                                    <a href="{{ EDUPYRAMIDS_URL }}/accounts/login">Login</a>
                                                 </li>
                                                 <li class="dropdown">
-                                                    <a href="/accounts/register">Register</a>
+                                                    <a href="{{ EDUPYRAMIDS_URL }}/accounts/register">Register</a>
                                                 </li>
                                             {% endif %}
                                         {% endblock %}

@@ -6,6 +6,8 @@ from mdldjango.urls import *
 from django.contrib.sitemaps.views import sitemap
 from spoken.sitemaps import SpokenStaticViewSitemap
 from donate.views import *
+from django.http import HttpResponseRedirect
+from spoken.config import EDUPYRAMIDS_URL
 
 app_name = 'cms'
 
@@ -14,8 +16,8 @@ spoken_sitemaps = {
 }
 
 urlpatterns = [
-	url(r'^accounts/register/$',  account_register, name='register'),
-	url(r'^accounts/login/$',  account_login, name='login'),
+	url(r'^accounts/login/$',lambda request: HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/login/'),name='login'),
+	url(r'^accounts/register/$',lambda request: HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/register/'),name='register'),
 	url(r'^accounts/logout/$',  account_logout, name='logout'),
 	url(r"^accounts/confirm/(?P<confirmation_code>\w+)/(?P<username>[\w. @-]+)/$",  confirm, name='confirm'),
 	url(r"^accounts/forgot-password/$",  password_reset, name='password_reset'),
