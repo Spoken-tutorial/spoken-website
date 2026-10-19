@@ -8,12 +8,14 @@ from django.conf import settings
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
+from spoken.config import SPOKEN_BASE_URL
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
 from reportlab.platypus import (
     Paragraph, SimpleDocTemplate, BaseDocTemplate, PageTemplate, Frame,
     Spacer, Table, TableStyle, PageBreak, KeepTogether, Image, NextPageTemplate
 )
+
 
 def format_ordinal_date(d):
     """
@@ -163,7 +165,8 @@ def generate_college_receipt_pdf(payment):
     
     p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#0055A5'))
-    p.drawCentredString(297.6, 745, "https://spoken-tutorial.org")
+    p.drawCentredString(297.6, 745, SPOKEN_BASE_URL)
+
     
     # 2. Reference Number
     year = payment.payment_date.year if (hasattr(payment, 'payment_date') and payment.payment_date) else 2026

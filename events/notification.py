@@ -6,6 +6,10 @@ from django.template import Context
 from events.models import *
 from django.http import HttpResponse, HttpResponseRedirect
 import time
+
+from spoken.config import PROCESS_URL
+
+
 def nemail(request):
   
   plaintext = get_template('email-template/email-template.txt')
@@ -45,10 +49,10 @@ def nemail(request):
       6. In the fourth step, the FC will select from the Master Batch to create a list with the names of students who will learn the particular FOSS/s
 
       7. In the fifth step, the FC will need to download the specified software, for that Click below.
-         Link : http://process.spoken-tutorial.org/images/1/1b/Download-Tutorials.pdf
+         Link : {0}
          
          And get the lab and systems ready for the training Click below
-         Link : http://process.spoken-tutorial.org/images/5/58/Machine-Readiness.pdf
+         Link : {1}
          
   IMPORTANT - Learner's Certificates will no longer be provided for FOSS courses that come with Online assessment Tests. For these courses, only Completion Certificate will be given on successfully completing and passing the test. 
 
@@ -58,7 +62,7 @@ def nemail(request):
 
   Regards,
   Spoken Tutorial Team,
-  IIT Bombay.'''
+    IIT Bombay.'''.format(PROCESS_URL + '/images/1/1b/Download-Tutorials.pdf',PROCESS_URL + '/images/5/58/Machine-Readiness.pdf')
 
 
   for organiser in organisers:

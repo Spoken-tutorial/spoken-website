@@ -15,7 +15,7 @@ from validate_email import validate_email
 
 # Spoken Tutorial Stuff
 from events.models import *
-
+from spoken.config import PROCESS_URL
 
 def update_participants_count(training):
     training.participant_count = TrainingAttendance.objects.filter(training=training, status__gte=1).count()
@@ -236,7 +236,7 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                         <hr>
                     </li>
                 </ul>
-                """.format(error_line_no, "http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf")
+                """.format(error_line_no, PROCESS_URL + "/images/c/c2/Participant_data.pdf")
         except Exception as e:
             csv_file_error = 1
             error_line_no = """
@@ -247,7 +247,7 @@ def check_csvfile(user, file_path, w=None, flag=0, **kwargs):
                         <hr>
                     </li>
                 </ul>
-                """.format(error_line_no, "http://process.spoken-tutorial.org/images/c/c2/Participant_data.pdf")
+                """.format(error_line_no, PROCESS_URL + "/images/c/c2/Participant_data.pdf")
         if invalid_emails:
             error_line_no += """
                 <ul>

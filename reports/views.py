@@ -11,7 +11,7 @@ from django.apps import apps
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template.defaultfilters import slugify
-
+from spoken.config import SPOKEN_BASE_URL
 # Spoken Tutorial Stuff
 from creation.views import *
 from events.views import *
@@ -259,7 +259,7 @@ def elibrary(request):
         vdurwithsize = '"' + str(duration) + ";" + str(filesize) + '"'
         tutorial_duration = time_plus_ten_min(tr, duration)
         tlevel = get_level(tr)
-        videourl = "https://spoken-tutorial.org/watch/" + tr.tutorial_detail.foss.foss + \
+        videourl = SPOKEN_BASE_URL + "/watch/" + tr.tutorial_detail.foss.foss + \
             "/" + tr.tutorial_detail.tutorial + "/" + tr.language.name
         # writer.writerow([outline])
         # print "___________________________"

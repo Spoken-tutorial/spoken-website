@@ -45,7 +45,7 @@ import os, sys
 from string import Template
 from events.certificates import get_organization, get_signature
 from health_app.models import TopicCategory, HNContributorRole, HNLanguage
-from spoken.config import HN_API
+from spoken.config import HN_API,SPOKEN_BASE_URL
 from training.templatetags.trainingdata import is_tr_ongoing, is_tr_completed, is_event_closed
 
 #pdf generate
@@ -1795,7 +1795,7 @@ class ILWTestCertificate(object):
     imgDoc.drawString(10, 6, footer_text)
 
     # Add verification link
-    verify_url = "https://spoken-tutorial.org/training/verify-ilwtest-certificate/"
+    verify_url = SPOKEN_BASE_URL + "/training/verify-ilwtest-certificate/"
 
     if event_type == "INTERN":
         imgDoc.setFillColorRGB(0, 0, 0)
@@ -1821,7 +1821,7 @@ class ILWTestCertificate(object):
     imgDoc.drawString(
         link_x + 50,
         link_y,
-        "or visit spoken-tutorial.org/training/verify-ilwtest-certificate/"
+        "or visit " + SPOKEN_BASE_URL + "/training/verify-ilwtest-certificate/"
     )
 
     #paragraphe
@@ -1967,7 +1967,8 @@ class BatchTestCertificateView(ILWTestCertificate, View):
             if teststatus.participant.apaar_id:
                 apaar_text = f"    APAAR ID {teststatus.participant.apaar_id}"
 
-            verify_url = "https://spoken-tutorial.org/training/verify-ilwtest-certificate/"
+            verify_url = SPOKEN_BASE_URL + "/training/verify-ilwtest-certificate/"
+			
 
             if event.event_type == "INTERN":
                 pdf_canvas.setFillColorRGB(0, 0, 0)
@@ -1989,7 +1990,7 @@ class BatchTestCertificateView(ILWTestCertificate, View):
             pdf_canvas.drawString(
                 link_x + 50,
                 link_y,
-                "or visit https://spoken-tutorial.org/training/verify-ilwtest-certificate/"
+                "or visit " + SPOKEN_BASE_URL + "/training/verify-ilwtest-certificate/"
             )
 
             pdf_canvas.setFillColorRGB(0, 0, 0)

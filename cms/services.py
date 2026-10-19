@@ -47,8 +47,8 @@ Spoken Tutorials
 IIT Bombay.
     """.format(
         user.username,
-        "https://spoken-tutorial.org",
-        "https://spoken-tutorial.org/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+        SPOKEN_BASE_URL,
+        SPOKEN_BASE_URL + "/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
@@ -69,6 +69,7 @@ def send_verify_email(request,email):
   message = None
   user_login = EDUPYRAMIDS_URL + "/accounts/login/"
   student_login = EDUPYRAMIDS_URL + "/participant/login/"
+
   user = get_user_email(email)
   if not user:
     message = "User "+email+" not registerd in the system."
@@ -138,7 +139,8 @@ line at the top of your web browser window.
 Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 
 Admin Spoken Tutorials
-'''.format(mdluser.firstname, mdluser.username, password_string, "https://spoken-tutorial.org/accounts/confirm_student/" + token)
+'''.format(mdluser.firstname,mdluser.username,password_string,SPOKEN_BASE_URL + "/accounts/confirm_student/" + token)
+  
 
   # send email
   email = EmailMultiAlternatives(

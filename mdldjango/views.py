@@ -22,7 +22,7 @@ from events.forms import OrganiserForm
 from events.models import *
 from events.signals import get_or_create_user
 from events.views import *
-from spoken.config import PROCESS_URL, EDUPYRAMIDS_URL
+from spoken.config import PROCESS_URL, EDUPYRAMIDS_URL, SPOKEN_BASE_URL
 
 from .forms import *
 from .get_or_create_participant import check_csvfile, encript_password

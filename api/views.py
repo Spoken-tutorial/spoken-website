@@ -20,7 +20,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
-from spoken.config import FOSS_API_LIST, SUPERCATEGORY_COL_NAME
+from spoken.config import FOSS_API_LIST, SUPERCATEGORY_COL_NAME,SPOKEN_BASE_URL,SCRIPT_URL
 from django.core.cache import cache
 from creation.templatetags.creationdata import instruction_sheet, installation_sheet, get_prerequisite
 from rest_framework import status
@@ -35,6 +35,9 @@ from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
 from .additional_learning import *
 from events.models import Organiser
 from training.models import Participant
+
+
+
 
 @csrf_exempt
 def video_list(request):
@@ -143,7 +146,7 @@ def get_fosslist(request):
             "price":"Free",
             "currency":"",
             "content_type":"course",
-            "deeplink_url":"https://spoken-tutorial.org/tutorial-search/?search_foss="+foss.foss+"&search_language=English",
+            "deeplink_url":(f"{SPOKEN_BASE_URL}/tutorial-search/"f"?search_foss={foss.foss}&search_language=English"),
             "image_url":foss_image,
             "description":foss.description,
             "keywords":key_list
@@ -184,11 +187,10 @@ def get_tutorialdetails(request, tutid):
         
         tutdict={}
         thumb_name = tut.tutorial_detail.tutorial.replace(' ', '-') + '-' + 'Big.png'
-        thumbnail_path = "https://spoken-tutorial.org/media/videos/"+str(tut.tutorial_detail.foss_id)+"/"+str(tut.tutorial_detail_id)+"/"+thumb_name
+        thumbnail_path = f"{SPOKEN_BASE_URL}/media/videos/{tut.tutorial_detail.foss_id}/{tut.tutorial_detail_id}/{thumb_name}"
         print(thumbnail_path)
 
-        videopage_path = "https://spoken-tutorial.org/watch/"+tut.tutorial_detail.foss.foss+"/"+\
-        tut.tutorial_detail.tutorial+"/"+tut.language.name
+        videopage_path = f"{SPOKEN_BASE_URL}/watch/{tut.tutorial_detail.foss.foss}/{tut.tutorial_detail.tutorial}/{tut.language.name}"
         print(videopage_path)
 
         tutdict={
@@ -272,16 +274,16 @@ class TutorialResourceAPI(APIView):
                 context['tutorial_id'] = tr.tutorial_detail.pk
                 context['language_id'] = tr.language.pk
                 instruct_sheet = instruction_sheet(tr.tutorial_detail.foss, tr.language)
-                context['instruction_sheet'] = "https://spoken-tutorial.org"+str(instruct_sheet) if instruct_sheet else None
+                context['instruction_sheet'] = (f"{SPOKEN_BASE_URL}{instruct_sheet}" if instruct_sheet else None)
                 install_sheet = installation_sheet(tr.tutorial_detail.foss, tr.language)
-                context['installation_sheet'] = "https://spoken-tutorial.org/"+str(install_sheet) if install_sheet else None
+                context['installation_sheet'] = (f"{SPOKEN_BASE_URL}/{install_sheet}" if install_sheet else None)
                 prerequisite = get_prerequisite(tr, tr.tutorial_detail)
-                context['prerequisite'] = "https://spoken-tutorial.org/watch/" + str(prerequisite) if prerequisite else None
+                context['prerequisite'] = f"{SPOKEN_BASE_URL}/watch/{prerequisite}" if prerequisite else None
                 context['code_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.code) if tr.common_content.code_status == 4 else None
                 context['assignment'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.assignment) if tr.common_content.assignment_status ==4 else None
                 context['slide'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.slide) if tr.common_content.slide_status == 4 else None
-                context['script'] = "https://script.spoken-tutorial.org/index.php/" + tr.script if tr.script_status == 4 else None
-                context['timed_script'] = "https://script.spoken-tutorial.org/index.php/" + tr.timed_script if tr.timed_script else None
+                context['script'] = (f"{SCRIPT_URL}{tr.script}"if tr.script_status == 4 else None)                
+                context['timed_script'] = (f"{SCRIPT_URL}{tr.timed_script}" if tr.timed_script else None)
                 context['srt_file'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/" + tr.tutorial_detail.tutorial.replace(' ', '-') + "-" + tr.language.name + ".srt")
                 context['additional_resource'] = request.build_absolute_uri(settings.MEDIA_URL + "videos/" + str(tr.tutorial_detail.foss.pk) + "/" + str(tr.tutorial_detail.pk) + "/resources/" + tr.common_content.additional_material) if tr.common_content.additional_material_status == 4 else None
                 # alm - additional learning material
