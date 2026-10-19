@@ -33,7 +33,7 @@ from mdldjango.urls import *
 from django.template.context_processors import csrf
 from cms.cache_registry import unregister_cache_key,list_cache_keys
 from donate.models import Payee
-from spoken.config import SPOKEN_BASE_URL
+from spoken.config import SPOKEN_BASE_URL,EDUPYRAMIDS_URL
 from django.core.cache import cache, caches
 
 import logging
@@ -58,10 +58,10 @@ def dispatcher(request, permalink=''):
                 impersonating=impersonating,
                 request=request
             )
-            return HttpResponseRedirect('/accounts/login/?next=/project_documents/')
+            return HttpResponseRedirect(EDUPYRAMIDS_URL +'/accounts/login/?next=/project_documents/')
         if not request.user.groups.filter(name ='page_admin').exists():
             messages.error(request, "You are not authorized to access this page. Please login as an authorized user.")
-            return HttpResponseRedirect('/accounts/login/?next=/project_documents/')
+            return HttpResponseRedirect(EDUPYRAMIDS_URL +'/accounts/login/?next=/project_documents/')
 
     page_content = get_object_or_404(Page, permalink=permalink, visible=True)
     col_offset = int((12 - page_content.cols) / 2)
@@ -505,14 +505,14 @@ def change_password(request):
                 login(request, user)
 
     if request.user.is_anonymous():
-        return HttpResponseRedirect('/accounts/login/?next=/accounts/change-password/')
+        return HttpResponseRedirect(EDUPYRAMIDS_URL +'/accounts/login/?next=/accounts/change-password/')
 
     if not profile:
         profile = (Profile.objects.filter(user=request.user).order_by('id').first())
 
     if not profile:
         messages.error(request, "Profile not found.")
-        return HttpResponseRedirect('/accounts/login/')
+        return HttpResponseRedirect(EDUPYRAMIDS_URL +'/accounts/login/')
 
     form = ChangePasswordForm()
 
@@ -561,7 +561,8 @@ def confirm_student(request, token):
             student.save()
 
             messages.success(request, "Your account has been activated!. Please login to continue.")
-            return HttpResponseRedirect(SPOKEN_BASE_URL + '/participant/login/')
+            return HttpResponseRedirect(EDUPYRAMIDS_URL + '/participant/login/')
+
         else:
             print('can not match record')
             messages.error(request, "Your account not activated!. Please try again!")

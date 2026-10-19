@@ -22,7 +22,7 @@ from events.forms import OrganiserForm
 from events.models import *
 from events.signals import get_or_create_user
 from events.views import *
-from spoken.config import PROCESS_URL, SPOKEN_BASE_URL
+from spoken.config import PROCESS_URL, EDUPYRAMIDS_URL, SPOKEN_BASE_URL
 
 from .forms import *
 from .get_or_create_participant import check_csvfile, encript_password
@@ -44,7 +44,7 @@ def mdl_logout(request):
         del request.session['mdluserid']
         request.session.save()
     #print "logout !!"
-    return HttpResponseRedirect('/participant/login')
+    return HttpResponseRedirect(EDUPYRAMIDS_URL +'/participant/login')
 
 def mdl_login(request):
     if request.POST:
@@ -77,12 +77,12 @@ def index(request):
     mdlusername = request.session.get('mdlusername')
     p = 0
     if not mdluserid:
-        return HttpResponseRedirect('/participant/login')
+        return HttpResponseRedirect(EDUPYRAMIDS_URL +'/participant/login')
 
     try:
         mdluser = MdlUser.objects.get(id=mdluserid)
     except:
-        return HttpResponseRedirect('/participant/login')
+        return HttpResponseRedirect(EDUPYRAMIDS_URL +'/participant/login')
     if str(mdluser.institution).isdigit():
         academic = None
         try:
@@ -239,7 +239,7 @@ def mdl_register(request):
             #Email exits
             try:
                 user = MdlUser.objects.filter(email=request.POST['email']).first().id
-                messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='{0}/participant/login/'>here </a>to login".format(SPOKEN_BASE_URL))   
+                messages.success(request, "Email : "+request.POST['email']+" already registered on this website. Please click <a href='{0}/participant/login/'>here </a>to login".format(EDUPYRAMIDS_URL))   
             except Exception as e:
                 mdluser = MdlUser()
                 mdluser.auth = 'manual'
@@ -254,7 +254,7 @@ def mdl_register(request):
                 mdluser.save()
                 mdluser = MdlUser.objects.get(email=mdluser.email)
                 get_or_create_user(mdluser, form.cleaned_data['password'])
-                messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['lastname']+" Created!. Please click <a href='{0}/participant/login/'>here </a>to login".format(SPOKEN_BASE_URL))
+                messages.success(request, "User " + form.cleaned_data['firstname'] +" "+form.cleaned_data['lastname']+" Created!. Please click <a href='{0}/participant/login/'>here </a>to login".format(EDUPYRAMIDS_URL))
                 return HttpResponseRedirect('/participant/register/')
 
     context['form'] = form
@@ -265,12 +265,12 @@ def feedback(request, wid):
     mdluserid = request.session.get('mdluserid')
     mdlusername = request.session.get('mdlusername')
     if not mdluserid:
-        return HttpResponseRedirect('/participant/login')
+        return HttpResponseRedirect(EDUPYRAMIDS_URL +'/participant/login')
 
     form = FeedbackForm()
     mdluserid = request.session.get('mdluserid')
     if not mdluserid:
-        return HttpResponseRedirect('/participant/login')
+        return HttpResponseRedirect(EDUPYRAMIDS_URL +'/participant/login')
     w = None
     try:
         w = TrainingRequest.objects.select_related().get(pk=wid)
@@ -360,7 +360,7 @@ Admin Spoken Tutorials
 
             result = email.send(fail_silently=False)
             messages.success(request, "New password sent to your email "+user.email)
-            return HttpResponseRedirect('/participant/login/')
+            return HttpResponseRedirect(EDUPYRAMIDS_URL +'/participant/login/')
 
     context = {
         'form': form

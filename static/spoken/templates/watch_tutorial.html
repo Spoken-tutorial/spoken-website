@@ -311,7 +311,7 @@
                 To access subsequent ones, Please  
                 <a href="{{ PROCESS_URL }}/index.php/Software-Training#Contacts_For_Training" target="_blank">contact Training Managers</a>. 
             {% else %}
-                {% with login_url="http://"|add:request.get_host|add:"/accounts/login/?next="|add:request.path %}
+                {% with login_url=EDUPYRAMIDS_URL|add:"/accounts/login/?next="|add:request.path %}
                     Spoken Tutorials published before {{restriction_date}} are accessible without login. 
                     To access subsequent ones, one has to <a href="{{ login_url }}">log in</a>.<br/>
                     If you don't have a login, please contact our 
@@ -343,9 +343,11 @@
                         </video>
                         <div id="overlay">
                             <p style="font-size: 1.5rem;">This is a sample video. To access the full content,<br/> please {% if user.is_authenticated %} <a href="{{ PROCESS_URL }}/index.php/Software-Training#Contacts_For_Training" style="padding: 4px 10px;" target="_blank">contact Training Managers.</a> {% else %} 
-                                {% with login_url="http://"|add:request.get_host|add:"/accounts/login/?next="|add:request.path %}
-                                     <a href="{{login_url}}">Login</a>
-                                {% endwith %}
+
+                                {% with login_url=EDUPYRAMIDS_URL|add:"/accounts/login/?next="|add:request.path %}
+    <a href="{{ login_url }}">Login</a>
+{% endwith %}
+
                                 {% endif %} </p>
                         </div>
                         {% if is_swayam %}
