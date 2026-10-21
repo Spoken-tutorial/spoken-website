@@ -20,7 +20,7 @@ from cms.models import *
 from events.models import Student, StudentBatch
 from mdldjango.get_or_create_participant import encript_password, get_or_create_participant
 from mdldjango.models import MdlUser
-from spoken.config import SPOKEN_BASE_URL,EDUPYRAMIDS_URL
+from spoken.config import EDUPYRAMIDS_URL
 
 def get_user_email(email):
   try:
@@ -47,8 +47,8 @@ Spoken Tutorials
 IIT Bombay.
     """.format(
         user.username,
-        SPOKEN_BASE_URL,
-        SPOKEN_BASE_URL + "/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
+        EDUPYRAMIDS_URL,
+        EDUPYRAMIDS_URL + "/accounts/confirm/" + str(p.confirmation_code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
@@ -139,7 +139,7 @@ line at the top of your web browser window.
 Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 
 Admin Spoken Tutorials
-'''.format(mdluser.firstname,mdluser.username,password_string,SPOKEN_BASE_URL + "/accounts/confirm_student/" + token)
+'''.format(mdluser.firstname,mdluser.username,password_string,EDUPYRAMIDS_URL + "/accounts/confirm_student/" + token)
   
 
   # send email
