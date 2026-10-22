@@ -33,7 +33,7 @@ from mdldjango.urls import *
 from django.template.context_processors import csrf
 from cms.cache_registry import unregister_cache_key,list_cache_keys
 from donate.models import Payee
-from spoken.config import SPOKEN_BASE_URL,EDUPYRAMIDS_URL
+from spoken.config import EDUPYRAMIDS_URL
 from django.core.cache import cache, caches
 
 import logging
@@ -117,7 +117,7 @@ def account_register(request):
                 Please confirm your registration by clicking on the activation link which has been sent to your registered email %s.<br>\
                 In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
                 <a href='%s/accounts/verify/'> %s/accounts/verify/</a>"
-                % (SPOKEN_BASE_URL, SPOKEN_BASE_URL, email))
+                % (EDUPYRAMIDS_URL, EDUPYRAMIDS_URL, email))
             return HttpResponseRedirect('/')
         context['form'] = form
         return render(request, 'cms/templates/register.html', context)
@@ -148,8 +148,8 @@ Spoken Tutorials
 IIT Bombay.
     """.format(
         user.username,
-        SPOKEN_BASE_URL,
-        SPOKEN_BASE_URL + "/accounts/confirm/" + str(code) + "/" + user.username
+        EDUPYRAMIDS_URL,
+        EDUPYRAMIDS_URL + "/accounts/confirm/" + str(code) + "/" + user.username
     )
 
     email = EmailMultiAlternatives(
@@ -203,7 +203,7 @@ IIT Bombay.
     """.format(
         user.username,
         str(p.confirmation_code),
-        SPOKEN_BASE_URL,
+        EDUPYRAMIDS_URL,
         user.email,
         password
     )
@@ -290,7 +290,7 @@ def account_login(request):
                             error_msg = "Your account is disabled.<br>\
                             Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
                             In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                            <a href='%s/accounts/verify/'>%s/accounts/verify/</a>" % (SPOKEN_BASE_URL, SPOKEN_BASE_URL, user.email)
+                            <a href='%s/accounts/verify/'>%s/accounts/verify/</a>" % (EDUPYRAMIDS_URL, EDUPYRAMIDS_URL, user.email)
                     else:
                         error_msg = 'Invalid username / password'
                 else:
@@ -411,7 +411,7 @@ def password_reset(request):
             if not user.profile_set.first():
                 profile = create_profile(user,None)
 
-            changePassUrl = SPOKEN_BASE_URL + "/accounts/change-password/"
+            changePassUrl = EDUPYRAMIDS_URL + "/accounts/change-password/"
             if request.GET and request.GET['next']:
                 changePassUrl = changePassUrl + "?auto=%s&username=%s&next=%s" % (user.profile_set.first().confirmation_code, user.username, request.GET['next'])
 
@@ -467,7 +467,7 @@ IIT Bombay.
                 if redirectNext:
                     return HttpResponseRedirect(redirectNext)
                 messages.success(request, "New password sent to your email "+user.email)
-                return HttpResponseRedirect('/accounts/change-password/')
+                return HttpResponseRedirect(EDUPYRAMIDS_URL +'/accounts/change-password/')
             except Exception as e:
                 logger.error(
                     "Password reset email failed | user=%s | user_id=%s | email=%s | ip=%s | path=%s | error=%s",

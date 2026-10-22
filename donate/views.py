@@ -42,7 +42,7 @@ from training.models import TrainingEvents,ILWCourseFossLevel
 from decimal import Decimal, InvalidOperation
 
 import logging
-from spoken.config import SPOKEN_BASE_URL
+from spoken.config import EDUPYRAMIDS_URL
 
 
 logger = logging.getLogger("mail_logs.donate")
@@ -354,7 +354,7 @@ def validate_user(request):
                 msg = "Your account is disabled.<br>\
                             Kindly activate your account by clicking on the activation link which has been sent to your registered email %s.<br>\
                             In case if you do not receive any activation mail kindly verify and activate your account from below link :<br>\
-                            <a href='%s/accounts/verify/'>%s/accounts/verify/</a>" % (SPOKEN_BASE_URL, SPOKEN_BASE_URL, user.email)               
+                            <a href='%s/accounts/verify/'>%s/accounts/verify/</a>" % (EDUPYRAMIDS_URL, EDUPYRAMIDS_URL, user.email)               
         else:
             msg = 'Invalid username / password'
     else:

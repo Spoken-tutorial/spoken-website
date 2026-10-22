@@ -10,7 +10,7 @@ admin.autodiscover()
 
 urlpatterns = [
     # url(r'^login/$', mdl_login, name='mdl_login'),
-    url( r'^login/$',lambda request: redirect(EDUPYRAMIDS_URL + '/particpant/login/'),name='mdl_login'),
+    url( r'^login/$',lambda request: redirect(EDUPYRAMIDS_URL + '/participant/login/'),name='mdl_login'),
     url(r'^forgot-password/$', forget_password, name='forgot_password'),
     url(r'^feedback/(\d+)/$', feedback, name='feedback'),
     # url(r'^register/$', mdl_register, name='mdl_register'),
