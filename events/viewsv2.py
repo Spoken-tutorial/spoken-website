@@ -3962,7 +3962,7 @@ class DownloadReceiptView(View):
         payment = get_object_or_404(AcademicPaymentStatus, pk=pk)
         
         # access control for download
-        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists()
+        is_staff = request.user.groups.filter(name='Payment Verification Staff').exists() or request.user.is_superuser
         is_owner = hasattr(request.user, 'organiser') and request.user.organiser.academic_id == payment.academic_id
         
         if not (is_staff or is_owner):
