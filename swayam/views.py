@@ -107,6 +107,7 @@ def _is_allowed_target(target):
         # 'www.spoken-tutorial.org',
         'beta.spoken-tutorial.org',
         # 'www.beta.spoken-tutorial.org',
+        'edupyramids.in',
     )
 
     return (
