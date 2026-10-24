@@ -33,7 +33,7 @@ from mdldjango.urls import *
 from django.template.context_processors import csrf
 from cms.cache_registry import unregister_cache_key,list_cache_keys
 from donate.models import Payee
-from spoken.config import EDUPYRAMIDS_URL
+from spoken.config import EDUPYRAMIDS_URL, IS_EDU_URL
 from django.core.cache import cache, caches
 
 import logging
@@ -85,6 +85,8 @@ def create_profile(user, phone='', code=None):
 
 
 def account_register(request):
+    if not IS_EDU_URL:
+        HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/register/')
     # import recaptcha validate function
     from cms.recaptcha import recaptcha_valdation, get_recaptcha_context
 
@@ -254,6 +256,8 @@ def confirm(request, confirmation_code, username):
         return HttpResponseRedirect('/')
 
 def account_login(request):
+    if not IS_EDU_URL:
+        HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/login/')
     user = request.user
     error_msg = ''
     if request.user.is_anonymous():

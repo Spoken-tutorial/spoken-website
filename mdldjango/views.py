@@ -22,7 +22,7 @@ from events.forms import OrganiserForm
 from events.models import *
 from events.signals import get_or_create_user
 from events.views import *
-from spoken.config import PROCESS_URL, EDUPYRAMIDS_URL, SPOKEN_BASE_URL
+from spoken.config import PROCESS_URL, EDUPYRAMIDS_URL, SPOKEN_BASE_URL, IS_EDU_URL
 
 from .forms import *
 from .get_or_create_participant import check_csvfile, encript_password
@@ -47,6 +47,8 @@ def mdl_logout(request):
     return HttpResponseRedirect(EDUPYRAMIDS_URL +'/participant/login')
 
 def mdl_login(request):
+    if not IS_EDU_URL:
+        return redirect(EDUPYRAMIDS_URL + '/participant/login/')
     if request.POST:
         email = request.POST["username"]
         password = request.POST["password"]
@@ -220,6 +222,8 @@ def offline_details(request, wid, category):
     return render(request, 'mdl/templates/offline_details.html', context)
 
 def mdl_register(request):
+    if not IS_EDU_URL:
+        return redirect(EDUPYRAMIDS_URL + '/Participant/register/')
     form = RegisterForm()
 
     # import recaptcha validate function

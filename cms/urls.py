@@ -16,8 +16,10 @@ spoken_sitemaps = {
 }
 
 urlpatterns = [
-	url(r'^accounts/login/$',lambda request: HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/login/'),name='login'),
-	url(r'^accounts/register/$',lambda request: HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/register/'),name='register'),
+	# url(r'^accounts/login/$',lambda request: HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/login/'),name='login'),
+    # url(r'^accounts/register/$',lambda request: HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/register/'),name='register'),
+	url(r'^accounts/login/$', account_login, name='login'),
+	url(r'^accounts/register/$', account_register, name='register'),
 	url(r'^accounts/logout/$',  account_logout, name='logout'),
 	url(r"^accounts/confirm/(?P<confirmation_code>\w+)/(?P<username>[\w. @-]+)/$",  confirm, name='confirm'),
 	url(r"^accounts/forgot-password/$",  password_reset, name='password_reset'),
