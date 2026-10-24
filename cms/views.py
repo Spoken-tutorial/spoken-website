@@ -86,7 +86,7 @@ def create_profile(user, phone='', code=None):
 
 def account_register(request):
     if not IS_EDU_URL:
-        HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/register/')
+        return HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/register/')
     # import recaptcha validate function
     from cms.recaptcha import recaptcha_valdation, get_recaptcha_context
 
@@ -257,7 +257,7 @@ def confirm(request, confirmation_code, username):
 
 def account_login(request):
     if not IS_EDU_URL:
-        HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/login/')
+        return HttpResponseRedirect(EDUPYRAMIDS_URL + '/accounts/login/')
     user = request.user
     error_msg = ''
     if request.user.is_anonymous():
