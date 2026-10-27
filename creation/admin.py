@@ -229,3 +229,13 @@ admin.site.register(BankDetail, BankDetailAdmin)
 admin.site.register(Collaborate, CollaborateAdmin)
 admin.site.register(Domain, DomainAdmin)
 admin.site.register(FosscategoryDomain, FosscategoryDomainAdmin)
+
+
+class FossTransferLogAdmin(admin.ModelAdmin):
+    list_display = ('source_foss', 'target_foss', 'user', 'created')
+    list_filter = ('created', 'source_foss', 'target_foss')
+    search_fields = ('source_foss__foss', 'target_foss__foss', 'user__username')
+    readonly_fields = ('source_foss', 'target_foss', 'user', 'transferred_data', 'created')
+
+
+admin.site.register(FossTransferLog, FossTransferLogAdmin)

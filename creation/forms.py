@@ -1272,3 +1272,31 @@ class UpdateThumbnailForm(forms.Form):
                 self.fields['tutorial'].choices =  [('', '-- Select tutorial --'),] + list(choices)
                 self.fields['tutorial'].widget.attrs = {}
                 self.fields['tutorial'].initial = initial_tut
+
+
+class TransferFossForm(forms.Form):
+    source_foss = forms.ModelChoiceField(
+        queryset=FossCategory.objects.filter(status=1).order_by('foss'),
+        empty_label="-- Select Source FOSS --",
+        widget=forms.Select(attrs={'class': 'form-control source-foss', 'id': 'id_source_foss'}),
+        label="Source FOSS"
+    )
+    target_foss = forms.ModelChoiceField(
+        queryset=FossCategory.objects.filter(status=1).order_by('foss'),
+        empty_label="-- Select Target FOSS --",
+        widget=forms.Select(attrs={'class': 'form-control target-foss', 'id': 'id_target_foss'}),
+        label="Target FOSS"
+    )
+    is_move = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'id': 'id_is_move'}),
+        label="Move tutorials instead of copying"
+    )
+
+    def clean(self):
+        cleaned_data = super(TransferFossForm, self).clean()
+        source_foss = cleaned_data.get('source_foss')
+        target_foss = cleaned_data.get('target_foss')
+        if source_foss and target_foss and source_foss == target_foss:
+            raise forms.ValidationError("Source FOSS and Target FOSS cannot be the same.")
+        return cleaned_data

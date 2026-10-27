@@ -36,9 +36,9 @@ from django.views.decorators.csrf import csrf_exempt,csrf_protect
 from django.template.context_processors import csrf
 from django.shortcuts import render,redirect
 from django.db.models import Count, F, Q
-from django.views.generic.list import ListView
 from django.core.urlresolvers import reverse
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
+import shutil
 
 # Spoken Tutorial Stuff
 from cms.sortable import *
@@ -5110,3 +5110,310 @@ def file_checker(request, username, file_name):
             response.write(pdf)
             return response
     return Http404
+
+
+@csrf_exempt
+def ajax_transfer_foss_details(request):
+    
+    # returns tutorials and languages for a given foss
+
+    if not request.user.is_authenticated or not (request.user.is_superuser or is_administrator(request.user)):
+        return HttpResponse(json.dumps({'error': 'Unauthorized'}), status=403, content_type='application/json')
+
+    foss_id = request.POST.get('foss_id') or request.GET.get('foss_id')
+    if not foss_id:
+        return HttpResponse(json.dumps({'error': 'FOSS ID is required'}), status=400, content_type='application/json')
+
+    try:
+        foss = FossCategory.objects.get(id=foss_id)
+    except FossCategory.DoesNotExist:
+        return HttpResponse(json.dumps({'error': 'FOSS not found'}), status=404, content_type='application/json')
+
+    # get tutorial details for this foss
+    tutorials_qs = TutorialDetail.objects.filter(foss=foss).select_related('level').order_by('order', 'tutorial')
+    tutorials_data = []
+    for td in tutorials_qs:
+        langs_for_td = list(TutorialResource.objects.filter(tutorial_detail=td).values_list('language__name', flat=True))
+        tutorials_data.append({
+            'id': td.id,
+            'tutorial': td.tutorial,
+            'level': td.level.level if td.level else '',
+            'order': td.order,
+            'languages': langs_for_td
+        })
+
+    # get languages for this foss
+    lang_ids = TutorialResource.objects.filter(
+        tutorial_detail__foss=foss
+    ).values_list('language_id', flat=True).distinct()
+    languages_qs = Language.objects.filter(id__in=lang_ids).order_by('name')
+    languages_data = [{'id': l.id, 'name': l.name, 'code': l.code} for l in languages_qs]
+
+    return HttpResponse(
+        json.dumps({
+            'status': 'success',
+            'tutorials': tutorials_data,
+            'languages': languages_data
+        }),
+        content_type='application/json'
+    )
+
+
+@login_required
+def transfer_foss(request):
+    
+    if not (request.user.is_superuser or is_administrator(request.user)):
+        raise PermissionDenied()
+
+    if request.method == 'POST':
+        form = TransferFossForm(request.POST)
+        selected_tut_ids = request.POST.getlist('tutorials')
+        selected_lang_ids = request.POST.getlist('languages')
+
+        if form.is_valid():
+            source_foss = form.cleaned_data['source_foss']
+            target_foss = form.cleaned_data['target_foss']
+            is_move = form.cleaned_data['is_move']
+
+            if not selected_tut_ids:
+                messages.error(request, 'Please select at least one tutorial to transfer.')
+                return render(request, 'creation/templates/transfer_foss.html', {'form': form})
+
+            if not selected_lang_ids:
+                messages.error(request, 'Please select at least one language to transfer.')
+                return render(request, 'creation/templates/transfer_foss.html', {'form': form})
+
+            # check if directory of target foss exists, else create it
+            target_foss_dir = os.path.join(settings.MEDIA_ROOT, 'videos', str(target_foss.id))
+            if not os.path.exists(target_foss_dir):
+                try:
+                    os.makedirs(target_foss_dir)
+                except Exception as e:
+                    logger.error("Failed to create target FOSS directory %s: %s", target_foss_dir, str(e))
+                    messages.error(request, f"Failed to create target FOSS directory: {e}")
+                    return render(request, 'creation/templates/transfer_foss.html', {'form': form})
+
+            source_foss_dir = os.path.join(settings.MEDIA_ROOT, 'videos', str(source_foss.id))
+
+            transferred_records = []
+            files_transferred_count = 0
+            selected_tutorials = TutorialDetail.objects.filter(id__in=selected_tut_ids, foss=source_foss).order_by('order')
+            selected_languages = Language.objects.filter(id__in=selected_lang_ids)
+
+            try:
+                with transaction.atomic():
+                    for src_td in selected_tutorials:
+                        # check/create target tutorialdetail
+                        tgt_td, created_td = TutorialDetail.objects.get_or_create(
+                            foss=target_foss,
+                            tutorial=src_td.tutorial,
+                            level=src_td.level,
+                            defaults={
+                                'order': src_td.order,
+                                'user': request.user
+                            }
+                        )
+
+                        # create target tutorial directory and resources subdirectory
+                        tgt_td_dir = os.path.join(target_foss_dir, str(tgt_td.id))
+                        tgt_resources_dir = os.path.join(tgt_td_dir, 'resources')
+                        if not os.path.exists(tgt_td_dir):
+                            os.makedirs(tgt_td_dir)
+                        if not os.path.exists(tgt_resources_dir):
+                            os.makedirs(tgt_resources_dir)
+
+                        src_td_dir = os.path.join(source_foss_dir, str(src_td.id))
+                        src_resources_dir = os.path.join(src_td_dir, 'resources')
+
+                        src_cc = None
+                        try:
+                            src_cc = src_td.tutorial_detail
+                        except TutorialCommonContent.DoesNotExist:
+                            src_cc = None
+
+                        tgt_cc = None
+                        if src_cc:
+                            tgt_cc, created_cc = TutorialCommonContent.objects.get_or_create(
+                                tutorial_detail=tgt_td,
+                                defaults={
+                                    'slide': src_cc.slide,
+                                    'slide_user': src_cc.slide_user,
+                                    'slide_status': src_cc.slide_status,
+                                    'code': src_cc.code,
+                                    'code_user': src_cc.code_user,
+                                    'code_status': src_cc.code_status,
+                                    'assignment': src_cc.assignment,
+                                    'assignment_user': src_cc.assignment_user,
+                                    'assignment_status': src_cc.assignment_status,
+                                    'prerequisite': None,
+                                    'prerequisite_user': src_cc.prerequisite_user,
+                                    'prerequisite_status': src_cc.prerequisite_status,
+                                    'additional_material': src_cc.additional_material,
+                                    'additional_material_user': src_cc.additional_material_user,
+                                    'additional_material_status': src_cc.additional_material_status,
+                                    'keyword': src_cc.keyword,
+                                    'keyword_user': src_cc.keyword_user,
+                                    'keyword_status': src_cc.keyword_status,
+                                }
+                            )
+
+                            # copy resource files into target resources directory
+                            if os.path.exists(src_resources_dir):
+                                for res_attr in ['slide', 'code', 'assignment', 'additional_material']:
+                                    res_filename = getattr(src_cc, res_attr, None)
+                                    if res_filename:
+                                        src_res_file = os.path.join(src_resources_dir, res_filename)
+                                        tgt_res_file = os.path.join(tgt_resources_dir, res_filename)
+                                        if os.path.isfile(src_res_file) and not os.path.exists(tgt_res_file):
+                                            try:
+                                                shutil.copy2(src_res_file, tgt_res_file)
+                                                files_transferred_count += 1
+                                            except Exception as e:
+                                                logger.error("Error copying resource file %s: %s", res_filename, str(e))
+
+                        # handle tutorialresource for each selected language
+                        langs_transferred_for_td = []
+                        tut_slug = src_td.tutorial.replace(' ', '-')
+
+                        for lang in selected_languages:
+                            src_tr = TutorialResource.objects.filter(tutorial_detail=src_td, language=lang).first()
+                            if not src_tr:
+                                continue
+
+                            # create target TutorialResource
+                            tgt_tr, created_tr = TutorialResource.objects.get_or_create(
+                                tutorial_detail=tgt_td,
+                                language=lang,
+                                defaults={
+                                    'common_content': tgt_cc if tgt_cc else src_tr.common_content,
+                                    'outline': src_tr.outline,
+                                    'outline_user': src_tr.outline_user,
+                                    'outline_status': src_tr.outline_status,
+                                    'script': src_tr.script,
+                                    'script_user': src_tr.script_user,
+                                    'script_status': src_tr.script_status,
+                                    'timed_script': src_tr.timed_script,
+                                    'video': src_tr.video,
+                                    'video_id': src_tr.video_id,
+                                    'playlist_item_id': src_tr.playlist_item_id,
+                                    'video_thumbnail_time': src_tr.video_thumbnail_time,
+                                    'video_user': src_tr.video_user,
+                                    'video_status': src_tr.video_status,
+                                    'status': src_tr.status,
+                                    'version': src_tr.version,
+                                    'hit_count': src_tr.hit_count,
+                                    'publish_at': src_tr.publish_at,
+                                    'submissiondate': src_tr.submissiondate,
+                                    'assignment_status': src_tr.assignment_status,
+                                    'extension_status': src_tr.extension_status,
+                                    'is_on_youtube': src_tr.is_on_youtube,
+                                    'is_unrestricted': src_tr.is_unrestricted,
+                                    'is_hst': src_tr.is_hst,
+                                }
+                            )
+
+                            # transfer video file
+                            if src_tr.video:
+                                src_video_file = os.path.join(src_td_dir, src_tr.video)
+                                tgt_video_file = os.path.join(tgt_td_dir, src_tr.video)
+                                if os.path.isfile(src_video_file):
+                                    try:
+                                        if is_move:
+                                            shutil.move(src_video_file, tgt_video_file)
+                                        else:
+                                            shutil.copy2(src_video_file, tgt_video_file)
+                                        files_transferred_count += 1
+                                    except Exception as e:
+                                        logger.error("Error transferring video %s: %s", src_tr.video, str(e))
+
+                            # subtitle file
+                            srt_name = f"{tut_slug}-{lang.name}.srt"
+                            src_srt_file = os.path.join(src_td_dir, srt_name)
+                            tgt_srt_file = os.path.join(tgt_td_dir, srt_name)
+                            if os.path.isfile(src_srt_file):
+                                try:
+                                    if is_move:
+                                        shutil.move(src_srt_file, tgt_srt_file)
+                                    else:
+                                        shutil.copy2(src_srt_file, tgt_srt_file)
+                                    files_transferred_count += 1
+                                except Exception as e:
+                                    logger.error("Error transferring SRT %s: %s", srt_name, str(e))
+
+                            # thumbnails
+                            for thumb_suffix in ['-Big.png', '-Small.png']:
+                                thumb_name = f"{tut_slug}{thumb_suffix}"
+                                src_thumb_file = os.path.join(src_td_dir, thumb_name)
+                                tgt_thumb_file = os.path.join(tgt_td_dir, thumb_name)
+                                if os.path.isfile(src_thumb_file):
+                                    try:
+                                        shutil.copy2(src_thumb_file, tgt_thumb_file)
+                                        files_transferred_count += 1
+                                    except Exception as e:
+                                        logger.error("Error transferring thumbnail %s: %s", thumb_name, str(e))
+
+                            # if move option is selected, delete source TutorialResource
+                            if is_move:
+                                try:
+                                    src_tr.delete()
+                                except Exception as e:
+                                    logger.warning("Could not delete source TutorialResource %s: %s", src_tr.id, str(e))
+
+                            langs_transferred_for_td.append(lang.name)
+
+                        if is_move:
+                            remaining_tr_count = TutorialResource.objects.filter(tutorial_detail=src_td).count()
+                            if remaining_tr_count == 0:
+                                if os.path.exists(src_resources_dir):
+                                    try:
+                                        shutil.rmtree(src_resources_dir)
+                                    except Exception as e:
+                                        logger.warning("Could not rmtree %s: %s", src_resources_dir, str(e))
+                                if os.path.exists(src_td_dir):
+                                    try:
+                                        shutil.rmtree(src_td_dir)
+                                    except Exception as e:
+                                        logger.warning("Could not rmtree %s: %s", src_td_dir, str(e))
+                                try:
+                                    if src_cc:
+                                        src_cc.delete()
+                                    src_td.delete()
+                                except Exception as e:
+                                    logger.warning("Could not delete source TutorialDetail %s: %s", src_td.id, str(e))
+
+                        if langs_transferred_for_td:
+                            transferred_records.append({
+                                'tutorial_id': src_td.id,
+                                'tutorial': src_td.tutorial,
+                                'languages': langs_transferred_for_td
+                            })
+
+                    # record log in FossTransferLog
+                    transfer_summary = {
+                        'mode': 'move' if is_move else 'copy',
+                        'tutorials_transferred_count': len(transferred_records),
+                        'files_transferred_count': files_transferred_count,
+                        'details': transferred_records
+                    }
+                    FossTransferLog.objects.create(
+                        source_foss=source_foss,
+                        target_foss=target_foss,
+                        user=request.user,
+                        transferred_data=json.dumps(transfer_summary)
+                    )
+
+                action_verb = "moved" if is_move else "copied"
+                messages.success(
+                    request,
+                    f"Successfully {action_verb} {len(transferred_records)} tutorial(s) with {files_transferred_count} file(s) from '{source_foss.foss}' to '{target_foss.foss}'."
+                )
+                return redirect(request.path)
+
+            except Exception as e:
+                logger.error("Error during FOSS transfer: %s", traceback.format_exc())
+                messages.error(request, f"An error occurred during transfer: {str(e)}")
+                return render(request, 'creation/templates/transfer_foss.html', {'form': form})
+    else:
+        form = TransferFossForm()
+
+    return render(request, 'creation/templates/transfer_foss.html', {'form': form})

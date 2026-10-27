@@ -1,0 +1,224 @@
+{% extends 'spoken/templates/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block title %}Transfer FOSS Tutorials{% endblock %}
+{% block heading %}
+    <i class="fa fa-exchange"></i> Transfer FOSS Tutorials
+    <a href="{% url 'events:events_dashboard' %}" class='dashboard pull-right'>Dashboard</a>
+{% endblock %}
+
+{% block content %}
+{% if form.errors %}
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <ul>
+            {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                    <li>{{ field|title }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+<form role="form" method="post" id="transfer-foss-form" action="">
+    {% csrf_token %}
+
+    <div class="row">
+        <div class="col-md-6 form-group">
+            <label for="{{ form.source_foss.id_for_label }}">Source FOSS:</label>
+            {% render_field form.source_foss class+="form-control" tabindex="1" %}
+        </div>
+
+        <div class="col-md-6 form-group">
+            <label for="{{ form.target_foss.id_for_label }}">Target FOSS:</label>
+            {% render_field form.target_foss class+="form-control" tabindex="2" %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 form-group">
+            <label>Tutorials:</label>
+            <span class="pull-right" style="font-size: 12px;">
+                <label style="font-weight: normal; cursor: pointer;">
+                    <input type="checkbox" id="select-all-tutorials" disabled> Select All
+                </label>
+            </span>
+            <div id="tutorial-list-container" style="max-height: 250px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: #fff;">
+                <p class="text-muted" style="margin: 5px 0;">Select a Source FOSS to load tutorials.</p>
+            </div>
+        </div>
+
+        <div class="col-md-6 form-group">
+            <label>Languages:</label>
+            <span class="pull-right" style="font-size: 12px;">
+                <label style="font-weight: normal; cursor: pointer;">
+                    <input type="checkbox" id="select-all-languages" disabled> Select All
+                </label>
+            </span>
+            <div id="language-list-container" style="max-height: 250px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px; background: #fff;">
+                <p class="text-muted" style="margin: 5px 0;">Select a Source FOSS to load languages.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group checkbox" style="margin-top: 15px;">
+        <label>
+            {% render_field form.is_move %} Move tutorials instead of copying
+        </label>
+    </div>
+
+    <div class="form-group" style="margin-top: 20px;">
+        <input type="submit" class="btn btn-primary" id="btn-submit-transfer" value="Transfer" disabled />
+        <a href="{% url 'events:events_dashboard' %}" class="btn btn-default" style="margin-left: 5px;">Cancel</a>
+    </div>
+</form>
+{% endblock %}
+
+{% block jsblock %}
+<script type="text/javascript">
+$(document).ready(function () {
+    // trigger on source foss change
+    $('#id_source_foss').on('change', function () {
+        var fossId = $(this).val();
+
+        $('#select-all-tutorials').prop('checked', false);
+        $('#select-all-languages').prop('checked', false);
+
+        if (!fossId) {
+            $('#tutorial-list-container').html('<p class="text-muted" style="margin: 5px 0;">Select a Source FOSS to load tutorials.</p>');
+            $('#language-list-container').html('<p class="text-muted" style="margin: 5px 0;">Select a Source FOSS to load languages.</p>');
+            $('#select-all-tutorials, #select-all-languages').prop('disabled', true);
+            updateSubmitButton();
+            return;
+        }
+
+        // prevent selecting same target foss
+        $('#id_target_foss option').prop('disabled', false);
+        $('#id_target_foss option[value="' + fossId + '"]').prop('disabled', true);
+        if ($('#id_target_foss').val() === fossId) {
+            $('#id_target_foss').val('');
+        }
+
+        $('#tutorial-list-container').html('<p class="text-muted" style="margin: 5px 0;">Loading tutorials...</p>');
+        $('#language-list-container').html('<p class="text-muted" style="margin: 5px 0;">Loading languages...</p>');
+
+        $.ajax({
+            url: "{% url 'eventsv2:ajax_transfer_foss_details' %}",
+            type: "POST",
+            data: {
+                'foss_id': fossId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response.status === 'success') {
+                    renderTutorials(response.tutorials || []);
+                    renderLanguages(response.languages || []);
+                    $('#select-all-tutorials, #select-all-languages').prop('disabled', false);
+                } else {
+                    $('#tutorial-list-container').html('<p class="text-danger">Failed to load tutorials.</p>');
+                    $('#language-list-container').html('<p class="text-danger">Failed to load languages.</p>');
+                }
+                updateSubmitButton();
+            },
+            error: function () {
+                $('#tutorial-list-container').html('<p class="text-danger">Error loading tutorials.</p>');
+                $('#language-list-container').html('<p class="text-danger">Error loading languages.</p>');
+                updateSubmitButton();
+            }
+        });
+    });
+
+    function renderTutorials(tutorials) {
+        if (!tutorials.length) {
+            $('#tutorial-list-container').html('<p class="text-muted" style="margin: 5px 0;">No tutorials found for this FOSS.</p>');
+            return;
+        }
+
+        var html = '';
+        $.each(tutorials, function (i, tut) {
+            html += '<div class="checkbox" style="margin: 5px 0;">';
+            html += '<label>';
+            html += '<input type="checkbox" name="tutorials" value="' + tut.id + '" class="tut-checkbox"> ';
+            html += tut.order + '. ' + tut.tutorial;
+            html += '</label>';
+            html += '</div>';
+        });
+
+        $('#tutorial-list-container').html(html);
+    }
+
+    function renderLanguages(languages) {
+        if (!languages.length) {
+            $('#language-list-container').html('<p class="text-muted" style="margin: 5px 0;">No languages found.</p>');
+            return;
+        }
+
+        var html = '';
+        $.each(languages, function (i, lang) {
+            html += '<div class="checkbox" style="margin: 5px 0;">';
+            html += '<label>';
+            html += '<input type="checkbox" name="languages" value="' + lang.id + '" class="lang-checkbox"> ';
+            html += lang.name;
+            html += '</label>';
+            html += '</div>';
+        });
+
+        $('#language-list-container').html(html);
+        $('#select-all-languages').prop('checked', false);
+    }
+
+    // select all tutorials toggle
+    $('#select-all-tutorials').on('change', function () {
+        $('.tut-checkbox').prop('checked', $(this).is(':checked'));
+        updateSubmitButton();
+    });
+
+    // select all languages toggle
+    $('#select-all-languages').on('change', function () {
+        $('.lang-checkbox').prop('checked', $(this).is(':checked'));
+        updateSubmitButton();
+    });
+
+    $(document).on('change', '.tut-checkbox', function () {
+        var total = $('.tut-checkbox').length;
+        var checked = $('.tut-checkbox:checked').length;
+        $('#select-all-tutorials').prop('checked', total > 0 && total === checked);
+        updateSubmitButton();
+    });
+
+    $(document).on('change', '.lang-checkbox', function () {
+        var total = $('.lang-checkbox').length;
+        var checked = $('.lang-checkbox:checked').length;
+        $('#select-all-languages').prop('checked', total > 0 && total === checked);
+        updateSubmitButton();
+    });
+
+    $('#id_target_foss').on('change', function () {
+        updateSubmitButton();
+    });
+
+    function updateSubmitButton() {
+        var tutSelected = $('.tut-checkbox:checked').length > 0;
+        var langSelected = $('.lang-checkbox:checked').length > 0;
+        var targetFoss = $('#id_target_foss').val();
+        var sourceFoss = $('#id_source_foss').val();
+
+        var canSubmit = sourceFoss && targetFoss && sourceFoss !== targetFoss && tutSelected && langSelected;
+        $('#btn-submit-transfer').prop('disabled', !canSubmit);
+    }
+
+    // confirm submit on move
+    $('#transfer-foss-form').on('submit', function (e) {
+        if ($('#id_is_move').is(':checked')) {
+            if (!confirm('Are you sure you want to move the selected tutorials?')) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

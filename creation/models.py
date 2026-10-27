@@ -685,3 +685,22 @@ class TutorialSummaryCache(models.Model):
     def __str__(self):
         return f"FOSS {self.foss_id}: {self.tutorial_count} tutorials"
 
+
+@python_2_unicode_compatible
+class FossTransferLog(models.Model):
+    source_foss = models.ForeignKey(FossCategory, related_name='transfers_as_source', on_delete=models.PROTECT)
+    target_foss = models.ForeignKey(FossCategory, related_name='transfers_as_target', on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    transferred_data = models.TextField(help_text="JSON summary of transferred tutorial IDs, language IDs, and file details")
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta(object):
+        verbose_name = 'FOSS Transfer Log'
+        verbose_name_plural = 'FOSS Transfer Logs'
+        ordering = ('-created',)
+
+    def __str__(self):
+        return "Transfer from {} to {} by {} on {}".format(
+            self.source_foss.foss, self.target_foss.foss, self.user.username, self.created.strftime('%Y-%m-%d %H:%M')
+        )
+
