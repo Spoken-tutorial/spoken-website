@@ -8,7 +8,10 @@ from django.conf import settings
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from spoken.config import SPOKEN_BASE_URL
+try:
+    from spoken.config import SPOKEN_BASE_URL
+except Exception:
+    SPOKEN_BASE_URL = "https://spoken-tutorial.org"
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
 from reportlab.platypus import (
@@ -100,6 +103,55 @@ def format_institution_location(academic):
         parts.append(state)
 
     return ", ".join(parts)
+
+def format_recipient_address(academic):
+    """
+    Cleans up and deduplicates the raw academic street address,
+    removing duplicate trailing tokens (city, district, state, pincode)
+    that are already displayed on the city/state/pincode line below it.
+    Returns a tuple of (clean_street_address, location_line).
+    """
+    if not academic:
+        return "", ""
+    if isinstance(academic, dict):
+        address = str(academic.get('address', '') or "").strip()
+        institution = str(academic.get('institution_name', '') or "").strip()
+        city = str(academic.get('city', '') or "").strip()
+        district = str(academic.get('district', '') or "").strip()
+        state = str(academic.get('state', '') or "").strip()
+        pincode = str(academic.get('pincode', '') or "").strip()
+    else:
+        address = (getattr(academic, 'address', '') or "").strip()
+        institution = (getattr(academic, 'institution_name', '') or "").strip()
+        city = (academic.city.name if hasattr(academic, 'city') and academic.city else "").strip()
+        district = (academic.district.name if hasattr(academic, 'district') and academic.district else "").strip()
+        state = (academic.state.name if hasattr(academic, 'state') and academic.state else "").strip()
+        pincode = str(academic.pincode or "").strip() if hasattr(academic, 'pincode') and academic.pincode else ""
+
+    loc_line = ", ".join([part for part in [city, state] if part])
+    if pincode:
+        loc_line = f"{loc_line} – {pincode}"
+
+    clean = re.sub(r'[\r\n\t]+', ', ', address)
+    clean = re.sub(r'\s+', ' ', clean)
+    clean = re.sub(r'\s*,\s*', ', ', clean)
+    clean = re.sub(r'(,\s*)+', ', ', clean).strip(', ')
+
+    if institution and clean.lower().startswith(institution.lower()):
+        clean = clean[len(institution):].strip(', ')
+
+    for _ in range(3):
+        if pincode:
+            clean = re.sub(rf'[-–\s,]+{re.escape(pincode)}\s*$', '', clean, flags=re.IGNORECASE).strip(', ')
+        if state:
+            clean = re.sub(rf'(?:,\s*|\s+){re.escape(state)}\s*$', '', clean, flags=re.IGNORECASE).strip(', ')
+        if district and district.lower() != city.lower():
+            clean = re.sub(rf'(?:,\s*|\s+){re.escape(district)}\s*$', '', clean, flags=re.IGNORECASE).strip(', ')
+        if city:
+            clean = re.sub(rf'(?:,\s*|\s+){re.escape(city)}\s*$', '', clean, flags=re.IGNORECASE).strip(', ')
+
+    clean = re.sub(r'^(,\s*)+', '', clean).strip(', ')
+    return clean, loc_line
 
 def generate_unique_reference_no(year, doc_type, size=8):
     """
@@ -547,24 +599,7 @@ def generate_college_loa_pdf(payment):
     # 4. Recipient block
     academic = payment.academic
     institution = academic.institution_name
-    address = academic.address or ""
-    city = academic.city.name if academic.city else ""
-    district = academic.district.name if academic.district else ""
-    state = academic.state.name if academic.state else ""
-    pincode = str(academic.pincode) if academic.pincode else ""
-
-    loc_line = ", ".join([part for part in [city, state] if part])
-    if pincode:
-        loc_line = f"{loc_line} – {pincode}"
-
-    # Clean up newline and whitespace anomalies from raw database address field
-    clean_address = re.sub(r'[\r\n\t]+', ', ', address)
-    clean_address = re.sub(r'\s+', ' ', clean_address)
-    clean_address = re.sub(r'\s*,\s*', ', ', clean_address)
-    clean_address = re.sub(r'(,\s*)+', ', ', clean_address).strip(', ')
-    if institution and clean_address.lower().startswith(institution.lower()):
-        clean_address = clean_address[len(institution):].strip(', ')
-    clean_address = re.sub(r'^(,\s*)+', '', clean_address).strip(', ')
+    clean_address, loc_line = format_recipient_address(academic)
 
     recipient_style = ParagraphStyle(
         name='LOARecipient',
@@ -742,24 +777,7 @@ def generate_school_loa_pdf(payment):
     # 4. Recipient block
     academic = payment.academic
     institution = academic.institution_name
-    address = academic.address or ""
-    city = academic.city.name if academic.city else ""
-    district = academic.district.name if academic.district else ""
-    state = academic.state.name if academic.state else ""
-    pincode = str(academic.pincode) if academic.pincode else ""
-
-    loc_line = ", ".join([part for part in [city, state] if part])
-    if pincode:
-        loc_line = f"{loc_line} – {pincode}"
-
-    # Clean up newline and whitespace anomalies from raw database address field
-    clean_address = re.sub(r'[\r\n\t]+', ', ', address)
-    clean_address = re.sub(r'\s+', ' ', clean_address)
-    clean_address = re.sub(r'\s*,\s*', ', ', clean_address)
-    clean_address = re.sub(r'(,\s*)+', ', ', clean_address).strip(', ')
-    if institution and clean_address.lower().startswith(institution.lower()):
-        clean_address = clean_address[len(institution):].strip(', ')
-    clean_address = re.sub(r'^(,\s*)+', '', clean_address).strip(', ')
+    clean_address, loc_line = format_recipient_address(academic)
 
     recipient_style = ParagraphStyle(
         name='SchoolLOARecipient',
@@ -1004,21 +1022,15 @@ def generate_college_loc_pdf(payment):
     # 3. Recipient Address
     academic = payment.academic
     institution = academic.institution_name
-    address = academic.address or ""
-    city = academic.city.name if academic.city else ""
-    state = academic.state.name if academic.state else ""
-    pincode = str(academic.pincode) if academic.pincode else ""
+    clean_address, loc_line = format_recipient_address(academic)
+    salutation_label = get_salutation_label(payment)
 
-    loc_line = ", ".join([part for part in [city, state] if part])
-    if pincode:
-        loc_line = f"{loc_line} - {pincode}"
-
-    recipient_text = f"To,<br/>The Principal,<br/><b>{institution}</b>,<br/>"
-    if address:
-        recipient_text += f"{address},<br/>"
+    recipient_lines = ["To,", salutation_label, f"<b>{institution}</b>,"]
+    if clean_address:
+        recipient_lines.append(f"{clean_address},")
     if loc_line:
-        recipient_text += f"{loc_line}."
-    story.append(Paragraph(recipient_text, recipient_style))
+        recipient_lines.append(f"{loc_line}.")
+    story.append(Paragraph("<br/>".join(recipient_lines), recipient_style))
     story.append(Spacer(1, 8))
 
     # 4. Subject Line
@@ -1297,21 +1309,15 @@ def generate_school_loc_pdf(payment):
     # 3. Recipient Address
     academic = payment.academic
     institution = academic.institution_name
-    address = academic.address or ""
-    city = academic.city.name if academic.city else ""
-    state = academic.state.name if academic.state else ""
-    pincode = str(academic.pincode) if academic.pincode else ""
+    clean_address, loc_line = format_recipient_address(academic)
+    salutation_label = get_salutation_label(payment)
 
-    loc_line = ", ".join([part for part in [city, state] if part])
-    if pincode:
-        loc_line = f"{loc_line} - {pincode}"
-
-    recipient_text = f"To,<br/>The Principal,<br/><b>{institution}</b>,<br/>"
-    if address:
-        recipient_text += f"{address},<br/>"
+    recipient_lines = ["To,", salutation_label, f"<b>{institution}</b>,"]
+    if clean_address:
+        recipient_lines.append(f"{clean_address},")
     if loc_line:
-        recipient_text += f"{loc_line}."
-    story.append(Paragraph(recipient_text, recipient_style))
+        recipient_lines.append(f"{loc_line}.")
+    story.append(Paragraph("<br/>".join(recipient_lines), recipient_style))
     story.append(Spacer(1, 8))
 
     # 4. Subject Line
