@@ -8,7 +8,10 @@ from django.conf import settings
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from spoken.config import SPOKEN_BASE_URL
+try:
+    from spoken.config import SPOKEN_BASE_URL
+except Exception:
+    SPOKEN_BASE_URL = "https://spoken-tutorial.org"
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT, TA_RIGHT
 from reportlab.platypus import (
@@ -68,6 +71,87 @@ def get_salutation_label(payment):
     if not sal.lower().startswith('the'):
         return f"The {sal},"
     return f"{sal},"
+
+def format_institution_location(academic):
+    """
+    Formats the institution name with city, district, and state,
+    intelligently deduplicating repetitive tokens (e.g. Pune, Pune, Pune).
+    """
+    if not academic:
+        return ""
+    if isinstance(academic, dict):
+        inst = str(academic.get('institution_name', '') or "").strip()
+        city = str(academic.get('city', '') or "").strip()
+        district = str(academic.get('district', '') or "").strip()
+        state = str(academic.get('state', '') or "").strip()
+    else:
+        inst = (getattr(academic, 'institution_name', '') or "").strip()
+        city = (academic.city.name if hasattr(academic, 'city') and academic.city else "").strip()
+        district = (academic.district.name if hasattr(academic, 'district') and academic.district else "").strip()
+        state = (academic.state.name if hasattr(academic, 'state') and academic.state else "").strip()
+
+    parts = [inst] if inst else []
+    inst_lower = inst.lower()
+
+    if city and not (inst_lower.endswith(city.lower()) or f", {city.lower()}" in inst_lower):
+        parts.append(city)
+
+    if district and district.lower() != city.lower() and city.lower() not in district.lower() and not (inst_lower.endswith(district.lower()) or f", {district.lower()}" in inst_lower):
+        parts.append(district)
+
+    if state and not (inst_lower.endswith(state.lower()) or f", {state.lower()}" in inst_lower):
+        parts.append(state)
+
+    return ", ".join(parts)
+
+def format_recipient_address(academic):
+    """
+    Cleans up and deduplicates the raw academic street address,
+    removing duplicate trailing tokens (city, district, state, pincode)
+    that are already displayed on the city/state/pincode line below it.
+    Returns a tuple of (clean_street_address, location_line).
+    """
+    if not academic:
+        return "", ""
+    if isinstance(academic, dict):
+        address = str(academic.get('address', '') or "").strip()
+        institution = str(academic.get('institution_name', '') or "").strip()
+        city = str(academic.get('city', '') or "").strip()
+        district = str(academic.get('district', '') or "").strip()
+        state = str(academic.get('state', '') or "").strip()
+        pincode = str(academic.get('pincode', '') or "").strip()
+    else:
+        address = (getattr(academic, 'address', '') or "").strip()
+        institution = (getattr(academic, 'institution_name', '') or "").strip()
+        city = (academic.city.name if hasattr(academic, 'city') and academic.city else "").strip()
+        district = (academic.district.name if hasattr(academic, 'district') and academic.district else "").strip()
+        state = (academic.state.name if hasattr(academic, 'state') and academic.state else "").strip()
+        pincode = str(academic.pincode or "").strip() if hasattr(academic, 'pincode') and academic.pincode else ""
+
+    loc_line = ", ".join([part for part in [city, state] if part])
+    if pincode:
+        loc_line = f"{loc_line} – {pincode}"
+
+    clean = re.sub(r'[\r\n\t]+', ', ', address)
+    clean = re.sub(r'\s+', ' ', clean)
+    clean = re.sub(r'\s*,\s*', ', ', clean)
+    clean = re.sub(r'(,\s*)+', ', ', clean).strip(', ')
+
+    if institution and clean.lower().startswith(institution.lower()):
+        clean = clean[len(institution):].strip(', ')
+
+    for _ in range(3):
+        if pincode:
+            clean = re.sub(rf'[-–\s,]+{re.escape(pincode)}\s*$', '', clean, flags=re.IGNORECASE).strip(', ')
+        if state:
+            clean = re.sub(rf'(?:,\s*|\s+){re.escape(state)}\s*$', '', clean, flags=re.IGNORECASE).strip(', ')
+        if district and district.lower() != city.lower():
+            clean = re.sub(rf'(?:,\s*|\s+){re.escape(district)}\s*$', '', clean, flags=re.IGNORECASE).strip(', ')
+        if city:
+            clean = re.sub(rf'(?:,\s*|\s+){re.escape(city)}\s*$', '', clean, flags=re.IGNORECASE).strip(', ')
+
+    clean = re.sub(r'^(,\s*)+', '', clean).strip(', ')
+    return clean, loc_line
 
 def generate_unique_reference_no(year, doc_type, size=8):
     """
@@ -168,14 +252,17 @@ def generate_college_receipt_pdf(payment):
     p.drawCentredString(297.6, 745, SPOKEN_BASE_URL)
 
     
-    # 2. Reference Number
+    # 2. Reference Number & Date
     year = payment.payment_date.year if (hasattr(payment, 'payment_date') and payment.payment_date) else 2026
     payer_name = getattr(payment, 'name_of_the_payer', '') if not isinstance(payment, dict) else payment.get('name_of_the_payer', '')
     ref_no = get_or_create_academic_document(payment, 'REC', year=year, recipient_name=payer_name)
     display_ref = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
+    date_formatted = format_ordinal_date(payment.payment_date)
+    date_str = f"Date: - {date_formatted}"
     p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
     p.drawString(54, 665, display_ref)
+    p.drawRightString(541.27, 665, date_str)
     
     # 3. Title
     p.setFont("Helvetica-Bold", 13)
@@ -216,14 +303,9 @@ def generate_college_receipt_pdf(payment):
         
     date_formatted = format_ordinal_date(payment.payment_date)
     
-    # Institution location strings
-    institution = payment.academic.institution_name
-    city = payment.academic.city.name if payment.academic.city else ""
-    district = payment.academic.district.name if payment.academic.district else ""
-    state = payment.academic.state.name if payment.academic.state else ""
-    
-    loc_parts = [p for p in [institution, city, district, state] if p]
-    location_str = ", ".join(loc_parts)
+    # Institution location strings with smart deduplication
+    academic = getattr(payment, 'academic', None)
+    location_str = format_institution_location(academic)
     
     p2_text = (
         f"Please find the acknowledgement of payment of <b>Rs. {amount_formatted}/-</b> "
@@ -286,8 +368,8 @@ def generate_college_receipt_pdf(payment):
     
     p.setFont("Helvetica", 8)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawCentredString(297.6, 36, "Seat 60, SINE, RBTIC Building, IIT Bombay, Powai, Mumbai - 400 076")
-    p.drawCentredString(297.6, 24, "+ 91 22 25764229")
+    p.drawCentredString(297.6, 36, "6016 A, SINE, RBTIC Building IIT Bombay, Powai, Mumbai 400 076")
+    p.drawCentredString(297.6, 24, "+91 22-25764229 | contact@edupyramids.org | GSTIN: 27AAICE5225E1ZT | CIN: U85499MH2024PTC435910")
     
     p.showPage()
     p.save()
@@ -379,13 +461,9 @@ def generate_school_receipt_pdf(payment):
     except (ValueError, TypeError):
         amount_formatted = str(payment.amount)
         
-    institution = payment.academic.institution_name
-    city = payment.academic.city.name if payment.academic.city else ""
-    district = payment.academic.district.name if payment.academic.district else ""
-    state = payment.academic.state.name if payment.academic.state else ""
-    
-    loc_parts = [p for p in [institution, city, district, state] if p]
-    location_str = ", ".join(loc_parts)
+    # Institution location strings with smart deduplication
+    academic = getattr(payment, 'academic', None)
+    location_str = format_institution_location(academic)
     
     p2_text = (
         f"Please find the acknowledgement of payment of <b>Rs. {amount_formatted}/-</b> "
@@ -521,24 +599,7 @@ def generate_college_loa_pdf(payment):
     # 4. Recipient block
     academic = payment.academic
     institution = academic.institution_name
-    address = academic.address or ""
-    city = academic.city.name if academic.city else ""
-    district = academic.district.name if academic.district else ""
-    state = academic.state.name if academic.state else ""
-    pincode = str(academic.pincode) if academic.pincode else ""
-
-    loc_line = ", ".join([part for part in [city, state] if part])
-    if pincode:
-        loc_line = f"{loc_line} – {pincode}"
-
-    # Clean up newline and whitespace anomalies from raw database address field
-    clean_address = re.sub(r'[\r\n\t]+', ', ', address)
-    clean_address = re.sub(r'\s+', ' ', clean_address)
-    clean_address = re.sub(r'\s*,\s*', ', ', clean_address)
-    clean_address = re.sub(r'(,\s*)+', ', ', clean_address).strip(', ')
-    if institution and clean_address.lower().startswith(institution.lower()):
-        clean_address = clean_address[len(institution):].strip(', ')
-    clean_address = re.sub(r'^(,\s*)+', '', clean_address).strip(', ')
+    clean_address, loc_line = format_recipient_address(academic)
 
     recipient_style = ParagraphStyle(
         name='LOARecipient',
@@ -716,24 +777,7 @@ def generate_school_loa_pdf(payment):
     # 4. Recipient block
     academic = payment.academic
     institution = academic.institution_name
-    address = academic.address or ""
-    city = academic.city.name if academic.city else ""
-    district = academic.district.name if academic.district else ""
-    state = academic.state.name if academic.state else ""
-    pincode = str(academic.pincode) if academic.pincode else ""
-
-    loc_line = ", ".join([part for part in [city, state] if part])
-    if pincode:
-        loc_line = f"{loc_line} – {pincode}"
-
-    # Clean up newline and whitespace anomalies from raw database address field
-    clean_address = re.sub(r'[\r\n\t]+', ', ', address)
-    clean_address = re.sub(r'\s+', ' ', clean_address)
-    clean_address = re.sub(r'\s*,\s*', ', ', clean_address)
-    clean_address = re.sub(r'(,\s*)+', ', ', clean_address).strip(', ')
-    if institution and clean_address.lower().startswith(institution.lower()):
-        clean_address = clean_address[len(institution):].strip(', ')
-    clean_address = re.sub(r'^(,\s*)+', '', clean_address).strip(', ')
+    clean_address, loc_line = format_recipient_address(academic)
 
     recipient_style = ParagraphStyle(
         name='SchoolLOARecipient',
@@ -978,21 +1022,15 @@ def generate_college_loc_pdf(payment):
     # 3. Recipient Address
     academic = payment.academic
     institution = academic.institution_name
-    address = academic.address or ""
-    city = academic.city.name if academic.city else ""
-    state = academic.state.name if academic.state else ""
-    pincode = str(academic.pincode) if academic.pincode else ""
+    clean_address, loc_line = format_recipient_address(academic)
+    salutation_label = get_salutation_label(payment)
 
-    loc_line = ", ".join([part for part in [city, state] if part])
-    if pincode:
-        loc_line = f"{loc_line} - {pincode}"
-
-    recipient_text = f"To,<br/>The Principal,<br/><b>{institution}</b>,<br/>"
-    if address:
-        recipient_text += f"{address},<br/>"
+    recipient_lines = ["To,", salutation_label, f"<b>{institution}</b>,"]
+    if clean_address:
+        recipient_lines.append(f"{clean_address},")
     if loc_line:
-        recipient_text += f"{loc_line}."
-    story.append(Paragraph(recipient_text, recipient_style))
+        recipient_lines.append(f"{loc_line}.")
+    story.append(Paragraph("<br/>".join(recipient_lines), recipient_style))
     story.append(Spacer(1, 8))
 
     # 4. Subject Line
@@ -1054,7 +1092,7 @@ def generate_college_loc_pdf(payment):
     sig_title_style = ParagraphStyle('LOCSigTitle', fontName='Helvetica', fontSize=8.5, leading=12)
 
     if os.path.exists(footer_img_path):
-        sig_elements.append(Image(footer_img_path, width=150, height=33))
+        sig_elements.append(Image(footer_img_path, width=150, height=33, hAlign='LEFT'))
         sig_elements.append(Spacer(1, 4))
     else:
         sig_elements.append(Paragraph("<b>For EduPyramids Educational Services Pvt. Ltd.</b>", sig_company_style))
@@ -1066,7 +1104,7 @@ def generate_college_loc_pdf(payment):
     if has_sig or has_stamp:
         sig_cell = Image(sig_img_path, width=100, height=38) if has_sig else Paragraph("", body_style)
         stamp_cell = Image(stamp_img_path, width=60, height=60) if has_stamp else Paragraph("", body_style)
-        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[110, 80])
+        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[110, 80], hAlign='LEFT')
         sig_tbl.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -1271,21 +1309,15 @@ def generate_school_loc_pdf(payment):
     # 3. Recipient Address
     academic = payment.academic
     institution = academic.institution_name
-    address = academic.address or ""
-    city = academic.city.name if academic.city else ""
-    state = academic.state.name if academic.state else ""
-    pincode = str(academic.pincode) if academic.pincode else ""
+    clean_address, loc_line = format_recipient_address(academic)
+    salutation_label = get_salutation_label(payment)
 
-    loc_line = ", ".join([part for part in [city, state] if part])
-    if pincode:
-        loc_line = f"{loc_line} - {pincode}"
-
-    recipient_text = f"To,<br/>The Principal,<br/><b>{institution}</b>,<br/>"
-    if address:
-        recipient_text += f"{address},<br/>"
+    recipient_lines = ["To,", salutation_label, f"<b>{institution}</b>,"]
+    if clean_address:
+        recipient_lines.append(f"{clean_address},")
     if loc_line:
-        recipient_text += f"{loc_line}."
-    story.append(Paragraph(recipient_text, recipient_style))
+        recipient_lines.append(f"{loc_line}.")
+    story.append(Paragraph("<br/>".join(recipient_lines), recipient_style))
     story.append(Spacer(1, 8))
 
     # 4. Subject Line
@@ -1361,7 +1393,7 @@ def generate_school_loc_pdf(payment):
     if has_sig or has_stamp:
         sig_cell = Image(sig_school_path, width=100, height=38) if has_sig else Paragraph("", body_style)
         stamp_cell = Image(stamp_school_path, width=60, height=60) if has_stamp else Paragraph("", body_style)
-        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[110, 80])
+        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[110, 80], hAlign='LEFT')
         sig_tbl.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
