@@ -5233,6 +5233,8 @@ def transfer_foss(request):
 
             try:
                 with transaction.atomic():
+                    # first pass: ensure all target TutorialDetails exist and populate tgt_td_map
+                    tgt_td_map = {}
                     for rank, src_td in enumerate(selected_tutorials, start=1):
                         target_order = target_existing_max + rank
                         order_details.append({
@@ -5243,7 +5245,6 @@ def transfer_foss(request):
                             'target_order': target_order,
                         })
 
-                        # check/create target tutorialdetail
                         tgt_td, created_td = TutorialDetail.objects.get_or_create(
                             foss=target_foss,
                             tutorial=src_td.tutorial,
@@ -5256,6 +5257,11 @@ def transfer_foss(request):
                         if not created_td and tgt_td.order != target_order:
                             tgt_td.order = target_order
                             tgt_td.save(update_fields=['order'])
+
+                        tgt_td_map[src_td.id] = tgt_td
+
+                    for src_td in selected_tutorials:
+                        tgt_td = tgt_td_map[src_td.id]
 
                         # create target tutorial directory and resources subdirectory
                         tgt_td_dir = os.path.join(target_foss_dir, str(tgt_td.id))
@@ -5276,6 +5282,23 @@ def transfer_foss(request):
 
                         tgt_cc = None
                         if src_cc:
+                            # resolve prerequisite tutorial for target foss
+                            target_prereq = None
+                            if src_cc.prerequisite:
+                                if src_cc.prerequisite.foss_id == source_foss.id:
+                                    if src_cc.prerequisite_id in tgt_td_map:
+                                        target_prereq = tgt_td_map[src_cc.prerequisite_id]
+                                    else:
+                                        target_prereq = TutorialDetail.objects.filter(
+                                            foss=target_foss,
+                                            tutorial=src_cc.prerequisite.tutorial,
+                                            level=src_cc.prerequisite.level
+                                        ).first()
+                                        if not target_prereq and not is_move:
+                                            target_prereq = src_cc.prerequisite
+                                else:
+                                    target_prereq = src_cc.prerequisite
+
                             tgt_cc, created_cc = TutorialCommonContent.objects.get_or_create(
                                 tutorial_detail=tgt_td,
                                 defaults={
@@ -5288,7 +5311,7 @@ def transfer_foss(request):
                                     'assignment': src_cc.assignment,
                                     'assignment_user': src_cc.assignment_user,
                                     'assignment_status': src_cc.assignment_status,
-                                    'prerequisite': None,
+                                    'prerequisite': target_prereq,
                                     'prerequisite_user': src_cc.prerequisite_user,
                                     'prerequisite_status': src_cc.prerequisite_status,
                                     'additional_material': src_cc.additional_material,
@@ -5299,6 +5322,9 @@ def transfer_foss(request):
                                     'keyword_status': src_cc.keyword_status,
                                 }
                             )
+                            if not created_cc and tgt_cc.prerequisite != target_prereq:
+                                tgt_cc.prerequisite = target_prereq
+                                tgt_cc.save(update_fields=['prerequisite'])
 
                             # copy resource files into target resources directory
                             if os.path.exists(src_resources_dir):
@@ -5420,6 +5446,7 @@ def transfer_foss(request):
                                 try:
                                     if src_cc:
                                         src_cc.delete()
+                                    TutorialCommonContent.objects.filter(prerequisite=src_td, tutorial_detail__foss=source_foss).update(prerequisite=None)
                                     src_td.delete()
                                 except Exception as e:
                                     logger.warning("Could not delete source TutorialDetail %s: %s", src_td.id, str(e))

@@ -5,7 +5,7 @@
 {% block title %}Transfer FOSS Tutorials{% endblock %}
 {% block heading %}
     <i class="fa fa-exchange"></i> Transfer FOSS Tutorials
-    <a href="{% url 'events:events_dashboard' %}" class='dashboard pull-right'>Dashboard</a>
+    <a href="{% url 'creation:creationhome' %}" class='dashboard pull-right'>Dashboard</a>
 {% endblock %}
 
 {% block content %}
@@ -84,7 +84,7 @@
 
     <div class="form-group" style="margin-top: 20px;">
         <input type="submit" class="btn btn-primary" id="btn-submit-transfer" value="Transfer" disabled />
-        <a href="{% url 'events:events_dashboard' %}" class="btn btn-default" style="margin-left: 5px;">Cancel</a>
+        <a href="{% url 'creation:creationhome' %}" class="btn btn-default" style="margin-left: 5px;">Cancel</a>
     </div>
 </form>
 {% endblock %}
@@ -128,7 +128,7 @@ $(document).ready(function () {
         $('#language-list-container').html('<p class="text-muted" style="margin: 5px 0;">Loading languages...</p>');
 
         $.ajax({
-            url: "{% url 'eventsv2:ajax_transfer_foss_details' %}",
+            url: "{% url 'creation:ajax_transfer_foss_details' %}",
             type: "POST",
             data: {
                 'foss_id': fossId,
