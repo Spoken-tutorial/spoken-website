@@ -63,6 +63,19 @@
         </div>
     </div>
 
+    <div class="row" style="margin-top: 15px;">
+        <div class="col-md-12 form-group">
+            <label for="{{ form.tutorial_order.id_for_label }}">Tutorial Display Order:</label>
+            <button type="button" class="btn btn-default btn-xs pull-right" id="btn-reset-order">
+                <i class="fa fa-refresh"></i> Reset Default Order
+            </button>
+            <p class="text-muted" style="margin-bottom: 6px; font-size: 13px;">
+                Edit the leading numbers to change the order of tutorials in the target FOSS.
+            </p>
+            {% render_field form.tutorial_order class+="form-control" style="font-family: monospace; font-size: 13px;" %}
+        </div>
+    </div>
+
     <div class="form-group checkbox" style="margin-top: 15px;">
         <label>
             {% render_field form.is_move %} Move tutorials instead of copying
@@ -79,16 +92,26 @@
 {% block jsblock %}
 <script type="text/javascript">
 $(document).ready(function () {
+    var loadedTutorials = [];
+    var orderManuallyEdited = false;
+
+    $('#id_tutorial_order').on('input propertychange', function () {
+        orderManuallyEdited = true;
+    });
+
     // trigger on source foss change
     $('#id_source_foss').on('change', function () {
         var fossId = $(this).val();
 
         $('#select-all-tutorials').prop('checked', false);
         $('#select-all-languages').prop('checked', false);
+        orderManuallyEdited = false;
 
         if (!fossId) {
+            loadedTutorials = [];
             $('#tutorial-list-container').html('<p class="text-muted" style="margin: 5px 0;">Select a Source FOSS to load tutorials.</p>');
             $('#language-list-container').html('<p class="text-muted" style="margin: 5px 0;">Select a Source FOSS to load languages.</p>');
+            $('#id_tutorial_order').val('');
             $('#select-all-tutorials, #select-all-languages').prop('disabled', true);
             updateSubmitButton();
             return;
@@ -114,8 +137,10 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (response) {
                 if (response.status === 'success') {
-                    renderTutorials(response.tutorials || []);
+                    loadedTutorials = response.tutorials || [];
+                    renderTutorials(loadedTutorials);
                     renderLanguages(response.languages || []);
+                    syncTutorialOrder(true);
                     $('#select-all-tutorials, #select-all-languages').prop('disabled', false);
                 } else {
                     $('#tutorial-list-container').html('<p class="text-danger">Failed to load tutorials.</p>');
@@ -170,9 +195,78 @@ $(document).ready(function () {
         $('#select-all-languages').prop('checked', false);
     }
 
+    function syncTutorialOrder(forceReset) {
+        if (!loadedTutorials.length) {
+            $('#id_tutorial_order').val('');
+            return;
+        }
+
+        var checkedIds = $('.tut-checkbox:checked').map(function () {
+            return parseInt($(this).val());
+        }).get();
+
+        var activeTutorials = [];
+        if (checkedIds.length > 0) {
+            $.each(loadedTutorials, function (i, tut) {
+                if (checkedIds.indexOf(tut.id) !== -1) {
+                    activeTutorials.push(tut);
+                }
+            });
+        } else {
+            activeTutorials = loadedTutorials;
+        }
+
+        if (forceReset || !orderManuallyEdited) {
+            var lines = [];
+            $.each(activeTutorials, function (i, tut) {
+                lines.push((i + 1) + ' - ' + tut.tutorial);
+            });
+            $('#id_tutorial_order').val(lines.join('\n'));
+            if (forceReset) {
+                orderManuallyEdited = false;
+            }
+        } else {
+            var currentText = $('#id_tutorial_order').val();
+            var existingLines = currentText.split('\n');
+            var existingMap = {};
+            var maxNum = 0;
+
+            $.each(existingLines, function (i, line) {
+                var trimmed = line.trim();
+                if (!trimmed) return;
+                var match = trimmed.match(/^\s*(\d+)\s*[-.:)]?\s*(.+)$/);
+                if (match) {
+                    var num = parseInt(match[1]);
+                    var title = match[2].trim().toLowerCase();
+                    existingMap[title] = num;
+                    if (num > maxNum) maxNum = num;
+                }
+            });
+
+            var newLines = [];
+            $.each(activeTutorials, function (i, tut) {
+                var titleLower = tut.tutorial.trim().toLowerCase();
+                var num = existingMap[titleLower];
+                if (num === undefined) {
+                    maxNum++;
+                    num = maxNum;
+                }
+                newLines.push(num + ' - ' + tut.tutorial);
+            });
+            $('#id_tutorial_order').val(newLines.join('\n'));
+        }
+    }
+
+    // reset tutorial order to default
+    $('#btn-reset-order').on('click', function (e) {
+        e.preventDefault();
+        syncTutorialOrder(true);
+    });
+
     // select all tutorials toggle
     $('#select-all-tutorials').on('change', function () {
         $('.tut-checkbox').prop('checked', $(this).is(':checked'));
+        syncTutorialOrder(false);
         updateSubmitButton();
     });
 
@@ -186,6 +280,7 @@ $(document).ready(function () {
         var total = $('.tut-checkbox').length;
         var checked = $('.tut-checkbox:checked').length;
         $('#select-all-tutorials').prop('checked', total > 0 && total === checked);
+        syncTutorialOrder(false);
         updateSubmitButton();
     });
 

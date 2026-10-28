@@ -1292,6 +1292,16 @@ class TransferFossForm(forms.Form):
         widget=forms.CheckboxInput(attrs={'id': 'id_is_move'}),
         label="Move tutorials instead of copying"
     )
+    tutorial_order = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'id': 'id_tutorial_order',
+            'rows': 8,
+            'placeholder': '1 - Tutorial Title\n2 - Tutorial Title\n...'
+        }),
+        label="Tutorial Display Order"
+    )
 
     def clean(self):
         cleaned_data = super(TransferFossForm, self).clean()

@@ -692,6 +692,7 @@ class FossTransferLog(models.Model):
     target_foss = models.ForeignKey(FossCategory, related_name='transfers_as_target', on_delete=models.PROTECT)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     transferred_data = models.TextField(help_text="JSON summary of transferred tutorial IDs, language IDs, and file details")
+    order_data = models.TextField(blank=True, null=True, help_text="JSON summary of tutorial order details")
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta(object):

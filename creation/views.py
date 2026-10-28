@@ -51,7 +51,7 @@ from . import services
 from django.utils import timezone
 from datetime import datetime,timedelta
 from creation.filters import CreationStatisticsFilter, ContributorRatingFilter, ReviewerFilter
-from django.db.models import Count, Min, Q, Sum, F
+from django.db.models import Count, Min, Max, Q, Sum, F
 from django.contrib.auth.models import User
 import itertools
 from django.utils.html import format_html
@@ -5174,6 +5174,7 @@ def transfer_foss(request):
             source_foss = form.cleaned_data['source_foss']
             target_foss = form.cleaned_data['target_foss']
             is_move = form.cleaned_data['is_move']
+            tutorial_order_input = form.cleaned_data.get('tutorial_order', '')
 
             if not selected_tut_ids:
                 messages.error(request, 'Please select at least one tutorial to transfer.')
@@ -5182,6 +5183,22 @@ def transfer_foss(request):
             if not selected_lang_ids:
                 messages.error(request, 'Please select at least one language to transfer.')
                 return render(request, 'creation/templates/transfer_foss.html', {'form': form})
+
+            # parse custom tutorial order if provided
+            custom_order_map = {}
+            if tutorial_order_input:
+                for line in tutorial_order_input.strip().splitlines():
+                    line = line.strip()
+                    if not line:
+                        continue
+                    m = re.match(r'^\s*(\d+)\s*[-.:)]?\s*(.+)$', line)
+                    if m:
+                        try:
+                            order_num = int(m.group(1))
+                            tut_title = m.group(2).strip().lower()
+                            custom_order_map[tut_title] = order_num
+                        except (ValueError, IndexError):
+                            pass
 
             # check if directory of target foss exists, else create it
             target_foss_dir = os.path.join(settings.MEDIA_ROOT, 'videos', str(target_foss.id))
@@ -5196,23 +5213,49 @@ def transfer_foss(request):
             source_foss_dir = os.path.join(settings.MEDIA_ROOT, 'videos', str(source_foss.id))
 
             transferred_records = []
+            order_details = []
             files_transferred_count = 0
-            selected_tutorials = TutorialDetail.objects.filter(id__in=selected_tut_ids, foss=source_foss).order_by('order')
+            selected_tutorials = list(TutorialDetail.objects.filter(id__in=selected_tut_ids, foss=source_foss))
+
+            # sort tutorials based on custom order input, falling back to original order
+            def tutorial_sort_key(td):
+                title_key = td.tutorial.strip().lower()
+                custom_num = custom_order_map.get(title_key)
+                if custom_num is not None:
+                    return (custom_num, td.order, td.tutorial)
+                return (999999 + td.order, td.order, td.tutorial)
+
+            selected_tutorials.sort(key=tutorial_sort_key)
             selected_languages = Language.objects.filter(id__in=selected_lang_ids)
+
+            # calculate starting order offset for target foss
+            target_existing_max = TutorialDetail.objects.filter(foss=target_foss).aggregate(Max('order'))['order__max'] or 0
 
             try:
                 with transaction.atomic():
-                    for src_td in selected_tutorials:
+                    for rank, src_td in enumerate(selected_tutorials, start=1):
+                        target_order = target_existing_max + rank
+                        order_details.append({
+                            'tutorial_id': src_td.id,
+                            'tutorial': src_td.tutorial,
+                            'source_order': src_td.order,
+                            'custom_input_order': custom_order_map.get(src_td.tutorial.strip().lower()),
+                            'target_order': target_order,
+                        })
+
                         # check/create target tutorialdetail
                         tgt_td, created_td = TutorialDetail.objects.get_or_create(
                             foss=target_foss,
                             tutorial=src_td.tutorial,
                             level=src_td.level,
                             defaults={
-                                'order': src_td.order,
+                                'order': target_order,
                                 'user': request.user
                             }
                         )
+                        if not created_td and tgt_td.order != target_order:
+                            tgt_td.order = target_order
+                            tgt_td.save(update_fields=['order'])
 
                         # create target tutorial directory and resources subdirectory
                         tgt_td_dir = os.path.join(target_foss_dir, str(tgt_td.id))
@@ -5399,7 +5442,8 @@ def transfer_foss(request):
                         source_foss=source_foss,
                         target_foss=target_foss,
                         user=request.user,
-                        transferred_data=json.dumps(transfer_summary)
+                        transferred_data=json.dumps(transfer_summary),
+                        order_data=json.dumps(order_details)
                     )
 
                 action_verb = "moved" if is_move else "copied"
