@@ -98,11 +98,125 @@
         <li {% if status == 'approved' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/approved/">Approved</a></li>
         <li {% if status == 'ongoing' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/ongoing/">Ongoing</a></li>
         <li {% if status == 'completed' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/completed/">Completed</a></li>
-        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/reschedule/">Reschedule</a></li>
+        
         {% if role != 'invigilator' %}
+        <li {% if status == 'reschedule' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/reschedule/">Reschedule</a></li>
             <li {% if status == 'rejected' %}{{ 'class="active"'}}{% endif %}><a href="/software-training/test/{{role}}/rejected/">Rejected</a></li>
         {% endif %}
     </ul>
+
+{% if role == 'rp' or role == 'em' %}
+<div class="alert alert-info" style="margin-top: 15px;">
+   
+    <ul style="margin-bottom: 0;">
+
+        {% if status == 'predated' %}
+            <li>
+                <strong>Pre-Dated:</strong>
+                {% if role == 'rp' %}
+                    Includes tests with database status 0, 1, 2, or 3
+                    and a scheduled date before today.
+                {% elif role == 'em' %}
+                    Results are filtered by assigned academic centres and
+                    status. The current backend logic does not apply a
+                    separate past-date condition for this tab.
+                {% endif %}
+            </li>
+
+        {% elif status == 'pending' %}
+            <li>
+                <strong>Pending:</strong>
+                Database status = 0. Additional role-specific filters apply.
+            </li>
+
+        {% elif status == 'waitingforinvigilator' %}
+            <li>
+                <strong>Waiting for Invigilator:</strong>
+                Database status = 1. Additional role-specific filters apply.
+            </li>
+
+        {% elif status == 'approved' %}
+            <li>
+                <strong>Approved:</strong>
+                Database status = 2. Results also depend on the role-specific
+                and assigned academic-centre filters.
+            </li>
+
+        {% elif status == 'ongoing' %}
+            <li>
+                <strong>Ongoing:</strong>
+                {% if role == 'rp' %}
+                    Database status = 3 and scheduled date = today.
+                {% elif role == 'em' %}
+                    Database status = 3 and scheduled date = today,
+                    subject to the assigned academic-centre filters.
+                {% endif %}
+            </li>
+
+        {% elif status == 'completed' %}
+            <li>
+                <strong>Completed:</strong>
+                Database status = 4. Additional role-specific filters apply.
+            </li>
+
+        {% elif status == 'reschedule' %}
+            <li>
+                <strong>Reschedule:</strong>
+                Currently maps to database status = 2, the same status
+                value as Approved.
+            </li>
+
+        {% elif status == 'rejected' %}
+            <li>
+                <strong>Rejected:</strong>
+                Database status = 5. Additional role-specific filters apply.
+            </li>
+        {% endif %}
+
+    </ul>
+</div>
+
+{% else %}
+
+<div class="alert alert-info" style="margin-top: 15px;">
+
+    {% if status == 'predated' %}
+        <strong>Pre-Dated:</strong>
+        The scheduled date has already passed. Check the test details to
+        see whether any further action is needed.
+
+    {% elif status == 'pending' %}
+        <strong>Pending:</strong>
+        Your test request is waiting for the next step.
+
+    {% elif status == 'waitingforinvigilator' %}
+        <strong>Waiting for Invigilator:</strong>
+        The test is waiting for an invigilator to accept the request.
+
+    {% elif status == 'approved' %}
+        <strong>Approved:</strong>
+        The test has been approved. Check the scheduled date and test details.
+
+    {% elif status == 'ongoing' %}
+        <strong>Ongoing:</strong>
+        Tests scheduled for today that meet the system's conditions are shown here.
+
+    {% elif status == 'completed' %}
+        <strong>Completed:</strong>
+        These tests have been completed.
+
+    {% elif status == 'reschedule' %}
+        <strong>Reschedule:</strong>
+        Check the test details for information about rescheduling.
+
+    {% elif status == 'rejected' %}
+        <strong>Rejected:</strong>
+        These test requests have been rejected.
+    {% endif %}
+
+</div>
+{% endif %}
+
     <!-- Tab panes -->
     <div class="tab-content">
         <div class="tab-pane" id="new">
