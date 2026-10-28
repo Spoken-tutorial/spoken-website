@@ -70,7 +70,7 @@
                 <i class="fa fa-refresh"></i> Reset Default Order
             </button>
             <p class="text-muted" style="margin-bottom: 6px; font-size: 13px;">
-                Edit the leading numbers to change the order of tutorials in the target FOSS.
+                Edit the leading numbers to change the order of tutorials in the target FOSS. Tutorials to be transferred are marked with <strong>[Source]</strong>.
             </p>
             {% render_field form.tutorial_order class+="form-control" style="font-family: monospace; font-size: 13px;" %}
         </div>
@@ -79,6 +79,9 @@
     <div class="form-group checkbox" style="margin-top: 15px;">
         <label>
             {% render_field form.is_move %} Move tutorials instead of copying
+            <span class="text-muted" style="font-weight: normal; font-size: 12px; display: block; margin-top: 3px; margin-left: 20px;">
+                (Note: Selected tutorials and files will be deleted from the source FOSS and moved to the target FOSS)
+            </span>
         </label>
     </div>
 
@@ -92,9 +95,11 @@
 {% block jsblock %}
 <script type="text/javascript">
 $(document).ready(function () {
-    var loadedTutorials = [];
+    var loadedSourceTutorials = [];
+    var loadedTargetTutorials = [];
     var orderManuallyEdited = false;
 
+    // track manual editing in tutorial order textarea
     $('#id_tutorial_order').on('input propertychange', function () {
         orderManuallyEdited = true;
     });
@@ -106,12 +111,12 @@ $(document).ready(function () {
         $('#select-all-tutorials').prop('checked', false);
         $('#select-all-languages').prop('checked', false);
         orderManuallyEdited = false;
+        $('#id_tutorial_order').val('');
 
         if (!fossId) {
-            loadedTutorials = [];
+            loadedSourceTutorials = [];
             $('#tutorial-list-container').html('<p class="text-muted" style="margin: 5px 0;">Select a Source FOSS to load tutorials.</p>');
             $('#language-list-container').html('<p class="text-muted" style="margin: 5px 0;">Select a Source FOSS to load languages.</p>');
-            $('#id_tutorial_order').val('');
             $('#select-all-tutorials, #select-all-languages').prop('disabled', true);
             updateSubmitButton();
             return;
@@ -121,7 +126,7 @@ $(document).ready(function () {
         $('#id_target_foss option').prop('disabled', false);
         $('#id_target_foss option[value="' + fossId + '"]').prop('disabled', true);
         if ($('#id_target_foss').val() === fossId) {
-            $('#id_target_foss').val('');
+            $('#id_target_foss').val('').trigger('change');
         }
 
         $('#tutorial-list-container').html('<p class="text-muted" style="margin: 5px 0;">Loading tutorials...</p>');
@@ -137,10 +142,12 @@ $(document).ready(function () {
             dataType: 'json',
             success: function (response) {
                 if (response.status === 'success') {
-                    loadedTutorials = response.tutorials || [];
-                    renderTutorials(loadedTutorials);
+                    loadedSourceTutorials = response.tutorials || [];
+                    renderTutorials(loadedSourceTutorials);
                     renderLanguages(response.languages || []);
-                    syncTutorialOrder(true);
+                    if ($('#id_target_foss').val()) {
+                        syncTutorialOrder(true);
+                    }
                     $('#select-all-tutorials, #select-all-languages').prop('disabled', false);
                 } else {
                     $('#tutorial-list-container').html('<p class="text-danger">Failed to load tutorials.</p>');
@@ -151,6 +158,43 @@ $(document).ready(function () {
             error: function () {
                 $('#tutorial-list-container').html('<p class="text-danger">Error loading tutorials.</p>');
                 $('#language-list-container').html('<p class="text-danger">Error loading languages.</p>');
+                updateSubmitButton();
+            }
+        });
+    });
+
+    // trigger on target foss change
+    $('#id_target_foss').on('change', function () {
+        var targetFossId = $(this).val();
+        orderManuallyEdited = false;
+
+        if (!targetFossId) {
+            loadedTargetTutorials = [];
+            $('#id_tutorial_order').val('');
+            updateSubmitButton();
+            return;
+        }
+
+        $.ajax({
+            url: "{% url 'creation:ajax_transfer_foss_details' %}",
+            type: "POST",
+            data: {
+                'foss_id': targetFossId,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response.status === 'success') {
+                    loadedTargetTutorials = response.tutorials || [];
+                } else {
+                    loadedTargetTutorials = [];
+                }
+                syncTutorialOrder(true);
+                updateSubmitButton();
+            },
+            error: function () {
+                loadedTargetTutorials = [];
+                syncTutorialOrder(true);
                 updateSubmitButton();
             }
         });
@@ -183,9 +227,10 @@ $(document).ready(function () {
 
         var html = '';
         $.each(languages, function (i, lang) {
+            var isEnglish = (lang.name && lang.name.trim().toLowerCase() === 'english');
             html += '<div class="checkbox" style="margin: 5px 0;">';
             html += '<label>';
-            html += '<input type="checkbox" name="languages" value="' + lang.id + '" class="lang-checkbox"> ';
+            html += '<input type="checkbox" name="languages" value="' + lang.id + '" class="lang-checkbox"' + (isEnglish ? ' checked' : '') + '> ';
             html += lang.name;
             html += '</label>';
             html += '</div>';
@@ -196,31 +241,46 @@ $(document).ready(function () {
     }
 
     function syncTutorialOrder(forceReset) {
-        if (!loadedTutorials.length) {
+        var targetFossId = $('#id_target_foss').val();
+        if (!targetFossId) {
             $('#id_tutorial_order').val('');
             return;
         }
 
-        var checkedIds = $('.tut-checkbox:checked').map(function () {
+        var checkedSourceIds = $('.tut-checkbox:checked').map(function () {
             return parseInt($(this).val());
         }).get();
 
-        var activeTutorials = [];
-        if (checkedIds.length > 0) {
-            $.each(loadedTutorials, function (i, tut) {
-                if (checkedIds.indexOf(tut.id) !== -1) {
-                    activeTutorials.push(tut);
+        var selectedSourceTuts = [];
+        if (checkedSourceIds.length > 0) {
+            $.each(loadedSourceTutorials, function (i, tut) {
+                if (checkedSourceIds.indexOf(tut.id) !== -1) {
+                    selectedSourceTuts.push(tut);
                 }
             });
-        } else {
-            activeTutorials = loadedTutorials;
+        }
+
+        if (!loadedTargetTutorials.length && !selectedSourceTuts.length) {
+            $('#id_tutorial_order').val('');
+            return;
         }
 
         if (forceReset || !orderManuallyEdited) {
             var lines = [];
-            $.each(activeTutorials, function (i, tut) {
-                lines.push((i + 1) + ' - ' + tut.tutorial);
+            var rank = 1;
+
+            // show target foss content if target already has stuff in order
+            $.each(loadedTargetTutorials, function (i, tut) {
+                lines.push(rank + ' - ' + tut.tutorial);
+                rank++;
             });
+
+            // source tutorials appended to bottom (marked with [Source])
+            $.each(selectedSourceTuts, function (i, tut) {
+                lines.push(rank + ' - [Source] ' + tut.tutorial);
+                rank++;
+            });
+
             $('#id_tutorial_order').val(lines.join('\n'));
             if (forceReset) {
                 orderManuallyEdited = false;
@@ -234,7 +294,7 @@ $(document).ready(function () {
             $.each(existingLines, function (i, line) {
                 var trimmed = line.trim();
                 if (!trimmed) return;
-                var match = trimmed.match(/^\s*(\d+)\s*[-.:)]?\s*(.+)$/);
+                var match = trimmed.match(/^\s*(\d+)\s*[-.:)]?\s*(?:\[|\()?(?:source|target)?(?:\]|\))?\s*(.+)$/i);
                 if (match) {
                     var num = parseInt(match[1]);
                     var title = match[2].trim().toLowerCase();
@@ -244,16 +304,44 @@ $(document).ready(function () {
             });
 
             var newLines = [];
-            $.each(activeTutorials, function (i, tut) {
+            // target tutorials
+            $.each(loadedTargetTutorials, function (i, tut) {
                 var titleLower = tut.tutorial.trim().toLowerCase();
                 var num = existingMap[titleLower];
                 if (num === undefined) {
                     maxNum++;
                     num = maxNum;
                 }
-                newLines.push(num + ' - ' + tut.tutorial);
+                newLines.push({ order: num, title: tut.tutorial, isSource: false });
             });
-            $('#id_tutorial_order').val(newLines.join('\n'));
+
+            // source tutorials
+            $.each(selectedSourceTuts, function (i, tut) {
+                var titleLower = tut.tutorial.trim().toLowerCase();
+                var num = existingMap[titleLower];
+                if (num === undefined) {
+                    maxNum++;
+                    num = maxNum;
+                }
+                newLines.push({ order: num, title: tut.tutorial, isSource: true });
+            });
+
+            newLines.sort(function (a, b) {
+                if (a.order !== b.order) return a.order - b.order;
+                if (a.isSource !== b.isSource) return a.isSource ? 1 : -1;
+                return 0;
+            });
+
+            var linesOutput = [];
+            $.each(newLines, function (i, item) {
+                if (item.isSource) {
+                    linesOutput.push(item.order + ' - [Source] ' + item.title);
+                } else {
+                    linesOutput.push(item.order + ' - ' + item.title);
+                }
+            });
+
+            $('#id_tutorial_order').val(linesOutput.join('\n'));
         }
     }
 
@@ -266,7 +354,9 @@ $(document).ready(function () {
     // select all tutorials toggle
     $('#select-all-tutorials').on('change', function () {
         $('.tut-checkbox').prop('checked', $(this).is(':checked'));
-        syncTutorialOrder(false);
+        if ($('#id_target_foss').val()) {
+            syncTutorialOrder(false);
+        }
         updateSubmitButton();
     });
 
@@ -280,7 +370,9 @@ $(document).ready(function () {
         var total = $('.tut-checkbox').length;
         var checked = $('.tut-checkbox:checked').length;
         $('#select-all-tutorials').prop('checked', total > 0 && total === checked);
-        syncTutorialOrder(false);
+        if ($('#id_target_foss').val()) {
+            syncTutorialOrder(false);
+        }
         updateSubmitButton();
     });
 
@@ -288,10 +380,6 @@ $(document).ready(function () {
         var total = $('.lang-checkbox').length;
         var checked = $('.lang-checkbox:checked').length;
         $('#select-all-languages').prop('checked', total > 0 && total === checked);
-        updateSubmitButton();
-    });
-
-    $('#id_target_foss').on('change', function () {
         updateSubmitButton();
     });
 

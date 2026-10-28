@@ -5185,18 +5185,26 @@ def transfer_foss(request):
                 return render(request, 'creation/templates/transfer_foss.html', {'form': form})
 
             # parse custom tutorial order if provided
-            custom_order_map = {}
+            custom_target_map = {}
+            custom_source_map = {}
+            custom_general_map = {}
             if tutorial_order_input:
                 for line in tutorial_order_input.strip().splitlines():
                     line = line.strip()
                     if not line:
                         continue
-                    m = re.match(r'^\s*(\d+)\s*[-.:)]?\s*(.+)$', line)
+                    m = re.match(r'^\s*(\d+)\s*[-.:)]?\s*(?:\[|\()?(source|target)?(?:\]|\))?\s*(.+)$', line, re.IGNORECASE)
                     if m:
                         try:
                             order_num = int(m.group(1))
-                            tut_title = m.group(2).strip().lower()
-                            custom_order_map[tut_title] = order_num
+                            tag = (m.group(2) or '').lower()
+                            tut_title = m.group(3).strip().lower()
+                            if tag == 'target':
+                                custom_target_map[tut_title] = order_num
+                            elif tag == 'source':
+                                custom_source_map[tut_title] = order_num
+                            else:
+                                custom_general_map[tut_title] = order_num
                         except (ValueError, IndexError):
                             pass
 
@@ -5215,33 +5223,80 @@ def transfer_foss(request):
             transferred_records = []
             order_details = []
             files_transferred_count = 0
-            selected_tutorials = list(TutorialDetail.objects.filter(id__in=selected_tut_ids, foss=source_foss))
-
-            # sort tutorials based on custom order input, falling back to original order
-            def tutorial_sort_key(td):
-                title_key = td.tutorial.strip().lower()
-                custom_num = custom_order_map.get(title_key)
-                if custom_num is not None:
-                    return (custom_num, td.order, td.tutorial)
-                return (999999 + td.order, td.order, td.tutorial)
-
-            selected_tutorials.sort(key=tutorial_sort_key)
+            existing_target_tutorials = list(TutorialDetail.objects.filter(foss=target_foss).order_by('order'))
+            selected_tutorials = list(TutorialDetail.objects.filter(id__in=selected_tut_ids, foss=source_foss).order_by('order'))
             selected_languages = Language.objects.filter(id__in=selected_lang_ids)
 
-            # calculate starting order offset for target foss
-            target_existing_max = TutorialDetail.objects.filter(foss=target_foss).aggregate(Max('order'))['order__max'] or 0
+            # combine existing target tutorials and incoming source tutorials to resolve final sequence
+            combined_items = []
+            for td in existing_target_tutorials:
+                key = td.tutorial.strip().lower()
+                user_order = custom_target_map.get(key, custom_general_map.get(key, td.order))
+                combined_items.append({
+                    'type': 'target',
+                    'obj': td,
+                    'title': td.tutorial,
+                    'user_order': user_order,
+                    'original_order': td.order
+                })
+
+            target_count = len(existing_target_tutorials)
+            for td in selected_tutorials:
+                key = td.tutorial.strip().lower()
+                user_order = custom_source_map.get(key, custom_general_map.get(key))
+                if user_order is None:
+                    user_order = target_count + td.order
+                combined_items.append({
+                    'type': 'source',
+                    'obj': td,
+                    'title': td.tutorial,
+                    'user_order': user_order,
+                    'original_order': td.order
+                })
+
+            # sort combined items by configured user order
+            combined_items.sort(key=lambda x: (x['user_order'], 0 if x['type'] == 'target' else 1, x['original_order']))
+
+            # assign sequential final ranks 
+            existing_target_updated = []
+            source_final_orders = {}
+            full_final_order = []
+
+            for rank, item in enumerate(combined_items, start=1):
+                full_final_order.append({
+                    'order': rank,
+                    'tutorial': item['title'],
+                    'type': item['type']
+                })
+                if item['type'] == 'target':
+                    tgt_td = item['obj']
+                    if tgt_td.order != rank:
+                        existing_target_updated.append({
+                            'tutorial_id': tgt_td.id,
+                            'tutorial': tgt_td.tutorial,
+                            'previous_order': tgt_td.order,
+                            'new_order': rank
+                        })
+                        tgt_td.order = rank
+                else:
+                    src_td = item['obj']
+                    source_final_orders[src_td.id] = rank
 
             try:
                 with transaction.atomic():
+                    # update any existing target tutorial whose order shifted
+                    for updated_info in existing_target_updated:
+                        TutorialDetail.objects.filter(id=updated_info['tutorial_id']).update(order=updated_info['new_order'])
+
                     # first pass: ensure all target TutorialDetails exist and populate tgt_td_map
                     tgt_td_map = {}
-                    for rank, src_td in enumerate(selected_tutorials, start=1):
-                        target_order = target_existing_max + rank
+                    for src_td in selected_tutorials:
+                        target_order = source_final_orders.get(src_td.id, 1)
                         order_details.append({
                             'tutorial_id': src_td.id,
                             'tutorial': src_td.tutorial,
                             'source_order': src_td.order,
-                            'custom_input_order': custom_order_map.get(src_td.tutorial.strip().lower()),
+                            'custom_input_order': custom_source_map.get(src_td.tutorial.strip().lower(), custom_general_map.get(src_td.tutorial.strip().lower())),
                             'target_order': target_order,
                         })
 
@@ -5465,12 +5520,17 @@ def transfer_foss(request):
                         'files_transferred_count': files_transferred_count,
                         'details': transferred_records
                     }
+                    order_summary_data = {
+                        'transferred_tutorials': order_details,
+                        'existing_target_tutorials_updated': existing_target_updated,
+                        'full_final_order': full_final_order
+                    }
                     FossTransferLog.objects.create(
                         source_foss=source_foss,
                         target_foss=target_foss,
                         user=request.user,
                         transferred_data=json.dumps(transfer_summary),
-                        order_data=json.dumps(order_details)
+                        order_data=json.dumps(order_summary_data)
                     )
 
                 action_verb = "moved" if is_move else "copied"
