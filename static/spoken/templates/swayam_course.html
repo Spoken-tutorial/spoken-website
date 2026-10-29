@@ -10,7 +10,7 @@
         border: 1px solid #e5e5e5;
         border-radius: 8px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-        padding: 30px;
+        padding: 35px;
         margin-top: 20px;
         margin-bottom: 40px;
     }
@@ -18,7 +18,7 @@
     .swayam-main-heading {
         color: #1b83bc;
         font-weight: 700;
-        font-size: 26px;
+        font-size: 28px;
         margin-top: 0;
         margin-bottom: 20px;
         text-align: center;
@@ -62,7 +62,7 @@
     }
 
     .swayam-video-wrapper {
-        width: 100%;
+        max-width: 680px;
         margin: 0 auto 25px auto;
         border-radius: 8px;
         overflow: hidden;
@@ -71,7 +71,7 @@
     }
 
     .swayam-actions-container {
-        width: 100%;
+        max-width: 680px;
         margin: 20px auto 10px auto;
         display: flex;
         justify-content: center;
@@ -80,7 +80,7 @@
     }
 
     .swayam-action-btn {
-        flex: 1 1 220px;
+        flex: 1 1 240px;
         padding: 14px 20px;
         font-size: 15px;
         font-weight: 600;
@@ -141,24 +141,20 @@
         font-size: 17px;
     }
 
-    .swayam-instruction-card {
-        background: #ffffff;
-        border: 1px solid #e5e5e5;
-        border-radius: 8px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-        padding: 25px;
-        margin-top: 20px;
-        margin-bottom: 40px;
+    .swayam-instruction-section {
+        max-width: 680px;
+        margin: 35px auto 10px auto;
+        border-top: 2px solid #eef2f7;
+        padding-top: 25px;
     }
 
     .swayam-instruction-heading {
         color: #2c3e50;
         font-weight: 700;
-        font-size: 20px;
+        font-size: 18px;
         margin-top: 0;
-        margin-bottom: 18px;
-        border-bottom: 2px solid #eef2f7;
-        padding-bottom: 12px;
+        margin-bottom: 15px;
+        text-align: center;
     }
 
     .swayam-instruction-heading i {
@@ -171,7 +167,7 @@
         border: 1px solid #e2e8f0;
         border-radius: 6px;
         padding: 16px;
-        max-height: 440px;
+        max-height: 400px;
         overflow-y: auto;
     }
 
@@ -207,8 +203,7 @@
 {% block content %}
 <div class="container" style="width: 100%;">
     <div class="row">
-        <!-- Main Section: Video and Actions -->
-        <div class="col-md-8 col-sm-12">
+        <div class="col-md-10 col-md-offset-1">
             <div class="swayam-card">
                 <!-- 1. Heading -->
                 <h2 class="swayam-main-heading">More about SWAYAM Plus</h2>
@@ -233,7 +228,8 @@
                     <div class="swayam-video-wrapper">
                         <div class="embed-responsive embed-responsive-16by9">
                             {% if is_video_file %}
-                            <video class="embed-responsive-item" controls preload="metadata" playsinline style="width: 100%; height: 100%; background: #000;">
+                            <video class="embed-responsive-item" controls preload="metadata" playsinline
+                                style="width: 100%; height: 100%; background: #000;">
                                 <source src="{{ video_url }}">
                                 Your browser does not support the HTML5 video tag.
                             </video>
@@ -252,42 +248,35 @@
                         <i class="fa fa-graduation-cap"></i> View Course Tutorials
                     </a>
                     {% else %}
-                    <span id="swayam_tutorial_btn" class="swayam-action-btn swayam-btn-disabled" title="Course ID is required to view course tutorials">
+                    <span id="swayam_tutorial_btn" class="swayam-action-btn swayam-btn-disabled"
+                        title="Course ID is required to view course tutorials">
                         <i class="fa fa-graduation-cap"></i> View Course Tutorials
                     </span>
                     {% endif %}
 
-                    <a href="{{ social_url }}" target="_blank" rel="noopener noreferrer" id="swayam_social_btn" class="swayam-action-btn swayam-btn-social">
+                    <a href="{{ social_url }}" target="_blank" rel="noopener noreferrer" id="swayam_social_btn"
+                        class="swayam-action-btn swayam-btn-social">
                         <i class="fa fa-users"></i> Spoken Social
                     </a>
                 </div>
-            </div>
-        </div>
 
-        <!-- Right Side: Instruction Sheet Section -->
-        <div class="col-md-4 col-sm-12">
-            <div class="swayam-instruction-card">
-                <h3 class="swayam-instruction-heading">
-                    <i class="fa fa-file-text-o"></i> Instruction Sheet
-                </h3>
+                <!-- 4. Instruction Sheet -->
+                <div class="swayam-instruction-section">
+                    <h3 class="swayam-instruction-heading">
+                        <i class="fa fa-file-text-o"></i> Instruction Sheet
+                    </h3>
 
-                <div class="swayam-instruction-body">
-                    {% if instruction_content %}
-                    <pre class="swayam-instruction-text">{{ instruction_content }}</pre>
-                    {% else %}
-                    <p class="text-muted" style="font-size: 14px; font-style: italic; margin-bottom: 0;">
-                        No instructions available at this time.
-                    </p>
-                    {% endif %}
+                    <div class="swayam-instruction-body">
+                        {% if instruction_content %}
+                        <pre class="swayam-instruction-text">{{ instruction_content }}</pre>
+                        {% else %}
+                        <p class="text-muted"
+                            style="font-size: 14px; font-style: italic; margin-bottom: 0; text-align: center;">
+                            No instructions available at this time.
+                        </p>
+                        {% endif %}
+                    </div>
                 </div>
-
-                {% if instruction_file_url %}
-                <div style="margin-top: 15px; text-align: center;">
-                    <a href="{{ instruction_file_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-default btn-sm btn-block" style="border-radius: 4px; font-weight: 600;">
-                        <i class="fa fa-external-link" style="margin-right: 4px;"></i> Open Instruction Sheet
-                    </a>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
@@ -296,8 +285,8 @@
 
 {% block jsblock %}
 <script>
-    $(document).ready(function() {
-        $('#swayam_tutorial_btn.swayam-btn-disabled').on('click', function(e) {
+    $(document).ready(function () {
+        $('#swayam_tutorial_btn.swayam-btn-disabled').on('click', function (e) {
             e.preventDefault();
             return false;
         });
