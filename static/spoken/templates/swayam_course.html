@@ -1,0 +1,295 @@
+{% extends 'spoken/templates/base.html' %}
+{% load static %}
+
+{% block title %}More about SWAYAM Plus | Spoken Tutorial{% endblock %}
+
+{% block cssblock %}
+<style>
+    .swayam-card {
+        background: #ffffff;
+        border: 1px solid #e5e5e5;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        padding: 35px;
+        margin-top: 20px;
+        margin-bottom: 40px;
+    }
+
+    .swayam-main-heading {
+        color: #1b83bc;
+        font-weight: 700;
+        font-size: 28px;
+        margin-top: 0;
+        margin-bottom: 20px;
+        text-align: center;
+        border-bottom: 2px solid #eef2f7;
+        padding-bottom: 15px;
+    }
+
+    .swayam-subheading {
+        color: #333333;
+        font-weight: 600;
+        font-size: 18px;
+        margin-top: 10px;
+        margin-bottom: 18px;
+        text-align: center;
+    }
+
+    .swayam-meta-badges {
+        text-align: center;
+        margin-bottom: 18px;
+    }
+
+    .swayam-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 20px;
+        margin: 0 4px 6px 4px;
+    }
+
+    .swayam-badge-foss {
+        background-color: #e8f4fd;
+        color: #1b83bc;
+        border: 1px solid #bce0fd;
+    }
+
+    .swayam-badge-status-yes {
+        background-color: #e6f7ec;
+        color: #27ae60;
+        border: 1px solid #b7ebc6;
+    }
+
+    .swayam-video-wrapper {
+        max-width: 680px;
+        margin: 0 auto 25px auto;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+        background: #000000;
+    }
+
+    .swayam-actions-container {
+        max-width: 680px;
+        margin: 20px auto 10px auto;
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .swayam-action-btn {
+        flex: 1 1 240px;
+        padding: 14px 20px;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 6px;
+        text-align: center;
+        text-decoration: none !important;
+        transition: all 0.2s ease-in-out;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .swayam-btn-tutorial {
+        background-color: #1b83bc;
+        border: 1px solid #156d9c;
+        color: #ffffff !important;
+    }
+
+    .swayam-btn-tutorial:hover,
+    .swayam-btn-tutorial:focus,
+    .swayam-btn-tutorial:active {
+        background-color: #136694;
+        border-color: #0f5277;
+        color: #ffffff !important;
+        box-shadow: 0 5px 12px rgba(27, 131, 188, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .swayam-btn-disabled {
+        background-color: #94a3b8 !important;
+        border-color: #cbd5e1 !important;
+        color: #ffffff !important;
+        cursor: not-allowed !important;
+        box-shadow: none !important;
+        transform: none !important;
+        opacity: 0.7;
+    }
+
+    .swayam-btn-social {
+        background-color: #2c3e50;
+        border: 1px solid #1a252f;
+        color: #ffffff !important;
+    }
+
+    .swayam-btn-social:hover,
+    .swayam-btn-social:focus,
+    .swayam-btn-social:active {
+        background-color: #1a252f;
+        border-color: #11171d;
+        color: #ffffff !important;
+        box-shadow: 0 5px 12px rgba(44, 62, 80, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .swayam-action-btn i {
+        margin-right: 8px;
+        font-size: 17px;
+    }
+
+    .swayam-instruction-section {
+        max-width: 680px;
+        margin: 35px auto 10px auto;
+        border-top: 2px solid #eef2f7;
+        padding-top: 25px;
+    }
+
+    .swayam-instruction-heading {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 18px;
+        margin-top: 0;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .swayam-instruction-heading i {
+        color: #1b83bc;
+        margin-right: 6px;
+    }
+
+    .swayam-instruction-body {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 16px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .swayam-instruction-text {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-family: inherit;
+        font-size: 13.5px;
+        line-height: 1.6;
+        color: #334155;
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    @media (max-width: 767px) {
+        .swayam-actions-container {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .swayam-action-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block search %}
+{% endblock %}
+
+{% block content %}
+<div class="container" style="width: 100%;">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="swayam-card">
+                <!-- 1. Heading -->
+                <h2 class="swayam-main-heading">More about SWAYAM Plus</h2>
+
+                <!-- Optional Course Badge -->
+                {% if foss_name %}
+                <div class="swayam-meta-badges">
+                    <span class="swayam-badge swayam-badge-foss">
+                        <i class="fa fa-book"></i> Course: {{ foss_name }}
+                    </span>
+                    {% if is_swayam_foss %}
+                    <span class="swayam-badge swayam-badge-status-yes">
+                        <i class="fa fa-check-circle"></i> SWAYAM Plus Course
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- 2. Video section with subheading -->
+                <div class="swayam-video-section">
+                    <h3 class="swayam-subheading">Course Overview Video</h3>
+                    <div class="swayam-video-wrapper">
+                        <div class="embed-responsive embed-responsive-16by9">
+                            {% if is_video_file %}
+                            <video class="embed-responsive-item" controls preload="metadata" playsinline
+                                style="width: 100%; height: 100%; background: #000;">
+                                <source src="{{ video_url }}">
+                                Your browser does not support the HTML5 video tag.
+                            </video>
+                            {% else %}
+                            <iframe class="embed-responsive-item" src="{{ video_url }}" allowfullscreen
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Links Section: Tutorial Course & Spoken Social -->
+                <div class="swayam-actions-container">
+                    {% if tutorial_url %}
+                    <a href="{{ tutorial_url }}" id="swayam_tutorial_btn" class="swayam-action-btn swayam-btn-tutorial">
+                        <i class="fa fa-graduation-cap"></i> View Course Tutorials
+                    </a>
+                    {% else %}
+                    <span id="swayam_tutorial_btn" class="swayam-action-btn swayam-btn-disabled"
+                        title="Course ID is required to view course tutorials">
+                        <i class="fa fa-graduation-cap"></i> View Course Tutorials
+                    </span>
+                    {% endif %}
+
+                    <a href="{{ social_url }}" target="_blank" rel="noopener noreferrer" id="swayam_social_btn"
+                        class="swayam-action-btn swayam-btn-social">
+                        <i class="fa fa-users"></i> Spoken Social
+                    </a>
+                </div>
+
+                <!-- 4. Instruction Sheet -->
+                <div class="swayam-instruction-section">
+                    <h3 class="swayam-instruction-heading">
+                        <i class="fa fa-file-text-o"></i> Instruction Sheet
+                    </h3>
+
+                    <div class="swayam-instruction-body">
+                        {% if instruction_content %}
+                        <pre class="swayam-instruction-text">{{ instruction_content }}</pre>
+                        {% else %}
+                        <p class="text-muted"
+                            style="font-size: 14px; font-style: italic; margin-bottom: 0; text-align: center;">
+                            No instructions available at this time.
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block jsblock %}
+<script>
+    $(document).ready(function () {
+        $('#swayam_tutorial_btn.swayam-btn-disabled').on('click', function (e) {
+            e.preventDefault();
+            return false;
+        });
+    });
+</script>
+{% endblock %}

@@ -1,6 +1,7 @@
 import datetime as dt
 import json
 import os
+import re
 from urllib.parse import quote, unquote_plus
 from urllib.request import urlopen
 from random import randint, sample
@@ -30,7 +31,8 @@ from creation.views import get_video_info
 from events.views import get_page
 from forums.models import Question, Answer
 from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
- MONGO_HOST, MONGO_DB, TUTORIAL_RESTRICTION_DATE, ALLOWED_LOGS, SWAYAM_VIDEO_URL, SWAYAM_REGISTRATION_URL
+ MONGO_HOST, MONGO_DB, TUTORIAL_RESTRICTION_DATE, ALLOWED_LOGS, SWAYAM_VIDEO_URL, SWAYAM_REGISTRATION_URL,\
+ SWAYAM_COURSE_VIDEO_PATH, SWAYAM_VIDEO_PATH, SWAYAM_INSTRUCTION_FILE, SPOKEN_SOCIAL_URL
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
 from .search import search_for_results
@@ -1234,3 +1236,82 @@ def swayam(request):
         'registration_url': SWAYAM_REGISTRATION_URL,
     }
     return render(request, 'spoken/templates/swayam.html', context)
+
+
+def swayam_course(request):
+    foss_param = request.GET.get('id') or request.GET.get('foss_id') or request.GET.get('foss') or request.GET.get('search_foss') or ''
+    foss_obj = None
+    foss_id = None
+
+    if foss_param:
+        foss_param_str = str(foss_param).strip()
+        if foss_param_str.isdigit():
+            foss_obj = FossCategory.objects.filter(id=int(foss_param_str)).first()
+            if foss_obj:
+                foss_id = foss_obj.id
+            else:
+                foss_id = int(foss_param_str)
+        else:
+            foss_obj = FossCategory.objects.filter(foss__iexact=foss_param_str).first()
+            if not foss_obj:
+                foss_obj = FossCategory.objects.filter(foss__icontains=foss_param_str).first()
+            if foss_obj:
+                foss_id = foss_obj.id
+
+    from swayam.utils import is_swayam_foss
+    swayam_foss_flag = False
+    if foss_obj:
+        swayam_foss_flag = is_swayam_foss(foss_obj)
+    elif foss_id:
+        swayam_foss_flag = is_swayam_foss(foss_id)
+
+    # tutorial search link using foss id
+    tutorial_url = ''
+    if foss_id:
+        tutorial_url = f"/tutorial-search/?search_foss={foss_id}&search_language=English"
+
+    raw_video_path = SWAYAM_COURSE_VIDEO_PATH or SWAYAM_VIDEO_PATH
+    if str(raw_video_path).startswith(('http://', 'https://', '/')):
+        video_url = str(raw_video_path)
+    else:
+        media_url = getattr(settings, 'MEDIA_URL', '/media/')
+        if not media_url.endswith('/'):
+            media_url += '/'
+        video_url = media_url + str(raw_video_path).lstrip('/')
+
+    is_video_file = bool(re.search(r'\.(mp4|webm|ogg)($|\?)', video_url, re.I))
+
+    # spoken social url
+    social_url = SPOKEN_SOCIAL_URL
+
+    # instruction sheet file 
+    instruction_content = ''
+    instruction_file_url = ''
+    if SWAYAM_INSTRUCTION_FILE:
+        file_path = os.path.join(settings.MEDIA_ROOT, SWAYAM_INSTRUCTION_FILE)
+        if os.path.exists(file_path):
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    instruction_content = f.read()
+            except Exception:
+                pass
+        media_url = getattr(settings, 'MEDIA_URL', '/media/')
+        if not media_url.endswith('/'):
+            media_url += '/'
+        instruction_file_url = media_url + SWAYAM_INSTRUCTION_FILE.lstrip('/')
+
+    context = {
+        'video_url': video_url,
+        'video_path': raw_video_path,
+        'is_video_file': is_video_file,
+        'tutorial_url': tutorial_url,
+        'social_url': social_url,
+        'foss': foss_obj,
+        'foss_id': foss_id,
+        'foss_name': foss_obj.foss if foss_obj else '',
+        'is_swayam_foss': swayam_foss_flag,
+        'is_swayam': swayam_foss_flag,
+        'instruction_content': instruction_content,
+        'instruction_file_url': instruction_file_url,
+    }
+    return render(request, 'spoken/templates/swayam_course.html', context)
