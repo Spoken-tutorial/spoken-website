@@ -5185,28 +5185,33 @@ def transfer_foss(request):
                 return render(request, 'creation/templates/transfer_foss.html', {'form': form})
 
             # parse custom tutorial order if provided
-            custom_target_map = {}
-            custom_source_map = {}
-            custom_general_map = {}
+            custom_order_map = {}
             if tutorial_order_input:
                 for line in tutorial_order_input.strip().splitlines():
                     line = line.strip()
                     if not line:
                         continue
-                    m = re.match(r'^\s*(\d+)\s*[-.:)]?\s*(?:\[|\()?(source|target)?(?:\]|\))?\s*(.+)$', line, re.IGNORECASE)
+                    m = re.match(r'^\s*(\d+)\s*[-.:)]?\s*(.*)$', line)
                     if m:
                         try:
                             order_num = int(m.group(1))
-                            tag = (m.group(2) or '').lower()
-                            tut_title = m.group(3).strip().lower()
-                            if tag == 'target':
-                                custom_target_map[tut_title] = order_num
-                            elif tag == 'source':
-                                custom_source_map[tut_title] = order_num
-                            else:
-                                custom_general_map[tut_title] = order_num
+                            title = m.group(2).strip()
+                            clean_title = re.sub(r'\[\s*(source|target)\s*\]|\(\s*(source|target)\s*\)', '', title, flags=re.IGNORECASE)
+                            clean_title = re.sub(r'^[-.:)]+\s*', '', clean_title).strip()
+                            key = ' '.join(clean_title.lower().split())
+                            custom_order_map[key] = order_num
                         except (ValueError, IndexError):
                             pass
+
+            def get_user_order(tut_title, default_order):
+                key = ' '.join(tut_title.strip().lower().split())
+                if key in custom_order_map:
+                    return custom_order_map[key]
+                key_alnum = re.sub(r'[^a-z0-9]', '', key)
+                for k, v in custom_order_map.items():
+                    if re.sub(r'[^a-z0-9]', '', k) == key_alnum or (key and (key in k or k in key)):
+                        return v
+                return default_order
 
             # check if directory of target foss exists, else create it
             target_foss_dir = os.path.join(settings.MEDIA_ROOT, 'videos', str(target_foss.id))
@@ -5230,8 +5235,7 @@ def transfer_foss(request):
             # combine existing target tutorials and incoming source tutorials to resolve final sequence
             combined_items = []
             for td in existing_target_tutorials:
-                key = td.tutorial.strip().lower()
-                user_order = custom_target_map.get(key, custom_general_map.get(key, td.order))
+                user_order = get_user_order(td.tutorial, td.order)
                 combined_items.append({
                     'type': 'target',
                     'obj': td,
@@ -5242,10 +5246,7 @@ def transfer_foss(request):
 
             target_count = len(existing_target_tutorials)
             for td in selected_tutorials:
-                key = td.tutorial.strip().lower()
-                user_order = custom_source_map.get(key, custom_general_map.get(key))
-                if user_order is None:
-                    user_order = target_count + td.order
+                user_order = get_user_order(td.tutorial, target_count + td.order)
                 combined_items.append({
                     'type': 'source',
                     'obj': td,
@@ -5255,7 +5256,7 @@ def transfer_foss(request):
                 })
 
             # sort combined items by configured user order
-            combined_items.sort(key=lambda x: (x['user_order'], 0 if x['type'] == 'target' else 1, x['original_order']))
+            combined_items.sort(key=lambda x: (x['user_order'], 0 if x['type'] == 'source' else 1, x['original_order']))
 
             # assign sequential final ranks 
             existing_target_updated = []
@@ -5296,7 +5297,7 @@ def transfer_foss(request):
                             'tutorial_id': src_td.id,
                             'tutorial': src_td.tutorial,
                             'source_order': src_td.order,
-                            'custom_input_order': custom_source_map.get(src_td.tutorial.strip().lower(), custom_general_map.get(src_td.tutorial.strip().lower())),
+                            'custom_input_order': get_user_order(src_td.tutorial, None),
                             'target_order': target_order,
                         })
 
