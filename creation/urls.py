@@ -86,6 +86,8 @@ urlpatterns = [
     url(r'^update-common-component/$', update_common_component, name="update_common_component"),
     url(r'^update_tutorials/$',  update_tutorials, name="update_tutorials"),
     url(r'^grant_role/$',  grant_role, name="grant_role"),
+    url(r'^transfer-foss/$',  transfer_foss, name="transfer_foss"),
+    url(r'^ajax-transfer-foss-details/$',  ajax_transfer_foss_details, name="ajax_transfer_foss_details"),
 
     # Common to Domain & Admin reviewer parts    
     url(r'^accept-all/(\w+)/(\d+)/$',  accept_all, name="accept_all"),
