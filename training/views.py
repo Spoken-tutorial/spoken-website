@@ -480,7 +480,11 @@ def reg_success(request, user_type):
 		company = request.POST.get('company')
 		new_company = request.POST.get('new_company')
 		event = TrainingEvents.objects.get(id=event_obj)
-		
+		# Payment-required events must not allow direct registration
+		if event.payment_required and user_type == 'paid':
+			messages.warning(request,"Payment is required for this event. Please complete the payment to register.")
+			return redirect('training:list_events', status='ongoing')
+
 		form = RegisterUser(request.POST)
 		event_type = request.POST.get('event_type', '')
 		if form.is_valid():
@@ -550,7 +554,7 @@ def reg_success(request, user_type):
 		else:
 			print(f"*** Form Errors ****")
 			print(f"------------- {form.errors} -------------")
-			messages.warning(request, 'Invalid form payment request 1.')
+			messages.warning(request, 'Please fill in all the required details correctly.')
 			return redirect('training:list_events', status='ongoing' )
 
 
