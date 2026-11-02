@@ -476,6 +476,19 @@ LOGGING = {
             "backupCount": 5,
             "formatter": "simple",
         },
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "creation_file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": ALLOWED_LOGS['creation'],
+            "maxBytes": 1024 * 1024 * 20,
+            "backupCount": 5,
+            "formatter": "simple",
+        },
     },
 
     "loggers": {
@@ -501,6 +514,11 @@ LOGGING = {
         },
         "swayam": {
             "handlers": ["swayam_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "creation": {
+            "handlers": ["console", "creation_file", "django_error_file"],
             "level": "INFO",
             "propagate": False,
         },
