@@ -7,7 +7,10 @@ from django import forms
 from django.contrib.auth.models import User
 from django.db.models import Q
 
+import logging
 import datetime
+
+logger = logging.getLogger(__name__)
 
 # Spoken Tutorial Stuff
 from creation.models import *
@@ -482,7 +485,11 @@ class ComponentForm(forms.Form):
             component = self.cleaned_data['comp']
         component_type = self.cleaned_data['comptype']
         if component and component_type:
-            if not component.content_type in file_types[component_type]:
+            logger.info("ComponentForm.clean: comptype=%s, file_name=%s, content_type=%s, size=%s",
+                        component_type, getattr(component, 'name', None), getattr(component, 'content_type', None), getattr(component, 'size', None))
+            if not component.content_type in file_types.get(component_type, []):
+                logger.warning("ComponentForm.clean validation failed: content_type '%s' not allowed for comptype '%s'",
+                               getattr(component, 'content_type', None), component_type)
                 self._errors["comp"] = self.error_class(["Not a valid file format."])
         else:
             raise forms.ValidationError("Access Denied!")
