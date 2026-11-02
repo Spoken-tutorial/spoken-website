@@ -184,14 +184,17 @@ def get_video_info(path):
 def create_thumbnail(row, attach_str, thumb_time, thumb_size):
     filepath = settings.MEDIA_ROOT + 'videos/' + str(row.tutorial_detail.foss_id) + '/' + str(row.tutorial_detail_id) + '/'
     filename = row.tutorial_detail.tutorial.replace(' ', '-') + '-' + attach_str + '.png'
-    logger.info("Thumbnail generation selected timestamp: %s", thumb_time)
+    video_path = filepath + row.video
+    logger.info("Thumbnail generation selected timestamp: %s (attach=%s, exists=%s)", thumb_time, attach_str, os.path.isfile(video_path))
     try:
         cmd = ['/usr/bin/ffmpeg', '-nostdin', '-hide_banner', '-nostats', '-y', '-i', filepath + row.video, '-r', str(30), '-ss', str(thumb_time), '-s', thumb_size, '-vframes', str(1), '-f', 'image2', filepath + filename]
         logger.info("Thumbnail generation ffmpeg command: %s", " ".join(cmd))
         #process = subprocess.Popen(['/usr/bin/ffmpeg', '-i ' + filepath + row.video + ' -r ' + str(30) + ' -ss ' + str(thumb_time) + ' -s ' + thumb_size + ' -vframes ' + str(1) + ' -f ' + 'image2 ' + filepath + filename], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+        t0 = time.time()
         process = subprocess.Popen(cmd, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, start_new_session=True)
         stdout, stderr = process.communicate()
-        logger.info("Thumbnail generation return code: %s", process.returncode)
+        duration = time.time() - t0
+        logger.info("Thumbnail generation finished in %.2fs, return code: %s", duration, process.returncode)
         logger.info("Thumbnail generation stdout: %s", stdout)
         logger.info("Thumbnail generation stderr: %s", stderr)
         if stderr:
@@ -1155,11 +1158,15 @@ def upload_component(request, trid, component):
             # Log file information if present in request.FILES
             if 'comp' in request.FILES:
                 f = request.FILES['comp']
-                logger.info("File upload request: name=%s, content_type=%s, size=%s bytes", f.name, f.content_type, f.size)
+                logger.info("File upload request: trid=%s, component=%s, name=%s, content_type=%s, size=%s bytes",
+                            trid, component, f.name, f.content_type, f.size)
+            else:
+                logger.warning("upload_component POST received without 'comp' in request.FILES: trid=%s, component=%s, FILES keys=%s",
+                               trid, component, list(request.FILES.keys()))
 
             form = ComponentForm(component, request.POST, request.FILES)
             if form.is_valid():
-                logger.info("Validation passed")
+                logger.info("Form validation passed for trid=%s, component=%s", trid, component)
                 try:
                     comp_log = ContributorLog()
                     comp_log.user = request.user
@@ -1181,6 +1188,11 @@ def upload_component(request, trid, component):
                         logger.info("Video upload environment check | Full Path: %s | Dir Exists: %s | Dir Writable: %s | Prev Video: %s | Prev Exists: %s | Tutorial ID: %s | FOSS ID: %s | Language ID: %s",
                                     full_path, dir_exists, dir_writable, prev_video_name, prev_video_exists, tr_rec.tutorial_detail.id, tr_rec.tutorial_detail.foss_id, tr_rec.language_id)
 
+                        if not dir_exists:
+                            logger.error("Target video directory does not exist: %s", file_path)
+                        elif not dir_writable:
+                            logger.error("Target video directory is not writable: %s", file_path)
+
                         if prev_video_exists and tr_rec.video_status > 0:
                             if 'isarchive' in request.POST and int(request.POST.get('isarchive', 0)) > 0:
                                 archived_file = 'Archived-' + str(request.user.id) + '-' + str(int(time.time())) + '-' + tr_rec.video
@@ -1190,13 +1202,15 @@ def upload_component(request, trid, component):
                                 if int(request.POST.get('isarchive', 0)) == 2:
                                     tr_rec.version += 1
                         
+                        t_write_start = time.time()
                         fout = open(full_path, 'wb+')
                         f = request.FILES['comp']
                         # Iterate through the chunks.
                         for chunk in f.chunks():
                             fout.write(chunk)
                         fout.close()
-                        logger.info("Video file successfully written to disk: %s (%s bytes)", full_path, f.size)
+                        write_duration = time.time() - t_write_start
+                        logger.info("Video file successfully written to disk in %.2fs: %s (%s bytes)", write_duration, full_path, f.size)
 
                         comp_log.status = tr_rec.video_status
                         tr_rec.video = file_name
@@ -1206,13 +1220,17 @@ def upload_component(request, trid, component):
                             tr_rec.version = 1
                         tr_rec.video_thumbnail_time = '00:' + request.POST.get('thumb_mins', '00') + ':' + request.POST.get('thumb_secs', '00')
                         tr_rec.save()
+                        logger.info("Saved video record: trid=%s, video=%s, thumbnail_time=%s", tr_rec.id, tr_rec.video, tr_rec.video_thumbnail_time)
                         if tr_rec.language.name == 'English':
+                            t_thumb_start = time.time()
                             create_thumbnail(tr_rec, 'Big', tr_rec.video_thumbnail_time, '700:500')
                             create_thumbnail(tr_rec, 'Small', tr_rec.video_thumbnail_time, '170:127')
+                            logger.info("Both thumbnails generated in %.2fs for trid=%s", time.time() - t_thumb_start, tr_rec.id)
                         comp_log.save()
                         comp_title = tr_rec.tutorial_detail.foss.foss + ': ' + tr_rec.tutorial_detail.tutorial + ' - ' + tr_rec.language.name
                         add_adminreviewer_notification(tr_rec, comp_title, 'Video waiting for admin review')
                         response_msg = 'Video uploaded successfully!'
+                        logger.info("Video upload pipeline completed successfully for trid=%s", tr_rec.id)
                     elif component == 'slide':
                         file_name, file_extension = os.path.splitext(request.FILES['comp'].name)
                         file_name = tr_rec.tutorial_detail.tutorial.replace(' ', '-') + '-Slides' + file_extension
