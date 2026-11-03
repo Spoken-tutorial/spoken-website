@@ -1987,6 +1987,7 @@ def test_request(request, role, rid = None):
 
         messages.info(request, """
             <ul>
+                <li>Please note: A maximum of 2 tests can be created for any training (First Attempt and Second Attempt).</li>
                 <li>Please make sure that before making the test request a faculty/trainer should have registered as invigilator.</li>
                 <li>Same person cannot be an organiser and the invigilator for the same test.</li>
 -               <li>Please confirm the Invigilator's availability and acceptance to invigilate before selecting his name in this form.</li>
@@ -2438,12 +2439,16 @@ def test_participant_ceritificate(request, wid, participant_id):
             mdlgrade = MdlQuizGrades.objects.get(quiz = ta.mdlquiz_id, userid = participant_id)
             grade_val = float(mdlgrade.grade)
 
-            from mdldjango.templatetags.mdldata import is_second_attempt, calculate_second_attempt_grade
+            from mdldjango.templatetags.mdldata import is_second_attempt, calculate_second_attempt_grade, calculate_first_attempt_grade
             is_sec = is_second_attempt(ta)
             if is_sec:
                 sec_grade = calculate_second_attempt_grade(ta)
                 if sec_grade is not None:
                     grade_val = float(sec_grade)
+            else:
+                first_grade = calculate_first_attempt_grade(ta)
+                if first_grade is not None:
+                    grade_val = float(first_grade)
 
             print(w.foss.credits,"#########################&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
             if ta.status < 1 or round(grade_val, 1) < 40 or not w.invigilator:
@@ -2619,12 +2624,16 @@ def test_participant_ceritificate_all(request, testid):
             continue
         grade_val = float(mdlgrade.grade)
 
-        from mdldjango.templatetags.mdldata import is_second_attempt, calculate_second_attempt_grade
+        from mdldjango.templatetags.mdldata import is_second_attempt, calculate_second_attempt_grade, calculate_first_attempt_grade
         is_sec = is_second_attempt(ta)
         if is_sec:
             sec_grade = calculate_second_attempt_grade(ta)
             if sec_grade is not None:
                 grade_val = float(sec_grade)
+        else:
+            first_grade = calculate_first_attempt_grade(ta)
+            if first_grade is not None:
+                grade_val = float(first_grade)
 
         if ta.status < 1 or round(grade_val, 1) < 40:
             continue

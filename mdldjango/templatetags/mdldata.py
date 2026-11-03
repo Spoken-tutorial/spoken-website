@@ -55,12 +55,67 @@ def get_first_attempt_ta(rid, mdluser_id):
     except Exception:
         return None
 
+def calculate_attempt_grade(ta, attempt_index=0):
+    if not ta or not ta.mdlquiz_id:
+        return None
+    
+    quiz_id = ta.mdlquiz_id
+    mdluser_id = ta.mdluser_id
+    sumgrades = None
+    quiz_grade = None
+    quiz_sumgrades = None
+    
+    from django.db import connections
+    try:
+        with connections['moodle'].cursor() as cursor:
+            if ta.mdlattempt_id:
+                cursor.execute("SELECT sumgrades, quiz FROM mdl_quiz_attempts WHERE id = %s", [ta.mdlattempt_id])
+                row = cursor.fetchone()
+                if row and row[0] is not None:
+                    sumgrades = row[0]
+                    quiz_id = row[1]
+            
+            if sumgrades is None:
+                cursor.execute("SELECT sumgrades, quiz FROM mdl_quiz_attempts WHERE quiz = %s AND userid = %s ORDER BY id ASC", [quiz_id, mdluser_id])
+                rows = cursor.fetchall()
+                if len(rows) > attempt_index and rows[attempt_index][0] is not None:
+                    sumgrades = rows[attempt_index][0]
+                    quiz_id = rows[attempt_index][1]
+                elif len(rows) == 1 and rows[0][0] is not None:
+                    sumgrades = rows[0][0]
+                    quiz_id = rows[0][1]
+            
+            cursor.execute("SELECT grade, sumgrades FROM mdl_quiz WHERE id = %s", [quiz_id])
+            q_row = cursor.fetchone()
+            if q_row:
+                quiz_grade = float(q_row[0]) if q_row[0] is not None else 0.0
+                quiz_sumgrades = float(q_row[1]) if q_row[1] is not None else 0.0
+            
+            if sumgrades is not None and quiz_grade is not None and quiz_sumgrades and quiz_sumgrades > 0:
+                final_grade = (float(sumgrades) * quiz_grade) / quiz_sumgrades
+                return round(final_grade, 2)
+            
+            cursor.execute("SELECT grade FROM mdl_quiz_grades WHERE quiz = %s AND userid = %s ORDER BY grade DESC", [quiz_id, mdluser_id])
+            g_row = cursor.fetchone()
+            if g_row and g_row[0] is not None:
+                return round(float(g_row[0]), 2)
+    except Exception as e:
+        return None
+    return None
+
+def calculate_first_attempt_grade(first_ta):
+    return calculate_attempt_grade(first_ta, attempt_index=0)
+
+def calculate_second_attempt_grade(second_ta):
+    return calculate_attempt_grade(second_ta, attempt_index=1)
+
 def get_first_attempt_mark(rid, mdluser_id):
     first_ta = get_first_attempt_ta(rid, mdluser_id)
-    if first_ta and first_ta.mdlquiz_id:
-        mdl = MdlQuizGrades.objects.filter(quiz=first_ta.mdlquiz_id, userid=mdluser_id).order_by('-grade').first()
-        if mdl:
-            return round(mdl.grade, 1)
+    if not first_ta:
+        return None
+    grade = calculate_first_attempt_grade(first_ta)
+    if grade is not None:
+        return round(grade, 1)
     return None
 
 def get_first_attempt_testid(rid, mdluser_id):
@@ -80,11 +135,14 @@ def get_participant_mark(rid, mdluser_id):
             ta = TestAttendance.objects.filter(test__training_id=test.training_id, mdluser_id=mdluser_id).order_by('id').first()
         elif not ta:
             ta = TestAttendance.objects.filter(test_id=rid, mdluser_id=mdluser_id).first()
-        if ta and ta.mdlquiz_id:
-            mdl = MdlQuizGrades.objects.filter(quiz=ta.mdlquiz_id, userid=mdluser_id).order_by('-grade').first()
-            if mdl:
-                return round(mdl.grade, 1)
-            return None
+        if ta:
+            grade = calculate_first_attempt_grade(ta)
+            if grade is not None:
+                return round(grade, 1)
+            if ta.mdlquiz_id:
+                mdl = MdlQuizGrades.objects.filter(quiz=ta.mdlquiz_id, userid=mdluser_id).order_by('-grade').first()
+                if mdl:
+                    return round(mdl.grade, 1)
     except Exception:
         return None
     return None
@@ -119,54 +177,6 @@ def get_second_attempt_testid(rid, mdluser_id):
     if not second_ta:
         return rid
     return second_ta.test_id
-
-def calculate_second_attempt_grade(second_ta):
-    if not second_ta or not second_ta.mdlquiz_id:
-        return None
-    
-    quiz_id = second_ta.mdlquiz_id
-    mdluser_id = second_ta.mdluser_id
-    sumgrades = None
-    quiz_grade = None
-    quiz_sumgrades = None
-    
-    from django.db import connections
-    try:
-        with connections['moodle'].cursor() as cursor:
-            if second_ta.mdlattempt_id:
-                cursor.execute("SELECT sumgrades, quiz FROM mdl_quiz_attempts WHERE id = %s", [second_ta.mdlattempt_id])
-                row = cursor.fetchone()
-                if row and row[0] is not None:
-                    sumgrades = row[0]
-                    quiz_id = row[1]
-            
-            if sumgrades is None:
-                cursor.execute("SELECT sumgrades, quiz FROM mdl_quiz_attempts WHERE quiz = %s AND userid = %s ORDER BY id ASC", [quiz_id, mdluser_id])
-                rows = cursor.fetchall()
-                if len(rows) >= 2:
-                    sumgrades = rows[1][0]
-                    quiz_id = rows[1][1]
-                elif len(rows) == 1:
-                    sumgrades = rows[0][0]
-                    quiz_id = rows[0][1]
-            
-            cursor.execute("SELECT grade, sumgrades FROM mdl_quiz WHERE id = %s", [quiz_id])
-            q_row = cursor.fetchone()
-            if q_row:
-                quiz_grade = float(q_row[0]) if q_row[0] is not None else 0.0
-                quiz_sumgrades = float(q_row[1]) if q_row[1] is not None else 0.0
-            
-            if sumgrades is not None and quiz_grade is not None and quiz_sumgrades and quiz_sumgrades > 0:
-                final_grade = (float(sumgrades) * quiz_grade) / quiz_sumgrades
-                return round(final_grade, 2)
-            
-            cursor.execute("SELECT grade FROM mdl_quiz_grades WHERE quiz = %s AND userid = %s ORDER BY grade DESC", [quiz_id, mdluser_id])
-            g_row = cursor.fetchone()
-            if g_row and g_row[0] is not None:
-                return round(float(g_row[0]), 2)
-    except Exception as e:
-        return None
-    return None
 
 def get_second_attempt_mark(rid, mdluser_id):
     second_ta = get_second_attempt_ta(rid, mdluser_id)
