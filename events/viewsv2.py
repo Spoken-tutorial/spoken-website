@@ -4020,12 +4020,14 @@ class DownloadLOCView(View):
         if payment.verification_status != 1:
             raise PermissionDenied("Payment is not verified/approved yet.")
 
+        academic_year = request.GET.get('academic_year')
+
         # Check 1-year completion requirement (staff/superuser can preview/download anytime)
         if not is_staff and not payment.is_loc_available:
             raise PermissionDenied(f"Annual Report / Certificate of Training will be available after completion of 1 year on {payment.expiry_date.strftime('%d %B, %Y')}.")
             
         try:
-            pdf_buffer = generate_letter_of_completion_pdf(payment)
+            pdf_buffer = generate_letter_of_completion_pdf(payment, academic_year=academic_year)
             response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename=certificate_of_training_{payment.id}.pdf'
             return response

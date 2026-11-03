@@ -58,19 +58,117 @@ def is_school(payment):
             return True
     return False
 
+def is_university(payment):
+    """
+    Checks if an AcademicPaymentStatus or dict represents a University.
+    """
+    if not payment:
+        return False
+    if isinstance(payment, dict):
+        college_type = str(payment.get('college_type', '')).strip().lower()
+        if 'university' in college_type:
+            return True
+        academic = payment.get('academic')
+        if isinstance(academic, dict):
+            inst_name = str(academic.get('institution_name', '')).strip().lower()
+            if 'university' in inst_name:
+                return True
+            inst_type = academic.get('institution_type')
+            if isinstance(inst_type, dict) and 'university' in str(inst_type.get('name', '')).lower():
+                return True
+            if isinstance(inst_type, str) and 'university' in inst_type.strip().lower():
+                return True
+        return False
+
+    if hasattr(payment, 'college_type') and payment.college_type and 'university' in str(payment.college_type).strip().lower():
+        return True
+    if hasattr(payment, 'academic') and payment.academic:
+        inst_name = getattr(payment.academic, 'institution_name', '')
+        if 'university' in str(inst_name).lower():
+            return True
+        if hasattr(payment.academic, 'institution_type') and payment.academic.institution_type:
+            inst_type_name = getattr(payment.academic.institution_type, 'name', '')
+            if 'university' in str(inst_type_name).lower():
+                return True
+    return False
+
 def get_salutation_label(payment):
     """
     Returns the formatted salutation label for institution letters.
-    E.g. 'The Vice Chancellor,', 'The Director,', 'The Principal,', 'The Headmaster,'
+    E.g. 'The Vice-Chancellor,', 'The Director,', 'The Principal,', 'The Headmaster,'
     """
     if isinstance(payment, dict):
-        sal = payment.get('salutation') or 'Principal'
+        sal = payment.get('salutation')
     else:
-        sal = getattr(payment, 'salutation', None) or 'Principal'
+        sal = getattr(payment, 'salutation', None)
+
+    # If salutation is blank or left at the generic default 'Principal', auto-detect based on institution type
+    if not sal or str(sal).strip().lower() in ('principal', 'the principal'):
+        if is_school(payment):
+            return "The Headmaster,"
+        if is_university(payment):
+            return "The Vice-Chancellor,"
+        return "The Principal,"
+
     sal = str(sal).strip()
+    if sal.lower() in ('vice chancellor', 'vice-chancellor'):
+        return "The Vice-Chancellor,"
     if not sal.lower().startswith('the'):
         return f"The {sal},"
     return f"{sal},"
+
+def draw_approved_footer(canvas, page_width=595.27, margin=54):
+    """
+    Draws the official approved two-column EduPyramids / Spoken Tutorial footer:
+    - Centered black header above the line
+    - Solid black divider line
+    - Left column: Building address (with comma after Building)
+    - Right column: Helpline, email, GSTIN, CIN
+    """
+    canvas.saveState()
+    # 1. Heading above line (Black)
+    canvas.setFont("Helvetica-Bold", 9)
+    canvas.setFillColor(colors.black)
+    canvas.drawCentredString(page_width / 2.0, 72, "Spoken Tutorial brought to you by EduPyramids")
+
+    # 2. Solid black horizontal divider
+    canvas.setStrokeColor(colors.black)
+    canvas.setLineWidth(1)
+    canvas.line(margin, 63, page_width - margin, 63)
+
+    # 3. Two-column footer below line (Black)
+    canvas.setFont("Helvetica", 8)
+    canvas.setFillColor(colors.black)
+
+    # Left column (Address)
+    canvas.drawString(margin, 50, "6016 A, SINE, RBTIC Building, IIT Bombay")
+    canvas.drawString(margin, 38, "Powai, Mumbai 400 076")
+
+    # Right column (Contact & Registration)
+    canvas.drawRightString(page_width - margin, 50, "+91 22-25764229 | contact@edupyramids.org")
+    canvas.drawRightString(page_width - margin, 38, "GSTIN: 27AAICE5225E1ZT | CIN: U85499MH2024PTC435910")
+    canvas.restoreState()
+
+def get_edu_logo_path():
+    """
+    Returns the path to the official EduPyramids logo.
+    Prioritizes 'edu_logo_sine.png' (with 'SINE, IIT BOMBAY' and clean borders),
+    falling back to 'edu_logo.png' if not present.
+    """
+    sine_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo_sine.png')
+    if os.path.exists(sine_path):
+        return sine_path
+    return os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
+
+def get_spoken_logo_path():
+    """
+    Returns the path to the official Spoken Tutorial IIT Bombay logo.
+    Prioritizes 'spoken_logo_clean.png', falling back to 'spoken_logo.png'.
+    """
+    clean_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo_clean.png')
+    if os.path.exists(clean_path):
+        return clean_path
+    return os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
 
 def format_institution_location(academic):
     """
@@ -227,8 +325,8 @@ def generate_college_receipt_pdf(payment):
     p = canvas.Canvas(buffer, pagesize=A4)
     
     # 1. Header logos and text
-    edu_logo_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
-    spoken_logo_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
+    edu_logo_path = get_edu_logo_path()
+    spoken_logo_path = get_spoken_logo_path()
     
     # Left Logo
     if os.path.exists(edu_logo_path):
@@ -347,7 +445,7 @@ def generate_college_receipt_pdf(payment):
     # Stamp
     stamp_img_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
     if os.path.exists(stamp_img_path):
-        p.drawImage(stamp_img_path, 180, 180, width=75, height=75, mask='auto')
+        p.drawImage(stamp_img_path, 165, 180, width=65, height=65, mask='auto')
         
     # Coordinator Info
     p.setFont("Helvetica-Bold", 10)
@@ -357,19 +455,8 @@ def generate_college_receipt_pdf(payment):
     p.drawString(54, 138, "National Coordinator")
     p.drawString(54, 126, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
     
-    # 10. Footer Branding Line and Text
-    p.setStrokeColor(colors.HexColor('#1F4E78'))
-    p.setLineWidth(1)
-    p.line(54, 65, 541.27, 65)
-    
-    p.setFont("Helvetica-Bold", 9)
-    p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawCentredString(297.6, 50, "Spoken Tutorial brought to you by EduPyramids")
-    
-    p.setFont("Helvetica", 8)
-    p.setFillColor(colors.HexColor('#000000'))
-    p.drawCentredString(297.6, 36, "6016 A, SINE, RBTIC Building IIT Bombay, Powai, Mumbai 400 076")
-    p.drawCentredString(297.6, 24, "+91 22-25764229 | contact@edupyramids.org | GSTIN: 27AAICE5225E1ZT | CIN: U85499MH2024PTC435910")
+    # 10. Official Approved Footer
+    draw_approved_footer(p)
     
     p.showPage()
     p.save()
@@ -386,8 +473,8 @@ def generate_school_receipt_pdf(payment):
     p = canvas.Canvas(buffer, pagesize=A4)
     
     # 1. Header logos and text
-    edu_logo_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
-    spoken_logo_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
+    edu_logo_path = get_edu_logo_path()
+    spoken_logo_path = get_spoken_logo_path()
     
     # Left Logo
     if os.path.exists(edu_logo_path):
@@ -506,7 +593,7 @@ def generate_school_receipt_pdf(payment):
     if not os.path.exists(stamp_school_path):
         stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
     if os.path.exists(stamp_school_path):
-        p.drawImage(stamp_school_path, 180, 180, width=75, height=75, mask='auto')
+        p.drawImage(stamp_school_path, 165, 180, width=65, height=65, mask='auto')
         
     # Coordinator Info (Mrs. Nidhi Sony)
     p.setFont("Helvetica-Bold", 10)
@@ -516,19 +603,8 @@ def generate_school_receipt_pdf(payment):
     p.drawString(54, 138, "National Coordinator - Schools")
     p.drawString(54, 126, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
     
-    # 10. Footer Branding Line and Text
-    p.setStrokeColor(colors.HexColor('#1F4E78'))
-    p.setLineWidth(1)
-    p.line(54, 65, 541.27, 65)
-    
-    p.setFont("Helvetica-Bold", 9)
-    p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawCentredString(297.6, 50, "Spoken Tutorial brought to you by EduPyramids")
-    
-    p.setFont("Helvetica", 8)
-    p.setFillColor(colors.HexColor('#000000'))
-    p.drawCentredString(297.6, 36, "Seat 60, SINE, RBTIC Building, IIT Bombay, Powai, Mumbai - 400 076")
-    p.drawCentredString(297.6, 24, "+ 91 22 25764229")
+    # 10. Official Approved Footer
+    draw_approved_footer(p)
     
     p.showPage()
     p.save()
@@ -554,8 +630,8 @@ def generate_college_loa_pdf(payment):
     p = canvas.Canvas(buffer, pagesize=A4)
 
     # 1. Header logos and text
-    edu_logo_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
-    spoken_logo_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
+    edu_logo_path = get_edu_logo_path()
+    spoken_logo_path = get_spoken_logo_path()
 
     if os.path.exists(edu_logo_path):
         p.drawImage(edu_logo_path, 54, 730, width=70, height=70, mask='auto')
@@ -593,7 +669,7 @@ def generate_college_loa_pdf(payment):
 
     # 3. Document Title
     p.setFont("Helvetica-Bold", 13)
-    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.setFillColor(colors.black)
     p.drawCentredString(297.6, 660, "LETTER OF ASSOCIATION")
 
     # 4. Recipient block
@@ -694,7 +770,7 @@ def generate_college_loa_pdf(payment):
 
     stamp_img_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
     if os.path.exists(stamp_img_path):
-        p.drawImage(stamp_img_path, 180, 170, width=75, height=75, mask='auto')
+        p.drawImage(stamp_img_path, 165, 175, width=65, height=65, mask='auto')
 
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#000000'))
@@ -703,19 +779,8 @@ def generate_college_loa_pdf(payment):
     p.drawString(54, 128, "National Coordinator")
     p.drawString(54, 116, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
 
-    # 9. Footer Branding Line and Address
-    p.setStrokeColor(colors.HexColor('#1F4E78'))
-    p.setLineWidth(1)
-    p.line(54, 65, 541.27, 65)
-
-    p.setFont("Helvetica-Bold", 9)
-    p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawCentredString(297.6, 50, "Spoken Tutorial brought to you by EduPyramids")
-
-    p.setFont("Helvetica", 8)
-    p.setFillColor(colors.HexColor('#000000'))
-    p.drawCentredString(297.6, 36, "6016 A, SINE, RBTIC Building IIT Bombay, Powai, Mumbai 400 076")
-    p.drawCentredString(297.6, 24, "+91 22-25764229 | contact@edupyramids.org | GSTIN: 27AAICE5225E1ZT | CIN: U85499MH2024PTC435910")
+    # 9. Official Approved Footer
+    draw_approved_footer(p)
 
     p.showPage()
     p.save()
@@ -732,8 +797,8 @@ def generate_school_loa_pdf(payment):
     p = canvas.Canvas(buffer, pagesize=A4)
 
     # 1. Header logos and text
-    edu_logo_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
-    spoken_logo_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
+    edu_logo_path = get_edu_logo_path()
+    spoken_logo_path = get_spoken_logo_path()
 
     if os.path.exists(edu_logo_path):
         p.drawImage(edu_logo_path, 54, 730, width=70, height=70, mask='auto')
@@ -771,7 +836,7 @@ def generate_school_loa_pdf(payment):
 
     # 3. Document Title
     p.setFont("Helvetica-Bold", 13)
-    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.setFillColor(colors.black)
     p.drawCentredString(297.6, 660, "LETTER OF ASSOCIATION")
 
     # 4. Recipient block
@@ -861,7 +926,7 @@ def generate_school_loa_pdf(payment):
         p.drawImage(sig_school_path, 54, 180, width=120, height=45, mask='auto')
 
     if os.path.exists(stamp_school_path):
-        p.drawImage(stamp_school_path, 180, 170, width=75, height=75, mask='auto')
+        p.drawImage(stamp_school_path, 165, 175, width=65, height=65, mask='auto')
 
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#000000'))
@@ -870,19 +935,8 @@ def generate_school_loa_pdf(payment):
     p.drawString(54, 128, "National Coordinator - Schools")
     p.drawString(54, 116, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
 
-    # 8. Footer Branding Line and Address
-    p.setStrokeColor(colors.HexColor('#1F4E78'))
-    p.setLineWidth(1)
-    p.line(54, 65, 541.27, 65)
-
-    p.setFont("Helvetica-Bold", 9)
-    p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawCentredString(297.6, 50, "Spoken Tutorial brought to you by EduPyramids")
-
-    p.setFont("Helvetica", 8)
-    p.setFillColor(colors.HexColor('#000000'))
-    p.drawCentredString(297.6, 36, "6016 A, SINE, RBTIC Building IIT Bombay, Powai, Mumbai 400 076")
-    p.drawCentredString(297.6, 24, "+91 22-25764229 | contact@edupyramids.org | GSTIN: 27AAICE5225E1ZT | CIN: U85499MH2024PTC435910")
+    # 8. Official Approved Footer
+    draw_approved_footer(p)
 
     p.showPage()
     p.save()
@@ -901,11 +955,12 @@ def generate_letter_of_association_pdf(payment):
 
 
 
-def generate_college_loc_pdf(payment):
+def generate_college_loc_pdf(payment, academic_year=None):
     """
     Generates an Annual Report / Certificate of Training (LOC) PDF for an AcademicCenter's subscription year.
-    Lists all workshops/trainings completed during that subscription period.
+    Lists all workshops/trainings completed during that subscription period or selected academic year.
     """
+    import datetime
     from events.models import TrainingRequest
     from django.db.models import Sum
 
@@ -914,17 +969,24 @@ def generate_college_loc_pdf(payment):
     margin = 54
     printable_width = PAGE_WIDTH - 2 * margin
 
-    start_date = payment.payment_date
-    sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
-    end_date = start_date + timedelta(days=sub_days)
-    academic_session = f"{start_date.year}-{end_date.year}" if start_date.year != end_date.year else f"{start_date.year}"
-    ref_year = end_date.year if end_date else (start_date.year + 1 if start_date else 2026)
-    inst_name = payment.academic.institution_name if hasattr(payment, 'academic') and hasattr(payment.academic, 'institution_name') else ""
-    ref_no = get_or_create_academic_document(payment, 'LOC', year=ref_year, recipient_name=inst_name)
-    ref_no = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
-    date_str = f"Date: - {end_date.strftime('%d/%m/%Y')}"
+    # Determine date range and session
+    if academic_year:
+        clean_ay = str(academic_year).strip()
+        if '-' in clean_ay:
+            start_yr = int(clean_ay.split('-')[0])
+        else:
+            start_yr = int(clean_ay)
+        end_yr = start_yr + 1
+        start_date = datetime.date(start_yr, 7, 1)
+        end_date = datetime.date(end_yr, 6, 30)
+        academic_session = f"{start_yr}-{end_yr}"
+    else:
+        start_date = payment.payment_date
+        sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
+        end_date = start_date + timedelta(days=sub_days)
+        academic_session = f"{start_date.year}-{end_date.year}" if start_date.year != end_date.year else f"{start_date.year}"
 
-    # Query completed trainings in that period
+    # Query completed trainings in that subscription period
     trainings = TrainingRequest.objects.filter(
         training_planner__academic_id=payment.academic_id,
         sem_start_date__gte=start_date,
@@ -932,27 +994,23 @@ def generate_college_loc_pdf(payment):
         participants__gt=0
     ).select_related('department', 'course__foss').order_by('department__name', 'course__foss__foss')
 
+    ref_year = end_date.year if end_date else (start_date.year + 1 if start_date else 2026)
+    inst_name = payment.academic.institution_name if hasattr(payment, 'academic') and hasattr(payment.academic, 'institution_name') else ""
+    ref_no = get_or_create_academic_document(payment, 'LOC', year=ref_year, recipient_name=inst_name)
+    ref_no = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
+    date_formatted = format_ordinal_date(end_date)
+    date_str = f"Date: - {date_formatted}"
+
     total_workshops = trainings.count()
     total_participants = trainings.aggregate(Sum('participants'))['participants__sum'] or 0
 
     def draw_footer(canvas):
-        canvas.setStrokeColor(colors.HexColor('#1F4E78'))
-        canvas.setLineWidth(1)
-        canvas.line(margin, 65, PAGE_WIDTH - margin, 65)
-
-        canvas.setFont("Helvetica-Bold", 9)
-        canvas.setFillColor(colors.HexColor('#1F4E78'))
-        canvas.drawCentredString(PAGE_WIDTH / 2.0, 50, "Spoken Tutorial brought to you by EduPyramids")
-
-        canvas.setFont("Helvetica", 8)
-        canvas.setFillColor(colors.HexColor('#000000'))
-        canvas.drawCentredString(PAGE_WIDTH / 2.0, 36, "6016 A, SINE, RBTIC Building IIT Bombay, Powai, Mumbai 400 076")
-        canvas.drawCentredString(PAGE_WIDTH / 2.0, 24, "+91 22-25764229 | contact@edupyramids.org | GSTIN: 27AAICE5225E1ZT | CIN: U85499MH2024PTC435910")
+        draw_approved_footer(canvas, page_width=PAGE_WIDTH, margin=margin)
 
     def draw_header_footer_p1(canvas, doc):
         canvas.saveState()
-        edu_logo_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
-        spoken_logo_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
+        edu_logo_path = get_edu_logo_path()
+        spoken_logo_path = get_spoken_logo_path()
 
         if os.path.exists(edu_logo_path):
             canvas.drawImage(edu_logo_path, 54, 730, width=70, height=70, mask='auto')
@@ -980,9 +1038,9 @@ def generate_college_loc_pdf(payment):
         draw_footer(canvas)
         canvas.restoreState()
 
-    frame_p1 = Frame(margin, 75, printable_width, PAGE_HEIGHT - 75 - 125, id='frame_p1',
+    frame_p1 = Frame(margin, 82, printable_width, PAGE_HEIGHT - 82 - 125, id='frame_p1',
                      leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
-    frame_later = Frame(margin, 75, printable_width, PAGE_HEIGHT - 75 - 54, id='frame_later',
+    frame_later = Frame(margin, 82, printable_width, PAGE_HEIGHT - 82 - 54, id='frame_later',
                         leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
 
     template_p1 = PageTemplate(id='FirstPage', frames=frame_p1, onPage=draw_header_footer_p1)
@@ -993,7 +1051,7 @@ def generate_college_loc_pdf(payment):
     # Paragraph Styles
     ref_style = ParagraphStyle('LOCRef', fontName='Helvetica', fontSize=9.5, leading=12)
     date_style = ParagraphStyle('LOCDate', fontName='Helvetica', fontSize=9.5, leading=12, alignment=TA_RIGHT)
-    title_style = ParagraphStyle('LOCTitle', fontName='Helvetica-Bold', fontSize=13, leading=16, textColor=colors.HexColor('#1F4E78'), alignment=TA_CENTER)
+    title_style = ParagraphStyle('LOCTitle', fontName='Helvetica-Bold', fontSize=13, leading=16, textColor=colors.black, alignment=TA_CENTER)
     recipient_style = ParagraphStyle('LOCRecipient', fontName='Helvetica', fontSize=9.5, leading=13.5)
     subject_style = ParagraphStyle('LOCSubject', fontName='Helvetica-Bold', fontSize=9.5, leading=13.5)
     body_style = ParagraphStyle('LOCBody', fontName='Helvetica', fontSize=9, leading=13.5, alignment=TA_JUSTIFY)
@@ -1104,7 +1162,7 @@ def generate_college_loc_pdf(payment):
     if has_sig or has_stamp:
         sig_cell = Image(sig_img_path, width=100, height=38) if has_sig else Paragraph("", body_style)
         stamp_cell = Image(stamp_img_path, width=60, height=60) if has_stamp else Paragraph("", body_style)
-        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[110, 80], hAlign='LEFT')
+        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[105, 65], hAlign='LEFT')
         sig_tbl.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -1186,12 +1244,13 @@ def generate_college_loc_pdf(payment):
     return buffer
 
 
-def generate_school_loc_pdf(payment):
+def generate_school_loc_pdf(payment, academic_year=None):
     """
     Generates an Annual Report PDF for a School's subscription year.
-    Lists all workshops/trainings completed during that subscription period.
+    Lists all workshops/trainings completed during that subscription period or selected academic year.
     Matches the official EduPyramids / Spoken Tutorial IIT Bombay School template.
     """
+    import datetime
     from events.models import TrainingRequest
     from django.db.models import Sum
 
@@ -1200,18 +1259,24 @@ def generate_school_loc_pdf(payment):
     margin = 54
     printable_width = PAGE_WIDTH - 2 * margin
 
-    start_date = payment.payment_date
-    sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
-    end_date = start_date + timedelta(days=sub_days)
-    academic_session = f"{start_date.year}-{end_date.year}" if start_date.year != end_date.year else f"{start_date.year}"
-    ref_year = end_date.year if end_date else (start_date.year + 1 if start_date else 2026)
-    inst_name = payment.academic.institution_name if hasattr(payment, 'academic') and hasattr(payment.academic, 'institution_name') else ""
-    ref_no = get_or_create_academic_document(payment, 'LOC', year=ref_year, recipient_name=inst_name)
-    ref_no = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
-    date_formatted = format_ordinal_date(end_date)
-    date_str = f"Date: - {date_formatted}"
+    # Determine date range and session
+    if academic_year:
+        clean_ay = str(academic_year).strip()
+        if '-' in clean_ay:
+            start_yr = int(clean_ay.split('-')[0])
+        else:
+            start_yr = int(clean_ay)
+        end_yr = start_yr + 1
+        start_date = datetime.date(start_yr, 7, 1)
+        end_date = datetime.date(end_yr, 6, 30)
+        academic_session = f"{start_yr}-{end_yr}"
+    else:
+        start_date = payment.payment_date
+        sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
+        end_date = start_date + timedelta(days=sub_days)
+        academic_session = f"{start_date.year}-{end_date.year}" if start_date.year != end_date.year else f"{start_date.year}"
 
-    # Query completed trainings in that period
+    # Query completed trainings in that subscription period
     trainings = TrainingRequest.objects.filter(
         training_planner__academic_id=payment.academic_id,
         sem_start_date__gte=start_date,
@@ -1219,27 +1284,23 @@ def generate_school_loc_pdf(payment):
         participants__gt=0
     ).select_related('department', 'course__foss').order_by('department__name', 'course__foss__foss')
 
+    ref_year = end_date.year if end_date else (start_date.year + 1 if start_date else 2026)
+    inst_name = payment.academic.institution_name if hasattr(payment, 'academic') and hasattr(payment.academic, 'institution_name') else ""
+    ref_no = get_or_create_academic_document(payment, 'LOC', year=ref_year, recipient_name=inst_name)
+    ref_no = f"Ref.No. {ref_no}" if not ref_no.startswith("Ref.No.") else ref_no
+    date_formatted = format_ordinal_date(end_date)
+    date_str = f"Date: - {date_formatted}"
+
     total_workshops = trainings.count()
     total_participants = trainings.aggregate(Sum('participants'))['participants__sum'] or 0
 
     def draw_footer(canvas):
-        canvas.setStrokeColor(colors.HexColor('#1F4E78'))
-        canvas.setLineWidth(1)
-        canvas.line(margin, 65, PAGE_WIDTH - margin, 65)
-
-        canvas.setFont("Helvetica-Bold", 9)
-        canvas.setFillColor(colors.HexColor('#1F4E78'))
-        canvas.drawCentredString(PAGE_WIDTH / 2.0, 50, "Spoken Tutorial brought to you by EduPyramids")
-
-        canvas.setFont("Helvetica", 8)
-        canvas.setFillColor(colors.HexColor('#000000'))
-        canvas.drawCentredString(PAGE_WIDTH / 2.0, 36, "6016 A, SINE, RBTIC Building IIT Bombay, Powai, Mumbai 400 076")
-        canvas.drawCentredString(PAGE_WIDTH / 2.0, 24, "+91 22-25764229 | contact@edupyramids.org | GSTIN: 27AAICE5225E1ZT | CIN: U85499MH2024PTC435910")
+        draw_approved_footer(canvas, page_width=PAGE_WIDTH, margin=margin)
 
     def draw_header_footer_p1(canvas, doc):
         canvas.saveState()
-        edu_logo_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
-        spoken_logo_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
+        edu_logo_path = get_edu_logo_path()
+        spoken_logo_path = get_spoken_logo_path()
 
         if os.path.exists(edu_logo_path):
             canvas.drawImage(edu_logo_path, 54, 730, width=70, height=70, mask='auto')
@@ -1267,9 +1328,9 @@ def generate_school_loc_pdf(payment):
         draw_footer(canvas)
         canvas.restoreState()
 
-    frame_p1 = Frame(margin, 75, printable_width, PAGE_HEIGHT - 75 - 125, id='frame_school_loc_p1',
+    frame_p1 = Frame(margin, 82, printable_width, PAGE_HEIGHT - 82 - 125, id='frame_school_loc_p1',
                      leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
-    frame_later = Frame(margin, 75, printable_width, PAGE_HEIGHT - 75 - 54, id='frame_school_loc_later',
+    frame_later = Frame(margin, 82, printable_width, PAGE_HEIGHT - 82 - 54, id='frame_school_loc_later',
                         leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
 
     template_p1 = PageTemplate(id='SchoolLOCFirstPage', frames=frame_p1, onPage=draw_header_footer_p1)
@@ -1280,7 +1341,7 @@ def generate_school_loc_pdf(payment):
     # Paragraph Styles
     ref_style = ParagraphStyle('SchoolLOCRef', fontName='Helvetica', fontSize=9.5, leading=12)
     date_style = ParagraphStyle('SchoolLOCDate', fontName='Helvetica', fontSize=9.5, leading=12, alignment=TA_RIGHT)
-    title_style = ParagraphStyle('SchoolLOCTitle', fontName='Helvetica-Bold', fontSize=13, leading=16, textColor=colors.HexColor('#1F4E78'), alignment=TA_CENTER)
+    title_style = ParagraphStyle('SchoolLOCTitle', fontName='Helvetica-Bold', fontSize=13, leading=16, textColor=colors.black, alignment=TA_CENTER)
     recipient_style = ParagraphStyle('SchoolLOCRecipient', fontName='Helvetica', fontSize=9.5, leading=13.5)
     subject_style = ParagraphStyle('SchoolLOCSubject', fontName='Helvetica-Bold', fontSize=9.5, leading=13.5)
     body_style = ParagraphStyle('SchoolLOCBody', fontName='Helvetica', fontSize=9, leading=13.5, alignment=TA_JUSTIFY)
@@ -1393,7 +1454,7 @@ def generate_school_loc_pdf(payment):
     if has_sig or has_stamp:
         sig_cell = Image(sig_school_path, width=100, height=38) if has_sig else Paragraph("", body_style)
         stamp_cell = Image(stamp_school_path, width=60, height=60) if has_stamp else Paragraph("", body_style)
-        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[110, 80], hAlign='LEFT')
+        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[105, 65], hAlign='LEFT')
         sig_tbl.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -1475,14 +1536,14 @@ def generate_school_loc_pdf(payment):
     return buffer
 
 
-def generate_letter_of_completion_pdf(payment):
+def generate_letter_of_completion_pdf(payment, academic_year=None):
     """
     Dispatches Certificate of Training / Annual Report (LOC) PDF generation:
     School template for schools, College template for higher education institutions.
     """
     if is_school(payment):
-        return generate_school_loc_pdf(payment)
-    return generate_college_loc_pdf(payment)
+        return generate_school_loc_pdf(payment, academic_year=academic_year)
+    return generate_college_loc_pdf(payment, academic_year=academic_year)
 
 
 def generate_college_appreciation_pdf(payment, organiser=None, organiser_id=None):
@@ -1506,8 +1567,8 @@ def generate_college_appreciation_pdf(payment, organiser=None, organiser_id=None
     p = canvas.Canvas(buffer, pagesize=A4)
 
     # 1. Header logos and text
-    edu_logo_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
-    spoken_logo_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
+    edu_logo_path = get_edu_logo_path()
+    spoken_logo_path = get_spoken_logo_path()
 
     if os.path.exists(edu_logo_path):
         p.drawImage(edu_logo_path, 54, 730, width=70, height=70, mask='auto')
@@ -1561,7 +1622,7 @@ def generate_college_appreciation_pdf(payment, organiser=None, organiser_id=None
 
     # 3. Document Title
     p.setFont("Helvetica-Bold", 13)
-    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.setFillColor(colors.black)
     p.drawCentredString(297.6, 660, "LETTER OF APPRECIATION")
 
     academic = payment.academic
@@ -1634,39 +1695,28 @@ def generate_college_appreciation_pdf(payment, organiser=None, organiser_id=None
     _, h4 = p4.wrap(487.27, 100)
     p4.drawOn(p, 54, y - h4)
 
-    # 6. Signature Block
+    # 6. Signature Block (raised closer to paragraph 4)
     footer_img_path = os.path.join(settings.MEDIA_ROOT, 'footer.png')
     if os.path.exists(footer_img_path):
-        p.drawImage(footer_img_path, 54, 215, width=160, height=35, mask='auto')
+        p.drawImage(footer_img_path, 54, 260, width=150, height=33, mask='auto')
 
     sig_img_path = os.path.join(settings.MEDIA_ROOT, 'signature.png')
     if os.path.exists(sig_img_path):
-        p.drawImage(sig_img_path, 54, 145, width=120, height=45, mask='auto')
+        p.drawImage(sig_img_path, 54, 200, width=110, height=45, mask='auto')
 
     stamp_img_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
     if os.path.exists(stamp_img_path):
-        p.drawImage(stamp_img_path, 180, 135, width=75, height=75, mask='auto')
+        p.drawImage(stamp_img_path, 165, 195, width=65, height=65, mask='auto')
 
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 105, "Mrs. Akanksha Saini")
+    p.drawString(54, 160, "Mrs. Akanksha Saini")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 93, "National Coordinator")
-    p.drawString(54, 81, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, 148, "National Coordinator")
+    p.drawString(54, 136, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
 
-    # 7. Footer Branding Line and Address
-    p.setStrokeColor(colors.HexColor('#1F4E78'))
-    p.setLineWidth(1)
-    p.line(54, 65, 541.27, 65)
-
-    p.setFont("Helvetica-Bold", 9)
-    p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawCentredString(297.6, 50, "Spoken Tutorial brought to you by EduPyramids")
-
-    p.setFont("Helvetica", 8)
-    p.setFillColor(colors.HexColor('#000000'))
-    p.drawCentredString(297.6, 36, "6016 A, SINE, RBTIC Building IIT Bombay, Powai, Mumbai 400 076")
-    p.drawCentredString(297.6, 24, "+91 22-25764229 | contact@edupyramids.org | GSTIN: 27AAICE5225E1ZT | CIN: U85499MH2024PTC435910")
+    # 7. Official Approved Footer
+    draw_approved_footer(p)
 
     p.showPage()
     p.save()
@@ -1696,8 +1746,8 @@ def generate_school_appreciation_pdf(payment, organiser=None, organiser_id=None)
     p = canvas.Canvas(buffer, pagesize=A4)
 
     # 1. Header logos and text
-    edu_logo_path = os.path.join(settings.MEDIA_ROOT, 'edu_logo.png')
-    spoken_logo_path = os.path.join(settings.MEDIA_ROOT, 'spoken_logo.png')
+    edu_logo_path = get_edu_logo_path()
+    spoken_logo_path = get_spoken_logo_path()
 
     if os.path.exists(edu_logo_path):
         p.drawImage(edu_logo_path, 54, 730, width=70, height=70, mask='auto')
@@ -1751,7 +1801,7 @@ def generate_school_appreciation_pdf(payment, organiser=None, organiser_id=None)
 
     # 3. Document Title
     p.setFont("Helvetica-Bold", 13)
-    p.setFillColor(colors.HexColor('#1F4E78'))
+    p.setFillColor(colors.black)
     p.drawCentredString(297.6, 660, "LETTER OF APPRECIATION")
 
     academic = payment.academic
@@ -1825,13 +1875,13 @@ def generate_school_appreciation_pdf(payment, organiser=None, organiser_id=None)
     _, h4 = p4.wrap(487.27, 100)
     p4.drawOn(p, 54, y - h4)
 
-    # 6. Signature Block
+    # 6. Signature Block (raised closer to paragraph 4)
     p.setFont("Helvetica", 9.5)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 230, "For and on behalf of")
+    p.drawString(54, 275, "For and on behalf of")
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawString(54, 215, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, 260, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
 
     sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature_schools.png')
     if not os.path.exists(sig_school_path):
@@ -1842,31 +1892,20 @@ def generate_school_appreciation_pdf(payment, organiser=None, organiser_id=None)
         stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
 
     if os.path.exists(sig_school_path):
-        p.drawImage(sig_school_path, 54, 150, width=120, height=45, mask='auto')
+        p.drawImage(sig_school_path, 54, 200, width=110, height=45, mask='auto')
 
     if os.path.exists(stamp_school_path):
-        p.drawImage(stamp_school_path, 180, 140, width=75, height=75, mask='auto')
+        p.drawImage(stamp_school_path, 165, 195, width=65, height=65, mask='auto')
 
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 110, "Mrs. Nidhi Sony")
+    p.drawString(54, 160, "Mrs. Nidhi Sony")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 98, "National Coordinator - Schools")
-    p.drawString(54, 86, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, 148, "National Coordinator - Schools")
+    p.drawString(54, 136, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
 
-    # 7. Footer Branding Line and Address
-    p.setStrokeColor(colors.HexColor('#1F4E78'))
-    p.setLineWidth(1)
-    p.line(54, 65, 541.27, 65)
-
-    p.setFont("Helvetica-Bold", 9)
-    p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawCentredString(297.6, 50, "Spoken Tutorial brought to you by EduPyramids")
-
-    p.setFont("Helvetica", 8)
-    p.setFillColor(colors.HexColor('#000000'))
-    p.drawCentredString(297.6, 36, "6016 A, SINE, RBTIC Building IIT Bombay, Powai, Mumbai 400 076")
-    p.drawCentredString(297.6, 24, "+91 22-25764229 | contact@edupyramids.org | GSTIN: 27AAICE5225E1ZT | CIN: U85499MH2024PTC435910")
+    # 7. Official Approved Footer
+    draw_approved_footer(p)
 
     p.showPage()
     p.save()
