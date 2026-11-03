@@ -189,13 +189,15 @@
                                         {% endif %}
                                     {% endwith %}
                                 {% elif status >= 3 %}
-                                    {% with grade=record.id|get_participant_mark:mdluserid %}
+                                    {% with grade=record.id|get_first_attempt_mark:mdluserid %}
                                         {% if grade is not None %}
                                             {% if grade >= 40 %}
                                                 {{ grade }}%
-                                                {% if record.invigilator %}
-                                                 - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
-                                                {% endif %}
+                                                {% with first_testid=record.id|get_first_attempt_testid:mdluserid %}
+                                                    {% if record.invigilator %}
+                                                     - <a href="{% url 'events:test_participant_ceritificate' first_testid mdluserid %}">Certificate</a>
+                                                    {% endif %}
+                                                {% endwith %}
                                             {% else %}
                                                 {{ grade }} (Fail)
                                             {% endif %}
