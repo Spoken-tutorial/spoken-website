@@ -5,9 +5,65 @@
 {% block heading %}
     <i class="fa fa-list-ul"></i> New Institution
 {% endblock %}
+{% block cssblock %}
+<style type="text/css">
+	
+</style>
+
+{% endblock %}
 {% block content %}
     <div class="row well">
+        <div class='col-12'>
+            <form action="{% url 'events:upload_ac_csv' %}" method="post" enctype="multipart/form-data" class="form-horizontal">
+                {% csrf_token %}
+                {{ form_csv }}
+                <button type="submit" class="btn btn-primary m-4" style="margin-top: 12px;">upload csv</button>
+            </form>
+        </div>
+        <div class="alert alert-info col-12" style="margin-top: 12px;">
+  <h4>CSV Upload Instructions</h4>
+  <ol>
+    <li>
+      Use the following column headers, in the <strong>exact order and with exact spellings</strong>:<br>
+      <code>
+        institution_name, state, district, city, address, pincode, institution_type, institute_category, university,<br>
+        contact_person,resource_center, ratings, remarks, status<br>
+        
+      </code>
+    </li>
+    <li>
+      <strong>Do not change column names or their sequence.</strong>
+    </li>
+    <li>
+      If a value contains a comma <code>(,)</code>, enclose it in <strong>double quotes</strong> <code>("")</code>.<br>
+      <b>Example:</b><br>
+      <code>
+        "Institute of Physics, Pune",Maharashtra,Pune, Pune, "Plot 21, Industrial Area, MIDC",411001, School, Uncategorised,  Central Board of Secondary education,
+        Ankita 999999999 ankita@samtafoundation.com, no,1,no remarks,1
+      </code>
+    </li>
+    <li>
+      Save your file with a <code>.csv</code> extension and ensure it's UTF-8 encoded.
+    </li>
+  </ol>
+  <div>
+    <div class="alert alert-warning col-12" style="margin-top: 12px;">
+        <p>
+        To ensure that the fields — State, District, City, Institute Type, Institute Category, and University — exactly match the values in our database, please <strong>use the provided Google Sheet</strong> (link below). The sheet includes dropdowns for these fields to maintain correct data entry.<br/>
+        Make a copy of the sheet (ensure you are logged into Google), fill in your data, download it as a CSV file, and then upload it here.
+        </p>
+
+        <strong><a href="{{ academic_csv_template }}" target="_blank">CSV Template Link</a></strong>
+  </p>
+    </div>
+  </div>
+  
+</div>
+
+    </div>
+    <div class="row well">
         <div class='col-sm-8'>
+            <p><strong>Add Individual Academic Center</strong></p>
             <form action="{{ action }}" method="post" class='form-horizontal'>{% csrf_token %}
                 {% with WIDGET_ERROR_CLASS='field-error' WIDGET_REQUIRED_CLASS='field-required' %}
                     {% if form.non_field_errors %}
