@@ -6,6 +6,7 @@ from events.decorators import *
 from events.formsv2 import *
 from events.urls import *
 from events.viewsv2 import *
+from creation.views import transfer_foss, ajax_transfer_foss_details
 
 app_name = 'eventsv2'
 urlpatterns = [
@@ -71,6 +72,8 @@ urlpatterns = [
    url(r'^get-language-level-option/$', viewsv2.get_language_level_option, name='get_language_level_option'),
    url(r'^moodle-mapping/$', MoodleMappingView.as_view(), name='moodle_mapping'),
    url(r'^get-moodle-quizzes/$', GetMoodleQuizzesView.as_view(), name='get_moodle_quizzes'),
+   url(r'^transfer-foss/$', transfer_foss, name='transfer_foss'),
+   url(r'^ajax-transfer-foss-details/$', ajax_transfer_foss_details, name='ajax_transfer_foss_details'),
 
 
     url(
