@@ -417,9 +417,15 @@ function payment_btn_activate(){
   checkRegisterButton();
 }
 
-function payment_btn_hide(){
-  $('#make_payment').hide();
-  $('#register_paid').show();
+function payment_btn_hide() {
+    var paymentRequired = "{{ event_obj.payment_required|yesno:'true,false' }}" === "true";
+    if (paymentRequired) {
+        $('#make_payment').show();
+        $('#register_paid').hide();
+    } else {
+        $('#make_payment').hide();
+        $('#register_paid').show();
+    }
 }
 
 function check_college(control){
@@ -430,7 +436,11 @@ function check_college(control){
   }
   if(control.value=='None'){
       collegeInfo.style.display = "block";
-      payment_btn_activate();
+        if ("{{ event_obj.payment_required|yesno:'true,false' }}" === "true") {
+            payment_btn_hide();
+        } else {
+            payment_btn_activate();
+        }
   }else{
       collegeInfo.style.display = "none";
       payment_btn_hide();
@@ -465,12 +475,18 @@ function checkRegisterButton() {
 }
 
 $('#id_gender').change(function(){
+    var paymentRequired = "{{ event_obj.payment_required|yesno:'true,false' }}" === "true";
+    // If payment is required, always show Make Payment
+    if (paymentRequired) {
+        payment_btn_hide();
+    } else {
     var college = $('#id_college').val();
     var saved_college = $('#college_user_details').val();
     if(college||saved_college)
     {
       $('#amount_back').show();
       payment_btn_activate();
+    }
     }
     checkRegisterButton();
 });
@@ -604,7 +620,12 @@ $('#pwd').on('focusout',function(){
                 if (data['organizer_paid']=='1') {
                   $('#organizer_info').show();
                   $('#download_btn').show();
-                  $('#make_payment').hide();
+                  var paymentRequired = "{{ event_obj.payment_required|yesno:'true,false' }}" === "true";
+                  if (paymentRequired) {
+                      payment_btn_hide();
+                  } else {
+                      $('#make_payment').hide();
+                  }
                   
                   $('#id_country').parent().hide();
                   
@@ -627,36 +648,42 @@ $( "#edit_clg" ).click(function() {
   checkRegisterButton();
 });
 
-$('#id_college').change(function(){
-  var collegeid = $(this).val();
-  $.ajax({
-      type : "POST",
-      url:"/training/ajax_check_college/",
-      dataType : "json",
-      data: {
-        'college_id' : collegeid,
-      },
-      success: function(data){
-        if(!data){
-            $('#make_payment').show();
-            $('#register_paid').hide();
-            $('#paid-info').hide();
-            payment_btn_activate();
-            var collegeUserDetails = $('#college_user_details');
-            if (collegeUserDetails.length){
-              $('#college_user_details').val('');
+$('#id_college').change(function() {
+    var collegeid = $(this).val();
+    $.ajax({
+        type: "POST",
+        url: "/training/ajax_check_college/",
+        dataType: "json",
+        data: {
+            'college_id': collegeid
+        },
+        success: function(data) {
+            if (!data) {
+                $('#paid-info').hide();
+                var collegeUserDetails = $('#college_user_details');
+                if (collegeUserDetails.length) {
+                    collegeUserDetails.val('');
+                }
+                if ("{{ event_obj.payment_required|yesno:'true,false' }}" === "true") {
+                    payment_btn_hide();
+                } else {
+                    $('#make_payment').show();
+                    $('#register_paid').hide();
+                    payment_btn_activate();
+                }
+            } else {
+                // College subscription is active
+                payment_btn_hide();
             }
-          }
-          else{
+            checkRegisterButton();
+        },
+        error: function(xhr, status, error) {
+            console.error("College payment check failed:", error);
+            // Do not allow Register to appear because of an AJAX failure
             payment_btn_hide();
-            var registerPaid = $('#register_paid');
-            if (registerPaid.length) {
-              registerPaid.show();
-              }
-            }
-          }
-      });
-  });
+        }
+    });
+});
 
   $('#id_name, #id_email, #id_phone, #id_gender, #id_state, #id_college, #college_user_details').on('change input', checkRegisterButton);
   checkRegisterButton();
