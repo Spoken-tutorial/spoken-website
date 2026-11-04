@@ -8,7 +8,7 @@ from collections import defaultdict
 import logging
 import traceback
 
-logger = logging.getLogger(__name__)
+
 from django.utils import timezone
 from decimal import Decimal
 from string import Template
@@ -56,6 +56,8 @@ from django.contrib.auth.models import User
 import itertools
 from django.utils.html import format_html
 from django.core.urlresolvers import reverse
+
+logger = logging.getLogger(__name__)
 
 def humansize(nbytes):
     suffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']

@@ -32,7 +32,7 @@ from events.views import get_page
 from forums.models import Question, Answer
 from config import FOSS_FOR_ANALYTICS, MONGO_PORT, MONGO_USER, MONGO_PASS,\
  MONGO_HOST, MONGO_DB, TUTORIAL_RESTRICTION_DATE, ALLOWED_LOGS, SWAYAM_VIDEO_URL, SWAYAM_REGISTRATION_URL,\
- SWAYAM_COURSE_VIDEO_PATH, SWAYAM_VIDEO_PATH, SWAYAM_INSTRUCTION_FILE, SPOKEN_SOCIAL_URL
+ SWAYAM_COURSE_VIDEO_PATH, SWAYAM_VIDEO_PATH, SWAYAM_INSTRUCTION_FILE, SPOKEN_SOCIAL_URL, WATCH_VIDEO_ROLE
 from .filters import NewsStateFilter, MediaTestimonialsFossFilter
 from .forms import *
 from .search import search_for_results
@@ -321,7 +321,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         tutorial = unquote_plus(tutorial)
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
         tr_rec = TutorialResource.objects.select_related('tutorial_detail', 'tutorial_detail__foss', 'language').get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
-        is_authorized_user = is_valid_user(request.user, foss, lang, tr_rec)
+        is_authorized_user = (request.user.is_authenticated and request.user.groups.filter(name__in=WATCH_VIDEO_ROLE).exists())
         tr_recs = get_tutorials_list(foss, lang)
     except Exception as e:
         messages.error(request, str(e))
