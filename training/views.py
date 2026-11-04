@@ -45,7 +45,8 @@ import os, sys
 from string import Template
 from events.certificates import get_organization, get_signature
 from health_app.models import TopicCategory, HNContributorRole, HNLanguage
-from spoken.config import HN_API,SPOKEN_BASE_URL
+from spoken.config import HN_API,SPOKEN_BASE_URL,EDUPYRAMIDS_URL
+from config import IS_EDU_URL
 from training.templatetags.trainingdata import is_tr_ongoing, is_tr_completed, is_event_closed
 
 #pdf generate
@@ -171,7 +172,7 @@ class TrainingEventsListView(ListView):
         context['swayam_attendance_map'] = {}
         context['completed_event_ids'] = set()
         context['current_date'] = date.today()
-        
+	
         if self.status == 'myevents':
             # Get filtered events from the filter
             filtered_events = self.collection.qs
@@ -217,6 +218,8 @@ class TrainingEventsListView(ListView):
         context['show_myevents'] = self.show_myevents
         context['ILW_ONLINE_TEST_URL'] = settings.ILW_ONLINE_TEST_URL
         context['HN_API'] = HN_API
+        context['IS_EDU_URL'] = IS_EDU_URL
+        context['EDUPYRAMIDS_URL'] = EDUPYRAMIDS_URL
         
         if self.request.user:
             context['user'] = self.request.user
@@ -279,6 +282,10 @@ def _validate_parameters(parameter, value):
 
 @csrf_exempt
 def register_user(request):
+	if not IS_EDU_URL:
+		redirect_url = EDUPYRAMIDS_URL.rstrip('/') + request.get_full_path()
+		return HttpResponseRedirect(redirect_url)
+
 	form = RegisterUser()
 	template_name = "register_user.html"
 	context = {}

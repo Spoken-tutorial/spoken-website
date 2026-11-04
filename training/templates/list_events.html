@@ -212,7 +212,11 @@
     </div>
 {% else %}
 {% for event in collection %}
-  <form method="post" action="{% url 'training:register_user' %}?event_id={{event.id}}">
+{% if IS_EDU_URL %}
+    <form method="post" action="{% url 'training:register_user' %}?event_id={{event.id}}">
+{% else %}
+    <form method="post" action="{{ EDUPYRAMIDS_URL }}/register/?event_id={{event.id}}">
+{% endif %}
 
 {% csrf_token %}
 
