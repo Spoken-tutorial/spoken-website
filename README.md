@@ -1,4 +1,4 @@
-Spoken-Website
+Spoken-Website - This is Amezing 
 ==============
 
 Spoken tutorial website in django (https://spoken-tutorial.org)
