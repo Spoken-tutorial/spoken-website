@@ -480,7 +480,7 @@
                     {% endwith %}
                     <li><a href="/creation/report-missing-component/{{ tr_rec.id}}" class="fancybox fancybox.iframe"> Report Missing Component</a></li>
 
-                    <li><a id="text" target="_blank" href="" class="forum-post">Post your Question on the Forum</a></li>
+                    <li><a id="text" target="_blank" href="{{ FORUMS_SPOKEN_URL }}/new-question/?category={{ tr_rec.tutorial_detail.foss.foss|urlencode }}&tutorial={{ tr_rec.tutorial_detail.tutorial|urlencode }}&minute_range=0-1&second_range=0-10" class="forum-post">Post your Question on the Forum</a></li>
          <!--<li><p id="playerHolder"></p></li> 
 	<li><p id="playerHolder1"></p></li> !-->
 
@@ -1036,11 +1036,10 @@ function clickListener(e)
             }
 
            	trigger( cur_time);
-							$("#text").click(function(e){
-							trackedPlayer.pause()
-		       		setForum(cur_time)
-		         
-		      		});
+           	setForum(cur_time);
+			$("#text").click(function(e){
+				trackedPlayer.pause();
+			});
 			
             });
  
@@ -1065,7 +1064,7 @@ function clickListener(e)
 									sec_range = "50-60"
 						}
 		
-						 var url = "{{ FORUMS_SPOKEN_URL }}/new-question/?category={{ tr_rec.tutorial_detail.foss.foss }}&tutorial={{ tr_rec.tutorial_detail.tutorial }}&minute_range="+min_range+"&second_range="+sec_range;
+						 var url = "{{ FORUMS_SPOKEN_URL }}/new-question/?category={{ tr_rec.tutorial_detail.foss.foss|urlencode }}&tutorial={{ tr_rec.tutorial_detail.tutorial|urlencode }}&minute_range="+min_range+"&second_range="+sec_range;
 						$("#text").attr("href", url);
 				}
     </script>
