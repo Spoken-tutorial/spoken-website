@@ -3993,11 +3993,6 @@ class DownloadLOAView(View):
         if not (is_staff or is_owner):
             raise PermissionDenied("You do not have permission to download this Letter of Association.")
             
-        if is_staff and not request.user.is_superuser:
-            user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
-            if payment.state_id not in user_states:
-                raise PermissionDenied("You do not have permission to download Letter of Association for this state.")
-            
         if payment.verification_status != 1:
             raise PermissionDenied("Letter of Association is not verified/approved yet.")
             
@@ -4022,20 +4017,17 @@ class DownloadLOCView(View):
         if not (is_staff or is_owner):
             raise PermissionDenied("You do not have permission to download this Certificate of Training.")
             
-        if is_staff and not request.user.is_superuser:
-            user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
-            if payment.state_id not in user_states:
-                raise PermissionDenied("You do not have permission to download Certificate of Training for this state.")
-            
         if payment.verification_status != 1:
             raise PermissionDenied("Payment is not verified/approved yet.")
+
+        academic_year = request.GET.get('academic_year')
 
         # Check 1-year completion requirement (staff/superuser can preview/download anytime)
         if not is_staff and not payment.is_loc_available:
             raise PermissionDenied(f"Annual Report / Certificate of Training will be available after completion of 1 year on {payment.expiry_date.strftime('%d %B, %Y')}.")
             
         try:
-            pdf_buffer = generate_letter_of_completion_pdf(payment)
+            pdf_buffer = generate_letter_of_completion_pdf(payment, academic_year=academic_year)
             response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename=certificate_of_training_{payment.id}.pdf'
             return response
@@ -4054,11 +4046,6 @@ class DownloadAppreciationLetterView(View):
         
         if not (is_staff or is_owner):
             raise PermissionDenied("You do not have permission to download this Letter of Appreciation.")
-            
-        if is_staff and not request.user.is_superuser:
-            user_states = PaymentVerificationUser.objects.filter(user=request.user).values_list('state_id', flat=True)
-            if payment.state_id not in user_states:
-                raise PermissionDenied("You do not have permission to download Letter of Appreciation for this state.")
             
         if payment.verification_status != 1:
             raise PermissionDenied("Payment is not verified/approved yet.")
