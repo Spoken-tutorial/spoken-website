@@ -560,20 +560,20 @@
                     {% if tr_rec.script_status %}
                         <div class="list-group-item-container">
                             
-                 <a {% if user_authorized %}{% if tr_rec.is_hst %} href="{{ tr_rec.script }}" {% else %} href="{{ script_base|add:tr_rec.script }}"{% endif %}{% else %}style="pointer-events: none; cursor: default;"{% endif %}target="_blank"class="list-group-item">
+                 <a {% if resources_authorized %}{% if tr_rec.is_hst %} href="{{ tr_rec.script }}" {% else %} href="{{ script_base|add:tr_rec.script }}"{% endif %}{% else %}style="pointer-events: none; cursor: default;"{% endif %}target="_blank"class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> 
                                     Script 
                                 </h4>
-                                {% if not user_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
+                                {% if not resources_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
                             </a>
                         </div>
                         {% if tr_rec.language.name == 'English' %}
                             {% with timed_script=tr_rec.script|get_timed_script:tr_rec.timed_script %}
                                 {% if timed_script %}
                                     <div class="list-group-item-container">
-                                        <a {% if user_authorized %}href="{{ timed_script }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %} target="_blank" class="list-group-item">
+                                        <a {% if resources_authorized %}href="{{ timed_script }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %} target="_blank" class="list-group-item">
                                             <h4 class="list-group-item-heading"><i class="fa fa-1 fa-link"></i> Timed Script</h4>
-                                            {% if not user_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
+                                            {% if not resources_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
                                         </a>
                                     </div>
                                 {% endif %}
@@ -583,7 +583,7 @@
                  
                     {% if tr_rec.common_content.slide_status and tr_rec.common_content.slide_status != 6 %}
                         <div class="list-group-item-container">
-                            <a  {% if user_authorized %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %} target="_blank" class="list-group-item">
+                            <a  {% if resources_authorized %}href="{{ media_url }}videos/{{ tr_rec.tutorial_detail.foss_id }}/{{ tr_rec.tutorial_detail_id }}/resources/{{ tr_rec.common_content.slide }}"{% else %}style="pointer-events: none; cursor: default;"{% endif %} target="_blank" class="list-group-item">
                                 <h4 class="list-group-item-heading"><i class="fa fa-1 fa-archive"></i> Slides</h4>
                                 {% with path=media_path|add:'videos/'|add:tutorial_path|add:'resources/'|add:tr_rec.common_content.slide %}
                                     {% with slide_files=path|get_zip_content %}
@@ -597,7 +597,7 @@
                                         {% endif %}
                                     {% endwith %}
                                 {% endwith %}
-                                {% if not user_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
+                                {% if not resources_authorized %} <i class="fa fa-lock" aria-hidden="true"></i> Restricted {% endif %}
                             </a>
                         </div>
                     {% endif %}

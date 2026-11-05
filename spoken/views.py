@@ -322,6 +322,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         td_rec = TutorialDetail.objects.get(foss__foss=foss, tutorial=tutorial)
         tr_rec = TutorialResource.objects.select_related('tutorial_detail', 'tutorial_detail__foss', 'language').get(tutorial_detail=td_rec, language=Language.objects.get(name=lang))
         is_authorized_user = (request.user.is_authenticated and request.user.groups.filter(name__in=WATCH_VIDEO_ROLE).exists())
+        resources_authorized = (request.user.is_authenticated and request.user.groups.filter(name__in=WATCH_VIDEO_ROLE).exists())
         tr_recs = get_tutorials_list(foss, lang)
     except Exception as e:
         messages.error(request, str(e))
@@ -391,6 +392,7 @@ def watch_tutorial(request, foss, tutorial, lang):
         'video_play_time':getattr(settings, 'VIDEO_TIME', 15),
         'questions': sorted_questions,
         'user_authorized': is_authorized_user,
+        'resources_authorized': resources_authorized,
         'restriction_date': TUTORIAL_RESTRICTION_DATE.strftime("%-d %b. %Y"),
         'is_swayam': is_swayam,
         'swayam_completed': swayam_completed,
