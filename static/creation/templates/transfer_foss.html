@@ -395,6 +395,7 @@ $(document).ready(function () {
     });
 
     function updateSubmitButton() {
+        if (isSubmitting) return;
         var tutSelected = $('.tut-checkbox:checked').length > 0;
         var langSelected = $('.lang-checkbox:checked').length > 0;
         var targetFoss = $('#id_target_foss').val();
@@ -404,14 +405,32 @@ $(document).ready(function () {
         $('#btn-submit-transfer').prop('disabled', !canSubmit);
     }
 
-    // confirm submit on move
+    // confirm submit on move and prevent double submission
+    var isSubmitting = false;
     $('#transfer-foss-form').on('submit', function (e) {
+        if (isSubmitting) {
+            e.preventDefault();
+            return false;
+        }
+
         if ($('#id_is_move').is(':checked')) {
             if (!confirm('Are you sure you want to move the selected tutorials?')) {
                 e.preventDefault();
                 return false;
             }
         }
+
+        isSubmitting = true;
+        var $btn = $('#btn-submit-transfer');
+        setTimeout(function () {
+            $btn.prop('disabled', true).val('Transferring, please wait...');
+        }, 0);
+    });
+
+    $(window).on('pageshow', function () {
+        isSubmitting = false;
+        $('#btn-submit-transfer').val('Transfer');
+        updateSubmitButton();
     });
 });
 </script>
