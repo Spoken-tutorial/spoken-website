@@ -52,6 +52,10 @@
                 {{ user.organiser.academic.state }} - {{ user.organiser.academic }}
             {% endif %}
         </div>
+        <div class="bs-callout bs-callout-warning alert alert-warning" style="margin-top: 15px; margin-bottom: 20px; border-left: 5px solid #f0ad4e; background-color: #fcf8e3; color: #8a6d3b; padding: 15px;">
+            <h4 style="margin-top: 0; color: #8a6d3b;"><i class="fa fa-exclamation-triangle"></i> <strong>Important Warning: Maximum 2 Tests Allowed</strong></h4>
+            <p style="margin-bottom: 0; font-size: 14px;">Please note: You can only create a maximum of <strong>two tests</strong> (First Attempt and Second Attempt) for a single training batch. Creating more than two tests is not supported.</p>
+        </div>
         <div class="row well">
             <div class='col-sm-8'>
                 <form action="{{ action }}" method="post" class='form-horizontal'>{% csrf_token %}
@@ -85,6 +89,7 @@
                             {% render_field form.training class+="form-control training" tabindex="1" data-placeholder="Enter batch code" %}
                             {{ form.training.errors }}
                             <small>Please select the participants Batch for training.</small>
+                            <span class="help-block text-warning" style="color: #c09853; font-weight: bold; margin-top: 5px;"><i class="fa fa-info-circle"></i> Note: A training batch can have at most 2 tests (1st attempt and 2nd attempt).</span>
                         </div>
                     </div>
 
