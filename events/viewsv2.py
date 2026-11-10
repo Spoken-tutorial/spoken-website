@@ -3968,8 +3968,7 @@ class DownloadReceiptView(View):
         if not (is_staff or is_owner):
             raise PermissionDenied("You do not have permission to download this receipt.")
             
-            
-        if payment.verification_status != 1:
+        if payment.verification_status not in (1, None):
             raise PermissionDenied("Receipt is not verified/approved yet.")
             
         try:
@@ -3993,7 +3992,7 @@ class DownloadLOAView(View):
         if not (is_staff or is_owner):
             raise PermissionDenied("You do not have permission to download this Letter of Association.")
             
-        if payment.verification_status != 1:
+        if payment.verification_status not in (1, None):
             raise PermissionDenied("Letter of Association is not verified/approved yet.")
             
         try:
@@ -4017,19 +4016,30 @@ class DownloadLOCView(View):
         if not (is_staff or is_owner):
             raise PermissionDenied("You do not have permission to download this Certificate of Training.")
             
-        if payment.verification_status != 1:
+        if payment.verification_status not in (1, None):
             raise PermissionDenied("Payment is not verified/approved yet.")
 
+        report_type = request.GET.get('report_type')
         academic_year = request.GET.get('academic_year')
 
-        # Check 1-year completion requirement (staff/superuser can preview/download anytime)
-        if not is_staff and not payment.is_loc_available:
-            raise PermissionDenied(f"Annual Report / Certificate of Training will be available after completion of 1 year on {payment.expiry_date.strftime('%d %B, %Y')}.")
+        sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
+        is_half_yearly = (str(report_type).lower() in ('half_yearly', 'half-yearly')) if report_type else (sub_days <= 182)
+
+        # Check completion requirement (staff/superuser can preview/download anytime)
+        if not is_staff:
+            if is_half_yearly:
+                if not payment.is_half_yearly_available:
+                    half_date = payment.payment_date + timedelta(days=180) if payment.payment_date else payment.expiry_date
+                    raise PermissionDenied(f"Half-Yearly Training Report will be available after completion of 6 months on {half_date.strftime('%d %B, %Y')}.")
+            else:
+                if not payment.is_loc_available:
+                    raise PermissionDenied(f"Certificate of Training (Annual Report) will be available after completion of 1 year on {payment.expiry_date.strftime('%d %B, %Y')}.")
             
         try:
-            pdf_buffer = generate_letter_of_completion_pdf(payment, academic_year=academic_year)
+            pdf_buffer = generate_letter_of_completion_pdf(payment, academic_year=academic_year, report_type=report_type)
             response = HttpResponse(pdf_buffer.read(), content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename=certificate_of_training_{payment.id}.pdf'
+            suffix = "_half_yearly" if is_half_yearly else ""
+            response['Content-Disposition'] = f'attachment; filename=certificate_of_training{suffix}_{payment.id}.pdf'
             return response
         except Exception as e:
             return HttpResponse("Error generating Certificate of Training PDF.", status=500)
@@ -4047,7 +4057,7 @@ class DownloadAppreciationLetterView(View):
         if not (is_staff or is_owner):
             raise PermissionDenied("You do not have permission to download this Letter of Appreciation.")
             
-        if payment.verification_status != 1:
+        if payment.verification_status not in (1, None):
             raise PermissionDenied("Payment is not verified/approved yet.")
 
         # Check 1-year completion requirement (staff/superuser can preview/download anytime)

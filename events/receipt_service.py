@@ -120,15 +120,15 @@ def get_salutation_label(payment):
 def draw_approved_footer(canvas, page_width=595.27, margin=54):
     """
     Draws the official approved two-column EduPyramids / Spoken Tutorial footer:
-    - Centered black header above the line
+    - Centered unbolded grey header above the line
     - Solid black divider line
     - Left column: Building address (with comma after Building)
     - Right column: Helpline, email, GSTIN, CIN
     """
     canvas.saveState()
-    # 1. Heading above line (Black)
-    canvas.setFont("Helvetica-Bold", 9)
-    canvas.setFillColor(colors.black)
+    # 1. Heading above line (Unbolded, medium grey)
+    canvas.setFont("Helvetica", 9)
+    canvas.setFillColor(colors.HexColor('#555555'))
     canvas.drawCentredString(page_width / 2.0, 72, "Spoken Tutorial brought to you by EduPyramids")
 
     # 2. Solid black horizontal divider
@@ -426,34 +426,34 @@ def generate_college_receipt_pdf(payment):
     _, h4 = p4.wrap(487.27, 50)
     p4.drawOn(p, 54, 340)
     
-    # 9. Signature Header
+    # 9. Signature Header (raised closer to paragraph 4)
     footer_img_path = os.path.join(settings.MEDIA_ROOT, 'footer.png')
     if os.path.exists(footer_img_path):
-        p.drawImage(footer_img_path, 54, 260, width=160, height=35, mask='auto')
+        p.drawImage(footer_img_path, 54, 290, width=150, height=33, mask='auto')
     else:
         p.setFont("Helvetica-Bold", 10)
         p.setFillColor(colors.HexColor('#2980B9'))
-        p.drawString(54, 280, "For EduPyramids")
+        p.drawString(54, 305, "For EduPyramids")
         p.setFont("Helvetica", 9)
-        p.drawString(54, 265, "Educational Services Pvt. Ltd.")
+        p.drawString(54, 292, "Educational Services Pvt. Ltd.")
         
     # Signature
     sig_img_path = os.path.join(settings.MEDIA_ROOT, 'signature.png')
     if os.path.exists(sig_img_path):
-        p.drawImage(sig_img_path, 54, 190, width=120, height=45, mask='auto')
+        p.drawImage(sig_img_path, 54, 225, width=110, height=45, mask='auto')
         
-    # Stamp
+    # Stamp (properly aligned beside signature)
     stamp_img_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
     if os.path.exists(stamp_img_path):
-        p.drawImage(stamp_img_path, 165, 180, width=65, height=65, mask='auto')
+        p.drawImage(stamp_img_path, 140, 215, width=60, height=60, mask='auto')
         
     # Coordinator Info
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 150, "Mrs. Akanksha Saini")
+    p.drawString(54, 190, "Mrs. Akanksha Saini")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 138, "National Coordinator")
-    p.drawString(54, 126, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, 178, "National Coordinator")
+    p.drawString(54, 166, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
     
     # 10. Official Approved Footer
     draw_approved_footer(p)
@@ -573,35 +573,35 @@ def generate_school_receipt_pdf(payment):
     _, h4 = p4.wrap(487.27, 50)
     p4.drawOn(p, 54, 340)
     
-    # 9. Signature Block
+    # 9. Signature Block (raised closer to paragraph 4)
     p.setFont("Helvetica", 9.5)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 275, "For and on behalf of")
+    p.drawString(54, 295, "For and on behalf of")
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawString(54, 260, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, 280, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
         
     # Signature
     sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature_schools.png')
     if not os.path.exists(sig_school_path):
         sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature.png')
     if os.path.exists(sig_school_path):
-        p.drawImage(sig_school_path, 54, 190, width=120, height=45, mask='auto')
+        p.drawImage(sig_school_path, 54, 225, width=110, height=45, mask='auto')
         
-    # Stamp
+    # Stamp (properly aligned beside signature)
     stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp_schools.png')
     if not os.path.exists(stamp_school_path):
         stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
     if os.path.exists(stamp_school_path):
-        p.drawImage(stamp_school_path, 165, 180, width=65, height=65, mask='auto')
+        p.drawImage(stamp_school_path, 140, 215, width=60, height=60, mask='auto')
         
     # Coordinator Info (Mrs. Nidhi Sony)
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 150, "Mrs. Nidhi Sony")
+    p.drawString(54, 190, "Mrs. Nidhi Sony")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 138, "National Coordinator - Schools")
-    p.drawString(54, 126, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, 178, "National Coordinator - Schools")
+    p.drawString(54, 166, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
     
     # 10. Official Approved Footer
     draw_approved_footer(p)
@@ -753,31 +753,32 @@ def generate_college_loa_pdf(payment):
     _, h3 = p3.wrap(487.27, 100)
     p3.drawOn(p, 54, y - h3)
 
-    # 8. Signature Block
+    # 8. Signature Block (raised closer to paragraph 3)
     footer_img_path = os.path.join(settings.MEDIA_ROOT, 'footer.png')
     if os.path.exists(footer_img_path):
-        p.drawImage(footer_img_path, 54, 250, width=160, height=35, mask='auto')
+        p.drawImage(footer_img_path, 54, 275, width=150, height=33, mask='auto')
     else:
         p.setFont("Helvetica-Bold", 10)
         p.setFillColor(colors.HexColor('#2980B9'))
-        p.drawString(54, 265, "For EduPyramids")
+        p.drawString(54, 290, "For EduPyramids")
         p.setFont("Helvetica", 9)
-        p.drawString(54, 252, "Educational Services Pvt. Ltd.")
+        p.drawString(54, 277, "Educational Services Pvt. Ltd.")
 
     sig_img_path = os.path.join(settings.MEDIA_ROOT, 'signature.png')
     if os.path.exists(sig_img_path):
-        p.drawImage(sig_img_path, 54, 180, width=120, height=45, mask='auto')
+        p.drawImage(sig_img_path, 54, 215, width=110, height=45, mask='auto')
 
+    # Stamp (properly aligned beside signature)
     stamp_img_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
     if os.path.exists(stamp_img_path):
-        p.drawImage(stamp_img_path, 165, 175, width=65, height=65, mask='auto')
+        p.drawImage(stamp_img_path, 140, 205, width=60, height=60, mask='auto')
 
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 140, "Mrs. Akanksha Saini")
+    p.drawString(54, 175, "Mrs. Akanksha Saini")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 128, "National Coordinator")
-    p.drawString(54, 116, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, 163, "National Coordinator")
+    p.drawString(54, 151, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
 
     # 9. Official Approved Footer
     draw_approved_footer(p)
@@ -906,13 +907,13 @@ def generate_school_loa_pdf(payment):
     _, h2 = p2.wrap(487.27, 100)
     p2.drawOn(p, 54, y - h2)
 
-    # 7. Signature Block
+    # 7. Signature Block (raised closer to paragraph 2)
     p.setFont("Helvetica", 9.5)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 265, "For and on behalf of")
+    p.drawString(54, 285, "For and on behalf of")
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawString(54, 250, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, 270, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
 
     sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature_schools.png')
     if not os.path.exists(sig_school_path):
@@ -923,17 +924,18 @@ def generate_school_loa_pdf(payment):
         stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
 
     if os.path.exists(sig_school_path):
-        p.drawImage(sig_school_path, 54, 180, width=120, height=45, mask='auto')
+        p.drawImage(sig_school_path, 54, 215, width=110, height=45, mask='auto')
 
+    # Stamp (properly aligned beside signature)
     if os.path.exists(stamp_school_path):
-        p.drawImage(stamp_school_path, 165, 175, width=65, height=65, mask='auto')
+        p.drawImage(stamp_school_path, 140, 205, width=60, height=60, mask='auto')
 
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 140, "Mrs. Nidhi Sony")
+    p.drawString(54, 175, "Mrs. Nidhi Sony")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 128, "National Coordinator - Schools")
-    p.drawString(54, 116, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, 163, "National Coordinator - Schools")
+    p.drawString(54, 151, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
 
     # 8. Official Approved Footer
     draw_approved_footer(p)
@@ -955,10 +957,11 @@ def generate_letter_of_association_pdf(payment):
 
 
 
-def generate_college_loc_pdf(payment, academic_year=None):
+def generate_college_loc_pdf(payment, academic_year=None, report_type=None):
     """
-    Generates an Annual Report / Certificate of Training (LOC) PDF for an AcademicCenter's subscription year.
-    Lists all workshops/trainings completed during that subscription period or selected academic year.
+    Generates a Certificate of Training PDF (Annual Report or Half-Yearly Report)
+    for an AcademicCenter's subscription duration or selected academic year.
+    Lists all workshops/trainings completed during that period.
     """
     import datetime
     from events.models import TrainingRequest
@@ -969,6 +972,13 @@ def generate_college_loc_pdf(payment, academic_year=None):
     margin = 54
     printable_width = PAGE_WIDTH - 2 * margin
 
+    # Determine if this is a Half-Yearly or Annual report
+    sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
+    if report_type:
+        is_half_yearly = str(report_type).strip().lower() in ('half_yearly', 'half-yearly', 'halfyearly', '6months', '6_months')
+    else:
+        is_half_yearly = (sub_days <= 182)
+
     # Determine date range and session
     if academic_year:
         clean_ay = str(academic_year).strip()
@@ -978,13 +988,18 @@ def generate_college_loc_pdf(payment, academic_year=None):
             start_yr = int(clean_ay)
         end_yr = start_yr + 1
         start_date = datetime.date(start_yr, 7, 1)
-        end_date = datetime.date(end_yr, 6, 30)
-        academic_session = f"{start_yr}-{end_yr}"
+        if is_half_yearly:
+            end_date = datetime.date(start_yr, 12, 31)
+            academic_session = f"{start_yr} (Half-Yearly)"
+        else:
+            end_date = datetime.date(end_yr, 6, 30)
+            academic_session = f"{start_yr}-{end_yr}"
     else:
         start_date = payment.payment_date
-        sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
-        end_date = start_date + timedelta(days=sub_days)
-        academic_session = f"{start_date.year}-{end_date.year}" if start_date.year != end_date.year else f"{start_date.year}"
+        effective_days = 182 if is_half_yearly else sub_days
+        end_date = start_date + timedelta(days=effective_days)
+        period_label = " (Half-Yearly)" if is_half_yearly else ""
+        academic_session = f"{start_date.year}-{end_date.year}{period_label}" if start_date.year != end_date.year else f"{start_date.year}{period_label}"
 
     # Query completed trainings in that subscription period
     trainings = TrainingRequest.objects.filter(
@@ -1092,7 +1107,8 @@ def generate_college_loc_pdf(payment, academic_year=None):
     story.append(Spacer(1, 8))
 
     # 4. Subject Line
-    subject_text = f"Subject - Status of Training done in collaboration with Spoken Tutorial, EduPyramids, SINE, IIT Bombay ({academic_session})"
+    training_kind = "Half-Yearly Training" if is_half_yearly else "Annual Training"
+    subject_text = f"Subject - Status of {training_kind} done in collaboration with Spoken Tutorial, EduPyramids, SINE, IIT Bombay ({academic_session})"
     story.append(Paragraph(subject_text, subject_style))
     story.append(Spacer(1, 8))
 
@@ -1244,9 +1260,9 @@ def generate_college_loc_pdf(payment, academic_year=None):
     return buffer
 
 
-def generate_school_loc_pdf(payment, academic_year=None):
+def generate_school_loc_pdf(payment, academic_year=None, report_type=None):
     """
-    Generates an Annual Report PDF for a School's subscription year.
+    Generates a Certificate of Training (Annual Report or Half-Yearly Report) PDF for a School.
     Lists all workshops/trainings completed during that subscription period or selected academic year.
     Matches the official EduPyramids / Spoken Tutorial IIT Bombay School template.
     """
@@ -1259,6 +1275,13 @@ def generate_school_loc_pdf(payment, academic_year=None):
     margin = 54
     printable_width = PAGE_WIDTH - 2 * margin
 
+    # Determine if this is a Half-Yearly or Annual report
+    sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
+    if report_type:
+        is_half_yearly = str(report_type).strip().lower() in ('half_yearly', 'half-yearly', 'halfyearly', '6months', '6_months')
+    else:
+        is_half_yearly = (sub_days <= 182)
+
     # Determine date range and session
     if academic_year:
         clean_ay = str(academic_year).strip()
@@ -1268,13 +1291,18 @@ def generate_school_loc_pdf(payment, academic_year=None):
             start_yr = int(clean_ay)
         end_yr = start_yr + 1
         start_date = datetime.date(start_yr, 7, 1)
-        end_date = datetime.date(end_yr, 6, 30)
-        academic_session = f"{start_yr}-{end_yr}"
+        if is_half_yearly:
+            end_date = datetime.date(start_yr, 12, 31)
+            academic_session = f"{start_yr} (Half-Yearly)"
+        else:
+            end_date = datetime.date(end_yr, 6, 30)
+            academic_session = f"{start_yr}-{end_yr}"
     else:
         start_date = payment.payment_date
-        sub_days = int(payment.subscription) if payment.subscription and str(payment.subscription).isdigit() else 365
-        end_date = start_date + timedelta(days=sub_days)
-        academic_session = f"{start_date.year}-{end_date.year}" if start_date.year != end_date.year else f"{start_date.year}"
+        effective_days = 182 if is_half_yearly else sub_days
+        end_date = start_date + timedelta(days=effective_days)
+        period_label = " (Half-Yearly)" if is_half_yearly else ""
+        academic_session = f"{start_date.year}-{end_date.year}{period_label}" if start_date.year != end_date.year else f"{start_date.year}{period_label}"
 
     # Query completed trainings in that subscription period
     trainings = TrainingRequest.objects.filter(
@@ -1364,7 +1392,7 @@ def generate_school_loc_pdf(payment, academic_year=None):
     story.append(Spacer(1, 10))
 
     # 2. Document Title
-    story.append(Paragraph("Annual Report", title_style))
+    story.append(Paragraph("CERTIFICATE OF TRAINING", title_style))
     story.append(Spacer(1, 10))
 
     # 3. Recipient Address
@@ -1382,7 +1410,8 @@ def generate_school_loc_pdf(payment, academic_year=None):
     story.append(Spacer(1, 8))
 
     # 4. Subject Line
-    subject_text = f"Subject - Status of Training done in collaboration with Spoken Tutorial, EduPyramids, SINE, IIT Bombay in the academic year {academic_session}"
+    training_kind = "Half-Yearly Training" if is_half_yearly else "Annual Training"
+    subject_text = f"Subject - Status of {training_kind} done in collaboration with Spoken Tutorial, EduPyramids, SINE, IIT Bombay in the academic year {academic_session}"
     story.append(Paragraph(subject_text, subject_style))
     story.append(Spacer(1, 8))
 
@@ -1536,14 +1565,14 @@ def generate_school_loc_pdf(payment, academic_year=None):
     return buffer
 
 
-def generate_letter_of_completion_pdf(payment, academic_year=None):
+def generate_letter_of_completion_pdf(payment, academic_year=None, report_type=None):
     """
-    Dispatches Certificate of Training / Annual Report (LOC) PDF generation:
+    Dispatches Certificate of Training (Annual Report or Half-Yearly Report) PDF generation:
     School template for schools, College template for higher education institutions.
     """
     if is_school(payment):
-        return generate_school_loc_pdf(payment, academic_year=academic_year)
-    return generate_college_loc_pdf(payment, academic_year=academic_year)
+        return generate_school_loc_pdf(payment, academic_year=academic_year, report_type=report_type)
+    return generate_college_loc_pdf(payment, academic_year=academic_year, report_type=report_type)
 
 
 def generate_college_appreciation_pdf(payment, organiser=None, organiser_id=None):
@@ -1704,9 +1733,10 @@ def generate_college_appreciation_pdf(payment, organiser=None, organiser_id=None
     if os.path.exists(sig_img_path):
         p.drawImage(sig_img_path, 54, 200, width=110, height=45, mask='auto')
 
+    # Stamp (properly aligned beside signature)
     stamp_img_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
     if os.path.exists(stamp_img_path):
-        p.drawImage(stamp_img_path, 165, 195, width=65, height=65, mask='auto')
+        p.drawImage(stamp_img_path, 140, 195, width=60, height=60, mask='auto')
 
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#000000'))
@@ -1894,8 +1924,9 @@ def generate_school_appreciation_pdf(payment, organiser=None, organiser_id=None)
     if os.path.exists(sig_school_path):
         p.drawImage(sig_school_path, 54, 200, width=110, height=45, mask='auto')
 
+    # Stamp (properly aligned beside signature)
     if os.path.exists(stamp_school_path):
-        p.drawImage(stamp_school_path, 165, 195, width=65, height=65, mask='auto')
+        p.drawImage(stamp_school_path, 140, 195, width=60, height=60, mask='auto')
 
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#000000'))

@@ -65,7 +65,7 @@
                 {% endif %}
               </td>
               <td>
-                {% if record.verification_status == 1 %}
+                {% if record.verification_status == 1 or record.verification_status is None %}
                   <div style="display: flex; gap: 4px; align-items: center; margin-bottom: 4px;">
                     <a class="btn btn-primary btn-xs" href="{% url 'eventsv2:download_academic_receipt' record.id %}" style="width: auto !important; white-space: nowrap;">
                       <i class="fa fa-download"></i> Receipt
@@ -75,15 +75,21 @@
                     </a>
                   </div>
                   <div style="display: flex; gap: 4px; align-items: center;">
-                    {% if record.is_loc_available %}
-                      <a class="btn btn-info btn-xs" href="{% url 'eventsv2:download_academic_loc' record.id %}" style="width: auto !important; white-space: nowrap;" title="Download Annual Report (Certificate of Training)">
-                        <i class="fa fa-file-text-o"></i> Annual Report
-                      </a>
+                    {% if record.is_loc_available or record.is_certificate_available %}
+                      {% if record.subscription == '180' or record.subscription == '182' %}
+                        <a class="btn btn-info btn-xs" href="{% url 'eventsv2:download_academic_loc' record.id %}?report_type=half_yearly" style="width: auto !important; white-space: nowrap;" title="Download Certificate of Training (Half-Yearly Report)">
+                          <i class="fa fa-file-text-o"></i> Training Report
+                        </a>
+                      {% else %}
+                        <a class="btn btn-info btn-xs" href="{% url 'eventsv2:download_academic_loc' record.id %}?report_type=annual" style="width: auto !important; white-space: nowrap;" title="Download Certificate of Training (Annual Report)">
+                          <i class="fa fa-file-text-o"></i> Annual Report
+                        </a>
+                      {% endif %}
                       <a class="btn btn-warning btn-xs" href="{% url 'eventsv2:download_academic_appreciation' record.id %}" style="width: auto !important; margin-left: 0 !important; white-space: nowrap;" title="Download Letter of Appreciation">
                         <i class="fa fa-star"></i> Appreciation Letter
                       </a>
                     {% else %}
-                      <button class="btn btn-default btn-xs" disabled style="width: auto !important; white-space: nowrap;" title="Annual Report will be available after completion of 1 year on {{ record.expiry_date|date:'d M, Y' }}">
+                      <button class="btn btn-default btn-xs" disabled style="width: auto !important; white-space: nowrap;" title="Certificate of Training will be available after completion of subscription period on {{ record.expiry_date|date:'d M, Y' }}">
                         <i class="fa fa-lock"></i> Report ({{ record.expiry_date|date:'d M, Y' }})
                       </button>
                       <button class="btn btn-default btn-xs" disabled style="width: auto !important; white-space: nowrap;" title="Letter of Appreciation will be available after completion of 1 year on {{ record.expiry_date|date:'d M, Y' }}">

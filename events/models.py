@@ -1834,6 +1834,20 @@ class AcademicPaymentStatus(models.Model):
       return False
     return date.today() >= self.expiry_date
 
+  @property
+  def is_half_yearly_available(self):
+    if not self.payment_date:
+      return False
+    return date.today() >= (self.payment_date + timedelta(days=180))
+
+  @property
+  def is_certificate_available(self):
+    if not self.payment_date:
+      return False
+    sub_days = int(self.subscription) if self.subscription and str(self.subscription).isdigit() else 365
+    threshold_days = 180 if sub_days <= 182 else sub_days
+    return date.today() >= (self.payment_date + timedelta(days=threshold_days))
+
   def __str__(self):
     return self.academic.institution_name
 
