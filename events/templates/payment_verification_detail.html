@@ -124,7 +124,7 @@
               </tr>
             {% endif %}
           </table>
-          {% if record.verification_status == 1 %}
+          {% if record.verification_status == 1 or record.verification_status is None %}
             <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
               <a class="btn btn-primary" href="{% url 'eventsv2:download_academic_receipt' record.id %}" style="width: auto !important; white-space: nowrap; margin-bottom: 6px; margin-right: 6px;">
                 <i class="fa fa-download"></i> Download Receipt PDF
@@ -132,9 +132,32 @@
               <a class="btn btn-success" href="{% url 'eventsv2:download_academic_loa' record.id %}" style="width: auto !important; white-space: nowrap; margin-bottom: 6px; margin-right: 6px;">
                 <i class="fa fa-certificate"></i> Download Letter of Association (LOA) PDF
               </a>
-              <a class="btn btn-info" href="{% url 'eventsv2:download_academic_loc' record.id %}" style="width: auto !important; white-space: nowrap; margin-bottom: 6px; margin-right: 6px;">
-                <i class="fa fa-file-text-o"></i> Download Annual Report (LOC) PDF
-              </a>
+              {% if record.subscription == '180' or record.subscription == '182' %}
+                <a class="btn btn-info" href="{% url 'eventsv2:download_academic_loc' record.id %}?report_type=half_yearly" style="width: auto !important; white-space: nowrap; margin-bottom: 6px; margin-right: 6px;">
+                  <i class="fa fa-file-text-o"></i> Download Certificate of Training (Half-Yearly Report) PDF
+                </a>
+              {% else %}
+                <div class="btn-group" style="margin-bottom: 6px; margin-right: 6px;">
+                  <a class="btn btn-info" href="{% url 'eventsv2:download_academic_loc' record.id %}?report_type=annual" style="width: auto !important; white-space: nowrap;">
+                    <i class="fa fa-file-text-o"></i> Download Certificate of Training (Annual Report) PDF
+                  </a>
+                  <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a href="{% url 'eventsv2:download_academic_loc' record.id %}?report_type=annual">
+                        <i class="fa fa-file-text-o"></i> Annual Report (Full Year)
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{% url 'eventsv2:download_academic_loc' record.id %}?report_type=half_yearly">
+                        <i class="fa fa-file-text-o"></i> Half-Yearly Training Report
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              {% endif %}
               {% if organisers|length > 1 %}
                 <div class="btn-group" style="margin-bottom: 6px;">
                   <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: auto !important; white-space: nowrap;">
