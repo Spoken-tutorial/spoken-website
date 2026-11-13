@@ -150,6 +150,10 @@
                         $('#id_foss').append('<option value="126"> Moodle Test for Teachers </option>'); 
                         $('#id_foss').append('<option value="127"> Moodle Test for Site Administrators </option>');
                         }
+                        if (data.multiquiz_foss == 196){
+                        $('#id_foss').append('<option value="211"> Moodle Test for Teachers (New)</option>'); 
+                        $('#id_foss').append('<option value="212"> Moodle Test for Site Administrators (New)</option>');
+                        }
                         $("#id_foss").prop('required',true);
                     }
                     else{
@@ -243,7 +247,10 @@
                 $('#id_foss').append('<option value="126"> Moodle Test for Teachers </option>'); 
                 $('#id_foss').append('<option value="127"> Moodle Test for Site Administrators </option>');
                 }
-                
+                if (data.multiquiz_foss == 196){
+                $('#id_foss').append('<option value="211"> Moodle Test for Teachers (New)</option>'); 
+                $('#id_foss').append('<option value="212"> Moodle Test for Site Administrators (New)</option>');
+                }
                 $("#id_foss").prop('required',true);
             }
             else{
