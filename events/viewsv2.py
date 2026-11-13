@@ -438,7 +438,7 @@ class StudentBatchCreateView(CreateView):
       try:
         user = User.objects.get(email = email)
       except ObjectDoesNotExist:
-        user = User.objects.create_user(email, email, fname)
+        user = User.objects.create_user(username=email,email=email,password=None)
         user.is_active = False
       if user:
         user.first_name = fname

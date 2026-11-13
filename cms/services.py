@@ -20,7 +20,7 @@ from cms.models import *
 from events.models import Student, StudentBatch
 from mdldjango.get_or_create_participant import encript_password, get_or_create_participant
 from mdldjango.models import MdlUser
-from spoken.config import EDUPYRAMIDS_URL
+from spoken.config import EDUPYRAMIDS_URL,ONLINE_TEST_URL
 
 def get_user_email(email):
   try:
@@ -115,9 +115,15 @@ def send_student_mail(email):
   
   mdluser.password = mdl_new_password
   mdluser.save()
+  # Synchronize the normal Spoken Tutorial Django password
+  user = User.objects.filter(email__iexact=email).first()
+
+  if user:
+      user.set_password(password_string)
+      user.save()
   
   token = Hashids(salt = settings.SPOKEN_HASH_SALT).encode(mdluser.id)
-  
+
   #send mail to student_mail
   subject = "Spoken Tutorial Online Test password"
   to = [mdluser.email]
@@ -139,7 +145,7 @@ line at the top of your web browser window.
 Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 
 Admin Spoken Tutorials
-'''.format(mdluser.firstname,mdluser.username,password_string,EDUPYRAMIDS_URL + "/accounts/confirm_student/" + token)
+'''.format(mdluser.firstname,mdluser.username,password_string,EDUPYRAMIDS_URL + "/accounts/confirm_student/" + token,ONLINE_TEST_URL)
   
 
   # send email
@@ -154,3 +160,4 @@ Admin Spoken Tutorials
   except smtplib.SMTPException:
     print("Failed to send email")
     return False
+  

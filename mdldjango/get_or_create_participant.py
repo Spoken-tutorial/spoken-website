@@ -13,9 +13,11 @@ from django.core.mail import EmailMultiAlternatives
 from .models import MdlUser
 from validate_email import validate_email
 
+from django.contrib.auth.models import User
 # Spoken Tutorial Stuff
 from events.models import *
 from spoken.config import PROCESS_URL
+
 
 def update_participants_count(training):
     training.participant_count = TrainingAttendance.objects.filter(training=training, status__gte=1).count()
@@ -34,38 +36,47 @@ def encript_password(password):
     password = hashlib.md5((password + 'VuilyKd*PmV?D~lO19jL(Hy4V/7T^G>p').encode('utf-8')).hexdigest()
     return password
 
-
-def create_account(w, firstname, lastname, gender, email, category):
-    password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-    password_encript = encript_password(password_string)
-    password = password_encript
-    username = email
-    mdluser = None
+def create_account(w, firstname, lastname, gender, email, category,send_legacy_email=True, sync_spoken_password=False):
+    password_string = ''.join(random.choice(string.ascii_uppercase + string.digits)for _ in range(8))
+    password = encript_password(password_string)
     try:
-        mdluser = MdlUser.objects.filter(email=email).first()
-        mdluser.institution = w.academic_id
-        mdluser.firstname = firstname
-        mdluser.lastname = lastname
-        mdluser.save()
-    except Exception as e:
-        mdluser = MdlUser()
-        mdluser.auth = 'manual'
-        mdluser.firstname = firstname
-        mdluser.username = username
-        mdluser.lastname = lastname
-        mdluser.password = password
-        mdluser.institution = w.academic_id
-        mdluser.email = email
-        mdluser.confirmed = 1
-        mdluser.mnethostid = 1
-        mdluser.save()
-        mdluser = MdlUser.objects.filter(email=email, firstname=firstname, username=username, password=password).first()
-        # send password to email
-        subject = "Spoken Tutorial Online Test password"
-        to = [mdluser.email]
-        message = '''Hi {0},
+        mdluser = MdlUser.objects.filter(email__iexact=email).first()
+        new_mdluser = False
+        if not mdluser:
+            mdluser = MdlUser()
+            mdluser.auth = 'manual'
+            mdluser.username = email
+            mdluser.email = email
+            mdluser.password = password
+            mdluser.confirmed = 1
+            mdluser.mnethostid = 1
+            new_mdluser = True
 
-Your account password at 'Spoken Tutorials Online Test as follows'
+        mdluser.firstname = firstname
+        mdluser.lastname = lastname
+        mdluser.institution = w.academic_id
+        mdluser.save()
+        # Synchronize existing Spoken Tutorial password with Moodle password
+        if new_mdluser and sync_spoken_password:
+            spoken_user = User.objects.filter(email__iexact=email).first()
+
+            if spoken_user:
+                spoken_user.set_password(password_string)
+                spoken_user.save()
+
+                print("SUCCESS: Spoken Tutorial password synchronized:", email)        
+
+    except Exception as e:
+        print("Error creating/updating Moodle user:", e)
+        raise
+    # Send Moodle password email only for other participant categories.
+    if new_mdluser and send_legacy_email:
+        try:
+            subject = "Spoken Tutorial Online Test password"
+            to = [mdluser.email]
+            message = '''Hi {0},
+
+Your account password at 'Spoken Tutorial Online Test' is as follows.
 
 Your current login information is now:
 username: {1}
@@ -73,6 +84,9 @@ password: {2}
 
 Please go to this page to change your password:
 {3}
+
+Spoken Tutorial Login:
+{4}
 
 In most mail programs, this should appear as a blue link
 which you can just click on.  If that doesn't work,
@@ -82,28 +96,56 @@ line at the top of your web browser window.
 Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 
 Admin Spoken Tutorials
-'''.format(mdluser.firstname, mdluser.username, password_string, 'http://onlinetest.spoken-tutorial.org/login/change_password.php')
-
-        # send email
-        email = EmailMultiAlternatives(
-            subject, message, 'administrator@spoken-tutorial.org',
-            to=to, bcc=[], cc=[],
-            headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type": "text/html;charset=iso-8859-1"}
-        )
-        try:
-            result = email.send(fail_silently=False)
-        except:
-            pass
+'''.format(mdluser.firstname,mdluser.username,password_string,'http://onlinetest.spoken-tutorial.org/login/change_password.php')
+            email = EmailMultiAlternatives(
+                subject,
+                message,
+                'administrator@spoken-tutorial.org',
+                to=to,bcc=[],cc=[],
+                headers={'Reply-To': 'no-replay@spoken-tutorial.org','Content-type': 'text/html;charset=iso-8859-1'}
+            )
+            email.send(fail_silently=False)
+        except Exception as e:
+            print("Failed to send Moodle password email:", e)
     return mdluser
+
 
 
 def get_or_create_participant(w, firstname, lastname, gender, email, category):
     mdluser = None
-    # Added category check as zero. Means the call is coming from new student
-    # batch upload interface. And category is/was not used.
     if category == 0:
-        create_account(w, firstname, lastname, gender, email, category)
-        return True
+        spoken_user = User.objects.filter(email__iexact=email).first()
+        # Existing active Spoken student
+        if spoken_user and spoken_user.is_active:
+            mdluser = MdlUser.objects.filter(email__iexact=email).first()
+            if mdluser:
+                # Update profile only. Do not change password.
+                mdluser.firstname = firstname
+                mdluser.lastname = lastname
+                mdluser.institution = w.academic_id
+                print("DEBUG: Saving Moodle user:", mdluser.email)
+                mdluser.save()
+                print("DEBUG: Moodle user saved successfully:", mdluser.email)
+            else:
+                # Create Moodle account and synchronize Spoken password.
+                # Send Moodle password email.
+                mdluser = create_account(w,firstname,lastname,gender,email,category,send_legacy_email=True,sync_spoken_password=True)
+            return True
+        # New or inactive Spoken student
+        mdluser = create_account(w,firstname,lastname,gender,email,category,send_legacy_email=False)
+        from cms.services import send_student_mail
+        print("Sending activation email to:", mdluser.email)
+
+        mail_status = send_student_mail(mdluser.email)
+
+        if mail_status:
+            print("SUCCESS: Student activation email sent to:", mdluser.email)
+        else:
+            print("FAILED: Student activation email not sent to:", mdluser.email)
+
+        return mail_status
+        # return send_student_mail(mdluser.email)
+    
     if w and w.organiser.academic.institution_type.name == 'School' and not email:
         ta = TrainingAttendance()
         ta.status = 1
