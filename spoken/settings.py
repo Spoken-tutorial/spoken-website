@@ -489,6 +489,14 @@ LOGGING = {
             "backupCount": 5,
             "formatter": "simple",
         },
+        'master_batch_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': ALLOWED_LOGS['master-batch'],
+            'maxBytes': 1024 * 1024 * 20,
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
     },
 
     "loggers": {
@@ -521,6 +529,21 @@ LOGGING = {
             "handlers": ["console", "creation_file", "django_error_file"],
             "level": "INFO",
             "propagate": False,
+        },
+        'events.viewsv2': {
+            'handlers': ['master_batch_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'mdldjango.get_or_create_participant': {
+            'handlers': ['master_batch_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'cms.services': {
+            'handlers': ['master_batch_file'],
+            'level': 'INFO',
+            'propagate': False,
         },
     },
 }

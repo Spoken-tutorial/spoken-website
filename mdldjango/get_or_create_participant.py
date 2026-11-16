@@ -17,7 +17,9 @@ from django.contrib.auth.models import User
 # Spoken Tutorial Stuff
 from events.models import *
 from spoken.config import PROCESS_URL,EDUPYRAMIDS_URL
+import logging
 
+logger = logging.getLogger(__name__)
 
 def update_participants_count(training):
     training.participant_count = TrainingAttendance.objects.filter(training=training, status__gte=1).count()
@@ -37,6 +39,7 @@ def encript_password(password):
     return password
 
 def create_account(w, firstname, lastname, gender, email, category,send_legacy_email=True, sync_spoken_password=False):
+    logger.info("[PARTICIPANT] create_account started | email=%s | category=%s | send_legacy_email=%s | sync_spoken_password=%s",email, category, send_legacy_email, sync_spoken_password)
     password_string = ''.join(random.choice(string.ascii_uppercase + string.digits)for _ in range(8))
     password = encript_password(password_string)
     try:
@@ -51,11 +54,15 @@ def create_account(w, firstname, lastname, gender, email, category,send_legacy_e
             mdluser.confirmed = 1
             mdluser.mnethostid = 1
             new_mdluser = True
+            logger.info("[PARTICIPANT] New Moodle account prepared | email=%s", email)
+        else:
+            logger.info("[PARTICIPANT] Existing Moodle account found | email=%s | mdluser_id=%s",email, mdluser.id)
 
         mdluser.firstname = firstname
         mdluser.lastname = lastname
         mdluser.institution = w.academic_id
         mdluser.save()
+        logger.info("[PARTICIPANT] Moodle account saved | email=%s | mdluser_id=%s | new=%s",email, mdluser.id, new_mdluser)
         # Synchronize existing Spoken Tutorial password with Moodle password
         if new_mdluser and sync_spoken_password:
             spoken_user = User.objects.filter(email__iexact=email).first()
@@ -63,15 +70,17 @@ def create_account(w, firstname, lastname, gender, email, category,send_legacy_e
             if spoken_user:
                 spoken_user.set_password(password_string)
                 spoken_user.save()
-
-                print("SUCCESS: Spoken Tutorial password synchronized:", email)        
+                logger.info("[PARTICIPANT] Spoken password synchronized | email=%s", email)
+            else:
+                logger.warning("[PARTICIPANT] Spoken user not found for password synchronization | email=%s",email)
 
     except Exception as e:
-        print("Error creating/updating Moodle user:", e)
+        logger.exception("[PARTICIPANT] Moodle account creation/update failed | email=%s", email)
         raise
     # Send Moodle password email only for other participant categories.
     if new_mdluser and send_legacy_email:
         try:
+            logger.info("[PARTICIPANT] Sending legacy Moodle password email | email=%s", email)
             subject = "Spoken Tutorial Online Test password"
             to = [mdluser.email]
             message = '''Hi {0},
@@ -104,48 +113,53 @@ Admin Spoken Tutorials
                 to=to,bcc=[],cc=[],
                 headers={'Reply-To': 'no-replay@spoken-tutorial.org','Content-type': 'text/html;charset=iso-8859-1'}
             )
-            email.send(fail_silently=False)
+            result = email.send(fail_silently=False)
+            logger.info("[PARTICIPANT] Legacy email send completed | email=%s | result=%s",email, result)
         except Exception as e:
-            print("Failed to send Moodle password email:", e)
+            logger.exception("[PARTICIPANT] Legacy email sending failed | email=%s", email)
+    elif new_mdluser:
+        logger.info("[PARTICIPANT] Legacy email skipped because send_legacy_email=False | email=%s",email)
+    else:
+        logger.info("[PARTICIPANT] Legacy email skipped because Moodle account already existed | email=%s",email)
     return mdluser
 
 
 
 def get_or_create_participant(w, firstname, lastname, gender, email, category):
+    logger.info("[PARTICIPANT] get_or_create_participant started | email=%s | category=%s",email, category)
     mdluser = None
     if category == 0:
         spoken_user = User.objects.filter(email__iexact=email).first()
+        logger.info("[PARTICIPANT] Spoken user lookup | email=%s | found=%s | active=%s",email,bool(spoken_user),spoken_user.is_active if spoken_user else None)
         # Existing active Spoken student
         if spoken_user and spoken_user.is_active:
             mdluser = MdlUser.objects.filter(email__iexact=email).first()
             if mdluser:
+                logger.info("[PARTICIPANT] Active Spoken user and Moodle account both exist | email=%s | mdluser_id=%s",email, mdluser.id)
                 # Update profile only. Do not change password.
                 mdluser.firstname = firstname
                 mdluser.lastname = lastname
                 mdluser.institution = w.academic_id
-                print("DEBUG: Saving Moodle user:", mdluser.email)
+                logger.info("[PARTICIPANT] Existing Moodle profile updated | email=%s", email)
                 mdluser.save()
-                print("DEBUG: Moodle user saved successfully:", mdluser.email)
             else:
                 # Create Moodle account and synchronize Spoken password.
                 # Send Moodle password email.
+                logger.info("[PARTICIPANT] Active Spoken user but Moodle account missing | email=%s",email)
                 mdluser = create_account(w,firstname,lastname,gender,email,category,send_legacy_email=True,sync_spoken_password=True)
             return True
+        
+        logger.info("[PARTICIPANT] New or inactive Spoken user branch | email=%s",email)
         # New or inactive Spoken student
         mdluser = create_account(w,firstname,lastname,gender,email,category,send_legacy_email=False)
         from cms.services import send_student_mail
-        print("Sending activation email to:", mdluser.email)
+        logger.info("[PARTICIPANT] Calling send_student_mail | email=%s", mdluser.email)
 
         mail_status = send_student_mail(mdluser.email)
-
-        if mail_status:
-            print("SUCCESS: Student activation email sent to:", mdluser.email)
-        else:
-            print("FAILED: Student activation email not sent to:", mdluser.email)
-
+        logger.info("[PARTICIPANT] send_student_mail returned | email=%s | status=%s",mdluser.email, mail_status)
         return mail_status
         # return send_student_mail(mdluser.email)
-    
+    logger.info("[PARTICIPANT] Non-Master-Batch participant branch | email=%s | category=%s",email, category)
     if w and w.organiser.academic.institution_type.name == 'School' and not email:
         ta = TrainingAttendance()
         ta.status = 1
@@ -155,10 +169,12 @@ def get_or_create_participant(w, firstname, lastname, gender, email, category):
         ta.gender = gender
         ta.email = email
         ta.save()
+        logger.info("[PARTICIPANT] School attendance saved without email | training_id=%s", w.id)
         return True
     else:
         mdluser = create_account(w, firstname, lastname, gender, email, category)
         if TrainingAttendance.objects.filter(training_id=w.id, mdluser_id=mdluser.id).exists():
+            logger.info("[PARTICIPANT] Training attendance already exists | email=%s", email)
             return True
         ta = TrainingAttendance()
         ta.mdluser_id = mdluser.id
@@ -169,6 +185,7 @@ def get_or_create_participant(w, firstname, lastname, gender, email, category):
         ta.gender = gender
         ta.email = mdluser.email
         ta.save()
+        logger.info("[PARTICIPANT] Training attendance created | email=%s", email)
         return True
     return False
 
