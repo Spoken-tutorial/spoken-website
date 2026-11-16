@@ -106,58 +106,67 @@ def send_verify_email(request,email):
       #notify to admin via mail
       return False, message
       
+
 def send_student_mail(email):
-  mdluser = MdlUser.objects.filter(email=email).first()
-  mdl_username = email
-  
-  password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-  mdl_new_password = encript_password(password_string)
-  
-  mdluser.password = mdl_new_password
-  mdluser.save()
-  # Synchronize the normal Spoken Tutorial Django password
-  user = User.objects.filter(email__iexact=email).first()
+    mdluser = MdlUser.objects.filter(email__iexact=email).first()
 
-  if user:
-      user.set_password(password_string)
-      user.save()
-  
-  token = Hashids(salt = settings.SPOKEN_HASH_SALT).encode(mdluser.id)
+    if not mdluser:
+        print("Moodle user not found:", email)
+        return False
 
-  #send mail to student_mail
-  subject = "Spoken Tutorial Online Test password"
-  to = [mdluser.email]
-  message = '''Hi {0},
-Your account password at 'Spoken Tutorials Online Test as follows'
+    password_string = ''.join(random.choice(string.ascii_uppercase + string.digits)for _ in range(8))
+    mdl_new_password = encript_password(password_string)
 
-Your current login information is now:
-username: {1}
-password: {2}
+    # Update Moodle password
+    mdluser.password = mdl_new_password
+    mdluser.save()
+    # Synchronize Spoken Tutorial password
+    user = User.objects.filter(email__iexact=email).first()
 
-Please click below link to activate your account:
+    if user:
+        user.set_password(password_string)
+        user.save()
+
+    token = Hashids(salt=settings.SPOKEN_HASH_SALT).encode(mdluser.id)
+    
+    #send mail to student_mail
+    subject = "Spoken Tutorial Online Test password"
+    message = '''Hi {0},
+
+Your account password at Spoken Tutorial Online Test is as follows.
+
+Your current login information:
+
+Username: {1}
+Password: {2}
+
+Please activate your Spoken Tutorial account using this link:
 {3}
 
-In most mail programs, this should appear as a blue link
-which you can just click on.  If that doesn't work,
-then cut and paste the address into the address
-line at the top of your web browser window.
+Spoken Tutorial Login:
+{5}
 
-Cheers from the 'Spoken Tutorials Online Test Center' administrator,
+Spoken Tutorial Online Test Login:
+{4}
 
+Regards,
 Admin Spoken Tutorials
-'''.format(mdluser.firstname,mdluser.username,password_string,EDUPYRAMIDS_URL + "/accounts/confirm_student/" + token,ONLINE_TEST_URL)
-  
+'''.format(mdluser.firstname,mdluser.username,password_string,EDUPYRAMIDS_URL + "/accounts/confirm_student/" + token,ONLINE_TEST_URL,EDUPYRAMIDS_URL + "/participant/login/")
+    email_message = EmailMultiAlternatives(
+        subject,
+        message,
+        'administrator@spoken-tutorial.org',
+        to=[mdluser.email],bcc=[],cc=[],
+        headers={
+            'Reply-To': 'no-replay@spoken-tutorial.org',
+            'Content-type': 'text/html;charset=iso-8859-1'
+        }
+    )
 
-  # send email
-  email = EmailMultiAlternatives(
-    subject, message, 'administrator@spoken-tutorial.org',
-    to=to, bcc=[], cc=[],
-    headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type": "text/html;charset=iso-8859-1"}
-  )
-  try:
-    result = email.send(fail_silently=False)
-    return True
-  except smtplib.SMTPException:
-    print("Failed to send email")
-    return False
-  
+    try:
+        result = email_message.send(fail_silently=False)
+        return result == 1
+
+    except Exception as e:
+        print("Failed to send student email:", email, str(e))
+        return False

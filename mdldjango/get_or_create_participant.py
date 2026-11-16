@@ -16,7 +16,7 @@ from validate_email import validate_email
 from django.contrib.auth.models import User
 # Spoken Tutorial Stuff
 from events.models import *
-from spoken.config import PROCESS_URL
+from spoken.config import PROCESS_URL,EDUPYRAMIDS_URL
 
 
 def update_participants_count(training):
@@ -96,7 +96,7 @@ line at the top of your web browser window.
 Cheers from the 'Spoken Tutorials Online Test Center' administrator,
 
 Admin Spoken Tutorials
-'''.format(mdluser.firstname,mdluser.username,password_string,'http://onlinetest.spoken-tutorial.org/login/change_password.php')
+'''.format(mdluser.firstname,mdluser.username,password_string,'http://onlinetest.spoken-tutorial.org/login/change_password.php',EDUPYRAMIDS_URL + '/participant/login/')
             email = EmailMultiAlternatives(
                 subject,
                 message,
