@@ -3284,13 +3284,10 @@ def ajax_check_foss(request):
     is_multiquiz_foss = False
     multiquiz_foss = 0
 
-    if foss_id == 43:
+    if foss_id in [43, 97, 196]:
         is_multiquiz_foss = True
-        multiquiz_foss = 43
-    
-    if foss_id == 97:
-        is_multiquiz_foss = True
-        multiquiz_foss = 97
+        multiquiz_foss = foss_id
+        
     data = {
     "is_multiquiz_foss": is_multiquiz_foss,
     "multiquiz_foss": multiquiz_foss
