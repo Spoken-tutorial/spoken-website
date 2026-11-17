@@ -91,6 +91,10 @@ from cms.management.commands.populate_subscription_data import update_subscripti
 
 from spoken.config import BASIC_LEVEL_INSTITUTIONS
 from spoken.config import WGF_INSTITUTIONS
+import logging
+import traceback
+
+logger = logging.getLogger(__name__)
 
 class JSONResponseMixin(object):
   """
@@ -362,16 +366,18 @@ class StudentBatchCreateView(CreateView):
     self.organiser = self.user.organiser
     form_data.organiser = self.user.organiser
     studentcount = 0
-
+    logger.info( "[MASTER_BATCH] Upload started | user_id=%s | organiser_id=%s",self.request.user.id,self.organiser.id)
 
     if 'bid' in self.kwargs:
       try:
         form_data = StudentBatch.objects.get(pk=self.kwargs['bid'])
       except StudentBatch.DoesNotExist:
+        logger.error("[MASTER_BATCH] Invalid batch ID: %s", self.kwargs['bid'])
         messages.error(self.request, 'Invalid Batch Id')
         return self.form_invalid(form)
       studentcount = form_data.stcount
       if studentcount >= 500 :
+        logger.warning("[MASTER_BATCH] Batch limit reached | batch_id=%s", form_data.id)
         messages.error(self.request, 'Can not add more than 500 students in one batch.')
         return self.form_invalid(form)
     else:
@@ -384,21 +390,26 @@ class StudentBatchCreateView(CreateView):
       this_organiser_dept = department.filter(organiser=self.request.user.organiser);
 
       if not this_organiser_dept.exists() and department.exists():
+        logger.warning("[MASTER_BATCH] Department already assigned to another organiser")
         messages.error(self.request, "%s department is already assigened to organiser %s in your College." % (form.cleaned_data['department'], department.first().organiser))
         return self.form_invalid(form)
       form_data.save()
       batch_name = StudentBatch.objects.get(pk=form_data.id).create_batch_name()
-
+    logger.info("[MASTER_BATCH] Processing CSV | batch_id=%s | existing_count=%s",form_data.id,studentcount)
 
     # StudentBatch.objects.get(pk=batch_id).update_student_count()
-    
-    skipped, error, warning, write_flag = \
-      self.csv_email_validate(form.cleaned_data['csv_file'], form_data.id , studentcount)
-    context = {'error' : error, 'warning' : warning, 'batch':form_data}
-
+      
+    try:
+          skipped, error, warning, write_flag = self.csv_email_validate(form.cleaned_data['csv_file'],form_data.id,studentcount)
+          logger.info("[MASTER_BATCH] Upload processing completed | batch_id=%s | skipped=%s | errors=%s | warnings=%s | write_flag=%s",form_data.id,len(skipped),len(error),len(warning),write_flag)
+    except Exception:
+          logger.exception("[MASTER_BATCH] CSV processing failed | batch_id=%s", form_data.id)
+          raise
+    context = {'error': error, 'warning': warning, 'batch': form_data}
     if error or warning:
       return render(self.request, self.template_name, context)
-    return HttpResponseRedirect('/software-training/student-batch/%s/new/'%(str(form_data.id)))
+    logger.info("[MASTER_BATCH] Upload finished successfully | batch_id=%s", form_data.id)
+    return HttpResponseRedirect('/software-training/student-batch/%s/new/' % str(form_data.id))
 
   def email_validator(self, email):
     if email and email.strip():
@@ -423,6 +434,7 @@ class StudentBatchCreateView(CreateView):
   def create_student(self, fname, lname, email, gender):
     # check params for empty/None
     if not fname or not lname or not email or not gender:
+      logger.warning("[MASTER_BATCH] Missing student details | email=%s", email)
       return False
     user = None
     fname = fname.strip().upper()
@@ -437,9 +449,11 @@ class StudentBatchCreateView(CreateView):
         gender = 'Female'
       try:
         user = User.objects.get(email = email)
+        logger.info("[MASTER_BATCH] Existing Django user found | email=%s | user_id=%s | is_active=%s",email, user.id, user.is_active)
       except ObjectDoesNotExist:
-        user = User.objects.create_user(email, email, fname)
+        user = User.objects.create_user(username=email,email=email,password=None)
         user.is_active = False
+        logger.info("[MASTER_BATCH] New Django user created | email=%s | user_id=%s", email, user.id)
       if user:
         user.first_name = fname
         user.last_name = lname
@@ -448,9 +462,18 @@ class StudentBatchCreateView(CreateView):
           student_group = Group.objects.get(name = 'Student')
           user.groups.add(student_group)
         except:
-          pass
+          logger.exception("[MASTER_BATCH] Failed to assign Student group | email=%s", email)
+
         student = Student.objects.create(user = user, gender = gender)
-        get_or_create_participant(self.organiser, fname, lname, gender, email, 0)
+        logger.info("[MASTER_BATCH] Student record created | email=%s | student_id=%s | user_active=%s",email, student.id, user.is_active)
+        try:
+            logger.info("[MASTER_BATCH] Calling get_or_create_participant | email=%s | category=0", email)
+            result = get_or_create_participant(self.organiser, fname, lname, gender, email, 0)
+            logger.info("[MASTER_BATCH] get_or_create_participant returned | email=%s | result=%s",email, result)
+
+        except Exception:
+            logger.exception("[MASTER_BATCH] get_or_create_participant failed | email=%s",email)
+            raise
         return student
     return False
 
@@ -472,6 +495,7 @@ class StudentBatchCreateView(CreateView):
         csvdata = csv.reader(file_data, delimiter=',', quotechar='|')
         for row in csvdata:
           stu_row_count = stu_row_count+1
+          logger.info("[MASTER_BATCH] Processing CSV row | row=%s | email=%s",stu_row_count,row[2].strip().lower() if len(row) > 2 else "MISSING")
           if len(row) < 4:
             skipped.append(row)
             continue
@@ -479,8 +503,10 @@ class StudentBatchCreateView(CreateView):
             error.append(row)
             continue
           student = self.get_student(row[2])
+          logger.info("[MASTER_BATCH] Student lookup | row=%s | email=%s | student_exists=%s",stu_row_count,row[2].strip().lower(),bool(student))
           if not student:
             student = self.create_student(row[0], row[1], row[2], row[3])
+            logger.info("[MASTER_BATCH] Student processing result | row=%s | email=%s | student_found_or_created=%s",stu_row_count,row[2].strip().lower(),bool(student))
           if student:
             try:
               smrec = StudentMaster.objects.get(student=student, moved=False)
@@ -495,9 +521,9 @@ class StudentBatchCreateView(CreateView):
               write_flag = True
 
         StudentBatch.objects.get(pk=batch_id).update_student_count()
-    except Exception as e:
-      print(e)
-      messages.warning(self.request, "The file you uploaded is not a valid CSV file, please add a valid CSV file")
+    except Exception:
+        logger.exception("[MASTER_BATCH] CSV validation exception | batch_id=%s", batch_id)
+        messages.warning(self.request,"The file you uploaded is not a valid CSV file, please add a valid CSV file")
     return skipped, error, warning, write_flag
 
 class StudentBatchUpdateView(UpdateView):

@@ -20,7 +20,10 @@ from cms.models import *
 from events.models import Student, StudentBatch
 from mdldjango.get_or_create_participant import encript_password, get_or_create_participant
 from mdldjango.models import MdlUser
-from spoken.config import EDUPYRAMIDS_URL
+from spoken.config import EDUPYRAMIDS_URL,ONLINE_TEST_URL
+import logging
+
+logger = logging.getLogger(__name__)
 
 def get_user_email(email):
   try:
@@ -106,51 +109,75 @@ def send_verify_email(request,email):
       #notify to admin via mail
       return False, message
       
+
 def send_student_mail(email):
-  mdluser = MdlUser.objects.filter(email=email).first()
-  mdl_username = email
-  
-  password_string = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(8))
-  mdl_new_password = encript_password(password_string)
-  
-  mdluser.password = mdl_new_password
-  mdluser.save()
-  
-  token = Hashids(salt = settings.SPOKEN_HASH_SALT).encode(mdluser.id)
-  
-  #send mail to student_mail
-  subject = "Spoken Tutorial Online Test password"
-  to = [mdluser.email]
-  message = '''Hi {0},
-Your account password at 'Spoken Tutorials Online Test as follows'
+    logger.info("[STUDENT_MAIL] Started | email=%s", email)
+    mdluser = MdlUser.objects.filter(email__iexact=email).first()
 
-Your current login information is now:
-username: {1}
-password: {2}
+    if not mdluser:
+        print("Moodle user not found:", email)
+        return False
+    logger.info("[STUDENT_MAIL] Moodle user found | email=%s | mdluser_id=%s",email, mdluser.id)
+    try:
+      password_string = ''.join(random.choice(string.ascii_uppercase + string.digits)for _ in range(8))
+      mdl_new_password = encript_password(password_string)
 
-Please click below link to activate your account:
-{3}
+      # Update Moodle password
+      mdluser.password = mdl_new_password
+      mdluser.save()
+      logger.info("[STUDENT_MAIL] Moodle password updated | email=%s", email)
 
-In most mail programs, this should appear as a blue link
-which you can just click on.  If that doesn't work,
-then cut and paste the address into the address
-line at the top of your web browser window.
+      # Synchronize Spoken Tutorial password
+      user = User.objects.filter(email__iexact=email).first()
 
-Cheers from the 'Spoken Tutorials Online Test Center' administrator,
+      if user:
+          user.set_password(password_string)
+          user.save()
+          logger.info("[STUDENT_MAIL] Spoken password synchronized | email=%s", email)
+      else:
+          logger.warning("[STUDENT_MAIL] Spoken user not found | email=%s", email)
 
-Admin Spoken Tutorials
-'''.format(mdluser.firstname,mdluser.username,password_string,EDUPYRAMIDS_URL + "/accounts/confirm_student/" + token)
-  
+      token = Hashids(salt=settings.SPOKEN_HASH_SALT).encode(mdluser.id)
+      
+      #send mail to student_mail
+      subject = "Spoken Tutorial Online Test password"
+      message = '''Hi {0},
 
-  # send email
-  email = EmailMultiAlternatives(
-    subject, message, 'administrator@spoken-tutorial.org',
-    to=to, bcc=[], cc=[],
-    headers={'Reply-To': 'no-replay@spoken-tutorial.org', "Content-type": "text/html;charset=iso-8859-1"}
-  )
-  try:
-    result = email.send(fail_silently=False)
-    return True
-  except smtplib.SMTPException:
-    print("Failed to send email")
-    return False
+  Your account password at Spoken Tutorial Online Test is as follows.
+
+  Your current login information:
+
+  Username: {1}
+  Password: {2}
+
+  Please activate your Spoken Tutorial account using this link:
+  {3}
+
+  Spoken Tutorial Login:
+  {5}
+
+  Spoken Tutorial Online Test Login:
+  {4}
+
+  Regards,
+  Admin Spoken Tutorials
+  '''.format(mdluser.firstname,mdluser.username,password_string,EDUPYRAMIDS_URL + "/accounts/confirm_student/" + token,ONLINE_TEST_URL,EDUPYRAMIDS_URL + "/participant/login/")
+      logger.info("[STUDENT_MAIL] Preparing activation email | email=%s", email)
+      email_message = EmailMultiAlternatives(
+          subject,
+          message,
+          'administrator@spoken-tutorial.org',
+          to=[mdluser.email],bcc=[],cc=[],
+          headers={
+              'Reply-To': 'no-replay@spoken-tutorial.org',
+              'Content-type': 'text/html;charset=iso-8859-1'
+          }
+      )
+
+      result = email_message.send(fail_silently=False)
+      logger.info("[STUDENT_MAIL] Email send completed | email=%s | result=%s",email, result)
+      return result == 1
+
+    except Exception as e:
+        logger.exception("[STUDENT_MAIL] Failed | email=%s", email)
+        return False
