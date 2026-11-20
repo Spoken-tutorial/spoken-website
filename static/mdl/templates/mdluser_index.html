@@ -176,17 +176,17 @@
                                 {% elif status == 1 %}
                                     {% with courseid=record.id|get_moodle_courseid:mdluserid %}
                                         {% if courseid %}
-                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Enter into Test</a>
+                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}&test_id={{record.id}}" target="_blank"> Enter into Test</a>
                                         {% else %}
-                                            <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Enter into Test</a>
+                                            <a href="{{ ONLINE_TEST_URL }}course/?test_id={{record.id}}" target="_blank"> Enter into Test</a>
                                         {% endif %}
                                     {% endwith %}
                                 {% elif status == 2 %}
                                     {% with courseid=record.id|get_moodle_courseid:mdluserid %}
                                         {% if courseid %}
-                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}" target="_blank"> Continue Test</a>
+                                            <a href="{{ ONLINE_TEST_URL }}course/view.php?id={{courseid}}&test_id={{record.id}}" target="_blank"> Continue Test</a>
                                         {% else %}
-                                            <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Continue Test</a>
+                                            <a href="{{ ONLINE_TEST_URL }}course/?test_id={{record.id}}" target="_blank"> Continue Test</a>
                                         {% endif %}
                                     {% endwith %}
                                 {% elif status >= 3 %}
