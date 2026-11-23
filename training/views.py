@@ -786,68 +786,71 @@ class ParticipantCreateView(CreateView):
 		return context
 
 	def form_valid(self, form):
-		count = 0
-		csv_file_data = form.cleaned_data['csv_file']
-		registartion_type = form.cleaned_data['registartion_type']			
-		if registartion_type == 2:
-			# 3 - Manual Registration via CSV(option not visible outside)
-			registartion_type = 3
-		rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
-		csv_error = False
-		user_errors = []
-		for i, row in enumerate(rows_data):
-			user = self.get_create_user(row)
-			if user:
-				try:
-					college = AcademicCenter.objects.get(academic_code=row[6])
-				except AcademicCenter.DoesNotExist:
-					csv_error = True
-					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " was not created.")
-					continue
-				
-				if registartion_type == 1:
-					if not(is_college_paid(college.id)):
-						messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution " + row[6] + " is not a Paid college."+" Participant "+ row[2] + " was not created.")
+		try:
+			count = 0
+			csv_file_data = form.cleaned_data['csv_file']
+			registartion_type = form.cleaned_data['registartion_type']			
+			if registartion_type == 2:
+				# 3 - Manual Registration via CSV(option not visible outside)
+				registartion_type = 3
+			rows_data = csv.reader(csv_file_data, delimiter=',', quotechar='|')
+			csv_error = False
+			user_errors = []
+			for i, row in enumerate(rows_data):
+				user = self.get_create_user(row)
+				if user:
+					try:
+						college = AcademicCenter.objects.get(academic_code=row[6])
+					except AcademicCenter.DoesNotExist:
+						csv_error = True
+						messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution name " + row[6] + " does not exist."+" Participant "+ row[2] + " was not created.")
+						continue
+					
+					if registartion_type == 1:
+						if not(is_college_paid(college.id)):
+							messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Institution " + row[6] + " is not a Paid college."+" Participant "+ row[2] + " was not created.")
+							continue
+
+					try:
+						foss_language = Language.objects.get(name=row[7].strip())	
+					except :
+						messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Language name " + row[7] + " does not exist."+" Participant "+ row[2] + " was not created.")
 						continue
 
-				try:
-					foss_language = Language.objects.get(name=row[7].strip())	
-				except :
-					messages.add_message(self.request, messages.ERROR, "Row: "+ str(i+1) + " Language name " + row[7] + " does not exist."+" Participant "+ row[2] + " was not created.")
-					continue
-
-				participant = Participant.objects.filter(email=row[2].strip(),event = self.event)
-				if participant.exists() and registartion_successful(user, self.event):
-					messages.add_message(self.request, messages.WARNING, "Participant with email "+row[2]+" already registered for "+self.event.event_name)
-					continue
+					participant = Participant.objects.filter(email=row[2].strip(),event = self.event)
+					if participant.exists() and registartion_successful(user, self.event):
+						messages.add_message(self.request, messages.WARNING, "Participant with email "+row[2]+" already registered for "+self.event.event_name)
+						continue
+					else:
+						try:
+							Participant.objects.create(
+								name = row[0]+" "+row[1], 
+								email = user.email, 
+								gender = row[3], 
+								amount = row[4], 
+								event = self.event, 
+								user = user, 
+								state = college.state, 
+								college = college,
+								foss_language = foss_language,
+								registartion_type = registartion_type,
+								reg_approval_status = 1
+								)
+							count = count + 1
+						except :
+							csv_error = True
+							messages.add_message(self.request, messages.ERROR, "Could not create participant having email id" + row[2])
 				else:
-					try:
-						Participant.objects.create(
-							name = row[0]+" "+row[1], 
-							email = user.email, 
-							gender = row[3], 
-							amount = row[4], 
-							event = self.event, 
-							user = user, 
-							state = college.state, 
-							college = college,
-							foss_language = foss_language,
-							registartion_type = registartion_type,
-							reg_approval_status = 1
-							)
-						count = count + 1
-					except :
-						csv_error = True
-						messages.add_message(self.request, messages.ERROR, "Could not create participant having email id" + row[2])
-			else:
-				user_errors.append(row[2])
-		if user_errors:
-			user_errors = ', '.join(user_errors)
-			messages.error(self.request, f"The participants with the following emails were not created. Please verify the email addresses: {user_errors}")
-		if csv_error:
-			messages.warning(self.request, 'Some rows in the csv file has errors and are not created.')
-		if count > 0:
-			messages.success(self.request, 'Successfully uploaded '+str(count)+" participants")
+					user_errors.append(row[2])
+			if user_errors:
+				user_errors = ', '.join(user_errors)
+				messages.error(self.request, f"The participants with the following emails were not created. Please verify the email addresses: {user_errors}")
+			if csv_error:
+				messages.warning(self.request, 'Some rows in the csv file has errors and are not created.')
+			if count > 0:
+				messages.success(self.request, 'Successfully uploaded '+str(count)+" participants")
+		except Exception:
+			messages.error(self.request, "File format is wrong.")
 		return HttpResponseRedirect(reverse("training:upload_participants", kwargs={'eventid': self.event.pk}))
 
 
