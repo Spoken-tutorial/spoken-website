@@ -77,47 +77,43 @@
                 <p class='no-record'>No record found!</p>
             {% endif %}
         </div>
-        <div class="tab-pane {% if category == 2 %} active {% endif %}" id="Past-Test">
-            {% if past_test %}
-            <table class="table table-striped table-hover table-bordered">
-                <tr>
-                    <th>Technology</th>
-                    <th>Test Code</th>
-                    <th>Date & Time</th>
-                   <th>1st Attempt</th>
-<th>2nd Attempt</th>
-                </tr>
-                {% for record in past_test %}
-                    <tr>
-                        <td>{{ record.foss.foss }}</td>
-                        <td>{{ record.test_code }}</td>
-                        <td>{{ record.tdate }} {{ record.ttime }}</td>
-                      {% with grades=record.training_id|get_training_attempt_scores:mdluserid %}
-    <td>
-        {% if grades.0 != None %}
-            {{ grades.0 }}%
-            {% if grades.0 >= 40 %}(Pass){% else %}(Fail){% endif %}
-        {% else %}
-            -
-        {% endif %}
-    </td>
+      <div class="tab-pane {% if category == 2 %} active {% endif %}" id="Past-Test">
+    {% if past_test %}
+    <table class="table table-striped table-hover table-bordered">
+        <tr>
+            <th>Technology</th>
+            <th>Test Code</th>
+            <th>Date & Time</th>
+            <th>Second Attempt</th>
+        </tr>
 
-    <td>
-        {% if grades.1 != None %}
-            {{ grades.1 }}%
-            {% if grades.1 >= 40 %}(Pass){% else %}(Fail){% endif %}
-        {% else %}
-            -
-        {% endif %}
-    </td>
-{% endwith %}
-                    </tr>
-                {% endfor %}
-            </table>
-            {% else %}
-                <p class='no-record'>No record found!</p>
-            {% endif %}
-        </div>
+        {% for record in past_test %}
+        <tr>
+            <td>{{ record.foss.foss }}</td>
+            <td>{{ record.test_code }}</td>
+            <td>{{ record.tdate }} {{ record.ttime }}</td>
+
+            <td>
+                {% with grade=record.id|get_test_attempt_score:mdluserid %}
+                    {% if grade is not None %}
+                        {{ grade }}%
+                        {% if grade >= 40 %}
+                            (Pass)
+                        {% else %}
+                            (Fail)
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                {% endwith %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p class='no-record'>No record found!</p>
+    {% endif %}
+</div>
         <div class="tab-pane {% if category == 3 %} active {% endif %}" id="Upcoming-Workshop">
             {% if upcoming_workshop %}
             <table class="table table-striped table-hover table-bordered">
