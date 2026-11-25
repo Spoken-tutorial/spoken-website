@@ -728,16 +728,65 @@ def edit_ac(request, rid = None):
 
     if request.method == 'POST':
         academic = AcademicCenter.objects.get(id = rid)
+        original_academic = AcademicCenter.objects.get(id = rid)
         form = AcademicForm(request.user, request.POST, instance=academic)
         if form.is_valid():
-            #change academic_code if state change
-            form_state = form.cleaned_data['state']
-            if academic.state_id != form_state:
-                form_data = form.save(commit=False)
-                form_data.academic_code = get_academic_code(form_state)
-            if form.save():
-                return HttpResponseRedirect("/software-training/ac/")
-        context = {'form':form}
+            form_data = form.save(commit=False)
+            update_code = form.cleaned_data.get('update_academic_code', False)
+            new_code = None
+            if update_code:
+                form_state = form.cleaned_data['state']
+                new_code = get_academic_code(form_state)
+                form_data.academic_code = new_code
+
+            # Compute what was edited
+            changes = {}
+            fields_to_check = [
+                'state', 'institution_type', 'university', 'institution_name',
+                'district', 'location', 'city', 'address', 'pincode',
+                'resource_center', 'rating', 'contact_person', 'remarks', 'status'
+            ]
+            for field in fields_to_check:
+                if field in form.cleaned_data:
+                    new_val = form.cleaned_data[field]
+                    old_val = getattr(original_academic, field, None)
+                    if hasattr(old_val, 'pk') or hasattr(new_val, 'pk'):
+                        old_id = old_val.pk if old_val else None
+                        new_id = new_val.pk if new_val else None
+                        if old_id != new_id:
+                            changes[field] = {
+                                'old': str(old_val) if old_val else '',
+                                'new': str(new_val) if new_val else ''
+                            }
+                    else:
+                        old_str = '' if old_val is None else str(old_val).strip()
+                        new_str = '' if new_val is None else str(new_val).strip()
+                        if old_str != new_str:
+                            changes[field] = {
+                                'old': str(old_val) if old_val is not None else '',
+                                'new': str(new_val) if new_val is not None else ''
+                            }
+
+            if update_code and new_code and new_code != original_academic.academic_code:
+                changes['academic_code'] = {
+                    'old': str(original_academic.academic_code),
+                    'new': str(new_code)
+                }
+
+            form_data.save()
+            form.save_m2m()
+
+            if changes:
+                AcademicHistory.objects.create(
+                    academic=form_data,
+                    who_created=original_academic.user,
+                    who_edited=user,
+                    what_was_edited=changes
+                )
+
+            messages.success(request, form_data.institution_name + " has been updated.")
+            return HttpResponseRedirect("/software-training/ac/")
+        context = {'form': form, 'edit': rid}
         return render(request, 'events/templates/ac/form.html', context)
     else:
         try:

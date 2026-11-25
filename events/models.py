@@ -2,6 +2,7 @@
 from builtins import str
 from builtins import object
 from django.db import models
+from jsonfield import JSONField
 from datetime import datetime, date, timedelta
 from django.db.models.signals import pre_delete, post_delete
 from django.dispatch import receiver
@@ -227,6 +228,24 @@ class AcademicCenter(models.Model):
       sem_start_date__lte=datetime.now()
     ).aggregate(Sum('participants'))
     return training['participants__sum']
+
+
+@python_2_unicode_compatible
+class AcademicHistory(models.Model):
+  academic = models.ForeignKey(AcademicCenter, related_name='academic_history', on_delete=models.PROTECT)
+  who_created = models.ForeignKey(User, related_name='academic_history_created', on_delete=models.PROTECT)
+  who_edited = models.ForeignKey(User, related_name='academic_history_edited', on_delete=models.PROTECT)
+  what_was_edited = JSONField(default=dict)
+  created = models.DateTimeField(auto_now_add=True)
+  updated = models.DateTimeField(auto_now=True)
+
+  class Meta(object):
+    verbose_name = "Academic History"
+    verbose_name_plural = "Academic Histories"
+
+  def __str__(self):
+    return "%s edited by %s at %s" % (self.academic.institution_name, self.who_edited.username, self.created)
+
 
 @python_2_unicode_compatible
 class Accountexecutive(models.Model):

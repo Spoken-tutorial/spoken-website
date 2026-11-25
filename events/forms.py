@@ -39,6 +39,7 @@ class AcademicForm(forms.ModelForm):
     contact_person = forms.CharField(widget = forms.Textarea(attrs = {'rows' : '5'}), required = False)
     remarks = forms.CharField(widget = forms.Textarea(attrs = {'rows' : '5'}), required = False)
     rating = forms.ChoiceField(choices = (('1', 'Rating 1'), ('2', 'Rating 2'), ('3', 'Rating 3'), ('4', 'Rating 4'), ('5', 'Rating 5')))
+    update_academic_code = forms.BooleanField(label='Update academic code', required=False)
     def __init__(self, user, *args, **kwargs):
         initial = ''
         if 'instance' in kwargs:
