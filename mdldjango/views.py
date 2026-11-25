@@ -117,7 +117,8 @@ def index(request):
             if category == 1:
                 past_workshop = TrainingAttend.objects.filter(student__user__email = mdluser.email).order_by('-training__sem_start_date')
             if category == 2:
-                past_test = Test.objects.filter(id__in=tests,status=4).order_by('-tdate')
+                completed_test_ids = list(TestAttendance.objects.filter(mdluser_id=mdluser.id,status=3).exclude(mdlattempt_id=0).order_by('created', 'id').values_list('test_id', flat=True)[:2])
+                past_test = Test.objects.filter(id__in=completed_test_ids).order_by('-tdate')
             if category == 4:
                 ongoing_test = Test.objects.filter(Q(status=2) | Q(status=3),id__in=tests,tdate__lte=dt.date.today()).order_by('-tdate')
             context = {
