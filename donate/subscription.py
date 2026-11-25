@@ -284,8 +284,14 @@ def is_organiser_insti_subscribed(user):
 
 def is_student_insti_subscribed(user):
     try:
-        academic = StudentMaster.objects.select_related('student','batch').get(student__user=user).batch.academic
-        return has_active_subscription(academic.id)
+        academic_ids = StudentMaster.objects.filter(
+            student__user=user
+        ).values_list('batch__academic_id', flat=True).distinct()
+        return any(
+            has_active_subscription(academic_id)
+            for academic_id in academic_ids
+            if academic_id
+        )
     except Exception as e:
         return False
 

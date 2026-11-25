@@ -429,7 +429,7 @@ def home(request):
     #     return HttpResponseForbidden('Access restricted: you do not have permission to access the CD content download page.')
     if request.method == 'POST':
         form = CDContentForm(request.POST, user=request.user)
-
+        context = {'path': '', 'status': False}
         if form.is_valid():
             try:
                 zipfile_name = internal_computation(request, 'paid')
@@ -441,7 +441,8 @@ def home(request):
                 context = {'path': '/media/cdimage/{}'.format(zipfile_name), 'status': True}
             except Exception as e:
                 print(e)
-                context = {'path': '', 'status': False}
+        else:
+            context['errors'] = form.errors
         return HttpResponse(json.dumps(context), content_type='application/json')
     else:
         form = CDContentForm(user=request.user)
@@ -625,51 +626,19 @@ def ajax_show_added_foss(request):
 
 
 def get_user_type(request):
-    user_type = 0
-    classification ={
-    'unregistered' : 'UR',
-    'registered_not_paid' : 'RNP',
-    'registered_paid' : 'RP'
+    classification = {
+        'unregistered': 'UR',
+        'registered_not_paid': 'RNP',
+        'registered_paid': 'RP',
     }
     # 'UR':'UnRegistered User',
     # 'RNP':'Registered but not Paid User',
     # 'RP':'Registered and Paid User'
     if request.user.is_authenticated():
-        try:
-            AcademicKey.objects.get(academic_id=request.user.organiser.academic_id, expiry_date__gte=date.today())
+        if is_cdcontent_role_allowed(request.user) or is_user_insti_subscribed(request.user):
             return classification['registered_paid']
-        except AcademicKey.DoesNotExist:
-            user_type = classification['registered_not_paid']
-        except AcademicKey.MultipleObjectsReturned:
-            return classification['registered_paid']
-        except:
-            user_type = classification['registered_not_paid']
-
-
-
-        try:
-            AcademicKey.objects.get(academic_id=request.user.invigilator.academic_id, expiry_date__gte=date.today())
-            return classification['registered_paid']
-        except AcademicKey.DoesNotExist:
-            user_type = classification['registered_not_paid']
-        except AcademicKey.MultipleObjectsReturned:
-            return classification['registered_paid']
-        except:
-            user_type = classification['registered_not_paid']
-        try:
-            student = Student.objects.get(user=request.user)
-            academic = StudentMaster.objects.get(student=student).batch.academic
-            AcademicKey.objects.get(academic=academic, expiry_date__gte=date.today())
-            return classification['registered_paid']
-        except AcademicKey.DoesNotExist:
-            user_type = classification['registered_not_paid']
-        except AcademicKey.MultipleObjectsReturned:
-            return classification['registered_paid']
-        except:
-            user_type = classification['registered_not_paid']
-        return user_type
-    else:
-        return classification['unregistered']
+        return classification['registered_not_paid']
+    return classification['unregistered']
 
 def get_payable_amount(filesize):
     lt_100 = 99
@@ -691,9 +660,6 @@ def check_user_details(request, filesize):
 
 # return '1' if organizer belongs to paid college with valid expiry date, else '0'
 def is_organizer_paid(request):
-    try:
-        idcase = AcademicKey.objects.filter(academic_id=request.user.organiser.academic_id, expiry_date__gte=date.today()).order_by('-expiry_date').first()
-        organizer_paid = '1' if (idcase.expiry_date >= date.today()) else '0'
-    except:
-        organizer_paid = '0'
-    return organizer_paid
+    if request.user.is_authenticated() and hasattr(request.user, 'organiser') and is_organiser_insti_subscribed(request.user):
+        return '1'
+    return '0'
