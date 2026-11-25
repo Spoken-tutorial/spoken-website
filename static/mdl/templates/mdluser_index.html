@@ -84,7 +84,7 @@
             <th>Technology</th>
             <th>Test Code</th>
             <th>Date & Time</th>
-            <th>Second Attempt</th>
+            <th>Score</th>
         </tr>
 
         {% for record in past_test %}
@@ -92,20 +92,23 @@
             <td>{{ record.foss.foss }}</td>
             <td>{{ record.test_code }}</td>
             <td>{{ record.tdate }} {{ record.ttime }}</td>
-            <td>
-                {% with grade=record.id|get_test_attempt_score:mdluserid %}
-                    {% if grade is not None %}
-                        {{ grade }}%
-                        {% if grade >= 40 %}
-                            (Pass)
-                        {% else %}
-                            (Fail)
-                        {% endif %}
-                    {% else %}
-                        -
-                    {% endif %}
-                {% endwith %}
-            </td>
+          <td>
+    {% with grade=record.id|get_test_attempt_score:mdluserid %}
+        {% with attempt=record.id|get_test_attempt_label:mdluserid %}
+            {% if grade is not None %}
+                {{ grade }}%
+                ({{ attempt }})
+                {% if grade >= 40 %}
+                    (Pass)
+                {% else %}
+                    (Fail)
+                {% endif %}
+            {% else %}
+                -
+            {% endif %}
+        {% endwith %}
+    {% endwith %}
+</td>
         </tr>
         {% endfor %}
     </table>
@@ -150,20 +153,21 @@
                                             <a href="{{ ONLINE_TEST_URL }}course/" target="_blank"> Continue Test</a>
                                         {% endif %}
                                     {% endwith %}
-                                {% elif status >= 3 %}
-                                    {% with grade=record.id|get_participant_mark:mdluserid %}
-                                        {% if grade is not None %}
-                                            {% if grade >= 40 %}
-                                                {{ grade }}%
-                                                {% if record.invigilator %}
-                                                 - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
-                                                {% endif %}
-                                            {% else %}
-                                                {{ grade }} (Fail)
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endwith %}
-                                {% endif %}
+                               {% elif status >= 3 %}
+    {% with grade=record.id|get_test_attempt_score:mdluserid %}
+        {% with attempt=record.id|get_test_attempt_label:mdluserid %}
+            {% if grade is not None %}
+                {{ grade }}% ({{ attempt }})
+                {% if grade >= 40 %}
+                    {% if record.invigilator %}
+                        - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
+                    {% endif %}
+                {% else %}
+                    (Fail)
+                {% endif %}
+            {% endif %}
+        {% endwith %}
+    {% endwith %}
                             {% endwith %}
                         </td>
                     </tr>

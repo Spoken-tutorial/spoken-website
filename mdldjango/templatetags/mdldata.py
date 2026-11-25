@@ -44,11 +44,9 @@ def get_participant_mark(rid, mdluser_id):
 
 def get_training_attempt_scores(training_id, mdluser_id):
     scores = []
-    attendance_records = TestAttendance.objects.filter(
-        test__training_id=training_id,mdluser_id=mdluser_id,status=3).exclude(mdlattempt_id=0).order_by('created', 'id')[:2]
 
+    attendance_records = TestAttendance.objects.filter(test__training_id=training_id,mdluser_id=mdluser_id,status=3).exclude(mdlattempt_id=0).exclude(mdlattempt_id__isnull=True).order_by('created', 'id')
     db_alias = router.db_for_read(MdlQuizAttempts)
-
     with connections[db_alias].cursor() as cursor:
         for ta in attendance_records:
 
@@ -87,10 +85,13 @@ def get_training_attempt_scores(training_id, mdluser_id):
                     or quiz_grade is None or decimalpoints is None):
                 continue
 
-            score = (Decimal(str(attempt[0])) * Decimal(str(quiz_grade)) / Decimal(str(quiz_sumgrades)))
+            score = (Decimal(str(attempt[0])) * Decimal(str(quiz_grade)) / Decimal(str(quiz_sumgrades)) )
             precision = Decimal('1').scaleb(-int(decimalpoints))
             score = score.quantize(precision,rounding=ROUND_HALF_UP)
             scores.append((ta.test_id, score))
+
+            if len(scores) == 2:
+                break
 
     return scores
 
@@ -152,7 +153,18 @@ def get_mdluser_details(mdluser_id):
     except:
         return False
     
-    
+def get_test_attempt_label(test_id, mdluser_id):
+    try:
+        ta = TestAttendance.objects.get(test_id=test_id, mdluser_id=mdluser_id,status=3)
+    except TestAttendance.DoesNotExist:
+        return ''
+    scores = get_training_attempt_scores(ta.test.training_id,mdluser_id)
+    for index, (completed_test_id, score) in enumerate(scores):
+        if completed_test_id == test_id:
+            return '1st Attempt' if index == 0 else '2nd Attempt'
+
+    return ''
+
 register.filter('get_participant_score', get_participant_score)
 register.filter('get_participant_mark', get_participant_mark)
 register.filter('check_training_enrole', check_training_enrole)
@@ -161,3 +173,4 @@ register.filter('get_moodle_courseid', get_moodle_courseid)
 register.filter('get_mdluser_details', get_mdluser_details)
 register.filter('get_training_attempt_scores',get_training_attempt_scores)
 register.filter('get_test_attempt_score',get_test_attempt_score)
+register.filter('get_test_attempt_label',get_test_attempt_label)
