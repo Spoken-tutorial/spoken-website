@@ -114,13 +114,29 @@ def index(request):
             if category == 1:
                 past_workshop = TrainingAttend.objects.filter(student__user__email = mdluser.email).order_by('-training__sem_start_date')
             if category == 2:
-                past_test = Test.objects.filter(id__in=tests, status=4).order_by('-tdate')
+                past_tests = Test.objects.filter(id__in=tests,status=4).select_related('training', 'foss').order_by('training_id', 'tdate', 'id')
+                grouped_tests = {}
+                for test in past_tests:
+                    training_id = test.training_id
+                    if training_id not in grouped_tests:
+                        grouped_tests[training_id] = {
+                            'id': test.id,
+                            'training_id': training_id,
+                            'foss': test.foss,
+                            'test_codes': [],
+                            'tdate': test.tdate,
+                            'ttime': test.ttime,
+                            'invigilator': test.invigilator
+                        }
+
+                    grouped_tests[training_id]['test_codes'].append(test.test_code)
+                past_test = list(grouped_tests.values())
+                for record in past_test:
+                    record['test_code'] = ', '.join(record['test_codes'])
             if category == 4:
                 # Display only the tests relevant to the student.
                 ongoing_test = Test.objects.filter(Q(status=2)|Q(status=3), id__in=tests, tdate__lte=dt.date.today()).order_by('-tdate')
-
             context = {
-                #'p': p,
                 'mdluserid' : mdluserid,
                 'mdlusername' : mdlusername,
                 'upcoming_workshop' : upcoming_workshop,

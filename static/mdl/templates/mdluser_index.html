@@ -84,29 +84,33 @@
                     <th>Technology</th>
                     <th>Test Code</th>
                     <th>Date & Time</th>
-                    <th>Score</th>
+                   <th>1st Attempt</th>
+<th>2nd Attempt</th>
                 </tr>
                 {% for record in past_test %}
                     <tr>
                         <td>{{ record.foss.foss }}</td>
                         <td>{{ record.test_code }}</td>
                         <td>{{ record.tdate }} {{ record.ttime }}</td>
-                        {% with grade=record.id|get_participant_mark:mdluserid %}
-                            {% if grade is not None %}
-                                {% if grade >= 40 %}
-                                    <td>
-                                        {{ grade }}%
-                                        {% if record.invigilator %}
-                                         - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
-                                        {% endif %}
-                                    </td>
-                                {% else %}
-                                    <td>{{ grade }} (Fail)</td>
-                                {% endif %}
-                            {% else %}
-                                <td></td>
-                            {% endif %}
-                        {% endwith %}
+                      {% with grades=record.training_id|get_training_attempt_scores:mdluserid %}
+    <td>
+        {% if grades.0 != None %}
+            {{ grades.0 }}%
+            {% if grades.0 >= 40 %}(Pass){% else %}(Fail){% endif %}
+        {% else %}
+            -
+        {% endif %}
+    </td>
+
+    <td>
+        {% if grades.1 != None %}
+            {{ grades.1 }}%
+            {% if grades.1 >= 40 %}(Pass){% else %}(Fail){% endif %}
+        {% else %}
+            -
+        {% endif %}
+    </td>
+{% endwith %}
                     </tr>
                 {% endfor %}
             </table>
