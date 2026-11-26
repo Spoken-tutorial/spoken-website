@@ -40,88 +40,116 @@ from django.db import close_old_connections
 
 
 
-def bulk_email(taskid, *args, **kwargs):
+
+def bulk_email(taskid, start_row=0, sent_count=0, error_count=0, *args, **kwargs):
     task = AsyncCronMail.objects.get(pk=taskid)
-    if  task.log_file.name == "":
-        log_file_name = 'log_email_'+uuid.uuid4().hex+".csv"
+
+    if not task.log_file:
+        log_file_name = 'log_email_' + uuid.uuid4().hex + '.csv'
         task.log_file.name = 'emails/' + log_file_name
         task.save()
-    with open(settings.MEDIA_ROOT + task.log_file.name, "a") as log_file:
+
+    log_file_path = os.path.join(settings.MEDIA_ROOT, task.log_file.name)
+
+    with open(log_file_path, "a") as log_file:
         with open(task.csvfile.path, newline='') as csvfile:
-            csvreader = list(csv.reader(csvfile, delimiter=' ', quotechar='|'))
+
+            # Use the same default comma delimiter as csv.writer()
+            csvreader = list(csv.reader(csvfile))
+
             job = get_current_job()
-            try:
-                row_id=int(job.meta['row_id'])
-            except:
-                row_id =0
-            try:
-                sent=int(job.meta['sent'])
-            except:
-                sent=0
-            try:
-                errors=int(job.meta['errors'])
-            except:
-                errors=0
-            for i,row in enumerate(csvreader[row_id:], row_id):
-                job.meta['row_id'] = i
-                job.save_meta()
-                if len(row) < 1:
+
+            row_id = start_row
+            sent = sent_count
+            errors = error_count
+
+            if job:
+                row_id = int(job.meta.get('row_id', start_row))
+                sent = int(job.meta.get('sent', sent_count))
+                errors = int(job.meta.get('errors', error_count))
+
+            def save_progress(next_row):
+                if job:
+                    job.meta['row_id'] = next_row
+                    job.meta['sent'] = sent
+                    job.meta['errors'] = errors
+                    job.save_meta()
+
+            for i, row in enumerate(csvreader[row_id:], row_id):
+
+                if i % 10 == 0:
+                    print('Total ran:', i)
+                    time.sleep(5)
+
+                if not row or not row[0].strip():
+                    save_progress(i + 1)
                     continue
-                if i%10 == 0:
-                        print('Total ran: ',i)
-                        time.sleep(5)
-                email = EmailMultiAlternatives(
-                            task.subject, task.message, task.sender,
-                            to = [row[0]],
-                            headers = {
-                                        "Content-type" : "text/html"
-                                    }
-                        )
+
+                recipient = row[0].strip()
+
                 try:
-                    validate_email(row[0])
+                    validate_email(recipient)
+
+                    email = EmailMultiAlternatives(
+                        task.subject,
+                        task.message,
+                        task.sender,
+                        to=[recipient],
+                        headers={"Content-type": "text/html"}
+                    )
+
                     email.attach_alternative(task.message, "text/html")
                     email.send()
+
                     sent += 1
-                    job.meta['sent'] = sent
-                    job.save_meta()
-                    log_file.write(str(row[0])+','+str(1)+'\n')
+                    log_file.write(str(recipient) + ',1\n')
+
                 except ValidationError as mail_error:
-                    log_file.write(str(row[0])+','+str(0)+','+str(mail_error)+'\n')
-                    errors+=1
-                    job.meta['errors'] = errors
-                    job.save_meta()
-                except SMTPException as send_error:
-                    log_file.write(str(row[0])+','+str(0)+','+str('SMTP mail send error.')+'\n')
-                    errors+=1
-                    job.meta['errors'] = errors
-                    job.save_meta()
+                    errors += 1
+                    log_file.write(
+                        str(recipient) + ',0,' + str(mail_error) + '\n'
+                    )
+
                 except BadHeaderError as header_error:
-                    log_file.write(str(row[0])+','+str(0)+','+str(header_error)+'\n')
-                    errors+=1
-                    job.meta['errors'] = errors
-                    job.save_meta()
-                except ConnectionRefusedError as refused:
-                    log_file.write(str(row[0])+','+str(0)+','+str('Failed to connect to SMTP server.')+'\n')
-                    errors+=1
-                except SMTPServerDisconnected as disconnect:
-                    log_file.write(str(row[0])+','+str(0)+','+str('Failed to connect to SMTP server.')+'\n')
-                    errors+=1
-                    job.meta['errors'] = errors
-                    job.save_meta()
-                except OSError as e:
-                    log_file.write(str(row[0])+','+str(0)+','+str('Failed to connect to SMTP server.')+'\n')
-                    errors+=1
-                    job.meta['errors'] = errors
-                    job.save_meta()
+                    errors += 1
+                    log_file.write(
+                        str(recipient) + ',0,' + str(header_error) + '\n'
+                    )
+
+                except SMTPServerDisconnected:
+                    errors += 1
+                    log_file.write(
+                        str(recipient) + ',0,Failed to connect to SMTP server.\n'
+                    )
+
+                except SMTPException:
+                    errors += 1
+                    log_file.write(
+                        str(recipient) + ',0,SMTP mail send error.\n'
+                    )
+
+                except OSError:
+                    errors += 1
+                    log_file.write(
+                        str(recipient) + ',0,Failed to connect to SMTP server.\n'
+                    )
+
+                # Flush log and save progress AFTER processing the recipient.
+                log_file.flush()
+                save_progress(i + 1)
 
             task.completed_at = timezone.now()
-            task.report = "Total: "+ str(sent+errors)+"\n"+ "Sent: "\
-                    +str(sent)+"\n"+"Errors: "+ str(errors)
-            task.status=True
+            task.report = (
+                "Total: " + str(sent + errors) + "\n"
+                + "Sent: " + str(sent) + "\n"
+                + "Errors: " + str(errors)
+            )
+            task.status = True
             task.save()
 
+
 def async_bulk_email(task, *args, **kwargs):
-    DEFAULT_QUEUE.enqueue(bulk_email, task.pk, job_id=task.job_id, job_timeout='72h')
+    DEFAULT_QUEUE.enqueue(bulk_email, task.pk, job_id=task.job_id, job_timeout='72h',retry=Retry(max=3))
 
 
 def filter_student_grades(key=None):
