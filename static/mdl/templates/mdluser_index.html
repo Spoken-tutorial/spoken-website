@@ -98,11 +98,6 @@
             {% if grade is not None %}
                 {{ grade }}%
                 ({{ attempt }})
-                {% if grade >= 40 %}
-                    (Pass)
-                {% else %}
-                    (Fail)
-                {% endif %}
             {% else %}
                 -
             {% endif %}
@@ -162,8 +157,6 @@
                                             {% if record.invigilator %}
                                                 - <a href="{% url 'events:test_participant_ceritificate' record.id mdluserid %}">Certificate</a>
                                             {% endif %}
-                                        {% else %}
-                                            (Fail)
                                         {% endif %}
                                     {% endif %}
                                 {% endwith %}

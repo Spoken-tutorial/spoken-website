@@ -175,6 +175,21 @@ def get_test_cert_text(test, mdluser, credits=''):
    """
    name = f"{mdluser.firstname} {mdluser.lastname}"
    foss = test.foss.foss
+   if test.training_id:
+      from events.models import TestAttendance
+      attempt_ids = list(
+         TestAttendance.objects.filter(
+            test__training_id=test.training_id,
+            mdluser_id=mdluser.id,
+            status__gte=3,
+         )
+         .exclude(mdlattempt_id=0)
+         .exclude(mdlattempt_id__isnull=True)
+         .order_by('created', 'id')
+         .values_list('test_id', flat=True)[:2]
+      )
+      if len(attempt_ids) > 1 and attempt_ids[1] == test.id:
+         foss = f"{foss} (2nd attempt)"
    test_date = test.tdate.strftime("%d-%m-%Y")
    academic = test.academic
    academic_code = academic.academic_code
