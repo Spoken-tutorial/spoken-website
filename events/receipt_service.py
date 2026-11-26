@@ -262,15 +262,27 @@ def format_recipient_address(academic):
 
     loc_line = ", ".join([part for part in [city, state] if part])
     if pincode:
-        loc_line = f"{loc_line} – {pincode}"
+        loc_line = f"{loc_line} - {pincode}"
 
     clean = re.sub(r'[\r\n\t]+', ', ', address)
     clean = re.sub(r'\s+', ' ', clean)
     clean = re.sub(r'\s*,\s*', ', ', clean)
     clean = re.sub(r'(,\s*)+', ', ', clean).strip(', ')
 
-    if institution and clean.lower().startswith(institution.lower()):
-        clean = clean[len(institution):].strip(', ')
+    if institution:
+        inst_candidates = [institution]
+        cur = institution
+        while True:
+            stripped = re.sub(r'\s*\([^)]*\)\s*$', '', cur).strip()
+            if stripped and stripped != cur:
+                inst_candidates.append(stripped)
+                cur = stripped
+            else:
+                break
+        for cand in inst_candidates:
+            if clean.lower().startswith(cand.lower()):
+                clean = clean[len(cand):].strip(', ')
+                break
 
     for _ in range(3):
         if pincode:
@@ -463,34 +475,35 @@ def generate_college_receipt_pdf(payment):
     _, h4 = p4.wrap(487.27, 50)
     p4.drawOn(p, 54, 340)
     
-    # 9. Signature Header (raised closer to paragraph 4)
+    # 9. Signature Block (tight gap directly below formal receipt)
+    y_sig_base = 250
     footer_img_path = os.path.join(settings.MEDIA_ROOT, 'footer.png')
     if os.path.exists(footer_img_path):
-        p.drawImage(footer_img_path, 54, 290, width=150, height=33, mask='auto')
+        p.drawImage(footer_img_path, 54, y_sig_base + 31, width=125, height=30, mask='auto')
     else:
         p.setFont("Helvetica-Bold", 10)
         p.setFillColor(colors.HexColor('#2980B9'))
-        p.drawString(54, 305, "For EduPyramids")
+        p.drawString(54, y_sig_base + 45, "For EduPyramids")
         p.setFont("Helvetica", 9)
-        p.drawString(54, 292, "Educational Services Pvt. Ltd.")
+        p.drawString(54, y_sig_base + 32, "Educational Services Pvt. Ltd.")
         
     # Signature
     sig_img_path = os.path.join(settings.MEDIA_ROOT, 'signature.png')
     if os.path.exists(sig_img_path):
-        p.drawImage(sig_img_path, 54, 230, width=100, height=26, mask='auto')
+        p.drawImage(sig_img_path, 54, y_sig_base, width=105, height=26, mask='auto')
         
-    # Stamp (properly aligned beside signature)
+    # Stamp (aligned snugly beside signature on exact same baseline)
     stamp_img_path = get_transparent_stamp_path(os.path.join(settings.MEDIA_ROOT, 'stamp.png'))
     if os.path.exists(stamp_img_path):
-        p.drawImage(stamp_img_path, 158, 222, width=62, height=61, mask='auto')
+        p.drawImage(stamp_img_path, 160, y_sig_base, width=63, height=61, mask='auto')
         
-    # Coordinator Info
-    p.setFont("Helvetica-Bold", 10)
+    # Coordinator Info (regular unbolded font matching approved document)
+    p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 198, "Mrs. Akanksha Saini")
+    p.drawString(54, y_sig_base - 15, "Mrs. Akanksha Saini")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 186, "National Coordinator")
-    p.drawString(54, 174, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, y_sig_base - 27, "National Coordinator")
+    p.drawString(54, y_sig_base - 39, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
     
     # 10. Official Approved Footer
     draw_approved_footer(p)
@@ -610,37 +623,37 @@ def generate_school_receipt_pdf(payment):
     _, h4 = p4.wrap(487.27, 50)
     p4.drawOn(p, 54, 340)
     
-    # 9. Signature Block (raised closer to paragraph 4)
+    # 9. Signature Block (tight gap directly below formal receipt)
+    y_sig_base = 250
     p.setFont("Helvetica", 9.5)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 295, "For and on behalf of")
+    p.drawString(54, y_sig_base + 46, "For and on behalf of")
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawString(54, 280, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, y_sig_base + 32, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
         
     # Signature
     sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature_schools.png')
     if not os.path.exists(sig_school_path):
         sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature.png')
     if os.path.exists(sig_school_path):
-        p.drawImage(sig_school_path, 54, 230, width=100, height=26, mask='auto')
+        p.drawImage(sig_school_path, 54, y_sig_base, width=105, height=26, mask='auto')
         
-    # Stamp (properly aligned beside signature)
+    # Stamp (aligned snugly beside signature on exact same baseline)
     stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp_schools.png')
     if not os.path.exists(stamp_school_path):
         stamp_school_path = os.path.join(settings.MEDIA_ROOT, 'stamp.png')
     stamp_school_path = get_transparent_stamp_path(stamp_school_path)
     if os.path.exists(stamp_school_path):
-        p.drawImage(stamp_school_path, 158, 222, width=62, height=61, mask='auto')
+        p.drawImage(stamp_school_path, 160, y_sig_base, width=63, height=61, mask='auto')
         
-    # Coordinator Info (Mrs. Nidhi Sony)
-    p.setFont("Helvetica-Bold", 10)
+    # Coordinator Info (Mrs. Nidhi Sony, unbolded matching approved document)
+    p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 198, "Mrs. Nidhi Sony")
+    p.drawString(54, y_sig_base - 15, "Mrs. Nidhi Sony")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 186, "National Coordinator - Schools")
-    p.drawString(54, 174, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
-    p.drawString(54, 166, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, y_sig_base - 27, "National Coordinator - Schools")
+    p.drawString(54, y_sig_base - 39, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
     
     # 10. Official Approved Footer
     draw_approved_footer(p)
@@ -796,32 +809,34 @@ def generate_college_loa_pdf(payment):
     _, h3 = p3.wrap(487.27, 100)
     p3.drawOn(p, 54, y - h3)
 
-    # 8. Signature Block (raised closer to paragraph 3)
+    # 8. Signature Block (tight gap directly below paragraph 3)
+    y_sig_base = max(215, y - h3 - 75)
     footer_img_path = os.path.join(settings.MEDIA_ROOT, 'footer.png')
     if os.path.exists(footer_img_path):
-        p.drawImage(footer_img_path, 54, 275, width=150, height=33, mask='auto')
+        p.drawImage(footer_img_path, 54, y_sig_base + 31, width=125, height=30, mask='auto')
     else:
         p.setFont("Helvetica-Bold", 10)
         p.setFillColor(colors.HexColor('#2980B9'))
-        p.drawString(54, 290, "For EduPyramids")
+        p.drawString(54, y_sig_base + 45, "For EduPyramids")
         p.setFont("Helvetica", 9)
-        p.drawString(54, 277, "Educational Services Pvt. Ltd.")
+        p.drawString(54, y_sig_base + 32, "Educational Services Pvt. Ltd.")
 
     sig_img_path = os.path.join(settings.MEDIA_ROOT, 'signature.png')
     if os.path.exists(sig_img_path):
-        p.drawImage(sig_img_path, 54, 220, width=100, height=26, mask='auto')
+        p.drawImage(sig_img_path, 54, y_sig_base, width=105, height=26, mask='auto')
 
-    # Stamp (properly aligned beside signature)
+    # Stamp (aligned snugly beside signature on exact same baseline)
     stamp_img_path = get_transparent_stamp_path(os.path.join(settings.MEDIA_ROOT, 'stamp.png'))
     if os.path.exists(stamp_img_path):
-        p.drawImage(stamp_img_path, 158, 212, width=62, height=61, mask='auto')
+        p.drawImage(stamp_img_path, 160, y_sig_base, width=63, height=61, mask='auto')
 
-    p.setFont("Helvetica-Bold", 10)
+    # Coordinator Info (regular unbolded font matching approved document)
+    p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 188, "Mrs. Akanksha Saini")
+    p.drawString(54, y_sig_base - 15, "Mrs. Akanksha Saini")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 176, "National Coordinator")
-    p.drawString(54, 164, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, y_sig_base - 27, "National Coordinator")
+    p.drawString(54, y_sig_base - 39, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
 
     # 9. Official Approved Footer
     draw_approved_footer(p)
@@ -954,13 +969,14 @@ def generate_school_loa_pdf(payment):
     _, h2 = p2.wrap(487.27, 100)
     p2.drawOn(p, 54, y - h2)
 
-    # 7. Signature Block (raised closer to paragraph 2)
+    # 7. Signature Block (tight gap directly below paragraph 2)
+    y_sig_base = max(215, y - h2 - 75)
     p.setFont("Helvetica", 9.5)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 285, "For and on behalf of")
+    p.drawString(54, y_sig_base + 46, "For and on behalf of")
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawString(54, 270, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, y_sig_base + 32, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
 
     sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature_schools.png')
     if not os.path.exists(sig_school_path):
@@ -972,18 +988,19 @@ def generate_school_loa_pdf(payment):
     stamp_school_path = get_transparent_stamp_path(stamp_school_path)
 
     if os.path.exists(sig_school_path):
-        p.drawImage(sig_school_path, 54, 220, width=100, height=26, mask='auto')
+        p.drawImage(sig_school_path, 54, y_sig_base, width=105, height=26, mask='auto')
 
-    # Stamp (properly aligned beside signature)
+    # Stamp (aligned snugly beside signature on exact same baseline)
     if os.path.exists(stamp_school_path):
-        p.drawImage(stamp_school_path, 158, 212, width=62, height=61, mask='auto')
+        p.drawImage(stamp_school_path, 160, y_sig_base, width=63, height=61, mask='auto')
 
-    p.setFont("Helvetica-Bold", 10)
+    # Coordinator Info (regular unbolded font matching approved document)
+    p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 188, "Mrs. Nidhi Sony")
+    p.drawString(54, y_sig_base - 15, "Mrs. Nidhi Sony")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 176, "National Coordinator - Schools")
-    p.drawString(54, 164, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, y_sig_base - 27, "National Coordinator - Schools")
+    p.drawString(54, y_sig_base - 39, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
 
     # 8. Official Approved Footer
     draw_approved_footer(p)
@@ -1214,11 +1231,11 @@ def generate_college_loc_pdf(payment, academic_year=None, report_type=None):
 
     sig_elements = []
     sig_company_style = ParagraphStyle('LOCSigCo', fontName='Helvetica-Bold', fontSize=9.5, leading=13, textColor=colors.HexColor('#1F4E78'))
-    sig_name_style = ParagraphStyle('LOCSigName', fontName='Helvetica-Bold', fontSize=9.5, leading=13)
+    sig_name_style = ParagraphStyle('LOCSigName', fontName='Helvetica', fontSize=9.5, leading=13)
     sig_title_style = ParagraphStyle('LOCSigTitle', fontName='Helvetica', fontSize=8.5, leading=12)
 
     if os.path.exists(footer_img_path):
-        sig_elements.append(Image(footer_img_path, width=150, height=33, hAlign='LEFT'))
+        sig_elements.append(Image(footer_img_path, width=125, height=30, hAlign='LEFT'))
         sig_elements.append(Spacer(1, 4))
     else:
         sig_elements.append(Paragraph("<b>For EduPyramids Educational Services Pvt. Ltd.</b>", sig_company_style))
@@ -1229,9 +1246,9 @@ def generate_college_loc_pdf(payment, academic_year=None, report_type=None):
     has_stamp = os.path.exists(stamp_img_path)
 
     if has_sig or has_stamp:
-        sig_cell = Image(sig_img_path, width=100, height=26) if has_sig else Paragraph("", body_style)
-        stamp_cell = Image(stamp_img_path, width=62, height=61) if has_stamp else Paragraph("", body_style)
-        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[105, 65], hAlign='LEFT')
+        sig_cell = Image(sig_img_path, width=105, height=26) if has_sig else Paragraph("", body_style)
+        stamp_cell = Image(stamp_img_path, width=63, height=61) if has_stamp else Paragraph("", body_style)
+        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[106, 65], hAlign='LEFT')
         sig_tbl.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'BOTTOM'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -1244,7 +1261,7 @@ def generate_college_loc_pdf(payment, academic_year=None, report_type=None):
     else:
         sig_elements.append(Spacer(1, 20))
 
-    sig_elements.append(Paragraph("<b>Mrs. Akanksha Saini</b>", sig_name_style))
+    sig_elements.append(Paragraph("Mrs. Akanksha Saini", sig_name_style))
     sig_elements.append(Paragraph("National Coordinator", sig_title_style))
     sig_elements.append(Paragraph("Spoken Tutorial, EduPyramids, SINE, IIT Bombay", sig_title_style))
 
@@ -1527,7 +1544,7 @@ def generate_school_loc_pdf(payment, academic_year=None, report_type=None):
     sig_elements = []
     sig_pre_style = ParagraphStyle('SchoolLOCSigPre', fontName='Helvetica', fontSize=9.5, leading=13)
     sig_company_style = ParagraphStyle('SchoolLOCSigCo', fontName='Helvetica-Bold', fontSize=9.5, leading=13, textColor=colors.HexColor('#1F4E78'))
-    sig_name_style = ParagraphStyle('SchoolLOCSigName', fontName='Helvetica-Bold', fontSize=9.5, leading=13)
+    sig_name_style = ParagraphStyle('SchoolLOCSigName', fontName='Helvetica', fontSize=9.5, leading=13)
     sig_title_style = ParagraphStyle('SchoolLOCSigTitle', fontName='Helvetica', fontSize=8.5, leading=12)
 
     sig_elements.append(Paragraph("For and on behalf of", sig_pre_style))
@@ -1539,9 +1556,9 @@ def generate_school_loc_pdf(payment, academic_year=None, report_type=None):
     has_stamp = os.path.exists(stamp_school_path)
 
     if has_sig or has_stamp:
-        sig_cell = Image(sig_school_path, width=100, height=26) if has_sig else Paragraph("", body_style)
-        stamp_cell = Image(stamp_school_path, width=62, height=61) if has_stamp else Paragraph("", body_style)
-        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[105, 65], hAlign='LEFT')
+        sig_cell = Image(sig_school_path, width=105, height=26) if has_sig else Paragraph("", body_style)
+        stamp_cell = Image(stamp_school_path, width=63, height=61) if has_stamp else Paragraph("", body_style)
+        sig_tbl = Table([[sig_cell, stamp_cell]], colWidths=[106, 65], hAlign='LEFT')
         sig_tbl.setStyle(TableStyle([
             ('VALIGN', (0,0), (-1,-1), 'BOTTOM'),
             ('LEFTPADDING', (0,0), (-1,-1), 0),
@@ -1554,7 +1571,7 @@ def generate_school_loc_pdf(payment, academic_year=None, report_type=None):
     else:
         sig_elements.append(Spacer(1, 20))
 
-    sig_elements.append(Paragraph("<b>Mrs. Nidhi Sony</b>", sig_name_style))
+    sig_elements.append(Paragraph("Mrs. Nidhi Sony", sig_name_style))
     sig_elements.append(Paragraph("National Coordinator - Schools", sig_title_style))
     sig_elements.append(Paragraph("Spoken Tutorials, EduPyramids, SINE, IIT Bombay", sig_title_style))
 
@@ -1791,26 +1808,34 @@ def generate_college_appreciation_pdf(payment, organiser=None, organiser_id=None
     _, h4 = p4.wrap(487.27, 100)
     p4.drawOn(p, 54, y - h4)
 
-    # 6. Signature Block (raised closer to paragraph 4)
+    # 6. Signature Block (tight gap directly below paragraph 4)
+    y_sig_base = max(215, y - h4 - 75)
     footer_img_path = os.path.join(settings.MEDIA_ROOT, 'footer.png')
     if os.path.exists(footer_img_path):
-        p.drawImage(footer_img_path, 54, 260, width=150, height=33, mask='auto')
+        p.drawImage(footer_img_path, 54, y_sig_base + 31, width=125, height=30, mask='auto')
+    else:
+        p.setFont("Helvetica-Bold", 10)
+        p.setFillColor(colors.HexColor('#2980B9'))
+        p.drawString(54, y_sig_base + 45, "For EduPyramids")
+        p.setFont("Helvetica", 9)
+        p.drawString(54, y_sig_base + 32, "Educational Services Pvt. Ltd.")
 
     sig_img_path = os.path.join(settings.MEDIA_ROOT, 'signature.png')
     if os.path.exists(sig_img_path):
-        p.drawImage(sig_img_path, 54, 205, width=100, height=26, mask='auto')
+        p.drawImage(sig_img_path, 54, y_sig_base, width=105, height=26, mask='auto')
 
-    # Stamp (properly aligned beside signature)
+    # Stamp (aligned snugly beside signature on exact same baseline)
     stamp_img_path = get_transparent_stamp_path(os.path.join(settings.MEDIA_ROOT, 'stamp.png'))
     if os.path.exists(stamp_img_path):
-        p.drawImage(stamp_img_path, 158, 197, width=62, height=61, mask='auto')
+        p.drawImage(stamp_img_path, 160, y_sig_base, width=63, height=61, mask='auto')
 
-    p.setFont("Helvetica-Bold", 10)
+    # Coordinator Info (regular unbolded font matching approved document)
+    p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 173, "Mrs. Akanksha Saini")
+    p.drawString(54, y_sig_base - 15, "Mrs. Akanksha Saini")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 161, "National Coordinator")
-    p.drawString(54, 149, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, y_sig_base - 27, "National Coordinator")
+    p.drawString(54, y_sig_base - 39, "Spoken Tutorial, EduPyramids, SINE, IIT Bombay")
 
     # 7. Official Approved Footer
     draw_approved_footer(p)
@@ -1981,13 +2006,14 @@ def generate_school_appreciation_pdf(payment, organiser=None, organiser_id=None)
     _, h4 = p4.wrap(487.27, 100)
     p4.drawOn(p, 54, y - h4)
 
-    # 6. Signature Block (raised closer to paragraph 4)
+    # 6. Signature Block (tight gap directly below paragraph 4)
+    y_sig_base = max(215, y - h4 - 75)
     p.setFont("Helvetica", 9.5)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 275, "For and on behalf of")
+    p.drawString(54, y_sig_base + 46, "For and on behalf of")
     p.setFont("Helvetica-Bold", 10)
     p.setFillColor(colors.HexColor('#1F4E78'))
-    p.drawString(54, 260, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, y_sig_base + 32, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
 
     sig_school_path = os.path.join(settings.MEDIA_ROOT, 'signature_schools.png')
     if not os.path.exists(sig_school_path):
@@ -2000,18 +2026,19 @@ def generate_school_appreciation_pdf(payment, organiser=None, organiser_id=None)
     stamp_school_path = get_transparent_stamp_path(stamp_school_path)
 
     if os.path.exists(sig_school_path):
-        p.drawImage(sig_school_path, 54, 205, width=100, height=26, mask='auto')
+        p.drawImage(sig_school_path, 54, y_sig_base, width=105, height=26, mask='auto')
 
-    # Stamp (properly aligned beside signature)
+    # Stamp (aligned snugly beside signature on exact same baseline)
     if os.path.exists(stamp_school_path):
-        p.drawImage(stamp_school_path, 158, 197, width=62, height=61, mask='auto')
+        p.drawImage(stamp_school_path, 160, y_sig_base, width=63, height=61, mask='auto')
 
-    p.setFont("Helvetica-Bold", 10)
+    # Coordinator Info (regular unbolded font matching approved document)
+    p.setFont("Helvetica", 10)
     p.setFillColor(colors.HexColor('#000000'))
-    p.drawString(54, 173, "Mrs. Nidhi Sony")
+    p.drawString(54, y_sig_base - 15, "Mrs. Nidhi Sony")
     p.setFont("Helvetica", 9)
-    p.drawString(54, 161, "National Coordinator - Schools")
-    p.drawString(54, 149, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
+    p.drawString(54, y_sig_base - 27, "National Coordinator - Schools")
+    p.drawString(54, y_sig_base - 39, "Spoken Tutorials, EduPyramids, SINE, IIT Bombay")
 
     # 7. Official Approved Footer
     draw_approved_footer(p)
