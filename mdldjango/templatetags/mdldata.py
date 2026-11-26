@@ -1,7 +1,8 @@
 # Third Party Stuff
 from django import template
 from django.contrib.auth.models import User
-
+from django.db import connections, router
+from decimal import Decimal, ROUND_HALF_UP
 # Spoken Tutorial Stuff
 from events.models import Test, TestAttendance, TrainingAttendance, FossMdlCourses
 from mdldjango.models import *
@@ -40,6 +41,74 @@ def get_participant_mark(rid, mdluser_id):
             return None
     except TestAttendance.DoesNotExist:
         return None
+
+def get_training_attempt_scores(training_id, mdluser_id):
+    scores = []
+
+    attendance_records = TestAttendance.objects.filter(test__training_id=training_id,mdluser_id=mdluser_id,status=3).exclude(mdlattempt_id=0).exclude(mdlattempt_id__isnull=True).order_by('created', 'id')
+    db_alias = router.db_for_read(MdlQuizAttempts)
+    with connections[db_alias].cursor() as cursor:
+        for ta in attendance_records:
+
+            if not ta.mdlattempt_id or not ta.mdlquiz_id:
+                continue
+
+            cursor.execute("""
+                SELECT sumgrades
+                FROM mdl_quiz_attempts
+                WHERE id = %s
+                  AND quiz = %s
+                  AND userid = %s
+                  AND state = 'finished'
+                LIMIT 1
+            """, [ta.mdlattempt_id, ta.mdlquiz_id, mdluser_id])
+
+            attempt = cursor.fetchone()
+
+            if not attempt or attempt[0] is None:
+                continue
+
+            cursor.execute("""
+                SELECT sumgrades, grade, decimalpoints
+                FROM mdl_quiz
+                WHERE id = %s
+            """, [ta.mdlquiz_id])
+
+            quiz = cursor.fetchone()
+
+            if not quiz:
+                continue
+
+            quiz_sumgrades, quiz_grade, decimalpoints = quiz
+
+            if (quiz_sumgrades is None or quiz_sumgrades <= 0
+                    or quiz_grade is None or decimalpoints is None):
+                continue
+
+            score = (Decimal(str(attempt[0])) * Decimal(str(quiz_grade)) / Decimal(str(quiz_sumgrades)) )
+            precision = Decimal('1').scaleb(-int(decimalpoints))
+            score = score.quantize(precision,rounding=ROUND_HALF_UP)
+            scores.append((ta.test_id, score))
+
+            if len(scores) == 2:
+                break
+
+    return scores
+
+
+def get_test_attempt_score(test_id, mdluser_id):
+    try:
+        ta = TestAttendance.objects.get(test_id=test_id,mdluser_id=mdluser_id,status=3 )
+    except TestAttendance.DoesNotExist:
+        return None
+
+    scores = get_training_attempt_scores(ta.test.training_id,mdluser_id)
+
+    for completed_test_id, score in scores:
+        if completed_test_id == test_id:
+            return score
+
+    return None
 
 def get_moodle_courseid(rid, mdluser_id):
     #print "rid =>", rid
@@ -84,10 +153,24 @@ def get_mdluser_details(mdluser_id):
     except:
         return False
     
-    
+def get_test_attempt_label(test_id, mdluser_id):
+    try:
+        ta = TestAttendance.objects.get(test_id=test_id, mdluser_id=mdluser_id,status=3)
+    except TestAttendance.DoesNotExist:
+        return ''
+    scores = get_training_attempt_scores(ta.test.training_id,mdluser_id)
+    for index, (completed_test_id, score) in enumerate(scores):
+        if completed_test_id == test_id:
+            return '1st Attempt' if index == 0 else '2nd Attempt'
+
+    return ''
+
 register.filter('get_participant_score', get_participant_score)
 register.filter('get_participant_mark', get_participant_mark)
 register.filter('check_training_enrole', check_training_enrole)
 register.filter('check_test_enrole', check_test_enrole)
 register.filter('get_moodle_courseid', get_moodle_courseid)
 register.filter('get_mdluser_details', get_mdluser_details)
+register.filter('get_training_attempt_scores',get_training_attempt_scores)
+register.filter('get_test_attempt_score',get_test_attempt_score)
+register.filter('get_test_attempt_label',get_test_attempt_label)
