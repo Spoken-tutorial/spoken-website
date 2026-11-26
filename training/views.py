@@ -785,6 +785,10 @@ class ParticipantCreateView(CreateView):
 		context['event']= self.event
 		return context
 
+	def form_invalid(self, form):
+		messages.error(self.request, "File format is wrong. Please ensure the uploaded file follows the required CSV format.")
+		return super(ParticipantCreateView, self).form_invalid(form)
+
 	def form_valid(self, form):
 		csv_file_data = form.cleaned_data['csv_file']
 		registartion_type = form.cleaned_data['registartion_type']			
@@ -812,7 +816,10 @@ class ParticipantCreateView(CreateView):
 				# Check minimum expected columns 
 				if len(row) < 8:
 					csv_error = True
-					messages.add_message(self.request, messages.ERROR, f"Row {i+1}: File format is wrong. Expected at least 8 columns, found {len(row)}.")
+					if i < 5:
+						messages.add_message(self.request, messages.ERROR, f"Row {i+1}: File format is wrong. Expected at least 8 columns, found {len(row)}.")
+					elif i == 5:
+						messages.add_message(self.request, messages.ERROR, "Additional rows also have column format errors.")
 					continue
 
 				user = self.get_create_user(row)
