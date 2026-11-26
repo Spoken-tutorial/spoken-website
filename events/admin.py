@@ -105,3 +105,12 @@ class AcademicDocumentAdmin(admin.ModelAdmin):
 
 admin.site.register(AcademicDocument, AcademicDocumentAdmin)
 
+
+class AcademicHistoryAdmin(admin.ModelAdmin):
+    list_display = ('academic', 'who_created', 'who_edited', 'created')
+    list_filter = ('created',)
+    search_fields = ('academic__institution_name', 'academic__academic_code', 'who_created__username', 'who_edited__username')
+    readonly_fields = ('academic', 'who_created', 'who_edited', 'what_was_edited', 'created', 'updated')
+
+admin.site.register(AcademicHistory, AcademicHistoryAdmin)
+

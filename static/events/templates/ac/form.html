@@ -1,9 +1,9 @@
 {% extends 'spoken/templates/base.html' %}
 {% load widget_tweaks %}
 {% load static %}
-{% block title %}New Institution{% endblock %}
+{% block title %}{% if edit %}Edit Institution{% else %}New Institution{% endif %}{% endblock %}
 {% block heading %}
-    <i class="fa fa-list-ul"></i> New Institution
+    <i class="fa fa-list-ul"></i> {% if edit %}Edit Institution{% else %}New Institution{% endif %}
 {% endblock %}
 {% block content %}
     <div class="row well">
@@ -18,6 +18,18 @@
                     </ul>
                     {% endif %}
                     {{ form.errors }}
+                    {% if edit %}
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Academic Code</label>
+                        <div class="col-sm-9">
+                            <p class="form-control-static" style="display:inline-block; margin-right: 15px; margin-bottom: 0;"><strong>{{ form.instance.academic_code }}</strong></p>
+                            <label style="font-weight: normal; margin-left: 10px;">
+                                {% render_field form.update_academic_code %} Update academic code
+                            </label>
+                            {{ form.update_academic_code.errors }}
+                        </div>
+                    </div>
+                    {% endif %}
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for= "id_state">State</label>
                         <div class="col-sm-9">
