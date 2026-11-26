@@ -115,11 +115,9 @@ def can_download_workshop_certificate(key, training):
 
 def can_enter_test(key, testcode):
     try:
-        ta = TestAttendance.objects.get(mdluser_id=key, test_id=testcode)
-        mdl = MdlQuizGrades.objects.filter(quiz=ta.mdlquiz_id, userid=key).order_by('-grade').first()
-        if mdl and mdl.grade >= 40:
-            return 3 # test completed with pass grade of 40 or more for given quiz 
+        ta = TestAttendance.objects.get(mdluser_id=key,test_id=testcode)
         return ta.status
+
     except TestAttendance.DoesNotExist:
         return None
 
