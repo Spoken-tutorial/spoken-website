@@ -125,7 +125,15 @@
         <label class='control-label'>Foss Category</label>
         {% render_field form.foss_category class+="form-control foss_category" tabindex="1" %}
         {{ form.foss_category.errors }}
+
         <small>No certificates will be provided for <b>"Foss available only for Training"</b></small>
+
+        {% if role == 'em' or is_technical_team %}
+            <small id="technical-team-foss-help" style="display:none; color:#31708f;">
+                Please add the FOSS under <b>FOSS available for Workshop</b> and also in 
+                <b>CourseMap with category = 0</b>.
+            </small>
+        {% endif %}
     </div>
 </div>
 
@@ -180,6 +188,26 @@
     var mind = 0 ; var maxd = 0;
     var tr_mind = 0 ; var tr_maxd = 0;
     $(document).ready(function(){
+    function toggleTechnicalTeamFossHelp() {
+        var helpText = $('#technical-team-foss-help');
+
+        if (!helpText.length) {
+            return;
+        }
+
+        if ($('.foss_category').val() == '0') {
+            helpText.show();
+        } else {
+            helpText.hide();
+        }
+    }
+
+    $('.foss_category').on('change', function() {
+        toggleTechnicalTeamFossHelp();
+    });
+
+    toggleTechnicalTeamFossHelp();
+    
       if (success!="")
       {
          $('#successModal').modal({
@@ -403,6 +431,7 @@ $(document).ready(function() {
     var initialCourseId = $('.course').val();
     loadLanguageLevelOptions(initialFossCategory, initialCourseId);
   }
+  
 });
 });
   </script>

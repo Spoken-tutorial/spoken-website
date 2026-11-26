@@ -673,6 +673,7 @@ class TrainingRequestCreateView(CreateView):
     context = super(TrainingRequestCreateView, self).get_context_data(**kwargs)
     context['training_planner_id'] = self.tpid
     context['tp'] = TrainingPlanner.objects.filter(pk=self.tpid, organiser_id = self.request.user.organiser.id)[0]
+    context['is_technical_team'] = self.request.user.groups.filter(name="Technical-Team").exists()
     return context
 
   def get_form_kwargs(self):
