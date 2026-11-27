@@ -129,58 +129,62 @@
 {% endblock %}
 {% block compressinlinejsblock %}
 <script type="text/javascript">
-    $(function() {
-        var training = $('#id_training').val();
-        if (training != '')
-        {
-            $.ajax({
-                url: '/software-training/ajax-check-foss/',
-                data: {
-                    'training': training,
-                },
-                dataType: 'json',
-                success: function (data) {
-                    if (data.is_multiquiz_foss) {
-                        $('#batch_foss').show();
-                        if (data.multiquiz_foss == 43){
-                        $('#id_foss').append('<option value="56"> C </option>'); 
-                        $('#id_foss').append('<option value="57"> CPP </option>');
-                        }
-                        if (data.multiquiz_foss == 97){
-                        $('#id_foss').append('<option value="126"> Moodle Test for Teachers </option>'); 
-                        $('#id_foss').append('<option value="127"> Moodle Test for Site Administrators </option>');
-                        }
-                        if (data.multiquiz_foss == 196){
-                        $('#id_foss').append('<option value="211"> Moodle Test for Teachers (New)</option>'); 
-                        $('#id_foss').append('<option value="212"> Moodle Test for Site Administrators (New)</option>');
-                        }
-                        $("#id_foss").prop('required',true);
-                    }
-                    else{
-                        $('#batch_foss').hide();
-                        $("#id_foss").prop('required',false);
-                    }
-                }
-            });
+    function loadBatchFoss(training, selectedFoss) {
+        $('#id_foss').find('option:not(:first)').remove();
+        if (!training) {
+            $('#batch_foss').hide();
+            $("#id_foss").prop('required', false);
+            return;
         }
-
-
-    });
+        $.ajax({
+            url: '/software-training/ajax-check-foss/',
+            data: {
+                'training': training,
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data.is_multiquiz_foss) {
+                    $('#batch_foss').show();
+                    if (data.multiquiz_foss == 43){
+                        $('#id_foss').append('<option value="56"> C </option>');
+                        $('#id_foss').append('<option value="57"> CPP </option>');
+                    }
+                    if (data.multiquiz_foss == 97){
+                        $('#id_foss').append('<option value="126"> Moodle Test for Teachers </option>');
+                        $('#id_foss').append('<option value="127"> Moodle Test for Site Administrators </option>');
+                    }
+                    if (data.multiquiz_foss == 196){
+                        $('#id_foss').append('<option value="211"> Moodle Test for Teachers (New)</option>');
+                        $('#id_foss').append('<option value="212"> Moodle Test for Site Administrators (New)</option>');
+                    }
+                    if (selectedFoss) {
+                        $('#id_foss').val(selectedFoss);
+                    }
+                    $("#id_foss").prop('required', true);
+                } else {
+                    $('#batch_foss').hide();
+                    $("#id_foss").prop('required', false);
+                }
+            }
+        });
+    }
 
     function hide_input() {
         $category = $('#id_test_category');
         if($category.val() == 1){
             $('.training_category_group').css({'display':'none'});
             $('.training_category_group .training').attr('disabled', 'disabled');
-            $('.workshop_group').css({'display':'black'});
+            $('.workshop_group').css({'display':'block'});
             $('.workshop_group .workshop').removeAttr('disabled');
             $('#batch_foss').hide();
         } else if ($category.val() == 2){
             $('.workshop_group').css({'display':'none'});
             $('.workshop_group .workshop').attr('disabled', 'disabled');
-            $('.training_category_group').css({'display':'black'});
+            $('.training_category_group').css({'display':'block'});
             $('.training_category_group .training').removeAttr('disabled');
-            $('#batch_foss').hide();
+            if ($('#id_foss option').length <= 1) {
+                $('#batch_foss').hide();
+            }
         }else {
             //ajaxFossDeptFillDatas('foss', 'dept', 2);
             $('.training_category_group').css({'display':'none'});
@@ -190,14 +194,24 @@
             $('#batch_foss').hide();
         }
     }
-        
+
     $category = $('#id_test_category');
     hide_input();
     $workshop = $('#id_workshop');
     $training = $('#id_training');
-    console.log($category.val());
     $category.change(function(){
         hide_input();
+        if ($(this).val() == 2 && $('#id_training').val()) {
+            loadBatchFoss($('#id_training').val(), null);
+        }
+    });
+
+    $(function() {
+        var training = $('#id_training').val();
+        var selectedFoss = '{{ request.POST.id_foss|default:"" }}';
+        if (training != '') {
+            loadBatchFoss(training, selectedFoss);
+        }
     });
 
     $workshop = $('#id_workshop');
@@ -228,38 +242,7 @@
 
     $batch_foss = $('#batch_foss');
     $("#id_training").change(function () {
-      $('#id_foss').find('option:not(:first)').remove();
-      var training = $(this).val();
-      $.ajax({
-        url: '/software-training/ajax-check-foss/',
-        data: {
-          'training': training,
-        },
-        dataType: 'json',
-        success: function (data) {
-            if (data.is_multiquiz_foss) {
-                $('#batch_foss').show();
-                if (data.multiquiz_foss == 43){
-                $('#id_foss').append('<option value="56"> C </option>'); 
-                $('#id_foss').append('<option value="57"> CPP </option>');
-                }
-                if (data.multiquiz_foss == 97){
-                $('#id_foss').append('<option value="126"> Moodle Test for Teachers </option>'); 
-                $('#id_foss').append('<option value="127"> Moodle Test for Site Administrators </option>');
-                }
-                if (data.multiquiz_foss == 196){
-                $('#id_foss').append('<option value="211"> Moodle Test for Teachers (New)</option>'); 
-                $('#id_foss').append('<option value="212"> Moodle Test for Site Administrators (New)</option>');
-                }
-                $("#id_foss").prop('required',true);
-            }
-            else{
-                $('#batch_foss').hide();
-                $("#id_foss").prop('required',false);
-            }
-        }
-      });
-
+      loadBatchFoss($(this).val(), null);
     });
 
 </script>
