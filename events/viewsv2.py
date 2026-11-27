@@ -299,7 +299,7 @@ def get_language_level_option(request):
                     include_basic = True
             except StudentBatch.DoesNotExist:
                 pass
-        if course_id:
+        if course_id and course_id.isdigit():
             cm = CourseMap.objects.get(id=course_id)
             fmdl = FossMdlCourses.objects.filter(foss_id=cm.foss_id)
             for item in fmdl:
@@ -799,14 +799,15 @@ class TrainingRequestEditView(CreateView):
         self.training.sem_start_date = form.cleaned_data['sem_start_date']
         self.training.training_start_date = form.cleaned_data['training_start_date']
         self.training.training_end_date = form.cleaned_data['training_end_date']
-        self.training.course_id = selectedCourse
+        self.training.course = selectedCourse
       else:
         messages.error(self.request, 'This student batch already taken the selected course.')
         return self.form_invalid(form)
       # save form
       self.training.save()
 
-    except:
+    except Exception:
+      messages.error(self.request, 'Something went wrong, Contact site administrator.')
       return self.form_invalid(form)
     context = {}
     return HttpResponseRedirect('/software-training/select-participants/')

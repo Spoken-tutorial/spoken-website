@@ -79,7 +79,7 @@ class TrainingRequestForm(forms.ModelForm):
 
       if self.cleaned_data and 'training_start_date' in self.cleaned_data and self.cleaned_data['training_start_date']:
         start_date, end_date =tp.get_current_semester_date_duration()
-        print((start_date, end_date, self.cleaned_data['sem_start_date']))
+        print((start_date, end_date, self.cleaned_data.get('sem_start_date')))
         if not (self.cleaned_data['training_start_date'] <= end_date and self.cleaned_data['training_start_date'] >= start_date):
           raise forms.ValidationError("Invalid training start date")
 
@@ -174,6 +174,9 @@ class TrainingRequestEditForm(forms.ModelForm):
 
     self.fields['course_type'].initial = training.course_type
     self.fields['course'].initial = training.course_id
+    if training:
+      self.fields['foss_category'].initial = 1 if training.course.test else 0
+      self.fields['fossmdlmap'].initial = training.fossmdlmap_id
     #department
     self.fields['department'].queryset = Department.objects.filter(id__in=StudentBatch.objects.filter(academic=user.organiser.academic, stcount__gt=0).values_list('department_id'))
     self.fields['department'].initial = training.department

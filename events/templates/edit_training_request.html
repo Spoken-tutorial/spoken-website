@@ -115,7 +115,7 @@
       $('.department').on('change', function(){
         department = $(this).val();
         department_name = $(this).children("option").filter(":selected").text()
-        $('.batch').html('<option>---------</option>');
+        $('.batch').html('<option value="">---------</option>');
         if(department != ''){
           $.ajax({
             url: "/software-training/get-batch-option/",
@@ -133,72 +133,96 @@
         }
       });
 
-      $('.course').html('<option>---------</option>');
-      $('.foss_category').on('change', function(){
-        foss_category = $(this).val();
-        document.getElementById('course_label').innerHTML = 'Course list loading ...'
+      var initialFossCategory = $('.foss_category').val();
+      var initialCourseId = $('.course').val();
+      var initialFossMdlId = $('#id_fossmdlmap').val();
+
+      function loadCourseOptions(foss_category, selectedCourseId, selectedFossMdlId) {
+        document.getElementById('course_label').innerHTML = 'Course list loading ...';
         $('.language-level-fields').hide();
-        if(foss_category != ''){
+        if (foss_category != '') {
           $.ajax({
             url: "/software-training/get-course-option/",
             type: "POST",
             data: {
               foss_category: foss_category,
             },
-            beforeSend: function() {
-              //$('.ajax-refresh-language').show();
-            },
             success: function(data) {
-              document.getElementById('course_label').innerHTML = 'Software Course'
-              // loading languages
-              if(data && data['course_option']) {
-                  $('.course').html(data['course_option']);
+              document.getElementById('course_label').innerHTML = 'Software Course';
+              if (data && data['course_option']) {
+                $('.course').html(data['course_option']);
+              }
+              if (selectedCourseId) {
+                $('.course').val(selectedCourseId);
               }
               if (foss_category == '1') {
                 var course_id = $('.course').val();
-                loadLanguageLevelOptions(foss_category, course_id);
+                loadLanguageLevelOptions(foss_category, course_id, selectedFossMdlId);
               } else {
                 $('.language-level-fields').hide();
               }
+            },
+            error: function() {
+              document.getElementById('course_label').innerHTML = 'Software Course';
+              $('.language-level-fields').hide();
             }
           });
         } else {
+          document.getElementById('course_label').innerHTML = 'Software Course';
+          $('.course').html('<option value="">---------</option>');
           $('.language-level-fields').hide();
         }
+      }
+
+      $('.foss_category').on('change', function(){
+        loadCourseOptions($(this).val(), null, null);
       });
-      
-$('.course').on('change', function() {
+
+      $('.course').on('change', function() {
         var foss_category = $('.foss_category').val();
         var course_id = $(this).val();
         if (foss_category == '1') {
-          loadLanguageLevelOptions(foss_category, course_id);
+          loadLanguageLevelOptions(foss_category, course_id, null);
         }
       });
-      function loadLanguageLevelOptions(foss_category, course_id) {
+
+      function loadLanguageLevelOptions(foss_category, course_id, selectedFossMdlId) {
+        if (!course_id) {
+          $('#id_fossmdlmap').html('<option value="">---------</option>');
+          $('.language-level-fields').hide();
+          return;
+        }
+        var batch_id = $('.batch').val();
         $.ajax({
           url: "/software-training/get-language-level-option/",
           type: "POST",
           data: {
             foss_category: foss_category,
-            course_id: course_id || ''
+            course_id: course_id,
+            batch_id: batch_id || ''
           },
           success: function(res) {
-            if(res && res.fossmdl) {
+            if (res && res.fossmdl && $.trim(res.fossmdl) !== '') {
               $('#id_fossmdlmap').html(res.fossmdl);
+              if (selectedFossMdlId) {
+                $('#id_fossmdlmap').val(selectedFossMdlId);
+              }
+              $('.language-level-fields').show();
+            } else {
+              $('#id_fossmdlmap').html('<option value="">---------</option>');
+              $('.language-level-fields').hide();
             }
-            $('.language-level-fields').show();
           },
           error: function() {
-            $('.language-level-fields').show();
+            $('.language-level-fields').hide();
           }
         });
       }
 
-      // added: check initial state
-      var initialFossCategory = $('.foss_category').val();
-      if (initialFossCategory == '1') {
-        var initialCourseId = $('.course').val();
-        loadLanguageLevelOptions(initialFossCategory, initialCourseId);
+      if (initialFossCategory != '') {
+        loadCourseOptions(initialFossCategory, initialCourseId, initialFossMdlId);
+      } else {
+        $('.course').html('<option value="">---------</option>');
       }
     });
 
